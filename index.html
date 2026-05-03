@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="theme-color" content="#050505" />
+    <link rel="apple-touch-icon" href="/logo.svg" />
+    <title>Jainism GPT</title>
+    <style>
+      body {
+        background-color: #050505;
+        color: white;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+      }
+      #initial-splash {
+        position: fixed;
+        inset: 0;
+        background-color: #050505;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-family: system-ui, -apple-system, sans-serif;
+        transition: opacity 1s ease-out;
+      }
+      .splash-bg {
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at center, rgba(230,81,0,0.15) 0%, transparent 50%);
+      }
+      .splash-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        z-index: 10;
+      }
+      .logo-container {
+        width: 8rem;
+        height: 8rem;
+        margin-bottom: 2rem;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+      }
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: .5; }
+      }
+      .logo-glow {
+        position: absolute;
+        inset: 0;
+        background-color: #FF6D00;
+        filter: blur(40px);
+        opacity: 0.5;
+        border-radius: 9999px;
+      }
+      .logo-inner {
+        position: relative;
+        z-index: 10;
+        width: 6rem;
+        height: 6rem;
+        background: linear-gradient(to bottom right, #FF6D00, #FFD54F);
+        border-radius: 9999px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 0 30px rgba(255,109,0,0.8);
+        border: 2px solid rgba(255,255,255,0.2);
+      }
+      .logo-icon {
+        width: 3rem;
+        height: 3rem;
+        color: black;
+        filter: drop-shadow(0 0 10px rgba(255,255,255,0.8));
+      }
+      .title {
+        font-size: 3rem;
+        font-weight: 900;
+        letter-spacing: -0.05em;
+        color: white;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 0 10px rgba(255,255,255,0.5);
+      }
+      .title span {
+        background: linear-gradient(to right, #FF6D00, #FFD54F);
+        -webkit-background-clip: text;
+        color: transparent;
+        filter: drop-shadow(0 0 15px rgba(255,109,0,0.8));
+      }
+      .subtitle {
+        font-size: 0.625rem;
+        font-weight: 700;
+        letter-spacing: 0.3em;
+        color: #FF8A65;
+        margin-bottom: 2rem;
+        text-shadow: 0 0 5px rgba(255,138,101,0.5);
+      }
+      .divider {
+        width: 12rem;
+        height: 0.25rem;
+        background: linear-gradient(to right, transparent, #FF6D00, transparent);
+        border-radius: 9999px;
+        margin-bottom: 1rem;
+        box-shadow: 0 0 10px rgba(255,109,0,0.8);
+      }
+      .footer-text {
+        font-size: 0.5rem;
+        font-weight: 700;
+        letter-spacing: 0.2em;
+        color: #6b7280;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="initial-splash">
+      <div class="splash-bg"></div>
+      <div class="splash-content">
+        <div class="logo-container">
+          <div class="logo-glow"></div>
+          <div class="logo-inner">
+            <svg class="logo-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+          </div>
+        </div>
+        <h1 class="title">JAINISM <span>GPT</span></h1>
+        <p class="subtitle">DIVINE WISDOM • SAMIL JAIN</p>
+        <div class="divider"></div>
+        <p class="footer-text">ULTRA PREMIUM NEON EDITION</p>
+      </div>
+    </div>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+

@@ -1,0 +1,149 @@
+{
+  "entities": {
+    "knowledge": {
+      "title": "Knowledge",
+      "description": "Jainism and Science Q&A",
+      "type": "object",
+      "properties": {
+        "question": { "type": "object", "description": "Question in Hindi and English" },
+        "jainReason": { "type": "object", "description": "Jain reason in Hindi and English" },
+        "scienceReason": { "type": "object", "description": "Science reason in Hindi and English" },
+        "category": { "type": "string" }
+      },
+      "required": ["question", "jainReason", "scienceReason"]
+    },
+    "tirthankar": {
+      "title": "Tirthankar",
+      "description": "Tirthankar details",
+      "type": "object",
+      "properties": {
+        "name": { "type": "object" },
+        "kaal": { "type": "string", "enum": ["Past", "Present", "Future"] },
+        "details": { "type": "object" },
+        "symbol": { "type": "object" },
+        "color": { "type": "string" },
+        "kalyanaks": { "type": "array", "items": { "type": "object" } }
+      },
+      "required": ["name", "kaal", "details", "symbol"]
+    },
+    "aagam": {
+      "title": "Aagam",
+      "description": "Jin Vani scriptures",
+      "type": "object",
+      "properties": {
+        "category": { "type": "string", "enum": ["Pujan", "Stuti", "Vidhan", "Chalisa", "Bhajan", "Aarti"] },
+        "title": { "type": "string" },
+        "content": { "type": "string" }
+      },
+      "required": ["category", "title", "content"]
+    },
+    "history": {
+      "title": "History",
+      "description": "Jain History",
+      "type": "object",
+      "properties": {
+        "title": { "type": "object" },
+        "content": { "type": "object" },
+        "image": { "type": "string" }
+      },
+      "required": ["title", "content"]
+    },
+    "festival": {
+      "title": "Festival",
+      "description": "Jain Festivals",
+      "type": "object",
+      "properties": {
+        "name": { "type": "object" },
+        "date": { "type": "string" },
+        "description": { "type": "object" },
+        "tithi": { "type": "string" }
+      },
+      "required": ["name", "date", "description"]
+    },
+    "user": {
+      "title": "User",
+      "description": "User profile and roles",
+      "type": "object",
+      "properties": {
+        "displayName": { "type": "string" },
+        "email": { "type": "string" },
+        "role": { "type": "string", "enum": ["admin", "user", "teacher", "student"] }
+      },
+      "required": ["email", "role"]
+    },
+    "class": {
+      "title": "Class",
+      "description": "Virtual Pathshala Class",
+      "type": "object",
+      "properties": {
+        "teacherId": { "type": "string" },
+        "teacherName": { "type": "string" },
+        "subject": { "type": "string" },
+        "title": { "type": "string" },
+        "link": { "type": "string" },
+        "isLive": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["teacherId", "teacherName", "subject", "title", "link"]
+    },
+    "exam": {
+      "title": "Exam",
+      "description": "Pathshala Exam",
+      "type": "object",
+      "properties": {
+        "teacherId": { "type": "string" },
+        "teacherName": { "type": "string" },
+        "title": { "type": "string" },
+        "duration": { "type": "number" },
+        "questions": { 
+          "type": "array", 
+          "items": { 
+            "type": "object",
+            "properties": {
+              "question": { "type": "string" },
+              "options": { "type": "array", "items": { "type": "string" } },
+              "correctAnswer": { "type": "number" }
+            }
+          } 
+        },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["teacherId", "teacherName", "title", "duration"]
+    },
+    "exam_submission": {
+      "title": "Exam Submission",
+      "description": "Student's exam result",
+      "type": "object",
+      "properties": {
+        "examId": { "type": "string" },
+        "studentId": { "type": "string" },
+        "studentName": { "type": "string" },
+        "score": { "type": "number" },
+        "totalQuestions": { "type": "number" },
+        "submittedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["examId", "studentId", "score"]
+    },
+    "settings": {
+      "title": "Settings",
+      "description": "Application Feature Flags",
+      "type": "object",
+      "properties": {
+        "quizEnabled": { "type": "boolean" },
+        "mediaEnabled": { "type": "boolean" }
+      }
+    }
+  },
+  "firestore": {
+    "/knowledge/{id}": { "schema": "knowledge", "description": "Knowledge items" },
+    "/tirthankars/{id}": { "schema": "tirthankar", "description": "Tirthankar data" },
+    "/aagams/{id}": { "schema": "aagam", "description": "Aagam data" },
+    "/history/{id}": { "schema": "history", "description": "History data" },
+    "/festivals/{id}": { "schema": "festival", "description": "Festival data" },
+    "/users/{uid}": { "schema": "user", "description": "User profiles" },
+    "/classes/{id}": { "schema": "class", "description": "Pathshala classes" },
+    "/exams/{id}": { "schema": "exam", "description": "Pathshala exams" },
+    "/exam_submissions/{id}": { "schema": "exam_submission", "description": "Exam results" },
+    "/settings/config": { "schema": "settings", "description": "Global app settings" }
+  }
+}

@@ -1,0 +1,185 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Fields:
+    //   - displayName: string (optional)
+    //   - email: string (required)
+    //   - role: string (required, 'admin' | 'user')
+    //
+    // Collection: knowledge
+    // Fields:
+    //   - question: map (required, {hi: string, en: string})
+    //   - jainReason: map (required, {hi: string, en: string})
+    //   - scienceReason: map (required, {hi: string, en: string})
+    //   - category: string (optional)
+    //
+    // Collection: tirthankars
+    // Fields:
+    //   - name: map (required, {hi: string, en: string})
+    //   - kaal: string (required, 'Past' | 'Present' | 'Future')
+    //   - details: map (required, {hi: string, en: string})
+    //   - symbol: map (required, {hi: string, en: string})
+    //   - color: string (optional)
+    //   - kalyanaks: list (optional)
+    //
+    // Collection: aagams
+    // Fields:
+    //   - category: string (required, 'Pujan' | 'Stuti' | 'Vidhan' | 'Chalisa' | 'Bhajan' | 'Aarti')
+    //   - title: string (required)
+    //   - content: string (required)
+    //
+    // Collection: history
+    // Fields:
+    //   - title: map (required, {hi: string, en: string})
+    //   - content: map (required, {hi: string, en: string})
+    //   - image: string (optional)
+    //
+    // Collection: festivals
+    // Fields:
+    //   - name: map (required, {hi: string, en: string})
+    //   - date: string (required)
+    //   - description: map (required, {hi: string, en: string})
+    //   - tithi: string (optional)
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (
+          (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin') ||
+          (request.auth.token.email == "samiljain0111@gmail.com" && request.auth.token.email_verified == true) ||
+          (request.auth.token.email == "admin@jainism.com")
+        );
+    }
+
+    function isTeacher() {
+      return isAuthenticated() && 
+        (
+          (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'teacher') || 
+          isAdmin()
+        );
+    }
+
+    function isStudent() {
+      return isAuthenticated() && 
+        (
+          (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'student') || 
+          isTeacher()
+        );
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    match /settings/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isOwner(userId);
+      allow update: if isAdmin() || (isOwner(userId) && request.resource.data.role == resource.data.role);
+      allow delete: if isAdmin();
+    }
+
+    match /pathshala_users/{id} {
+      allow read, write: if true;
+    }
+
+    match /discussions/{id} {
+      allow read, write: if true;
+    }
+
+    match /knowledge/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /tirthankars/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /aagams/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /history/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /festivals/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /classes/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /exams/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /exam_submissions/{id} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    match /notifications/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /media/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /saints/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /vichaar/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /quiz/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /panchang/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+  }
+}

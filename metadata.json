@@ -1,0 +1,8 @@
+{
+  "name": "Jainism GPT",
+  "description": "An AI assistant knowledgeable about Jainism, its principles, history, and practices.",
+  "requestFramePermissions": [
+    "microphone",
+    "camera"
+  ]
+}
