@@ -1,0 +1,22 @@
+{
+  "short_name": "Jainism GPT",
+  "name": "Jainism GPT",
+  "description": "An AI assistant knowledgeable about Jainism, its principles, history, and practices.",
+  "icons": [
+    {
+      "src": "/logo-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/logo-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#050505",
+  "theme_color": "#050505",
+  "display": "standalone",
+  "orientation": "portrait"
+}

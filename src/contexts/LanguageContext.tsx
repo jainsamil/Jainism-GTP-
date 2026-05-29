@@ -5,16 +5,21 @@ type Language = 'en' | 'hi';
 interface LanguageContextType {
   language: Language;
   toggleLanguage: () => void;
+  setLanguage: (lang: Language) => void;
   t: (en: string, hi: string) => string;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [language, setLanguage] = useState<Language>('en');
+  const [language, setLanguageState] = useState<Language>('en');
 
   const toggleLanguage = () => {
-    setLanguage(prev => prev === 'en' ? 'hi' : 'en');
+    setLanguageState(prev => prev === 'en' ? 'hi' : 'en');
+  };
+
+  const setLanguage = (lang: Language) => {
+    setLanguageState(lang);
   };
 
   const t = (en: string, hi: string) => {
@@ -22,7 +27,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <LanguageContext.Provider value={{ language, toggleLanguage, t }}>
+    <LanguageContext.Provider value={{ language, toggleLanguage, setLanguage, t }}>
       {children}
     </LanguageContext.Provider>
   );

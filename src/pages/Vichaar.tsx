@@ -4,20 +4,54 @@ import { cn } from '../lib/utils';
 import { db } from '../firebase';
 import { collection, onSnapshot } from 'firebase/firestore';
 
+const FALLBACK_QUOTES = [
+  {
+    hi: "अहिंसा परमो धर्मः।",
+    en: "Non-violence is the highest religion.",
+    source: "महान शास्त्र ग्रंथ",
+    color: "from-orange-500 to-amber-600"
+  },
+  {
+    hi: "परस्परोपग्रहो जीवाणाम्।",
+    en: "Souls render service to one another.",
+    source: "तत्त्वार्थ सूत्र (5.21)",
+    color: "from-blue-500 to-indigo-600"
+  },
+  {
+    hi: "जियस्स नत्थि मरणं, जस्स नत्थि अत्तभावो।",
+    en: "He who has conquered self-delusion has conquered death.",
+    source: "भगवान महावीर",
+    color: "from-emerald-500 to-teal-600"
+  },
+  {
+    hi: "सत्यमेव व्रतमुत्तमम्।",
+    en: "Truth indeed is the supreme vow.",
+    source: "आचार्य कुन्दकुन्द",
+    color: "from-purple-500 to-fuchsia-600"
+  },
+  {
+    hi: "मित्ती मे सव्व-भूदेसु, वेरं मज्झं न केणवि।",
+    en: "I have friendship with all beings and enmity with none.",
+    source: "समण सुत्तं (सार)",
+    color: "from-rose-500 to-pink-600"
+  }
+];
+
 export default function VichaarPage() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [liked, setLiked] = useState<Record<number, boolean>>({});
   const [copied, setCopied] = useState(false);
-  const [quotes, setQuotes] = useState<any[]>([]);
+  const [quotes, setQuotes] = useState<any[]>(FALLBACK_QUOTES);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'vichaar'), (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setQuotes(data);
+      setQuotes(data.length > 0 ? data : FALLBACK_QUOTES);
       setLoading(false);
     }, (error) => {
       console.error('Error fetching vichaar:', error);
+      setQuotes(FALLBACK_QUOTES);
       setLoading(false);
     });
     return () => unsubscribe();

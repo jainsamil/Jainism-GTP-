@@ -1,6 +1,97 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" fill="#050505"/>
-  <circle cx="256" cy="256" r="200" fill="none" stroke="#FF6D00" stroke-width="20"/>
-  <path d="M256 120 L350 350 L162 350 Z" fill="none" stroke="#FFD54F" stroke-width="20" stroke-linejoin="round"/>
-  <circle cx="256" cy="280" r="40" fill="#FF6D00"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Deep space background -->
+    <radialGradient id="bg-grad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#140a00" />
+      <stop offset="100%" stop-color="#050505" />
+    </radialGradient>
+    
+    <!-- Outer gold glow -->
+    <radialGradient id="ring-glow" cx="50%" cy="50%" r="48%">
+      <stop offset="70%" stop-color="#FF6D00" stop-opacity="0.1" />
+      <stop offset="90%" stop-color="#FFD54F" stop-opacity="0.4" />
+      <stop offset="100%" stop-color="#FF6D00" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Metallic gold border -->
+    <linearGradient id="gold-metallic" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFE082" />
+      <stop offset="30%" stop-color="#FFB300" />
+      <stop offset="50%" stop-color="#FF6D00" />
+      <stop offset="70%" stop-color="#FFD54F" />
+      <stop offset="100%" stop-color="#E65100" />
+    </linearGradient>
+
+    <!-- Inner coin/shield fluid shine -->
+    <linearGradient id="coin-body" x1="100%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#E65100" />
+      <stop offset="20%" stop-color="#FF6D00" />
+      <stop offset="50%" stop-color="#FFB300" />
+      <stop offset="80%" stop-color="#FFD54F" />
+      <stop offset="100%" stop-color="#FFF8E1" />
+    </linearGradient>
+
+    <!-- Central star metallic accent -->
+    <linearGradient id="star-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="30%" stop-color="#FFD54F" />
+      <stop offset="70%" stop-color="#FF6D00" />
+      <stop offset="100%" stop-color="#000000" />
+    </linearGradient>
+    
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="15" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Ground context -->
+  <rect width="512" height="512" fill="url(#bg-grad)"/>
+
+  <!-- Halo glow outer ring -->
+  <circle cx="256" cy="256" r="236" fill="url(#ring-glow)" />
+
+  <!-- Outer metallic gold rim -->
+  <circle cx="256" cy="256" r="200" fill="none" stroke="url(#gold-metallic)" stroke-width="12" filter="url(#glow)" />
+  <circle cx="256" cy="256" r="192" fill="none" stroke="#212121" stroke-width="2" />
+
+  <!-- The core golden coin body -->
+  <circle cx="256" cy="256" r="185" fill="url(#coin-body)" stroke="url(#gold-metallic)" stroke-width="4" />
+  
+  <!-- Subtle circular sun rays on coin -->
+  <circle cx="256" cy="256" r="160" fill="none" stroke="#FF6D00" stroke-width="1" stroke-dasharray="10 15" opacity="0.4" />
+  <circle cx="256" cy="256" r="140" fill="none" stroke="#FFD54F" stroke-width="2" stroke-dasharray="2 6" opacity="0.6" />
+  <circle cx="256" cy="256" r="120" fill="none" stroke="#E65100" stroke-width="1.5" opacity="0.5" />
+
+  <!-- Glowing core aura behind the Star -->
+  <circle cx="256" cy="256" r="60" fill="#FFE082" filter="url(#glow)" opacity="0.8" />
+
+  <!-- 4-Pointed Jainism Star -->
+  <!-- Coordinates mapping beautiful symmetric curve from center outward -->
+  <!-- Path of star: Center (256, 256), Top point (256, 140), Right point (372, 256), Bottom point (256, 372), Left point (140, 256) -->
+  <path d="M 256 130 
+           Q 256 256 382 256 
+           Q 256 256 256 382 
+           Q 256 256 130 256 
+           Q 256 256 256 130 Z" 
+        fill="#050505" 
+        stroke="url(#gold-metallic)" 
+        stroke-width="10" 
+        stroke-linejoin="round"
+        filter="url(#glow)" />
+
+  <!-- Star Inner layer for 3D bevel reflection look -->
+  <path d="M 256 142 
+           Q 256 256 370 256 
+           Q 256 256 256 370 
+           Q 256 256 142 256 
+           Q 256 256 256 142 Z" 
+        fill="url(#coin-body)" 
+        stroke="#FFFFFF" 
+        stroke-width="2" 
+        stroke-linejoin="round" />
+
+  <!-- Diamond Sparkle in the very center -->
+  <polygon points="256,236 261,251 276,256 261,261 256,276 251,261 236,256 251,251" fill="#FFFFFF" filter="url(#glow)" />
+  <circle cx="256" cy="256" r="4" fill="#FFFFFF" />
 </svg>

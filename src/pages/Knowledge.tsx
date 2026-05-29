@@ -5,13 +5,14 @@ import { db } from '../firebase';
 import { collection, onSnapshot, query } from 'firebase/firestore';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
+import { knowledgeData as FALLBACK_KNOWLEDGE } from '../data/knowledgeBase';
 
 export default function KnowledgePage() {
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const { language: lang } = useLanguage();
   const [openIdx, setOpenIdx] = useState<string | null>(null);
-  const [knowledge, setKnowledge] = useState<any[]>([]);
+  const [knowledge, setKnowledge] = useState<any[]>(FALLBACK_KNOWLEDGE);
   const [loading, setLoading] = useState(true);
   const [isListening, setIsListening] = useState(false);
   const [speechError, setSpeechError] = useState('');
@@ -50,10 +51,11 @@ export default function KnowledgePage() {
     const q = query(collection(db, 'knowledge'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setKnowledge(data);
+      setKnowledge(data.length > 0 ? data : FALLBACK_KNOWLEDGE);
       setLoading(false);
     }, (error) => {
       console.error('Error fetching knowledge:', error);
+      setKnowledge(FALLBACK_KNOWLEDGE);
       setLoading(false);
     });
     

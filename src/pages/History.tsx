@@ -4,21 +4,23 @@ import { db } from '../firebase';
 import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
+import { historyData as FALLBACK_HISTORY } from '../data/historyData';
 
 export default function HistoryPage() {
   const { language } = useLanguage();
   const navigate = useNavigate();
-  const [timeline, setTimeline] = useState<any[]>([]);
+  const [timeline, setTimeline] = useState<any[]>(FALLBACK_HISTORY);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const q = query(collection(db, 'history'), orderBy('period', 'asc'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setTimeline(data);
+      setTimeline(data.length > 0 ? data : FALLBACK_HISTORY);
       setLoading(false);
     }, (error) => {
       console.error('Error fetching history:', error);
+      setTimeline(FALLBACK_HISTORY);
       setLoading(false);
     });
     return () => unsubscribe();

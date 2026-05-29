@@ -4,6 +4,7 @@ import { cn } from '../lib/utils';
 import { useNavigate } from 'react-router-dom';
 import { db } from '../firebase';
 import { collection, onSnapshot } from 'firebase/firestore';
+import { fallbackMediaData } from '../data/mediaData';
 
 const tabs: { id: 'stories' | 'bhajans' | 'audiobooks', label: string, icon: any }[] = [
   { id: 'stories', label: 'Stories', icon: PlaySquare },
@@ -18,23 +19,51 @@ export default function MediaPage() {
   const [currentTrack, setCurrentTrack] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isListening, setIsListening] = useState(false);
-  const [mediaData, setMediaData] = useState<{stories: any[], bhajans: any[], audiobooks: any[]}>({stories: [], bhajans: [], audiobooks: []});
+  const [mediaData, setMediaData] = useState<{stories: any[], bhajans: any[], audiobooks: any[]}>({
+    stories: fallbackMediaData.stories,
+    bhajans: fallbackMediaData.bhajans,
+    audiobooks: fallbackMediaData.audiobooks,
+  });
   const [loading, setLoading] = useState(true);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
+    // Initialize with fallback first so user has immediate feedback
+    if (!currentTrack && fallbackMediaData.stories.length > 0) {
+      setCurrentTrack(fallbackMediaData.stories[0]);
+    }
+    
     const unsubscribe = onSnapshot(collection(db, 'media'), (snapshot) => {
-      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as any));
+        
+        const stories = data.filter((item: any) => item.type === 'stories');
+        const bhajans = data.filter((item: any) => item.type === 'bhajans');
+        const audiobooks = data.filter((item: any) => item.type === 'audiobooks');
       
-      const stories = data.filter(item => item.type === 'stories');
-      const bhajans = data.filter(item => item.type === 'bhajans');
-      const audiobooks = data.filter(item => item.type === 'audiobooks');
-      
-      setMediaData({ stories, bhajans, audiobooks });
-      if (!currentTrack && stories.length > 0) setCurrentTrack(stories[0]);
+      const updStories = stories.length > 0 ? stories : fallbackMediaData.stories;
+      const updBhajans = bhajans.length > 0 ? bhajans : fallbackMediaData.bhajans;
+      const updAudiobooks = audiobooks.length > 0 ? audiobooks : fallbackMediaData.audiobooks;
+
+      setMediaData({
+        stories: updStories,
+        bhajans: updBhajans,
+        audiobooks: updAudiobooks,
+      });
+
+      if (!currentTrack && updStories.length > 0) {
+        setCurrentTrack(updStories[0]);
+      }
       setLoading(false);
     }, (error) => {
-      console.error('Error fetching media:', error);
+      console.error('Error fetching media, loading fallback data:', error);
+      setMediaData({
+        stories: fallbackMediaData.stories,
+        bhajans: fallbackMediaData.bhajans,
+        audiobooks: fallbackMediaData.audiobooks,
+      });
+      if (!currentTrack && fallbackMediaData.stories.length > 0) {
+        setCurrentTrack(fallbackMediaData.stories[0]);
+      }
       setLoading(false);
     });
     return () => unsubscribe();
@@ -68,7 +97,7 @@ export default function MediaPage() {
   };
 
   const playTrack = (track: any) => {
-    if (currentTrack.id === track.id) {
+    if (currentTrack?.id === track.id) {
       togglePlay();
     } else {
       setCurrentTrack(track);
@@ -225,7 +254,7 @@ export default function MediaPage() {
                   <img src={story.thumbnail} alt={story.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" referrerPolicy="no-referrer" />
                   <div className="absolute inset-0 bg-[#FF6D00]/10 group-hover:bg-[#FF6D00]/20 transition-colors z-10 flex items-center justify-center">
                     <div className="w-16 h-16 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center text-white pl-1.5 shadow-[0_0_20px_rgba(255,109,0,0.5)] border border-white/20 transform group-hover:scale-110 group-hover:bg-[#FF6D00] group-hover:text-black transition-all duration-300">
-                      {currentTrack.id === story.id && isPlaying ? <Pause size={28} className="drop-shadow-[0_0_5px_rgba(0,0,0,0.5)] -ml-1.5" /> : <Play size={28} className="drop-shadow-[0_0_5px_rgba(0,0,0,0.5)]" />}
+                      {currentTrack?.id === story.id && isPlaying ? <Pause size={28} className="drop-shadow-[0_0_5px_rgba(0,0,0,0.5)] -ml-1.5" /> : <Play size={28} className="drop-shadow-[0_0_5px_rgba(0,0,0,0.5)]" />}
                     </div>
                   </div>
                   <div className="absolute bottom-4 right-4 bg-black/80 backdrop-blur-md text-[#FFD54F] text-xs px-3 py-1.5 rounded-lg font-bold tracking-wider z-20 border border-white/10 shadow-[0_0_10px_rgba(0,0,0,0.5)]">
@@ -248,7 +277,7 @@ export default function MediaPage() {
             {filteredContent.map((bhajan, idx) => (
               <div key={idx} onClick={() => playTrack(bhajan)} className="bg-[#121212]/80 backdrop-blur-xl p-5 rounded-[1.5rem] shadow-[0_0_15px_rgba(0,0,0,0.5)] border border-white/5 flex items-center gap-5 cursor-pointer hover:shadow-[0_0_20px_rgba(255,109,0,0.15)] hover:border-[#FF6D00]/30 transition-all duration-300 hover:-translate-y-1 group">
                 <div className="w-14 h-14 bg-[#FF6D00]/10 text-[#FF8A65] rounded-2xl flex items-center justify-center shrink-0 border border-[#FF6D00]/20 group-hover:scale-110 group-hover:bg-[#FF6D00] group-hover:text-black transition-all duration-300">
-                  {currentTrack.id === bhajan.id && isPlaying ? <Pause size={24} className="group-hover:drop-shadow-[0_0_5px_rgba(0,0,0,0.5)]" /> : <Play size={24} className="group-hover:drop-shadow-[0_0_5px_rgba(0,0,0,0.5)] ml-1" />}
+                  {currentTrack?.id === bhajan.id && isPlaying ? <Pause size={24} className="group-hover:drop-shadow-[0_0_5px_rgba(0,0,0,0.5)]" /> : <Play size={24} className="group-hover:drop-shadow-[0_0_5px_rgba(0,0,0,0.5)] ml-1" />}
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="font-bold text-gray-100 text-lg truncate group-hover:text-white transition-colors">{bhajan.title}</h3>
@@ -276,7 +305,7 @@ export default function MediaPage() {
                   <div className="flex items-center gap-3 text-xs font-bold tracking-widest text-[#FF8A65] uppercase">
                     <span className="bg-[#FF6D00]/10 border border-[#FF6D00]/20 px-3 py-1.5 rounded-lg shadow-[0_0_10px_rgba(255,109,0,0.1)]">{book.chapters} Chapters</span>
                     <span className="bg-[#FF6D00]/10 border border-[#FF6D00]/20 px-3 py-1.5 rounded-lg flex items-center gap-1.5 hover:bg-[#FF6D00] hover:text-black transition-colors shadow-[0_0_10px_rgba(255,109,0,0.1)]">
-                      {currentTrack.id === book.id && isPlaying ? <Pause size={12} /> : <Play size={12} />} Listen
+                      {currentTrack?.id === book.id && isPlaying ? <Pause size={12} /> : <Play size={12} />} Listen
                     </span>
                   </div>
                 </div>

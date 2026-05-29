@@ -8,7 +8,7 @@ import {
 import { cn } from '../lib/utils';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
-import { db, auth } from '../firebase';
+import { db, auth, googleProvider, signInWithPopup } from '../firebase';
 import { 
   collection, query, onSnapshot, addDoc, 
   updateDoc, doc, deleteDoc, serverTimestamp,
@@ -24,10 +24,12 @@ export default function PathshalaPage() {
   const { language, toggleLanguage } = useLanguage();
   const isDark = theme === 'dark';
   const navigate = useNavigate();
+  const { user: authUser, login: authLogin } = useAuth();
 
   const [pathshalaUser, setPathshalaUser] = useState<any>(null);
   const [isTeacher, setIsTeacher] = useState(false);
   const [isLoginMode, setIsLoginMode] = useState(true);
+  const [showGoogleRoleSetup, setShowGoogleRoleSetup] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
@@ -145,11 +147,11 @@ export default function PathshalaPage() {
 
     const qNotifications = query(collection(db, 'notifications'), where('userId', '==', pathshalaUser.id));
     const unsubscribeNotifications = onSnapshot(qNotifications, (snapshot) => {
-      const newNotifications = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const newNotifications = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as any));
       
       // Check for new unread notifications to trigger push
       if (pushEnabled && newNotifications.length > notifications.length) {
-        const latest = newNotifications.filter(n => !n.read)[0];
+        const latest = newNotifications.filter((n: any) => !n.read)[0];
         if (latest && 'Notification' in window && Notification.permission === 'granted') {
           new Notification(latest.title || 'New Notification', {
             body: latest.message,
@@ -332,26 +334,81 @@ export default function PathshalaPage() {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  // Google Auth & Presence Sync Logic
   useEffect(() => {
-    const storedUserId = localStorage.getItem('pathshala_user_id');
-    if (storedUserId) {
-      const fetchUser = async () => {
+    if (authUser) {
+      const fetchPathshalaUser = async () => {
         try {
-          const userDoc = await getDocs(query(collection(db, 'pathshala_users'), where('__name__', '==', storedUserId)));
-          if (!userDoc.empty) {
-            const userData = { id: userDoc.docs[0].id, ...userDoc.docs[0].data() } as any;
+          const uDoc = await getDocs(query(collection(db, 'pathshala_users'), where('__name__', '==', authUser.uid)));
+          if (!uDoc.empty) {
+            const userData = { id: uDoc.docs[0].id, ...uDoc.docs[0].data() } as any;
             setPathshalaUser(userData);
             setIsTeacher(userData.role === 'teacher' || userData.role === 'admin');
+            setShowGoogleRoleSetup(false);
           } else {
-            localStorage.removeItem('pathshala_user_id');
+            // First time Google login, trigger missing fields setup dialog
+            setShowGoogleRoleSetup(true);
+            setName(authUser.displayName || '');
           }
-        } catch (err) {
-          console.error('Error fetching user:', err);
+        } catch (e) {
+          console.error("Error reading pathshala profile:", e);
         }
       };
-      fetchUser();
+      fetchPathshalaUser();
+    } else {
+      const storedUserId = localStorage.getItem('pathshala_user_id');
+      if (storedUserId) {
+        const fetchUser = async () => {
+          try {
+            const userDoc = await getDocs(query(collection(db, 'pathshala_users'), where('__name__', '==', storedUserId)));
+            if (!userDoc.empty) {
+              const userData = { id: userDoc.docs[0].id, ...userDoc.docs[0].data() } as any;
+              setPathshalaUser(userData);
+              setIsTeacher(userData.role === 'teacher' || userData.role === 'admin');
+            } else {
+              localStorage.removeItem('pathshala_user_id');
+            }
+          } catch (err) {
+            console.error('Error fetching stored session:', err);
+          }
+        };
+        fetchUser();
+      }
     }
-  }, []);
+  }, [authUser]);
+
+  // Presence tracker heartbeat
+  useEffect(() => {
+    if (!pathshalaUser) return;
+
+    const uRef = doc(db, 'pathshala_users', pathshalaUser.id);
+    const setOnline = async () => {
+      try {
+        await setDoc(uRef, {
+          isActive: true,
+          lastActiveAt: Date.now()
+        }, { merge: true });
+      } catch (e) {
+        console.error("Presence status write error:", e);
+      }
+    };
+
+    setOnline();
+    const interval = setInterval(setOnline, 30 * 1000); // 30 seconds interval
+
+    return () => {
+      clearInterval(interval);
+      // Clean up on component unload
+      const setOffline = async () => {
+        try {
+          await setDoc(uRef, {
+            isActive: false
+          }, { merge: true });
+        } catch (e) {}
+      };
+      setOffline();
+    };
+  }, [pathshalaUser]);
 
   const handleCustomAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -424,6 +481,55 @@ export default function PathshalaPage() {
     }
   };
 
+  const handleGoogleSetupSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!authUser) return;
+    setAuthError('');
+
+    if (!name || !fatherName) {
+      setAuthError("Name and Father's Name are required.");
+      return;
+    }
+    if (signupRole === 'teacher' && (!teacherSubject || !teacherClassTime)) {
+      setAuthError("Subject and Class Time are required for Teachers.");
+      return;
+    }
+    if (signupRole === 'student' && (!studentTeacherName || !studentClassName)) {
+      setAuthError("Teacher Name and Class Name are required for Students.");
+      return;
+    }
+
+    try {
+      const newUserProfile: any = {
+        name,
+        fatherName,
+        role: signupRole,
+        email: authUser.email || '',
+        photoURL: authUser.photoURL || '',
+        isActive: true,
+        lastActiveAt: Date.now(),
+        createdAt: serverTimestamp()
+      };
+
+      if (signupRole === 'teacher') {
+        newUserProfile.subject = teacherSubject;
+        newUserProfile.classTime = teacherClassTime;
+      } else {
+        newUserProfile.teacherName = studentTeacherName;
+        newUserProfile.className = studentClassName;
+      }
+
+      await setDoc(doc(db, 'pathshala_users', authUser.uid), newUserProfile);
+      
+      const userData = { id: authUser.uid, ...newUserProfile };
+      setPathshalaUser(userData);
+      setIsTeacher(signupRole === 'teacher');
+      setShowGoogleRoleSetup(false);
+    } catch (err: any) {
+      setAuthError(err.message || 'Failed to finalize profile setup.');
+    }
+  };
+
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteError, setDeleteError] = useState('');
 
@@ -447,6 +553,121 @@ export default function PathshalaPage() {
   };
 
   if (!pathshalaUser) {
+    if (showGoogleRoleSetup) {
+      return (
+        <div className={cn("min-h-screen flex items-center justify-center p-6 relative", isDark ? "bg-[#050505]" : "bg-gray-50")}>
+          <div className={cn("p-10 rounded-[2.5rem] border w-full max-w-md text-left", isDark ? "bg-[#121212] border-white/10" : "bg-white border-gray-200 shadow-xl")}>
+            <div className="w-16 h-16 bg-[#FF6D00]/10 rounded-2xl flex items-center justify-center text-[#FF6D00] mb-6">
+              <GraduationCap size={32} />
+            </div>
+            <h2 className={cn("text-2xl font-black mb-2 uppercase tracking-wide", isDark ? "text-white" : "text-gray-900")}>Academy Profile</h2>
+            <p className="text-gray-500 text-xs mb-8">Please complete your academic profile with Google to finalise your identification in classes.</p>
+            
+            {authError && <p className="text-red-500 text-sm mb-4">{authError}</p>}
+
+            <form onSubmit={handleGoogleSetupSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">My Academy Role</label>
+                <div className="flex gap-4">
+                  <button
+                    type="button"
+                    onClick={() => setSignupRole('student')}
+                    className={cn("flex-1 py-3 rounded-xl border font-bold text-sm transition-all", signupRole === 'student' ? "bg-[#FF6D00] text-black border-[#FF6D00]" : isDark ? "bg-white/5 border-white/10 text-white" : "bg-gray-50 border-gray-200 text-gray-900")}
+                  >
+                    Student
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSignupRole('teacher')}
+                    className={cn("flex-1 py-3 rounded-xl border font-bold text-sm transition-all", signupRole === 'teacher' ? "bg-[#FF6D00] text-black border-[#FF6D00]" : isDark ? "bg-white/5 border-white/10 text-white" : "bg-gray-50 border-gray-200 text-gray-900")}
+                  >
+                    Teacher
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Display Name</label>
+                <input 
+                  type="text" 
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className={cn("w-full p-4 rounded-2xl border font-medium focus:ring-2 focus:ring-[#FF6D00] outline-none transition-all", isDark ? "bg-white/5 border-white/10 text-white" : "bg-gray-50 border-gray-200 text-gray-900")} 
+                  placeholder="Full Name"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Father's Name</label>
+                <input 
+                  type="text" 
+                  value={fatherName}
+                  onChange={(e) => setFatherName(e.target.value)}
+                  className={cn("w-full p-4 rounded-2xl border font-medium focus:ring-2 focus:ring-[#FF6D00] outline-none transition-all", isDark ? "bg-white/5 border-white/10 text-white" : "bg-gray-50 border-gray-200 text-gray-900")} 
+                  placeholder="Father's Name"
+                />
+              </div>
+
+              {signupRole === 'teacher' ? (
+                <>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Subject Taught</label>
+                    <input 
+                      type="text" 
+                      value={teacherSubject}
+                      onChange={(e) => setTeacherSubject(e.target.value)}
+                      className={cn("w-full p-4 rounded-2xl border font-medium focus:ring-2 focus:ring-[#FF6D00] outline-none transition-all", isDark ? "bg-white/5 border-white/10 text-white" : "bg-gray-50 border-gray-200 text-gray-900")} 
+                      placeholder="e.g. Jain History"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Class Time</label>
+                    <input 
+                      type="text" 
+                      value={teacherClassTime}
+                      onChange={(e) => setTeacherClassTime(e.target.value)}
+                      className={cn("w-full p-4 rounded-2xl border font-medium focus:ring-2 focus:ring-[#FF6D00] outline-none transition-all", isDark ? "bg-white/5 border-white/10 text-white" : "bg-gray-50 border-gray-200 text-gray-900")} 
+                      placeholder="e.g. 10:00 AM - 11:00 AM"
+                    />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Teacher Name</label>
+                    <input 
+                      type="text" 
+                      value={studentTeacherName}
+                      onChange={(e) => setStudentTeacherName(e.target.value)}
+                      className={cn("w-full p-4 rounded-2xl border font-medium focus:ring-2 focus:ring-[#FF6D00] outline-none transition-all", isDark ? "bg-white/5 border-white/10 text-white" : "bg-gray-50 border-gray-200 text-gray-900")} 
+                      placeholder="Enter teacher name"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Class Name</label>
+                    <input 
+                      type="text" 
+                      value={studentClassName}
+                      onChange={(e) => setStudentClassName(e.target.value)}
+                      className={cn("w-full p-4 rounded-2xl border font-medium focus:ring-2 focus:ring-[#FF6D00] outline-none transition-all", isDark ? "bg-white/5 border-white/10 text-white" : "bg-gray-50 border-gray-200 text-gray-900")} 
+                      placeholder="e.g. Level 1"
+                    />
+                  </div>
+                </>
+              )}
+
+              <button
+                type="submit"
+                className="w-full py-4 bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] text-black rounded-2xl font-black text-sm shadow-md hover:scale-[1.02] active:scale-95 transition-all uppercase tracking-wider"
+              >
+                Complete Account Sign Up
+              </button>
+            </form>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className={cn("min-h-screen flex items-center justify-center p-6 relative", isDark ? "bg-[#050505]" : "bg-gray-50")}>
         <button 
@@ -464,6 +685,34 @@ export default function PathshalaPage() {
           
           {authError && <p className="text-red-500 text-sm mb-4">{authError}</p>}
           
+          {/* Primary Google auth */}
+          <button
+            type="button"
+            onClick={async () => {
+              try {
+                await signInWithPopup(auth, googleProvider);
+              } catch (e) {
+                console.error("Google login failed", e);
+                setAuthError("Google authentication failed. Please try again.");
+              }
+            }}
+            className="w-full py-4.5 bg-white text-black hover:bg-gray-100 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-3 shadow-lg hover:scale-105 active:scale-95 transition-all mb-6 border border-gray-200"
+          >
+            <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l3.66-2.85z"/>
+              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.85c.87-2.6 3.3-4.53 6.16-4.53z"/>
+            </svg>
+            Sign In with Google
+          </button>
+
+          <div className="flex items-center my-6">
+            <div className="flex-1 border-t border-gray-200 dark:border-white/10"></div>
+            <span className="px-3 text-[10px] font-bold text-gray-500 uppercase tracking-widest">OR</span>
+            <div className="flex-1 border-t border-gray-200 dark:border-white/10"></div>
+          </div>
+
           <form onSubmit={handleCustomAuth} className="space-y-4 text-left">
             {!isLoginMode && (
               <>
@@ -586,10 +835,97 @@ export default function PathshalaPage() {
           
           <button 
             onClick={() => { setIsLoginMode(!isLoginMode); setAuthError(''); }}
-            className="mt-6 text-sm text-gray-400 hover:text-[#FF6D00] transition-colors"
+            className="mt-4 text-sm text-gray-400 hover:text-[#FF6D00] transition-colors"
           >
             {isLoginMode ? "Don't have an account? Sign up" : "Already have an account? Login"}
           </button>
+
+          {/* Quick Guest Logins */}
+          <div className="mt-6 pt-6 border-t border-gray-100 dark:border-white/10 text-center">
+            <p className="text-xs text-gray-400 font-bold uppercase tracking-wider mb-3">Quick / Guest Demo Access</p>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    const username = 'guest_student';
+                    const password = 'password123';
+                    const q = query(collection(db, 'pathshala_users'), where('username', '==', username), where('password', '==', password));
+                    const snap = await getDocs(q);
+                    if (!snap.empty) {
+                      const uData = { id: snap.docs[0].id, ...snap.docs[0].data() } as any;
+                      setPathshalaUser(uData);
+                      setIsTeacher(false);
+                      localStorage.setItem('pathshala_user_id', uData.id);
+                    } else {
+                      const newUser = {
+                        username,
+                        password,
+                        name: 'Guest Student',
+                        fatherName: 'Demo Father',
+                        role: 'student',
+                        className: 'Level 1',
+                        teacherName: 'Guest Teacher',
+                        isActive: true,
+                        createdAt: new Date()
+                      };
+                      const ref = await addDoc(collection(db, 'pathshala_users'), newUser);
+                      setPathshalaUser({ id: ref.id, ...newUser });
+                      setIsTeacher(false);
+                      localStorage.setItem('pathshala_user_id', ref.id);
+                    }
+                  } catch (e) {
+                    const fallbackUser = { id: 'temp_stud', username: 'guest_student', name: 'Guest Student', role: 'student', className: 'Level 1', teacherName: 'Guest Teacher' };
+                    setPathshalaUser(fallbackUser);
+                    setIsTeacher(false);
+                  }
+                }}
+                className="flex-1 py-3 bg-[#FF6D00]/20 hover:bg-[#FF6D00]/30 text-[#FFD54F] border border-[#FF6D00]/30 rounded-xl font-bold text-xs transition-colors"
+              >
+                As Student
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    const username = 'guest_teacher';
+                    const password = 'password123';
+                    const q = query(collection(db, 'pathshala_users'), where('username', '==', username), where('password', '==', password));
+                    const snap = await getDocs(q);
+                    if (!snap.empty) {
+                      const uData = { id: snap.docs[0].id, ...snap.docs[0].data() } as any;
+                      setPathshalaUser(uData);
+                      setIsTeacher(true);
+                      localStorage.setItem('pathshala_user_id', uData.id);
+                    } else {
+                      const newUser = {
+                        username,
+                        password,
+                        name: 'Guest Teacher',
+                        fatherName: 'Demo Father',
+                        role: 'teacher',
+                        subject: 'Jain Philosophy',
+                        classTime: '10:00 AM - 11:00 AM',
+                        isActive: true,
+                        createdAt: new Date()
+                      };
+                      const ref = await addDoc(collection(db, 'pathshala_users'), newUser);
+                      setPathshalaUser({ id: ref.id, ...newUser });
+                      setIsTeacher(true);
+                      localStorage.setItem('pathshala_user_id', ref.id);
+                    }
+                  } catch (e) {
+                    const fallbackUser = { id: 'temp_teach', username: 'guest_teacher', name: 'Guest Teacher', role: 'teacher', subject: 'Jain Philosophy', classTime: '10:00 AM - 11:00 AM' };
+                    setPathshalaUser(fallbackUser);
+                    setIsTeacher(true);
+                  }
+                }}
+                className="flex-1 py-3 bg-[#2962FF]/20 hover:bg-[#2962FF]/30 text-[#448AFF] border border-[#2962FF]/30 rounded-xl font-bold text-xs transition-colors"
+              >
+                As Teacher
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -760,6 +1096,87 @@ export default function PathshalaPage() {
             <div className={cn("rounded-[2rem] p-6 flex flex-col items-center justify-center border transition-all", isDark ? "bg-[#121212]/60 border-[#2962FF]/20" : "bg-white border-blue-100 shadow-sm")}>
               <span className="text-4xl font-black text-[#2962FF] mb-1">{exams.length}</span>
               <span className="text-[10px] font-bold tracking-widest text-gray-500 uppercase">{t.openExams}</span>
+            </div>
+          </div>
+
+          {/* Real-time Presence Visual Tracker Widget */}
+          <div className={cn("rounded-[2.5rem] p-6 border relative overflow-hidden", isDark ? "bg-[#121212]/80 border-white/10" : "bg-white border-gray-200 shadow-xl")}>
+            <div className="absolute top-6 right-6 flex items-center gap-1.5 bg-[#00E676]/10 px-3 py-1 rounded-full border border-[#00E676]/20">
+              <span className="w-2 h-2 bg-[#00E676] rounded-full animate-ping"></span>
+              <span className="w-2 h-2 bg-[#00E676] rounded-full absolute"></span>
+              <span className="text-[9px] font-black tracking-widest text-[#00E676] uppercase">LIVE PRESENCE</span>
+            </div>
+
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center">
+                <Users className="text-[#00E676]" size={20} />
+              </div>
+              <div>
+                <h3 className={cn("text-lg font-black", isDark ? "text-white" : "text-gray-900")}>Academy Active Identification</h3>
+                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                  Currently active students and instructors inside Pathshala
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Online Teachers */}
+              <div className="space-y-3">
+                <h4 className="text-xs font-black tracking-widest text-orange-500 uppercase flex items-center gap-2">
+                  <span>Teachers Online</span>
+                  <span className="bg-orange-500/10 px-2 py-0.5 rounded text-[10px]">
+                    {allUsers.filter(u => u.role === 'teacher' && u.isActive && u.lastActiveAt && u.lastActiveAt > Date.now() - 3 * 60 * 1000).length}
+                  </span>
+                </h4>
+                <div className="space-y-2 max-h-48 overflow-y-auto no-scrollbar">
+                  {allUsers.filter(u => u.role === 'teacher' && u.isActive && u.lastActiveAt && u.lastActiveAt > Date.now() - 3 * 60 * 1000).map(tUser => (
+                    <div key={tUser.id} className={cn("p-3 rounded-xl border flex items-center justify-between", isDark ? "bg-white/5 border-white/5" : "bg-gray-50 border-gray-100")}>
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-7 h-7 bg-orange-500/10 text-orange-500 rounded-full flex items-center justify-center font-bold text-xs uppercase">
+                          {tUser.name.charAt(0)}
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-gray-950 dark:text-gray-100">{tUser.name}</p>
+                          <p className="text-[9px] text-gray-500">{tUser.subject || 'Expert Teacher'}</p>
+                        </div>
+                      </div>
+                      <span className="text-[8px] bg-green-500/10 text-green-500 px-2 py-0.5 rounded font-bold uppercase tracking-wider">ACTIVE</span>
+                    </div>
+                  ))}
+                  {allUsers.filter(u => u.role === 'teacher' && u.isActive && u.lastActiveAt && u.lastActiveAt > Date.now() - 3 * 60 * 1000).length === 0 && (
+                    <p className="text-xs text-gray-500 font-bold uppercase py-2">No teachers active right now</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Online Students */}
+              <div className="space-y-3">
+                <h4 className="text-xs font-black tracking-widest text-blue-500 uppercase flex items-center gap-2">
+                  <span>Students Online</span>
+                  <span className="bg-blue-500/10 px-2 py-0.5 rounded text-[10px]">
+                    {allUsers.filter(u => u.role === 'student' && u.isActive && u.lastActiveAt && u.lastActiveAt > Date.now() - 3 * 60 * 1000).length}
+                  </span>
+                </h4>
+                <div className="space-y-2 max-h-48 overflow-y-auto no-scrollbar">
+                  {allUsers.filter(u => u.role === 'student' && u.isActive && u.lastActiveAt && u.lastActiveAt > Date.now() - 3 * 60 * 1000).map(sUser => (
+                    <div key={sUser.id} className={cn("p-3 rounded-xl border flex items-center justify-between", isDark ? "bg-white/5 border-white/5" : "bg-gray-50 border-gray-100")}>
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-7 h-7 bg-blue-500/10 text-blue-500 rounded-full flex items-center justify-center font-bold text-xs uppercase">
+                          {sUser.name.charAt(0)}
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-gray-950 dark:text-gray-100">{sUser.name}</p>
+                          <p className="text-[9px] text-gray-500">Father Name: {sUser.fatherName || 'Academy Student'}</p>
+                        </div>
+                      </div>
+                      <span className="text-[8px] bg-green-500/10 text-green-500 px-2 py-0.5 rounded font-bold uppercase tracking-wider">ACTIVE</span>
+                    </div>
+                  ))}
+                  {allUsers.filter(u => u.role === 'student' && u.isActive && u.lastActiveAt && u.lastActiveAt > Date.now() - 3 * 60 * 1000).length === 0 && (
+                    <p className="text-xs text-gray-500 font-bold uppercase py-2">No students active right now</p>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
 
@@ -1054,7 +1471,7 @@ export default function PathshalaPage() {
       )}
 
       {activeTab === 'discussions' && (
-        <div className={cn("flex flex-col h-[calc(100vh-200px)] rounded-[2.5rem] border overflow-hidden", isDark ? "bg-[#121212]/80 border-white/10" : "bg-white border-gray-200 shadow-xl")}>
+        <div className={cn("flex flex-col h-[500px] rounded-[2.5rem] border overflow-hidden", isDark ? "bg-[#121212]/80 border-white/10" : "bg-white border-gray-200 shadow-xl")}>
           <div className={cn("p-4 border-b flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4", isDark ? "border-white/10" : "border-gray-200")}>
             <div className="flex items-center gap-2">
               <h3 className={cn("text-lg font-black", isDark ? "text-white" : "text-gray-900")}>

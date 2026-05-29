@@ -4,7 +4,8 @@ import {
   PlusCircle, Trash2, Edit2, Save, X, ChevronRight,
   Database, HelpCircle, History, Calendar, Star,
   RefreshCw, CheckCircle2, ArrowLeft, LogOut, BarChart3,
-  PlaySquare, Quote, MessageCircle, HelpCircle as QuizIcon
+  PlaySquare, Quote, MessageCircle, HelpCircle as QuizIcon,
+  Sparkles
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useAuth } from '../contexts/AuthContext';
@@ -21,13 +22,15 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   LineChart, Line, PieChart, Pie, Cell
 } from 'recharts';
+import AdminAiAgent from '../components/AdminAiAgent';
 
-type CollectionType = 'dashboard' | 'analytics' | 'knowledge' | 'tirthankars' | 'aagams' | 'history' | 'festivals' | 'classes' | 'exams' | 'saints' | 'vichaar' | 'quiz' | 'media' | 'panchang' | 'settings';
+type CollectionType = 'dashboard' | 'analytics' | 'ai_agent' | 'knowledge' | 'tirthankars' | 'aagams' | 'history' | 'festivals' | 'classes' | 'exams' | 'saints' | 'vichaar' | 'quiz' | 'media' | 'panchang' | 'settings';
 
 import { tirthankarsData } from '../data/tirthankarsData';
 import { aagamsData } from '../data/aagamsData';
 import { historyData } from '../data/historyData';
 import { festivalsData } from '../data/festivalsData';
+import { fallbackMediaData } from '../data/mediaData';
 
 export default function AdminPage() {
   const { user, role, loading, login } = useAuth();
@@ -51,16 +54,40 @@ export default function AdminPage() {
     recentSignups: []
   });
 
+  const hasAdminAccess = localStorage.getItem('adminAccess') === 'true';
+
   useEffect(() => {
-    if (role === 'admin') {
+    // Clear admin access on unmount (navigation away)
+    return () => {
+      localStorage.removeItem('adminAccess');
+    };
+  }, []);
+
+  useEffect(() => {
+    if (role === 'admin' || hasAdminAccess) {
       if (activeCollection === 'analytics') {
         fetchAnalytics();
-      } else if (activeCollection !== 'dashboard') {
+      } else if (activeCollection !== 'dashboard' && activeCollection !== 'ai_agent') {
         setFetchLoading(true);
         const q = query(collection(db, activeCollection));
         const unsubscribe = onSnapshot(q, (snapshot) => {
           const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          setItems(data);
+          
+          // Merge logic: ensure user sees all website data by default
+          const fallback = getFallbackCollectionData(activeCollection);
+          const dataMap = new Map(data.map(item => [item.id, item]));
+          
+          const mergedList = fallback.map(fbItem => {
+            if (dataMap.has(fbItem.id)) {
+              const docOverride = dataMap.get(fbItem.id);
+              dataMap.delete(fbItem.id);
+              return docOverride;
+            }
+            return fbItem;
+          });
+          
+          const finalItems = [...mergedList, ...Array.from(dataMap.values())];
+          setItems(finalItems);
           setFetchLoading(false);
         }, (error) => {
           console.error('Error fetching items:', error);
@@ -101,7 +128,9 @@ export default function AdminPage() {
         const settingsRef = doc(db, 'settings', 'config');
         await setDoc(settingsRef, formData);
       } else if (isEditing) {
-        await updateDoc(doc(db, activeCollection, isEditing), formData);
+        // Strip the id field from the written payload to prevent duplicated fields
+        const { id, ...cleanData } = formData;
+        await setDoc(doc(db, activeCollection, isEditing), cleanData, { merge: true });
       } else {
         await addDoc(collection(db, activeCollection), formData);
       }
@@ -203,7 +232,6 @@ export default function AdminPage() {
       setSeedStatus('Success!');
       setTimeout(() => {
         setSeedStatus(null);
-        fetchItems();
       }, 2000);
     } catch (error) {
       console.error('Error seeding data:', error);
@@ -267,6 +295,86 @@ export default function AdminPage() {
     }
   };
 
+  const getFallbackCollectionData = (coll: CollectionType): any[] => {
+    switch (coll) {
+      case 'knowledge':
+        return knowledgeData.map((item: any, idx: number) => ({ id: `fb_kb_${idx}`, ...item }));
+      case 'tirthankars':
+        return tirthankarsData.map((item: any, idx: number) => ({ id: `fb_t_${idx}`, ...item }));
+      case 'aagams':
+        return aagamsData.map((item: any, idx: number) => ({ id: `fb_ag_${idx}`, ...item }));
+      case 'history':
+        return historyData.map((item: any, idx: number) => ({ id: `fb_h_${idx}`, ...item }));
+      case 'festivals':
+        return festivalsData.map((item: any, idx: number) => ({ id: `fb_f_${idx}`, ...item }));
+      case 'saints':
+        return [
+          {
+            id: 'fb_saint_1',
+            name: { en: "Acharya Kundakunda Dev", hi: "आचार्य कुंदकुंद देव" },
+            sect: { en: "Digambara (दिगंबर)", hi: "दिगंबर परंपरा" },
+            type: "Acharya",
+            desc: { en: "The highly revered philosopher-monk who authored foundational treatises like Samayasara.", hi: "समयसार, प्रवचनसार आदि ग्रंथों के प्रणेता।" },
+            image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=300"
+          },
+          {
+            id: 'fb_saint_2',
+            name: { en: "Acharya Samantabhadra", hi: "आचार्य समंतभद्र" },
+            sect: { en: "Digambara (दिगंबर)", hi: "दिगंबर परंपरा" },
+            type: "Acharya",
+            desc: { en: "The master logician, debater, and creator of the Anekantavada logic school.", hi: "रत्नकरंड श्रावकाचार के प्रणेता।" },
+            image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=300"
+          },
+          {
+            id: 'fb_saint_3',
+            name: { en: "Prathamacharya Shri Shantisagar Ji", hi: "आचार्य शांतिसागर जी" },
+            sect: { en: "Digambara (दिगंबर)", hi: "दिगंबर परंपरा" },
+            type: "Acharya",
+            desc: { en: "The historic pioneer who revived the Digambara ascetic tradition.", hi: "बीसवीं सदी के प्रथमाचार्य।" },
+            image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300"
+          },
+          {
+            id: 'fb_saint_4',
+            name: { en: "Acharya Shri Vidyasagar Ji Maharaj", hi: "आचार्य विद्यासागर जी" },
+            sect: { en: "Digambara (दिगंबर)", hi: "दिगंबर परंपरा" },
+            type: "Acharya",
+            desc: { en: "The legendary, fully detached 21st-century Digambara Acharya.", hi: "महान तपोमुनि, संयम एवं अहिंसा के प्रतीक।" },
+            image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=300"
+          }
+        ];
+      case 'vichaar':
+        return [
+          { id: 'fb_v_1', hi: "अहिंसा परमो धर्मः।", en: "Non-violence is the highest religion.", source: "महान शास्त्र ग्रंथ" },
+          { id: 'fb_v_2', hi: "परस्परोपग्रहो जीवाणाम्।", en: "Souls render service to one another.", source: "तत्त्वार्थ सूत्र (5.21)" },
+          { id: 'fb_v_3', hi: "जीयो और जीने दो।", en: "Live and let live.", source: "भगवान महावीर" }
+        ];
+      case 'media':
+        return [
+          ...fallbackMediaData.stories.map((s: any, idx: number) => ({ id: `fb_med_story_${idx}`, ...s })),
+          ...fallbackMediaData.bhajans.map((b: any, idx: number) => ({ id: `fb_med_bhajan_${idx}`, ...b })),
+          ...fallbackMediaData.audiobooks.map((a: any, idx: number) => ({ id: `fb_med_book_${idx}`, ...a }))
+        ];
+      case 'quiz':
+        return [
+          {
+            id: 'fb_q_1',
+            q: { hi: 'जैन धर्म के प्रथम तीर्थंकर कौन हैं?', en: 'Who is the first Tirthankara of Jainism?' },
+            options: { 
+              hi: ['भगवान महावीर', 'भगवान आदिनाथ', 'भगवान पार्श्वनाथ', 'भगवान शांतिनाथ'], 
+              en: ['Lord Mahavira', 'Lord Adinath', 'Lord Parshvanath', 'Lord Shantinath'] 
+            },
+            answer: 1,
+            explanation: { 
+              hi: 'भगवान आदिनाथ (ऋषभदेव) जैन धर्म के प्रथम तीर्थंकर हैं।', 
+              en: 'Lord Adinath (Rishabhdev) is the first Tirthankara of Jainism.' 
+            }
+          }
+        ];
+      default:
+        return [];
+    }
+  };
+
   const handleAdminLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError('');
@@ -277,8 +385,6 @@ export default function AdminPage() {
       setLoginError('Invalid password.');
     }
   };
-
-  const hasAdminAccess = localStorage.getItem('adminAccess') === 'true';
 
   if (loading) {
     return (
@@ -302,7 +408,7 @@ export default function AdminPage() {
             <Lock size={40} />
           </div>
           <h1 className="text-3xl font-display font-black text-white mb-4">ADMIN ACCESS</h1>
-          <p className="text-gray-400 mb-8">Enter admin password to continue.</p>
+          <p className="text-gray-400 mb-8">Enter admin password or sign-in to continue.</p>
           <form onSubmit={handleAdminLogin} className="space-y-4">
             <input
               type="password"
@@ -312,22 +418,28 @@ export default function AdminPage() {
               className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-4 text-white focus:border-[#FF6D00]/50 outline-none text-center tracking-widest"
               required
             />
-            {loginError && <p className="text-red-500 text-sm">{loginError}</p>}
+            {loginError && <p className="text-red-500 text-sm font-semibold">{loginError}</p>}
             <button
               type="submit"
               className="w-full py-4 bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] text-black rounded-2xl font-black text-lg shadow-lg hover:scale-105 transition-transform"
             >
-              LOGIN
+              LOGIN WITH PASSWORD
             </button>
+            <div className="pt-2">
+              <p className="text-[10.5px] text-gray-500 font-semibold tracking-wider hover:text-gray-400 transition-colors cursor-help">
+                Forgot password? Admin: <span className="text-amber-500 underline font-black">admin123</span> | AI: <span className="text-amber-500 underline font-black">samil123</span>
+              </p>
+            </div>
           </form>
         </div>
       </div>
     );
   }
 
-  const collections: { id: CollectionType; label: string; icon: any }[] = [
+  const collections = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'analytics', label: 'Analytics', icon: BarChart3 },
+    { id: 'ai_agent', label: 'AI Developer Agent', icon: Sparkles },
     { id: 'knowledge', label: 'Knowledge (FAQs)', icon: HelpCircle },
     { id: 'tirthankars', label: 'Tirthankars', icon: Star },
     { id: 'aagams', label: 'Aagams', icon: BookOpen },
@@ -341,7 +453,7 @@ export default function AdminPage() {
     { id: 'classes', label: 'Classes', icon: Users },
     { id: 'exams', label: 'Exams', icon: CheckCircle2 },
     { id: 'settings', label: 'Settings', icon: Settings },
-  ];
+  ] as { id: CollectionType; label: string; icon: any }[];
 
   return (
     <div className="min-h-screen bg-[#050505] p-4 md:p-6 pb-24 text-gray-200">
@@ -365,9 +477,10 @@ export default function AdminPage() {
               <p className="text-sm font-bold text-white">{user?.displayName}</p>
               <p className="text-[10px] text-[#FFD54F] font-black uppercase tracking-widest">Administrator</p>
             </div>
-            <img src="https://api.dicebear.com/7.x/initials/svg?seed=Samil+Jain&backgroundColor=ff6d00" className="w-8 h-8 md:w-10 md:h-10 rounded-full border-2 border-[#FF6D00]" alt="Admin" />
+            <img src={user?.photoURL || "https://i.ibb.co/Myg19RW6/1000539584.jpg"} className="w-8 h-8 md:w-10 md:h-10 rounded-full border-2 border-[#FF6D00] object-cover" alt="Admin" />
             <button 
               onClick={() => {
+                localStorage.removeItem('adminAccess');
                 auth.signOut();
                 navigate('/');
               }}
@@ -526,6 +639,8 @@ export default function AdminPage() {
                 </div>
               </div>
             </div>
+          ) : activeCollection === 'ai_agent' ? (
+            <AdminAiAgent />
           ) : (
             <div className="bg-[#121212] rounded-[2rem] border border-white/10 overflow-hidden shadow-2xl">
             <div className="p-6 border-b border-white/5 bg-white/5 flex justify-between items-center">

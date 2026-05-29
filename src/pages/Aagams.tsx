@@ -2,11 +2,216 @@ import { useState, useEffect, useRef } from 'react';
 import { ScrollText, Search, BookOpen, Info, Loader2, Mic, MicOff, ArrowLeft } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { db } from '../firebase';
-import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { collection, onSnapshot, query, orderBy, addDoc } from 'firebase/firestore';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 
 const categories = ['Pujan', 'Stuti', 'Vidhan', 'Chalisa', 'Bhajan', 'Aarti'];
+
+const FALLBACK_AAGAMS = [
+  {
+    id: "fb_pujan_1",
+    title: "देव शास्त्र गुरु पूजा (Dev Shastra Guru Puja)",
+    category: "Pujan",
+    content: `स्थापना (Sthapna):
+ॐ ह्रीं श्रीं देवशास्त्रगुरु-समूह! अत्र अवतर अवतर संवौषट्! (अत्र तिष्ठ तिष्ठ ठः ठः!)
+
+अष्टक (Ashtak):
+जल:
+भागीरथी-जल-कलश-भरि, सुनिर्मल गंध मिलाय।
+आनंद-कंद जिनेन्द्र आगे, पूजहूँ मन हरषाय॥
+ॐ ह्रीं श्रीं देव-शास्त्र-गुरु-चरणेभ्यः जन्म-जरा-मृत्यु-विनाशनाय जलं निर्वपामीति स्वाहा।
+
+चंदन:
+मलयगिरि को चोवा चंदन, केशर कुमकुम गाढ़े।
+अनादि काल की दाह मिटावन, जिनवर के आगे ठाढ़े॥
+ॐ ह्रीं श्रीं देव-शास्त्र-गुरु-चरणेभ्यः संसार-ताप-विनाशनाय चंदनं निर्वपामीति स्वाहा।
+
+अक्षत:
+अक्षत चन्द्र-समान धवल अति, परम सुगन्धित प्यारो।
+पुंज धरूँ जिननाथ-अग्र, भव-अक्षय-पद को धारो॥
+ॐ ह्रीं श्रीं देव-शास्त्र-गुरु-चरणेभ्यः अक्षयपद-प्राप्तये अक्षतान् निर्वपामीति स्वाहा।
+
+पुष्प:
+वर केतकी-गुलाब चमेली, फूले अनुपम बाग।
+काम-बाण-विध्वंसन आये, जिनेन्द्र-चरण अनुराग॥
+ॐ ह्रीं श्रीं देव-शास्त्र-गुरु-चरणेभ्यः कामबाण-विध्वंसनाय पुष्पं निर्वपामीति स्वाहा।
+
+नैवेद्य:
+मधुर सुगन्धित सरस महा-रस, व्यंजन विविध बनाये।
+क्षुधा-रोग-विध्वंसन कारन, थाल भरत ले आये॥
+ॐ ह्रीं श्रीं देव-शास्त्र-गुरु-चरणेभ्यः क्षुधारोग-निवारणाय नैवेद्यं निर्वपामीति स्वाहा।
+
+दीप:
+घृत का दीपक जोति जगावत, जगमगात अन्धियारो।
+मोह-महा-तम-नाश करन को, जिनवर आगे धारो॥
+ॐ ह्रीं श्रीं देव-शास्त्र-गुरु-चरणेभ्यः मोहान्धकार-विनाशनाय दीपं निर्वपामीति स्वाहा।
+
+धूप:
+उत्तम कृष्णागुरु धूप सुहावन, अनल-मध्य धधकाये।
+अष्ट-कर्म की धूपन कारन, जिनवर सन्मुख लाये॥
+ॐ ह्रीं श्रीं देव-शास्त्र-गुरु-चरणेभ्यः अष्टकर्म-दहनाय धूपं निर्वपामीति स्वाहा।
+
+फल:
+ऋतु-फल विविध प्रकार मँगाये, सरस सुगन्ध रसाले।
+मोक्ष-महाफल प्राप्ति करन को, जिनवर-चरण चढ़ाले॥
+ॐ ह्रीं श्रीं देव-शास्त्र-गुरु-चरणेभ्यः मोक्षफल-प्राप्तये फलं निर्वपामीति स्वाहा।
+
+अर्घ्य:
+जल गन्धाक्षत-पुष्पक रचिके, दीप धूप फल न्यारे।
+अर्घ्य चढ़ाय हरूँ भव-फेरा, जय जिन देव हमारे॥
+ॐ ह्रीं श्रीं देव-शास्त्र-गुरु-चरणेभ्यः अनर्घ्यपद-प्राप्तये अर्घ्यं निर्वपामीति स्वाहा।`
+  },
+  {
+    id: "fb_stuti_1",
+    title: "मेरी भावना (Meri Bhavna)",
+    category: "Stuti",
+    content: `जिसने राग-द्वेष कामादिक, जीते सब जग जान लिया।
+सब जीवों को मोक्ष-मार्ग का, निष्प्रह हो उपदेश दिया॥
+बुद्ध, वीर, जिन, हरि, हर, ब्रह्मा, या उसको स्वाधीन कहो।
+भक्ति-भाव से प्रेरित हो यह, चित्त उसी में लीन रहो॥१॥
+
+विषयों की आशा वैश्णिक हो, वीर पुरुष जग में विचरें।
+चौदह गुणस्थानों को पाकर, जो भव-सागर पार करें॥
+राग-द्वेष भय-शोक मिटाकर, संकट में भी विचलित न हों।
+ऐसे मंगलमयी संतों के, चरणों में नित शीश झुकें॥२॥
+
+रहे सदा सत्संग उन्हीं का, ध्यान उन्हीं का नित्य रहे।
+उन जैसा ही बनूँ निरन्तर, हृदय यही संकल्प बहे॥
+नहीं किसी का बुरा विचारूँ, नहीं किसी से वैर करूँ।
+सद्व्यवहार करूँ जग में सब, प्राणी-मात्र से प्रेम करूँ॥३॥
+
+मैत्री-भाव जगत में मेरा, सब जीवों से नित्य रहे।
+दीन-दुःखी जीवों पर मेरे, उर से करुणा-स्रोत बहे॥
+दुर्जन-विघ्न-विनाशक जन पर, क्षोभ नहीं मुझको आये।
+साम्य-भाव रक्खूँ मैं उन पर, ऐसी परिणति हो जाये॥४॥`
+  },
+  {
+    id: "fb_stuti_2",
+    title: "उवसग्गहरं स्तोत्र (Uvasaggaharam Stotra)",
+    category: "Stuti",
+    content: `उवसग्गहरं पासं, पासं वंदामि कम्म-घण-मुक्कम।
+विसहर-विस-निन्नासं, मंगल कल्लाण आवासं ॥१॥
+
+विसहर-फुलिंग मंतं, कंठे धारेइ जो सया मणुओ।
+तस्स गह-रोग-मारी, दुट्ठ-जरा जंति उवसामं ॥२॥
+
+चिट्ठउ दूरे मंतो, तुज्झ पणामो वि बहु-फलो होइ।
+नरतिरिएसु वि जीवो, पावेइ न दुक्ख-दोगच्चं ॥३॥
+
+तुह सम्मत्ते लद्धे, चिंतामणि-कप्पपायव-ब्भहिए।
+पावंति अविग्घेणं, जीवा अयरामरं ठाणं ॥४॥
+
+इअ संथुओ महायस!, भत्तिब्भर-निब्भरेण हिअएण।
+ता देव! दिज्ज बोहिं, भवे भवे पासजिणचंद! ॥५॥`
+  },
+  {
+    id: "fb_chalisa_1",
+    title: "महावीर चालीसा (Mahavir Chalisa)",
+    category: "Chalisa",
+    content: `॥ दोहा ॥
+शीश नवा अरिहंत को, सिद्धन करूँ प्रणाम।
+वीर जिनेश्वर देव का, सुमिरूँ पावन नाम॥
+
+॥ चौपाई ॥
+जय महावीर दयाला, संकट-हरन हरदम प्रतिपाला।
+कुण्डलपुर जनमे जग त्राता, त्रिशला नंदन जग-हित-दाता॥
+सिद्धारथ के राज-दुलारे, नैनन-तारे प्राण-प्यारे।
+दीक्षा ले सब राज गंवाया, बारह बरस घोर तप ठाया॥
+
+काँटों का उपसर्ग सहा मुख, विचलित हुए न पाए सब सुख।
+सिंह-वृत्ति धारण कर आये, केवलज्ञान परम पद पाये॥
+दिव्यध्वनि खिरती सुखदायी, समवशरण रचना मन भायी।
+अहिंसा का सन्देश दिया जग, मोक्ष-मार्ग दर्शाया पावन॥
+
+जो जन वीर का ध्यान लगावे, कष्ट रोग सब दूर नसावे।
+चालीसा पढ़ सुन मन लाये, महावीर वांछित फल पाये॥`
+  },
+  {
+    id: "fb_chalisa_2",
+    title: "पार्श्वनाथ चालीसा (Parshvanath Chalisa)",
+    category: "Chalisa",
+    content: `॥ दोहा ॥
+पार्श्वनाथ भगवान को, बारम्बार प्रणाम।
+जगत-तारक देव का, सुमिरूँ मंगल नाम॥
+
+॥ चौपाई ॥
+जय पार्श्वनाथ देवा, सुर-नर-मुनि कर रहे सेवा।
+काशी नगरी जन्म लिया प्रभु, वामा देवी नंदन विभु॥
+अश्वसेन के कुल उजियारे, कमठ मान-मर्दन अवतारे।
+हाथी के जीव को तारा, नवकार महामन्त्र सुनाया॥
+
+कमठ असुर ने मेह बरसाया, पाहन वृष्टि घोर कराया।
+धरणेन्द्र ने फण फैलाया, प्रभु सर पर छत्र बनाया॥
+अविचल ध्यान धरे जिनराया, केवलज्ञान परम पद पाया।
+सम्मेद शिखर से शिव पधारे, पावन चरण पूजें जग सारे॥
+
+जो पार्श्वनाथ का पाठ पढ़ेगा, संकट टरेगा रिद्धि बढ़ेगा।
+चालीसा जो मन से गावे, पार्श्व प्रभु का आशीष पावे॥`
+  },
+  {
+    id: "fb_aarti_1",
+    title: "जिनेन्द्र देव आरती (Jinendra Dev Aarti)",
+    category: "Aarti",
+    content: `जय जिनेन्द्र देव, स्वामी जय जिनेन्द्र देव।
+सुर-नर-मुनि-जन ध्यावें, सुर-नर-मुनि-जन ध्यावें, नित उठकर सहदेव॥
+॥ जय जिनेन्द्र देव... ॥
+
+ऋषभ देव जग-दाता, जग-हित उपकारी।
+भरत बाहुबली जनक, भरत बाहुबली जनक, मोह-मल्ल hary॥
+॥ जय जिनेन्द्र देव... ॥
+
+पार्श्वनाथ दुःख-भंजन, धरणेन्द्र-पद्मावती।
+संकट मोचन स्वामी, संकट मोचन स्वामी, सिद्ध-शिला वासी॥
+॥ जय जिनेन्द्र देव... ॥
+
+महावीर जिन स्वामी, शासन-नायक देवा।
+गौतम गणधर वन्दित, गौतम गणधर वन्दित, हम चाहत सेवा॥
+॥ जय जिनेन्द्र देव... ॥
+
+पंच-परमेष्ठी आरती, जो जन मन-लाये।
+कहे 'भक्त' अमर-पद, कहे 'भक्त' अमर-पद, साश्वत सुख पाये॥
+॥ जय जिनेन्द्र देव... ॥`
+  },
+  {
+    id: "fb_bhajan_1",
+    title: "मईया मोहे ऐसा वर दे (Maiya Mohe Aisa Var De)",
+    category: "Bhajan",
+    content: `जिनवाणी मईया मोहे ऐसा वर दे,
+ज्ञान का दीपक मेरे घट में धर दे॥
+जिनवाणी मईया मोहे ऐसा वर दे...
+
+राग और द्वेष की आंधी मिट जाये,
+सत्य अहिंसा की ज्योति जल जाये।
+मेरे मन मंदिर का अन्धेरा हर दे,
+ज्ञान का दीपक मेरे घट में धर दे॥
+जिनवाणी मईया मोहे ऐसा वर दे...
+
+परम पदारथ समयसार पाऊँ,
+आत्म-निधि पाकर तृप्त हो जाऊँ।
+समता का रस मेरे जीवन में भर दे,
+ज्ञान का दीपक मेरे घट में धर दे॥
+जिनवाणी मईया मोहे ऐसा वर दे...`
+  },
+  {
+    id: "fb_vidhan_1",
+    title: "सिद्धचक्र महामण्डल विधान (Siddhachakra Vidhan)",
+    category: "Vidhan",
+    content: `सिद्धचक्र महामण्डल विधान जैन धर्म का एक महान और कल्याणकारी अनुष्ठान है। यह विधान विशेष रूप से अष्टान्हिका पर्व के दिनों में (कार्तिक, फाल्गुन और आषाढ़ मास के अंत में) श्रद्धापूर्वक आयोजित किया जाता है।
+
+शास्त्रों में विधान का महत्त्व:
+श्रीपाल और मैनासुन्दरी की कथा इस विधान से घनिष्ठ रूप से जुड़ी हुई है। राजा श्रीपाल का कुष्ठ रोग भगवान सिद्ध परमेष्ठी की भक्ति और सिद्ध चक्र महामण्डल विधान के पवित्र जल (गन्धोदक) के प्रभाव से पूर्णतः दूर हो गया था।
+
+विधान की मूल रचना और अर्घ्य:
+सिद्धचक्र मण्डल में मूल रूप से ९ पद होते हैं - पंचपरमेष्ठी (अरिहंत, सिद्ध, आचार्य, उपाध्याय, साधु) और चार अनुयोग/रत्नत्रय देव (दर्शन, ज्ञान, चारित्र, तप)।
+
+विधान मंत्र:
+ॐ ह्रीं अनादि-सिद्धपरमेष्ठी-समूह! अत्र अवतर अवतर संवौषट्!
+ॐ ह्रीं श्रीं सिद्धपरमेष्ठीभ्यो अर्घ्यं निर्वपामीति स्वाहा।
+
+इस विधान के अर्घ्यों में सिद्धों की पावन अवस्था, उनके आठ गुणों (सम्यक्त्व, ज्ञान, दर्शन, वीर्य, सूक्ष्मत्व, अवगाहनत्व, अगुरुलघुत्व, अव्याबाधत्व) का अत्यंत विस्तारपूर्वक और भक्तिपूर्ण काव्यात्मक वर्णन होता है।`
+  }
+];
 
 export default function AagamsPage() {
   const { language, toggleLanguage } = useLanguage();
@@ -14,11 +219,49 @@ export default function AagamsPage() {
   const [activeCat, setActiveCat] = useState('Pujan');
   const [search, setSearch] = useState('');
   const [selectedItem, setSelectedItem] = useState<any>(null);
-  const [aagams, setAagams] = useState<any[]>([]);
+  const [aagams, setAagams] = useState<any[]>(FALLBACK_AAGAMS);
   const [loading, setLoading] = useState(true);
   const [isListening, setIsListening] = useState(false);
   const [speechError, setSpeechError] = useState('');
   const recognitionRef = useRef<any>(null);
+
+  const [showAiModal, setShowAiModal] = useState(false);
+  const [aiTitle, setAiTitle] = useState('');
+  const [isAiGenerating, setIsAiGenerating] = useState(false);
+  const [aiError, setAiError] = useState('');
+
+  const handleAiGenerate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!aiTitle.trim()) return;
+    setIsAiGenerating(true);
+    setAiError('');
+    try {
+      const response = await fetch('/api/gemini/generate-scripture', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: aiTitle, category: activeCat }),
+      });
+      const data = await response.json();
+      if (response.ok && data.content) {
+        const newDoc = {
+          title: aiTitle,
+          category: activeCat,
+          content: data.content,
+          createdAt: new Date().toISOString()
+        };
+        await addDoc(collection(db, 'aagams'), newDoc);
+        setAiTitle('');
+        setShowAiModal(false);
+      } else {
+        setAiError(data.error || 'Failed to generate scripture');
+      }
+    } catch (err: any) {
+      console.error(err);
+      setAiError('Connection failed. Please check setup.');
+    } finally {
+      setIsAiGenerating(false);
+    }
+  };
 
   useEffect(() => {
     // Initialize Speech Recognition
@@ -53,10 +296,11 @@ export default function AagamsPage() {
     const q = query(collection(db, 'aagams'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setAagams(data);
+      setAagams(data.length > 0 ? data : FALLBACK_AAGAMS);
       setLoading(false);
     }, (error) => {
       console.error('Error fetching aagams:', error);
+      setAagams(FALLBACK_AAGAMS);
       setLoading(false);
     });
     
@@ -189,6 +433,24 @@ export default function AagamsPage() {
         )}
       </div>
 
+      {/* Divine AI Expansion Module */}
+      <div className="mt-8 bg-gradient-to-br from-[#121212]/90 to-[#221C0F]/90 backdrop-blur-xl border border-[#FF6D00]/25 rounded-[2.5rem] p-8 text-center shadow-[0_0_30px_rgba(255,109,0,0.05)] relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-24 h-24 bg-[#FFD54F]/5 rounded-full blur-xl" />
+        <h3 className="font-display font-black text-white text-lg tracking-wider mb-2 uppercase flex items-center justify-center gap-2">
+          <BookOpen size={20} className="text-[#FFD54F] animate-pulse" />
+          More {activeCat}s Needed?
+        </h3>
+        <p className="text-xs text-gray-400 max-w-sm mx-auto mb-4 leading-relaxed">
+          Need a specific traditional pujan, stotra, chalisa, or aarti? Ask Jainism GPT to generate and add it live to the temple library.
+        </p>
+        <button
+          onClick={() => setShowAiModal(true)}
+          className="px-6 py-2.5 bg-[#FF6D00] hover:bg-[#FFD54F] text-black font-black uppercase text-xs tracking-widest rounded-xl transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg shadow-[#FF6D00]/15"
+        >
+          ✨ AI Generate {activeCat}
+        </button>
+      </div>
+
       {/* Content Modal */}
       {selectedItem && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300">
@@ -213,6 +475,60 @@ export default function AagamsPage() {
                 </pre>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* AI Scripture Generation Modal */}
+      {showAiModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[110] flex items-center justify-center p-4 animate-in fade-in duration-300">
+          <div className="bg-[#121212] rounded-[2.5rem] w-full max-w-md overflow-hidden shadow-2xl border border-white/10 p-8 flex flex-col relative animate-in zoom-in-95 duration-300">
+            <button 
+              onClick={() => { setShowAiModal(false); setAiError(''); }}
+              className="absolute top-6 right-6 p-2 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white rounded-full transition-colors"
+            >
+              ✕
+            </button>
+            <h2 className="text-2xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] mb-2 uppercase tracking-wide">
+              AI {activeCat} Generator
+            </h2>
+            <p className="text-xs text-gray-400 mb-6 font-medium leading-relaxed">
+              Enter the title of the scripture you want to generate. Jainism GPT will research its traditional elements and write it beautifully in Hindi/English.
+            </p>
+            
+            <form onSubmit={handleAiGenerate} className="space-y-4">
+              <div>
+                <label className="block text-[10px] font-black text-[#FF8A65] uppercase tracking-wider mb-2">Scripture Name / Title</label>
+                <input
+                  type="text"
+                  placeholder="e.g. भगवान पार्श्वनाथ आरती"
+                  value={aiTitle}
+                  onChange={(e) => setAiTitle(e.target.value)}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-gray-500 focus:border-[#FF6D00]/50 outline-none text-sm font-bold"
+                  required
+                  disabled={isAiGenerating}
+                />
+              </div>
+              
+              {aiError && (
+                <p className="text-red-500 text-xs font-semibold bg-red-500/10 border border-red-500/20 p-3 rounded-lg">{aiError}</p>
+              )}
+
+              <button
+                type="submit"
+                disabled={isAiGenerating}
+                className="w-full py-4 bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] text-black font-black uppercase text-xs tracking-widest rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center gap-2 shadow-lg shadow-[#FF6D00]/15"
+              >
+                {isAiGenerating ? (
+                  <>
+                    <Loader2 className="animate-spin" size={16} />
+                    GENERATING HOLY TEXT...
+                  </>
+                ) : (
+                  'ACTIVATE GENERATOR'
+                )}
+              </button>
+            </form>
           </div>
         </div>
       )}

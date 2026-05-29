@@ -4,6 +4,13 @@ import { cn } from '../lib/utils';
 import { db } from '../firebase';
 import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '../contexts/LanguageContext';
+import { tirthankarData } from '../data/tirthankars';
+
+const FALLBACK_TIRTHANKARS = tirthankarData.map((t, idx) => ({
+  ...t,
+  number: t.number || (t.kaal === 'Present' ? parseInt(t.id) || idx + 1 : (idx + 1) % 24 || 24)
+}));
 
 const categories = ['Present', 'Past', 'Future', 'Videh'];
 
@@ -11,19 +18,20 @@ export default function TirthankarsPage() {
   const navigate = useNavigate();
   const [activeCat, setActiveCat] = useState<'Past' | 'Present' | 'Future' | 'Videh'>('Present');
   const [search, setSearch] = useState('');
-  const [lang, setLang] = useState<'en' | 'hi'>('hi');
+  const { language: lang } = useLanguage();
   const [selectedT, setSelectedT] = useState<any>(null);
-  const [tirthankars, setTirthankars] = useState<any[]>([]);
+  const [tirthankars, setTirthankars] = useState<any[]>(FALLBACK_TIRTHANKARS);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const q = query(collection(db, 'tirthankars'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setTirthankars(data);
+      setTirthankars(data.length > 0 ? data : FALLBACK_TIRTHANKARS);
       setLoading(false);
     }, (error) => {
       console.error('Error fetching tirthankars:', error);
+      setTirthankars(FALLBACK_TIRTHANKARS);
       setLoading(false);
     });
     return () => unsubscribe();
@@ -53,13 +61,6 @@ export default function TirthankarsPage() {
             TIRTHANKARS
           </h1>
         </div>
-        <button 
-          onClick={() => setLang(l => l === 'en' ? 'hi' : 'en')}
-          className="flex items-center gap-2 px-4 py-2 bg-white/80 dark:bg-[#121212]/80 backdrop-blur-xl rounded-full border border-gray-200 dark:border-white/10 text-[#FF8A65] text-sm font-bold tracking-wider shadow-sm dark:shadow-[0_0_15px_rgba(255,109,0,0.2)] hover:border-[#FF6D00]/50 transition-all uppercase"
-        >
-          <Languages size={16} />
-          {lang === 'en' ? 'English' : 'हिंदी'}
-        </button>
       </header>
 
       {/* Featured Banner */}

@@ -24,6 +24,18 @@ import PathshalaPage from './pages/Pathshala';
 import SaintsPage from './pages/Saints';
 import HistoryPage from './pages/History';
 
+import JaapPage from './pages/Jaap';
+import TirthPage from './pages/Tirth';
+import FastingPage from './pages/Fasting';
+import SwadhyayPage from './pages/Swadhyay';
+import BhaktamarPage from './pages/Bhaktamar';
+import DietPage from './pages/Diet';
+
+import PrivacyPolicyPage from './pages/PrivacyPolicy';
+import TermsPage from './pages/Terms';
+import ContactPage from './pages/Contact';
+import Footer from './components/Footer';
+
 function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const navigate = useNavigate();
@@ -54,6 +66,7 @@ function Layout({ children }: { children: React.ReactNode }) {
             <button
               onClick={toggleTheme}
               className="w-10 h-10 bg-white/80 dark:bg-[#121212]/80 backdrop-blur-md border border-gray-200 dark:border-white/10 rounded-full flex items-center justify-center text-[#FF8A65] hover:bg-gray-100 dark:hover:bg-[#1A1A1A] transition-all shadow-sm"
+              title="Toggle Theme"
             >
               {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
             </button>
@@ -71,6 +84,7 @@ function Layout({ children }: { children: React.ReactNode }) {
             <button
               onClick={toggleLanguage}
               className="w-10 h-10 bg-white/80 dark:bg-[#121212]/80 backdrop-blur-md border border-gray-200 dark:border-white/10 rounded-full flex items-center justify-center text-[#FF8A65] hover:bg-gray-100 dark:hover:bg-[#1A1A1A] transition-all shadow-sm"
+              title="Toggle Language"
             >
               <span className="text-xs font-bold">{language === 'en' ? 'A/अ' : 'अ/A'}</span>
             </button>
@@ -80,6 +94,7 @@ function Layout({ children }: { children: React.ReactNode }) {
 
       <main className={cn("flex-1 overflow-y-auto relative z-10", (!isAdmin && !isChat) ? "pb-20" : "")}>
         {children}
+        {!isAdmin && !isChat && <Footer />}
       </main>
 
       {/* Global Ask AI Button */}
@@ -152,6 +167,15 @@ export default function App() {
                 <Route path="/history" element={<HistoryPage />} />
                 <Route path="/quiz" element={<QuizPage />} />
                 <Route path="/festivals" element={<FestivalsPage />} />
+                <Route path="/jaap" element={<JaapPage />} />
+                <Route path="/tirth" element={<TirthPage />} />
+                <Route path="/fasting" element={<FastingPage />} />
+                <Route path="/swadhyay" element={<SwadhyayPage />} />
+                <Route path="/bhaktamar" element={<BhaktamarPage />} />
+                <Route path="/diet" element={<DietPage />} />
+                <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+                <Route path="/terms" element={<TermsPage />} />
+                <Route path="/contact" element={<ContactPage />} />
               </Routes>
             </Layout>
           </BrowserRouter>

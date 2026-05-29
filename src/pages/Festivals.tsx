@@ -4,21 +4,23 @@ import { useNavigate } from 'react-router-dom';
 import { db } from '../firebase';
 import { collection, onSnapshot, query } from 'firebase/firestore';
 import { useLanguage } from '../contexts/LanguageContext';
+import { festivalsData as FALLBACK_FESTIVALS } from '../data/festivalsData';
 
 export default function FestivalsPage() {
   const navigate = useNavigate();
   const { language } = useLanguage();
-  const [festivals, setFestivals] = useState<any[]>([]);
+  const [festivals, setFestivals] = useState<any[]>(FALLBACK_FESTIVALS);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const q = query(collection(db, 'festivals'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setFestivals(data);
+      setFestivals(data.length > 0 ? data : FALLBACK_FESTIVALS);
       setLoading(false);
     }, (error) => {
       console.error('Error fetching festivals:', error);
+      setFestivals(FALLBACK_FESTIVALS);
       setLoading(false);
     });
     return () => unsubscribe();

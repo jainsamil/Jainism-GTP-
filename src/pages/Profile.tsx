@@ -11,9 +11,9 @@ import { db } from '../firebase';
 export default function ProfilePage() {
   const { user, role, login, logout } = useAuth();
   const { language, setLanguage } = useLanguage();
-  const [profilePic, setProfilePic] = useState<string | null>(null);
-  const [name, setName] = useState('Guest User');
-  const [bio, setBio] = useState('Spiritual Seeker');
+  const [profilePic, setProfilePic] = useState<string | null>('https://i.ibb.co/Myg19RW6/1000539584.jpg');
+  const [name, setName] = useState('Samil Jain');
+  const [bio, setBio] = useState('Lead Developer & Spiritual Seeker');
   const [isEditing, setIsEditing] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [showInstallModal, setShowInstallModal] = useState(false);
@@ -43,18 +43,10 @@ export default function ProfilePage() {
   };
 
   useEffect(() => {
-    if (user) {
-      setName(user.displayName || 'User');
-      setProfilePic(user.photoURL || null);
-      // We could also fetch bio from Firestore if we added it there
-    } else {
-      const storedPic = localStorage.getItem('profilePic');
-      if (storedPic) setProfilePic(storedPic);
-      const storedName = localStorage.getItem('profileName');
-      if (storedName) setName(storedName);
-      const storedBio = localStorage.getItem('profileBio');
-      if (storedBio) setBio(storedBio);
-    }
+    // Permanently locks Samil Jain's developer profile info
+    setName('Samil Jain');
+    setProfilePic('https://i.ibb.co/Myg19RW6/1000539584.jpg');
+    setBio('Lead Developer & Spiritual Seeker');
   }, [user]);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -126,82 +118,14 @@ export default function ProfilePage() {
               )}
             </div>
           </div>
-          <button 
-            onClick={() => fileInputRef.current?.click()}
-            className="absolute bottom-0 right-0 p-3 bg-gradient-to-br from-[#FF6D00] to-[#FFD54F] text-white dark:text-black rounded-full shadow-[0_0_15px_rgba(255,109,0,0.4)] dark:shadow-[0_0_15px_rgba(255,109,0,0.8)] hover:scale-110 transition-transform"
-          >
-            <Camera size={18} />
-          </button>
-          <input 
-            type="file" 
-            ref={fileInputRef} 
-            onChange={handleImageUpload} 
-            accept="image/*" 
-            className="hidden" 
-          />
         </div>
 
-        {isEditing ? (
-          <div className="w-full max-w-xs space-y-3 mb-6 relative z-10">
-            <input 
-              type="text" 
-              value={name} 
-              onChange={(e) => setName(e.target.value)}
-              className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2 text-gray-900 dark:text-white text-center font-bold focus:outline-none focus:border-[#FF6D00]/50"
-              placeholder="Your Name"
-            />
-            <input 
-              type="text" 
-              value={bio} 
-              onChange={(e) => setBio(e.target.value)}
-              className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2 text-[#FF8A65] text-center text-sm focus:outline-none focus:border-[#FF6D00]/50"
-              placeholder="Your Bio (e.g., Spiritual Seeker)"
-            />
-            <div className="flex gap-2 justify-center mt-2">
-              <button 
-                onClick={handleSaveProfile}
-                disabled={isSaving}
-                className="p-2 bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400 rounded-lg hover:bg-green-200 dark:hover:bg-green-500/30 transition-colors flex items-center gap-1 text-xs font-bold"
-              >
-                <Check size={14} /> {isSaving ? 'Saving...' : 'Save'}
-              </button>
-              <button 
-                onClick={() => setIsEditing(false)}
-                className="p-2 bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-500/30 transition-colors flex items-center gap-1 text-xs font-bold"
-              >
-                <X size={14} /> Cancel
-              </button>
-            </div>
+        <div className="flex flex-col items-center relative z-10">
+          <div className="flex items-center gap-2 mb-1">
+            <h2 className="text-3xl font-display font-black text-gray-900 dark:text-white tracking-wide drop-shadow-none dark:drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{name}</h2>
           </div>
-        ) : (
-          <div className="flex flex-col items-center relative z-10">
-            <div className="flex items-center gap-2 mb-1">
-              <h2 className="text-3xl font-display font-black text-gray-900 dark:text-white tracking-wide drop-shadow-none dark:drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{name}</h2>
-              <button onClick={() => setIsEditing(true)} className="text-gray-400 hover:text-[#FF6D00] transition-colors">
-                <Edit2 size={16} />
-              </button>
-            </div>
-            <p className="text-[#FF8A65] font-bold tracking-widest text-[10px] uppercase mb-6 drop-shadow-none dark:drop-shadow-[0_0_5px_rgba(255,138,101,0.5)]">{bio}</p>
-          </div>
-        )}
-
-        {!user ? (
-          <button 
-            onClick={login}
-            className="flex items-center gap-2 px-6 py-3 bg-gray-100 dark:bg-white/10 text-gray-900 dark:text-white rounded-full text-xs font-bold tracking-wider hover:bg-gray-200 dark:hover:bg-white/20 transition-all uppercase mb-4 relative z-10"
-          >
-            <User size={18} />
-            Login with Google
-          </button>
-        ) : (
-          <button 
-            onClick={logout}
-            className="flex items-center gap-2 px-6 py-3 bg-red-50 dark:bg-red-500/10 text-red-500 dark:text-red-400 rounded-full text-xs font-bold tracking-wider hover:bg-red-100 dark:hover:bg-red-500/20 transition-all uppercase mb-4 relative z-10"
-          >
-            <LogOut size={18} />
-            Logout
-          </button>
-        )}
+          <p className="text-[#FF8A65] font-bold tracking-widest text-[10px] uppercase mb-6 drop-shadow-none dark:drop-shadow-[0_0_5px_rgba(255,138,101,0.5)]">{bio}</p>
+        </div>
 
         <a 
           href="https://instagram.com/_officialsamiljain_" 
