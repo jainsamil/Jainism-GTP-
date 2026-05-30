@@ -4,7 +4,7 @@ export const festivalsData = [
     date: "April",
     tithi: "Chaitra Shukla Trayodashi",
     desc: { hi: "भगवान महावीर के जन्म का उत्सव।", en: "Celebrates the birth of Lord Mahavira." },
-    image: "https://picsum.photos/seed/mahavir/600/300",
+    image: "https://images.unsplash.com/photo-1606293926075-69a00dbfde81?auto=format&fit=crop&q=80&w=600",
     color: "from-orange-400 to-amber-500",
     daysLeft: 14
   },
@@ -13,7 +13,7 @@ export const festivalsData = [
     date: "August/September",
     tithi: "Bhadrapada",
     desc: { hi: "जैन धर्म का सबसे महत्वपूर्ण वार्षिक पवित्र पर्व, जिसमें 10 धर्मों की आराधना की जाती है।", en: "The most important annual holy event for Jains, focusing on 10 supreme virtues." },
-    image: "https://picsum.photos/seed/paryushan/600/300",
+    image: "https://images.unsplash.com/photo-1447069387593-a5de0862481e?auto=format&fit=crop&q=80&w=600",
     color: "from-emerald-400 to-teal-500",
     daysLeft: 120
   },
@@ -22,7 +22,7 @@ export const festivalsData = [
     date: "April/May",
     tithi: "Vaishakha Shukla Tritiya",
     desc: { hi: "भगवान ऋषभदेव के इक्षु रस (गन्ने का रस) से पारणा का दिन।", en: "Commemorates Lord Rishabhanatha breaking his year-long fast with sugarcane juice." },
-    image: "https://picsum.photos/seed/akshaya/600/300",
+    image: "https://images.unsplash.com/photo-1609137144814-7f1543faf743?auto=format&fit=crop&q=80&w=600",
     color: "from-yellow-400 to-orange-500",
     daysLeft: 40
   },
@@ -31,7 +31,7 @@ export const festivalsData = [
     date: "October/November",
     tithi: "Kartik Amavasya",
     desc: { hi: "भगवान महावीर का मोक्ष कल्याणक। इस दिन भगवान महावीर ने निर्वाण प्राप्त किया था।", en: "Celebrates the Nirvana (Moksha) of Lord Mahavira." },
-    image: "https://picsum.photos/seed/diwali/600/300",
+    image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&q=80&w=600",
     color: "from-red-400 to-orange-500",
     daysLeft: 200
   },
@@ -40,7 +40,7 @@ export const festivalsData = [
     date: "May/June",
     tithi: "Jyeshtha Shukla Panchami",
     desc: { hi: "इस दिन जैन आगमों (शास्त्रों) को पहली बार लिपिबद्ध किया गया था।", en: "Commemorates the day when Jain scriptures were first written down." },
-    image: "https://picsum.photos/seed/shrut/600/300",
+    image: "https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&q=80&w=600",
     color: "from-blue-400 to-indigo-500",
     daysLeft: 60
   },
@@ -49,7 +49,7 @@ export const festivalsData = [
     date: "August",
     tithi: "Shravan Purnima",
     desc: { hi: "विष्णुकुमार मुनिराज द्वारा 700 मुनियों की रक्षा का स्मरण।", en: "Commemorates the protection of 700 Jain monks by Vishnukumar Muni." },
-    image: "https://picsum.photos/seed/rakhi/600/300",
+    image: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&q=80&w=600",
     color: "from-pink-400 to-rose-500",
     daysLeft: 100
   },
@@ -58,7 +58,7 @@ export const festivalsData = [
     date: "Three times a year",
     tithi: "Phalguna, Ashadha, Kartika",
     desc: { hi: "नंदीश्वर द्वीप में देवताओं द्वारा की जाने वाली शाश्वत पूजा का पर्व।", en: "An 8-day festival celebrated three times a year, commemorating the celestial worship at Nandishwar Dweep." },
-    image: "https://picsum.photos/seed/ashtahnika/600/300",
+    image: "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&q=80&w=600",
     color: "from-purple-400 to-fuchsia-500",
     daysLeft: 80
   },
@@ -67,7 +67,7 @@ export const festivalsData = [
     date: "Monthly",
     tithi: "Rohini Nakshatra",
     desc: { hi: "हर महीने रोहिणी नक्षत्र के दिन महिलाओं द्वारा किया जाने वाला व्रत।", en: "A monthly fast observed primarily by women on the day of Rohini Nakshatra." },
-    image: "https://picsum.photos/seed/rohini/600/300",
+    image: "https://images.unsplash.com/photo-1502444330042-d1a1ddf9bb5c?auto=format&fit=crop&q=80&w=600",
     color: "from-cyan-400 to-blue-500",
     daysLeft: 10
   },
@@ -76,7 +76,7 @@ export const festivalsData = [
     date: "September",
     tithi: "Ashvin Krishna Pratipada",
     desc: { hi: "दशलक्षण पर्व के बाद क्षमा मांगने का दिन (मिच्छामि दुक्कड़म)।", en: "The day of universal forgiveness, observed after Das Lakshana Parva." },
-    image: "https://picsum.photos/seed/kshama/600/300",
+    image: "https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&q=80&w=600",
     color: "from-green-400 to-emerald-500",
     daysLeft: 130
   },
@@ -85,7 +85,7 @@ export const festivalsData = [
     date: "July/August",
     tithi: "Shravan Krishna Pratipada",
     desc: { hi: "भगवान महावीर की प्रथम देशना (दिव्यध्वनि) खिरने का दिन।", en: "Commemorates the first sermon (Divya Dhwani) of Lord Mahavira." },
-    image: "https://picsum.photos/seed/veer/600/300",
+    image: "https://images.unsplash.com/photo-1609137144814-7f1543faf743?auto=format&fit=crop&q=80&w=600",
     color: "from-orange-500 to-red-600",
     daysLeft: 90
   }

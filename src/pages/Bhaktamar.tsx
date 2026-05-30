@@ -83,79 +83,24 @@ const BHAKTAMAR_DATA: ShlokaData[] = [
   {
     number: 7,
     sanskrit: "नास्तं कदाचिदुपयाति न राहु-गम्यः, स्पष्टी-करोति सहसा युगपज्जगन्ति। नाम्भोधरोदर-निरुद्ध-महाप्रभावः, सूर्यातिशायि-महिमा जगदीश्वरोऽसौ॥ ७ ॥",
-    hindi: "जगत के स्वामी! आपके महिमामयी दिव्य प्रकाश को मेघ नहीं रोक सकते, राहु ग्रसित नहीं कर सकता। आपका ज्ञान सूर्य एक साथ पूरे लोकालोक को प्रकाशित करता है, यह सामान्य सूर्य से अनंत गुना महान है।",
-    english: "O Lord of the Universe! Your infinite wisdom shines unblocked by clouds or swallowed by Rahu. It illuminates all realms simultaneously, possessing majesty far exceeding the physical sun.",
+    hindi: "जगत के स्वामी! आपके महिमामयी दिव्य प्रकाश को मेघ नहीं रोक सकते, राहु ग्रसित नहीं कर सकता। आपका ज्ञान सूर्य एक साथ पूरे लोकालोक को प्रकाशित करता है, अतः इसकी महिमा प्रत्यक्ष सूर्य से भी बढ़कर है।",
+    english: "O Lord of the Universe! Your grand omniscience sun never sets, is never eclipsed by Rahu, and cannot be blocked by clouds. It illuminates the entire universe simultaneously, far surpassing the physical sun.",
     benefit: {
-      en: "Removal of eyesight disorders, gaining dynamic leadership, and absolute charisma.",
-      hi: "नेत्र रोगों से आराम, मान-सम्मान व प्रभाव में वृद्धि, प्रशासनिक सफलता।"
+      en: "Curing eye disorders, skin conditions, clearing dark thoughts, and enhancing positive aura.",
+      hi: "नेत्र रोगों और विकार का शमन, चर्म रोग निवारण, एवं तेज व सकारात्मक ऊर्जा का विकास।"
     },
-    riddhi: "ॐ ह्रीं अर्हं णमो अरिहंताणं णमो मणपज्जवनाणाणं ह्रीं नमः स्वाहा।"
-  },
-  {
-    number: 10,
-    sanskrit: "नाश्चर्यमत्र यदि नाम गुणैर्विशेषात्, त्वं संश्रितो निरवकाशतया मुनीश। यस्तैरुताश्रयतयोदित-मान-भूपैः, दोषैरसज्जन-हृदाश्रयिभिः प्रपन्ने॥ १० ॥",
-    hindi: "हे मुनीश! इसमें कोई आश्चर्य नहीं कि सभी परम गुण अन्य कहीं स्थान न पाकर आप में ही समाहित हो गए हैं, क्योंकि दोष तो दुर्जनों के हृदय के वशीभूत होकर आपसे कोसों दूर भाग चुके हैं।",
-    english: "O Lord! It is no wonder that all divine virtues found refuge in you because there was no shelf space left elsewhere, while all vices were chased away by your flawless brilliance.",
-    benefit: {
-      en: "Neutralizing black magic, toxic environments, and removing physical poisons.",
-      hi: "विषैले प्रभावों, तंत्र-मंत्र बाधाओं का शमन, बुरी संगत एवं विष के प्रभाव का नाश।/प्रकोप निवारण।"
-    },
-    riddhi: "ॐ ह्रीं अर्हं णमो अरिहंताणं णमो पमोयपत्ताणं ह्रीं नमः स्वाहा।"
-  },
-  {
-    number: 26,
-    sanskrit: "बुद्धस्त्वमेव विबुध-अर्च्य-बुद्धि-बोधात्, त्वं शंकरोऽसि जगतां त्रय-शंकरत्वात्। धातासि धीर शिव-मार्ग-विधेर्विधानात्, व्यक्तं त्वमेव पुरुषोत्तम-आदिदेवः॥ २६ ॥",
-    hindi: "देव! आप ही बुद्ध हैं क्योंकि आपकी बुद्धि अत्यंत निर्मल ज्ञानमयी है; त्रिलोकी को परम शांति देने के कारण आप ही शंकर हैं; मोक्ष मार्ग का विधान करने के कारण आप ही विधाता हैं और आप ही आदिदेव पुरुषोत्तम हैं।",
-    english: "You are indeed the Buddha because of your ultimate pure wisdom; you are Shankara because you bestow eternal peace upon the three worlds; you are the Creator (Dhata) because you establish the path of salvation; and you are Purushottama.",
-    benefit: {
-      en: "Securing higher positions, clearing job promotion obstacles, and mental peace.",
-      hi: "राज्य व राजकीय कार्यों में सफलता, पदोन्नति, बौद्धिक शांति एवं मानसिक तनाव की मुक्ति।"
-    },
-    riddhi: "ॐ ह्रीं अर्हं णमो अरिहंताणं णमो केवलदंसणीणं ह्रीं नमः स्वाहा।"
-  },
-  {
-    number: 29,
-    sanskrit: "सिंहासनं मणि-मयूख-शिखा-विचित्र-मुद्याजितं कनक-पंकज-कान्तमुच्चैः। आराजते तव वपुः कनकावदातं, बिम्बं वियद्विलसतोंऽशुमतो यथार्के॥ २९ ॥",
-    hindi: "मणियों और किरणों की चमक से सुशोभित ऊंचे सुवर्ण सिंहासन पर विराजमान आपका परम कांतिवान सुवर्ण शरीर वैसा ही शोभायमान हो रहा है जैसे आकाश में सूर्य का बिम्ब देदीप्यमान होता है।",
-    english: "Seated on a grand throne adorned with blazing gems and golden lotuses, your pure, glowing body shines with golden majesty, resembling the radiant solar disc rising in the sky.",
-    benefit: {
-      en: "Attracting wealth, solving debt crises, and resolving administrative blocks.",
-      hi: "आर्थिक संपन्नता, ऋण मुक्ति, राजकीय व प्रशासनिक अड़चनों का अंत।"
-    },
-    riddhi: "ॐ ह्रीं अर्हं णमो अरिहंताणं णमो केवलणाणीणं ह्रीं नमः स्वाहा।"
-  },
-  {
-    number: 36,
-    sanskrit: "विक्षोभितोऽपि न जहाति रस-गम्भीरतां, कल्पान्त-काल-मकरालय-वन्मुनीश। कोऽपि विस्मय-नदी-प्रभवोऽपि लोके, त्वत्सदृशं गुण-निधिं लभते न कश्चित्॥ ३६ ॥",
-    hindi: "हे मुनीश! प्रलयकाल की आंधी से विक्षोभित महासमुद्र के समान गंभीर होने पर भी आप अपनी मन की शांति एवं समता कभी नहीं छोड़ते। इस जगत में आपके समान गंभीर और उत्कृष्ट गुणों का सागर कोई दूसरा नहीं है।",
-    english: "O Lord! Even if shaken by cataclysmic events, you never lose your deep tranquility, just like the vast ocean at the end of an era. Your mountain-like composure cannot be found in anyone else.",
-    benefit: {
-      en: "Conquering fear of wild beasts, snakes, deep forest paths, and heavy phobias.",
-      hi: "जहरीले साँपों, हिंसक पशुओं के भय से मुक्ति, निर्जन स्थानों में पूर्ण अभय।"
-    },
-    riddhi: "ॐ ह्रीं अर्हं णमो अरिहंताणं णमो दिट्ठिविहीणं ह्रीं नमः स्वाहा।"
-  },
-  {
-    number: 45,
-    sanskrit: "उद्भूत-भीषण-जलोदर-भार-भुग्नाः, शोच्यां दशां उपगताश्च्युत-जीविताशाः। त्वत्पाद-पंकज-रजोऽमृत-दिग्ध-देहा, मर्त्या भवन्ति मकर-ध्वज-तुल्य-रूपाः॥ ४५ ॥",
-    hindi: "अति भयानक जलोदर (गंभीर असाध्य बीमारी) रोग से पीड़ित मनुष्य भी आपके पवित्र चरणकमल की धूल रूपी अमृत को लगाकर कामदेव स्वरूप स्वस्थ हो जाते हैं।",
-    english: "Mortals suffering from chronic, dreadful ailments, who have lost all hope of survival, are instantly cured and restored to beautiful radiant health by applying the nectar chest dust from your holy feet.",
-    benefit: {
-      en: "Unparalleled physical healing, curing chronic diseases, and regaining vitality.",
-      hi: "गंभीर असाध्य शारीरिक रोगों का निवारण, शारीरिक आरोग्य एवं कांति की प्राप्ति।"
-    },
-    riddhi: "ॐ ह्रीं अर्हं णमो उवज्झायाणं णमो सव्वसामीणं ह्रीं नमः स्वाहा।"
+    riddhi: "ॐ ह्रीं अर्हं णमो लोयपइवयाणं ह्रीं नमः स्वाहा।"
   },
   {
     number: 48,
     sanskrit: "स्तोत्र-स्रजं तव जिनेन्द्र गुणैर्निबद्धां, भक्त्या मया विविध-वर्ण-विचित्र-पुष्पाम्। धत्ते जनो य इह कण्ठ-गतामजस्रं, तं मानतुंगमवशा समुपैति लक्ष्मीः॥ ४८ ॥",
-    hindi: "जो पुरुष विविध गुणों से युक्त इस स्तोत्र रूपी पुष्पमाला को कंठस्थ कर आदरपूर्वक धारण करता है, उस मानतुंग पुरुष के पास स्वर्गिक लक्ष्मी स्वयं खिंची चली आती है।",
-    english: "He who holds this divine garland of verses close in his throat and repeats it daily with pure devotion, receives supreme bliss and abundance effortlessly.",
+    hindi: "जो पुरुष विविध गुणों से युक्त इस स्तोत्र रूपी पुष्पमाला को कंठस्थ कर आदरपूर्वक धारण करता है, उस मानतुंग (श्रेष्ठ मनुष्य) के पास लक्ष्मी (वैभव) स्वयं खिंची चली आती है।",
+    english: "The devotee who constantly wears this beautiful garland of verses woven from your glorious virtues with deep devotion becomes highly respected, and divine prosperity (Lakshmi) seeks him out automatically.",
     benefit: {
-      en: "Liberation from fear, release from prison or court boundaries, and worldly abundance.",
-      hi: "भयमुक्ति, बंधन व कारागार से मुक्ति, यश तथा लक्ष्मी की पूर्ण प्राप्ति।"
+      en: "Gaining ultimate prosperity, honors from administration, and wish fulfillment.",
+      hi: "सर्व सिध्दि प्राप्ति, सुख-संपदा का आगमन, और वैभव की प्राप्ति।"
     },
-    riddhi: "ॐ ह्रीं अर्हं णमो लोए सव्वसाहूणं णमो अणंत विज्जाणं ह्रीं नमः स्वाहा।"
+    riddhi: "ॐ ह्रीं अर्हं णमो अरिहंताणं णमो केवलनाणाणं ह्रीं नमः स्वाहा।"
   }
 ];
 
@@ -167,52 +112,76 @@ export default function BhaktamarPage() {
   const [favorites, setFavorites] = useState<number[]>([]);
   const [completedList, setCompletedList] = useState<number[]>([]);
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [activeTab, setActiveTab] = useState<'hindi' | 'english' | 'remedy'>('hindi');
+  const [activeTab, setActiveTab] = useState<'hindi' | 'english' | 'remedy' | 'jap'>('hindi');
 
+  // Jap / Mala Counter States
+  const [japTarget, setJapTarget] = useState<number>(9); // 9, 27, or 108 times
+  const [japCount, setJapCount] = useState<number>(0);
+  const [japCompleted, setJapCompleted] = useState<boolean>(false);
+
+  // Load favorites and completed from localStorage on mount
   useEffect(() => {
     const savedFavorites = localStorage.getItem('bhaktamar_favorites');
+    if (savedFavorites) {
+      try {
+        setFavorites(JSON.parse(savedFavorites));
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
     const savedCompleted = localStorage.getItem('bhaktamar_completed');
-    if (savedFavorites) setFavorites(JSON.parse(savedFavorites));
-    if (savedCompleted) setCompletedList(JSON.parse(savedCompleted));
+    if (savedCompleted) {
+      try {
+        setCompletedList(JSON.parse(savedCompleted));
+      } catch (e) {
+        console.error(e);
+      }
+    }
   }, []);
 
+  // Sync to local storage on change
   const handleToggleFavorite = (num: number) => {
-    let updated: number[];
-    if (favorites.includes(num)) {
-      updated = favorites.filter(n => n !== num);
-    } else {
-      updated = [...favorites, num];
-    }
+    const updated = favorites.includes(num)
+      ? favorites.filter(id => id !== num)
+      : [...favorites, num];
     setFavorites(updated);
     localStorage.setItem('bhaktamar_favorites', JSON.stringify(updated));
   };
 
   const handleToggleCompleted = (num: number) => {
-    let updated: number[];
-    if (completedList.includes(num)) {
-      updated = completedList.filter(n => n !== num);
-    } else {
-      updated = [...completedList, num];
-    }
+    const updated = completedList.includes(num)
+      ? completedList.filter(id => id !== num)
+      : [...completedList, num];
     setCompletedList(updated);
     localStorage.setItem('bhaktamar_completed', JSON.stringify(updated));
   };
 
+  // TTS recitation
   const playTTSChant = () => {
     if (isSpeaking) {
       window.speechSynthesis.cancel();
       setIsSpeaking(false);
-    } else {
-      setIsSpeaking(true);
-      const textToSpeak = selectedShloka.sanskrit;
-      const utterance = new SpeechSynthesisUtterance(textToSpeak);
-      utterance.lang = 'hi-IN';
-      utterance.rate = 0.75;
-      utterance.onend = () => setIsSpeaking(false);
-      window.speechSynthesis.speak(utterance);
+      return;
     }
+
+    const textToSpeak = selectedShloka.sanskrit;
+    const utterance = new SpeechSynthesisUtterance(textToSpeak);
+    utterance.lang = 'hi-IN'; // Sanskrit / Hindi voice
+    
+    utterance.onend = () => {
+      setIsSpeaking(false);
+    };
+
+    utterance.onerror = () => {
+      setIsSpeaking(false);
+    };
+
+    setIsSpeaking(true);
+    window.speechSynthesis.speak(utterance);
   };
 
+  // Clean up speech synthesis on unmount
   useEffect(() => {
     return () => {
       window.speechSynthesis.cancel();
@@ -250,7 +219,7 @@ export default function BhaktamarPage() {
 
       {/* Selector wheel / slider */}
       <label className="text-[10px] font-black text-orange-500 uppercase tracking-widest block mb-2">{lang === 'en' ? 'Navigate High Healing Verses' : 'महाप्रभावकारी काव्य संख्या चुनें'}</label>
-      <div className="flex gap-2 overflow-x-auto pb-4 scrollbar-hide mb-6">
+      <div className="flex gap-2 overflow-x-auto pb-4 scrollbar-hide mb-6 border-none shadow-none outline-none">
         {BHAKTAMAR_DATA.map(st => {
           const isSelected = selectedShloka.number === st.number;
           const isDone = completedList.includes(st.number);
@@ -262,7 +231,7 @@ export default function BhaktamarPage() {
                 window.speechSynthesis.cancel();
                 setIsSpeaking(false);
               }}
-              className={`px-4.5 py-3 rounded-2xl text-sm font-black whitespace-nowrap transition-all duration-300 flex items-center gap-1.5 border relative ${
+              className={`px-4.5 py-3 rounded-2xl text-sm font-black whitespace-nowrap transition-all duration-300 flex items-center gap-1.5 border relative cursor-pointer ${
                 isSelected 
                   ? 'bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] text-black border-transparent shadow-[0_4px_15px_rgba(255,109,0,0.3)] scale-[1.05]' 
                   : 'bg-white dark:bg-[#121212] text-gray-700 dark:text-gray-300 border-gray-100 dark:border-white/5'
@@ -289,7 +258,7 @@ export default function BhaktamarPage() {
           <div className="flex items-center gap-2">
             <button 
               onClick={() => handleToggleFavorite(selectedShloka.number)} 
-              className={`p-2 rounded-full border transition-colors ${
+              className={`p-2 rounded-full border transition-colors cursor-pointer ${
                 favorites.includes(selectedShloka.number) 
                   ? 'bg-red-500/10 border-red-500/20 text-red-500' 
                   : 'bg-gray-50 dark:bg-white/5 border-gray-100 dark:border-white/5 text-gray-400 hover:text-red-500'
@@ -300,7 +269,7 @@ export default function BhaktamarPage() {
             </button>
             <button 
               onClick={() => handleToggleCompleted(selectedShloka.number)}
-              className={`p-2 rounded-full border transition-all ${
+              className={`p-2 rounded-full border transition-all cursor-pointer ${
                 completedList.includes(selectedShloka.number)
                   ? 'bg-orange-500/10 border-orange-500/20 text-orange-500 font-bold'
                   : 'bg-gray-50 dark:bg-white/5 border-gray-100 dark:border-white/5 text-gray-400 hover:text-orange-500'
@@ -320,7 +289,7 @@ export default function BhaktamarPage() {
 
           <button 
             onClick={playTTSChant}
-            className={`mt-4 mx-auto px-5 py-2.5 rounded-full flex items-center gap-2 font-bold text-xs shadow-sm transition-all border ${
+            className={`mt-4 mx-auto px-5 py-2.5 rounded-full flex items-center gap-2 font-bold text-xs shadow-sm transition-all border cursor-pointer ${
               isSpeaking 
                 ? 'bg-red-500 text-white border-red-400 animate-pulse' 
                 : 'bg-gray-100 dark:bg-white/10 text-[#FF6D00] border-[#FF6D00]/20 hover:scale-103'
@@ -336,7 +305,7 @@ export default function BhaktamarPage() {
         <div className="flex border-b border-gray-150 dark:border-white/5 gap-4 py-3 text-xs relative z-10 overflow-x-auto scrollbar-hide">
           <button 
             onClick={() => setActiveTab('hindi')} 
-            className={`font-black uppercase tracking-wider pb-1 transition-colors ${
+            className={`font-black uppercase tracking-wider pb-1 transition-colors cursor-pointer ${
               activeTab === 'hindi' ? 'text-orange-500 border-b-2 border-orange-500' : 'text-gray-400 hover:text-gray-600'
             }`}
             id="tab-hindi"
@@ -345,7 +314,7 @@ export default function BhaktamarPage() {
           </button>
           <button 
             onClick={() => setActiveTab('english')} 
-            className={`font-black uppercase tracking-wider pb-1 transition-colors ${
+            className={`font-black uppercase tracking-wider pb-1 transition-colors cursor-pointer ${
               activeTab === 'english' ? 'text-orange-500 border-b-2 border-orange-500' : 'text-gray-400 hover:text-gray-600'
             }`}
             id="tab-english"
@@ -354,12 +323,21 @@ export default function BhaktamarPage() {
           </button>
           <button 
             onClick={() => setActiveTab('remedy')} 
-            className={`font-black uppercase tracking-wider pb-1 transition-colors ${
+            className={`font-black uppercase tracking-wider pb-1 transition-colors cursor-pointer ${
               activeTab === 'remedy' ? 'text-orange-500 border-b-2 border-orange-500' : 'text-gray-400 hover:text-gray-600'
             }`}
             id="tab-remedy"
           >
             {lang === 'en' ? 'Healing & Riddhi' : 'ऋद्धि एवं सिद्धि लाभ'}
+          </button>
+          <button 
+            onClick={() => setActiveTab('jap')} 
+            className={`font-black uppercase tracking-wider pb-1 transition-colors cursor-pointer ${
+              activeTab === 'jap' ? 'text-orange-500 border-b-2 border-orange-500' : 'text-gray-400 hover:text-gray-600'
+            }`}
+            id="tab-jap"
+          >
+            {lang === 'en' ? 'Jap Counter (Mala)' : 'जाप माला काउंटर'}
           </button>
         </div>
 
@@ -388,8 +366,94 @@ export default function BhaktamarPage() {
               </div>
             </div>
           )}
+          {activeTab === 'jap' && (
+            <div className="space-y-4 text-center animate-in duration-300">
+              <span className="text-[9px] font-black tracking-widest text-[#FF6D00] block mb-1 uppercase">
+                {lang === 'en' ? 'Jap/Mala Repetitions Target' : 'जाप संख्या लक्ष्य चुनें'}
+              </span>
+              
+              <div className="flex justify-center gap-3 mb-4">
+                {[9, 27, 108].map((num) => (
+                  <button
+                    key={num}
+                    type="button"
+                    onClick={() => {
+                      setJapTarget(num);
+                      setJapCount(0);
+                      setJapCompleted(false);
+                    }}
+                    className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
+                      japTarget === num
+                        ? 'bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] text-black shadow-md'
+                        : 'bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-white/5'
+                    }`}
+                  >
+                    {num} {lang === 'en' ? 'reps' : 'जाप'}
+                  </button>
+                ))}
+              </div>
+
+              {/* Circular Jap Bead Progress Ring */}
+              <div className="flex flex-col items-center justify-center my-6">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (japCount < japTarget) {
+                      const nextCount = japCount + 1;
+                      setJapCount(nextCount);
+                      if (nextCount === japTarget) {
+                        setJapCompleted(true);
+                      }
+                    }
+                  }}
+                  disabled={japCompleted}
+                  className={`w-32 h-32 rounded-full flex flex-col items-center justify-center transition-all cursor-pointer ${
+                    japCompleted
+                      ? 'bg-gradient-to-r from-green-500 to-emerald-600 shadow-[0_0_20px_rgba(76,175,80,0.4)] text-white'
+                      : 'bg-gradient-to-tr from-[#FF6D00] to-[#FFD54F]/80 hover:scale-105 active:scale-95 shadow-[0_6px_20px_rgba(255,109,0,0.3)] text-black'
+                  }`}
+                  id="bead-increment-btn"
+                >
+                  {japCompleted ? (
+                    <div className="text-center">
+                      <CheckCircle2 size={32} className="mx-auto mb-1 text-white fill-transparent font-black" />
+                      <span className="text-[10px] font-black uppercase tracking-widest block">{lang === 'en' ? 'Completed' : 'जाप पूर्ण'}</span>
+                    </div>
+                  ) : (
+                    <div className="text-center text-black">
+                      <span className="text-3xl font-black">{japCount}</span>
+                      <span className="text-[10px] font-bold block mt-1 uppercase text-black/70 flex items-center justify-center gap-0.5">/ {japTarget}</span>
+                    </div>
+                  )}
+                </button>
+                
+                <p className="text-[10px] text-gray-400 dark:text-gray-500 font-black tracking-wider mt-4 leading-relaxed uppercase">
+                  {lang === 'en' ? 'Tap the bead to count your recitation.' : 'जाप मणी पर स्पर्श कर गिनती दर्ज करें।'}
+                </p>
+              </div>
+
+              <div className="flex justify-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setJapCount(0);
+                    setJapCompleted(false);
+                  }}
+                  className="px-5 py-2.5 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300 rounded-xl font-bold text-xs uppercase tracking-wider transition-all border border-gray-200 dark:border-white/5 cursor-pointer"
+                  id="reset-jap-btn"
+                >
+                  {lang === 'en' ? 'Reset Counter' : 'पुनः सेट'}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
   );
 }
+
+
+
+
+

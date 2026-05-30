@@ -132,6 +132,45 @@
         "quizEnabled": { "type": "boolean" },
         "mediaEnabled": { "type": "boolean" }
       }
+    },
+    "user_chats": {
+      "title": "User Chats",
+      "description": "User private chats with Jainism GPT",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "messages": { "type": "array", "items": { "type": "object" } },
+        "updatedAt": { "type": "number" }
+      },
+      "required": ["id", "userId", "title"]
+    },
+    "homeworks": {
+      "title": "Homeworks",
+      "description": "Homework assignments in Pathshala",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "teacherId": { "type": "string" },
+        "teacherName": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["title", "description", "teacherId", "teacherName"]
+    },
+    "homework_submissions": {
+      "title": "Homework Submissions",
+      "description": "Submissions for assigned homeworks",
+      "type": "object",
+      "properties": {
+        "homeworkId": { "type": "string" },
+        "studentId": { "type": "string" },
+        "studentName": { "type": "string" },
+        "link": { "type": "string" },
+        "submittedAt": { "type": "string" }
+      },
+      "required": ["homeworkId", "studentId", "studentName", "link"]
     }
   },
   "firestore": {
@@ -144,6 +183,9 @@
     "/classes/{id}": { "schema": "class", "description": "Pathshala classes" },
     "/exams/{id}": { "schema": "exam", "description": "Pathshala exams" },
     "/exam_submissions/{id}": { "schema": "exam_submission", "description": "Exam results" },
-    "/settings/config": { "schema": "settings", "description": "Global app settings" }
+    "/settings/config": { "schema": "settings", "description": "Global app settings" },
+    "/user_chats/{id}": { "schema": "user_chats", "description": "Private user chat sessions" },
+    "/homeworks/{id}": { "schema": "homeworks", "description": "Pathshala homework records" },
+    "/homework_submissions/{id}": { "schema": "homework_submissions", "description": "Homework student answers" }
   }
 }

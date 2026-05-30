@@ -9,11 +9,29 @@ import {
 } from 'lucide-react';
 import { db } from '../firebase';
 import { collection, query, limit, doc, onSnapshot } from 'firebase/firestore';
+import { FALLBACK_VICHAARS, getDeterministicVichaar, Vichaar } from '../data/vichaarData';
 
 export default function HomePage() {
   const [settings, setSettings] = useState({ quizEnabled: true, mediaEnabled: true });
+  const [vichaars, setVichaars] = useState<Vichaar[]>(FALLBACK_VICHAARS);
+  const [dailyVichaar, setDailyVichaar] = useState<Vichaar>(FALLBACK_VICHAARS[0]);
 
   useEffect(() => {
+    const unsubVichaars = onSnapshot(collection(db, 'vichaar'), (snapshot) => {
+      const dbVichaars = snapshot.docs.map(d => ({ id: d.id, ...d.data() }) as Vichaar);
+      if (dbVichaars.length > 0) {
+        setVichaars(dbVichaars);
+        setDailyVichaar(getDeterministicVichaar(dbVichaars));
+      } else {
+        setVichaars(FALLBACK_VICHAARS);
+        setDailyVichaar(getDeterministicVichaar(FALLBACK_VICHAARS));
+      }
+    }, (error) => {
+      console.error('Error fetching vichaars:', error);
+      setVichaars(FALLBACK_VICHAARS);
+      setDailyVichaar(getDeterministicVichaar(FALLBACK_VICHAARS));
+    });
+
     const docRef = doc(db, 'settings', 'config');
     const unsubscribe = onSnapshot(docRef, (docSnap) => {
       if (docSnap.exists()) {
@@ -22,7 +40,10 @@ export default function HomePage() {
     }, (error) => {
       console.error('Error fetching settings:', error);
     });
-    return () => unsubscribe();
+    return () => {
+      unsubVichaars();
+      unsubscribe();
+    };
   }, []);
 
   const cards = [
@@ -62,10 +83,11 @@ export default function HomePage() {
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-3 opacity-90">
             <Quote size={16} className="text-[#FF6D00] dark:text-[#FFD54F] drop-shadow-none dark:drop-shadow-[0_0_5px_rgba(255,213,79,0.8)]" />
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#FF6D00] dark:text-[#FFD54F] drop-shadow-none dark:drop-shadow-[0_0_5px_rgba(255,213,79,0.5)]">Daily Vichaar</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#FF6D00] dark:text-[#FFD54F] drop-shadow-none dark:drop-shadow-[0_0_5px_rgba(255,213,79,0.5)]">Daily Vichaar (Thought of the Day)</span>
           </div>
-          <p className="text-xl font-bold leading-snug mb-2 text-gray-900 dark:text-white drop-shadow-none dark:drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">"अहिंसा परमो धर्मः।"</p>
-          <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">Non-violence is the highest religion.</p>
+          <p className="text-xl font-bold leading-snug mb-2 text-gray-900 dark:text-white drop-shadow-none dark:drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">"{dailyVichaar.hi}"</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">"{dailyVichaar.en}"</p>
+          <div className="mt-3 text-[10px] uppercase font-black tracking-widest text-[#FFD54F]">Source: {dailyVichaar.source}</div>
         </div>
       </Link>
 

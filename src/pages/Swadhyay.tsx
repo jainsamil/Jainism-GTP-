@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, BookOpen, ScrollText, Calendar, Plus, Save, Trash2, Edit2, CheckCircle2, FileText, Bookmark, Target } from 'lucide-react';
+import { ArrowLeft, BookOpen, ScrollText, Calendar, Plus, Save, Trash2, Edit2, CheckCircle2, FileText, Bookmark, Target, Timer, Play, Pause, RotateCcw, Sparkles } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -30,6 +30,12 @@ export default function SwadhyayPage() {
   const [newGoal, setNewGoal] = useState('');
   const [isAddingLog, setIsAddingLog] = useState(false);
   const [editingLogId, setEditingLogId] = useState<string | null>(null);
+
+  // Swadhyay Timer States
+  const [timerDuration, setTimerDuration] = useState(10 * 60); // Default 10 minutes in seconds
+  const [timeLeft, setTimeLeft] = useState(10 * 60);
+  const [isTimerRunning, setIsTimerRunning] = useState(false);
+  const [timerCompleted, setTimerCompleted] = useState(false);
 
   // Load persisted study notes
   useEffect(() => {
@@ -75,6 +81,42 @@ export default function SwadhyayPage() {
       localStorage.setItem('swadhyay_goals', JSON.stringify(defaultGoals));
     }
   }, [lang]);
+
+  // Timer system countdown effect
+  useEffect(() => {
+    let interval: any = null;
+    if (isTimerRunning && timeLeft > 0) {
+      interval = setInterval(() => {
+        setTimeLeft(prev => prev - 1);
+      }, 1000);
+    } else if (timeLeft === 0 && isTimerRunning) {
+      setIsTimerRunning(false);
+      setTimerCompleted(true);
+    }
+    return () => clearInterval(interval);
+  }, [isTimerRunning, timeLeft]);
+
+  const handleStartTimer = () => {
+    setIsTimerRunning(true);
+    setTimerCompleted(false);
+  };
+
+  const handlePauseTimer = () => {
+    setIsTimerRunning(false);
+  };
+
+  const handleResetTimer = (seconds = 10 * 60) => {
+    setIsTimerRunning(false);
+    setTimerDuration(seconds);
+    setTimeLeft(seconds);
+    setTimerCompleted(false);
+  };
+
+  const formatTime = (seconds: number) => {
+    const min = Math.floor(seconds / 60);
+    const sec = seconds % 60;
+    return `${min}:${sec < 10 ? '0' : ''}${sec}`;
+  };
 
   // Sync to localStorage helpers
   const saveLogsToLocal = (updated: SwadhyayLog[]) => {
@@ -192,6 +234,87 @@ export default function SwadhyayPage() {
               : "स्वाध्याय अंतरंग तप का सर्वोत्तम अंग है। महान ग्रंथों को पढ़कर चिंतन-मनन करना आत्मशुद्धि का महामार्ग है।"}
           </p>
         </div>
+      </div>
+
+      {/* Interactive Swadhyay Meditation/Study Timer */}
+      <div className="mb-6 bg-white/90 dark:bg-[#121212]/90 backdrop-blur-md border border-gray-200 dark:border-white/10 rounded-3xl p-5 shadow-sm">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <Timer className="text-[#FF6D00] animate-pulse" size={18} />
+            <h2 className="text-sm font-black uppercase tracking-wider text-gray-800 dark:text-gray-200">
+              {lang === 'en' ? 'Swadhyay & Contemplation Timer' : 'स्वाध्याय एवं ध्यान घड़ी'}
+            </h2>
+          </div>
+          {isTimerRunning && (
+            <span className="text-[10px] bg-[#FF6D00]/10 text-[#FF6D00] border border-[#FF6D00]/20 font-extrabold uppercase tracking-widest px-2.5 py-0.5 rounded-full animate-bounce">
+              {lang === 'en' ? 'In Contemplation' : 'स्वाध्याय ध्यान जारी'}
+            </span>
+          )}
+        </div>
+
+        <div className="flex flex-col items-center justify-center py-4 bg-gray-50/50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5">
+          <div className="text-4xl font-mono font-black text-[#FF6D00] tracking-wider mb-2">
+            {formatTime(timeLeft)}
+          </div>
+
+          <div className="flex gap-2 mb-4">
+            {[5, 10, 20, 30].map(minutes => {
+              const seconds = minutes * 60;
+              const isActive = timerDuration === seconds;
+              return (
+                <button
+                  key={minutes}
+                  type="button"
+                  onClick={() => handleResetTimer(seconds)}
+                  disabled={isTimerRunning}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer ${
+                    isActive
+                      ? 'bg-[#FF6D00] text-black shadow-sm'
+                      : 'bg-white dark:bg-white/10 text-gray-700 dark:text-gray-300 border border-gray-150 dark:border-white/5'
+                  }`}
+                >
+                  {minutes}m
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="flex gap-3">
+            {!isTimerRunning ? (
+              <button
+                type="button"
+                onClick={handleStartTimer}
+                className="px-6 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 hover:opacity-90 text-white font-extrabold text-xs uppercase tracking-wider rounded-xl flex items-center gap-1.5 transition-all shadow-md active:scale-95 cursor-pointer"
+              >
+                <Play size={12} className="fill-white" />
+                {lang === 'en' ? 'Start' : 'प्रारंभ'}
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={handlePauseTimer}
+                className="px-6 py-2.5 bg-yellow-500 dark:bg-yellow-600 text-white font-extrabold text-xs uppercase tracking-wider rounded-xl flex items-center gap-1.5 transition-all shadow-md active:scale-95 cursor-pointer"
+              >
+                <Pause size={12} className="fill-white" />
+                {lang === 'en' ? 'Pause' : 'विराम'}
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => handleResetTimer(timerDuration)}
+              className="px-6 py-2.5 bg-gray-250 dark:bg-white/10 text-gray-750 dark:text-gray-200 font-extrabold text-xs uppercase tracking-wider rounded-xl flex items-center gap-1.5 transition-all border border-gray-200 dark:border-white/5 active:scale-95 cursor-pointer"
+            >
+              <RotateCcw size={12} />
+              {lang === 'en' ? 'Reset' : 'पुनः सेट'}
+            </button>
+          </div>
+        </div>
+
+        {timerCompleted && (
+          <div className="mt-3 p-3 bg-green-500/10 border border-green-500/20 text-green-400 rounded-xl text-center text-xs font-bold animate-in duration-300">
+            🎉 {lang === 'en' ? 'Swadhyay Meditation session complete!' : 'स्वाध्याय चिंतन सत्र पूर्ण! अपने विचारों को नीचे अंकित करें।'}
+          </div>
+        )}
       </div>
 
       {/* Study Targets Checklist Widget */}
@@ -405,23 +528,36 @@ export default function SwadhyayPage() {
               </div>
             )}
 
-            <div className="flex items-center gap-4 justify-end border-t border-gray-100 dark:border-white/5 pt-3 text-xs">
+            <div className="flex items-center justify-between border-t border-gray-100 dark:border-white/5 pt-3 text-xs">
               <button 
-                onClick={() => handleEditLog(item)} 
-                className="text-gray-500 hover:text-orange-500 font-bold flex items-center gap-1"
-                id={`btn-edit-log-${item.id}`}
+                onClick={() => {
+                  navigate('/chat', { state: { initialPrompt: `Jai Jinendra! I am doing स्वाध्याय of ${item.textName} (${item.chapter || "general study"}). I wrote this insight: "${item.insight}". Let's discuss this according to Digambar Jain tradition. What are standard commentaries, Acharyas' views, or deep spiritual meanings for this insight, and what can be further resolutions?` } });
+                }} 
+                className="text-[#FF6D00] hover:text-[#FFD54F] font-bold flex items-center gap-1 cursor-pointer transition-colors"
+                id={`btn-ai-discuss-${item.id}`}
               >
-                <Edit2 size={12} />
-                <span>{lang === 'en' ? 'Edit' : 'संशोधन'}</span>
+                <Sparkles size={12} className="text-[#FF6D00] animate-pulse" />
+                <span>{lang === 'en' ? 'Discuss with AI' : 'AI से चर्चा करें'}</span>
               </button>
-              <button 
-                onClick={() => handleDeleteLog(item.id)} 
-                className="text-gray-500 hover:text-red-500 font-bold flex items-center gap-1"
-                id={`btn-del-log-${item.id}`}
-              >
-                <Trash2 size={12} />
-                <span>{lang === 'en' ? 'Remove' : 'हटाएं'}</span>
-              </button>
+
+              <div className="flex items-center gap-4">
+                <button 
+                  onClick={() => handleEditLog(item)} 
+                  className="text-gray-500 hover:text-orange-500 font-bold flex items-center gap-1 cursor-pointer"
+                  id={`btn-edit-log-${item.id}`}
+                >
+                  <Edit2 size={12} />
+                  <span>{lang === 'en' ? 'Edit' : 'संशोधन'}</span>
+                </button>
+                <button 
+                  onClick={() => handleDeleteLog(item.id)} 
+                  className="text-gray-500 hover:text-red-500 font-bold flex items-center gap-1 cursor-pointer"
+                  id={`btn-del-log-${item.id}`}
+                >
+                  <Trash2 size={12} />
+                  <span>{lang === 'en' ? 'Remove' : 'हटाएं'}</span>
+                </button>
+              </div>
             </div>
           </div>
         ))}

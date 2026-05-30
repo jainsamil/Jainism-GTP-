@@ -69,10 +69,10 @@ export default function HistoryPage() {
                   <h3 className="text-xl font-black text-white mb-3 drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] group-hover:text-[#FFD54F] transition-colors">
                     {item.title?.[language] || item.title}
                   </h3>
-                  {item.imageUrl && (
+                  {(item.image || item.imageUrl) && (
                     <div className="mb-4 rounded-xl overflow-hidden border border-white/10 shadow-lg">
                       <img 
-                        src={item.imageUrl} 
+                        src={item.image || item.imageUrl} 
                         alt={item.title?.[language] || item.title} 
                         className="w-full h-48 object-cover hover:scale-105 transition-transform duration-500"
                         referrerPolicy="no-referrer"

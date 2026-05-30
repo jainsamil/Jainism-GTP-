@@ -1,217 +1,40 @@
 import { useState, useEffect, useRef } from 'react';
-import { ScrollText, Search, BookOpen, Info, Loader2, Mic, MicOff, ArrowLeft } from 'lucide-react';
+import { 
+  ScrollText, 
+  Search, 
+  BookOpen, 
+  Info, 
+  Loader2, 
+  Mic, 
+  MicOff, 
+  ArrowLeft, 
+  Maximize2, 
+  Minimize2, 
+  ZoomIn, 
+  ZoomOut, 
+  Play, 
+  Pause, 
+  Volume2, 
+  Heart, 
+  Sparkles, 
+  CheckCircle2, 
+  Bookmark, 
+  Music, 
+  Compass, 
+  Settings, 
+  Star 
+} from 'lucide-react';
 import { cn } from '../lib/utils';
 import { db } from '../firebase';
-import { collection, onSnapshot, query, orderBy, addDoc } from 'firebase/firestore';
+import { collection, onSnapshot, query, addDoc } from 'firebase/firestore';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 
+import { aagamsData } from '../data/aagamsData';
+
 const categories = ['Pujan', 'Stuti', 'Vidhan', 'Chalisa', 'Bhajan', 'Aarti'];
 
-const FALLBACK_AAGAMS = [
-  {
-    id: "fb_pujan_1",
-    title: "देव शास्त्र गुरु पूजा (Dev Shastra Guru Puja)",
-    category: "Pujan",
-    content: `स्थापना (Sthapna):
-ॐ ह्रीं श्रीं देवशास्त्रगुरु-समूह! अत्र अवतर अवतर संवौषट्! (अत्र तिष्ठ तिष्ठ ठः ठः!)
-
-अष्टक (Ashtak):
-जल:
-भागीरथी-जल-कलश-भरि, सुनिर्मल गंध मिलाय।
-आनंद-कंद जिनेन्द्र आगे, पूजहूँ मन हरषाय॥
-ॐ ह्रीं श्रीं देव-शास्त्र-गुरु-चरणेभ्यः जन्म-जरा-मृत्यु-विनाशनाय जलं निर्वपामीति स्वाहा।
-
-चंदन:
-मलयगिरि को चोवा चंदन, केशर कुमकुम गाढ़े।
-अनादि काल की दाह मिटावन, जिनवर के आगे ठाढ़े॥
-ॐ ह्रीं श्रीं देव-शास्त्र-गुरु-चरणेभ्यः संसार-ताप-विनाशनाय चंदनं निर्वपामीति स्वाहा।
-
-अक्षत:
-अक्षत चन्द्र-समान धवल अति, परम सुगन्धित प्यारो।
-पुंज धरूँ जिननाथ-अग्र, भव-अक्षय-पद को धारो॥
-ॐ ह्रीं श्रीं देव-शास्त्र-गुरु-चरणेभ्यः अक्षयपद-प्राप्तये अक्षतान् निर्वपामीति स्वाहा।
-
-पुष्प:
-वर केतकी-गुलाब चमेली, फूले अनुपम बाग।
-काम-बाण-विध्वंसन आये, जिनेन्द्र-चरण अनुराग॥
-ॐ ह्रीं श्रीं देव-शास्त्र-गुरु-चरणेभ्यः कामबाण-विध्वंसनाय पुष्पं निर्वपामीति स्वाहा।
-
-नैवेद्य:
-मधुर सुगन्धित सरस महा-रस, व्यंजन विविध बनाये।
-क्षुधा-रोग-विध्वंसन कारन, थाल भरत ले आये॥
-ॐ ह्रीं श्रीं देव-शास्त्र-गुरु-चरणेभ्यः क्षुधारोग-निवारणाय नैवेद्यं निर्वपामीति स्वाहा।
-
-दीप:
-घृत का दीपक जोति जगावत, जगमगात अन्धियारो।
-मोह-महा-तम-नाश करन को, जिनवर आगे धारो॥
-ॐ ह्रीं श्रीं देव-शास्त्र-गुरु-चरणेभ्यः मोहान्धकार-विनाशनाय दीपं निर्वपामीति स्वाहा।
-
-धूप:
-उत्तम कृष्णागुरु धूप सुहावन, अनल-मध्य धधकाये।
-अष्ट-कर्म की धूपन कारन, जिनवर सन्मुख लाये॥
-ॐ ह्रीं श्रीं देव-शास्त्र-गुरु-चरणेभ्यः अष्टकर्म-दहनाय धूपं निर्वपामीति स्वाहा।
-
-फल:
-ऋतु-फल विविध प्रकार मँगाये, सरस सुगन्ध रसाले।
-मोक्ष-महाफल प्राप्ति करन को, जिनवर-चरण चढ़ाले॥
-ॐ ह्रीं श्रीं देव-शास्त्र-गुरु-चरणेभ्यः मोक्षफल-प्राप्तये फलं निर्वपामीति स्वाहा।
-
-अर्घ्य:
-जल गन्धाक्षत-पुष्पक रचिके, दीप धूप फल न्यारे।
-अर्घ्य चढ़ाय हरूँ भव-फेरा, जय जिन देव हमारे॥
-ॐ ह्रीं श्रीं देव-शास्त्र-गुरु-चरणेभ्यः अनर्घ्यपद-प्राप्तये अर्घ्यं निर्वपामीति स्वाहा।`
-  },
-  {
-    id: "fb_stuti_1",
-    title: "मेरी भावना (Meri Bhavna)",
-    category: "Stuti",
-    content: `जिसने राग-द्वेष कामादिक, जीते सब जग जान लिया।
-सब जीवों को मोक्ष-मार्ग का, निष्प्रह हो उपदेश दिया॥
-बुद्ध, वीर, जिन, हरि, हर, ब्रह्मा, या उसको स्वाधीन कहो।
-भक्ति-भाव से प्रेरित हो यह, चित्त उसी में लीन रहो॥१॥
-
-विषयों की आशा वैश्णिक हो, वीर पुरुष जग में विचरें।
-चौदह गुणस्थानों को पाकर, जो भव-सागर पार करें॥
-राग-द्वेष भय-शोक मिटाकर, संकट में भी विचलित न हों।
-ऐसे मंगलमयी संतों के, चरणों में नित शीश झुकें॥२॥
-
-रहे सदा सत्संग उन्हीं का, ध्यान उन्हीं का नित्य रहे।
-उन जैसा ही बनूँ निरन्तर, हृदय यही संकल्प बहे॥
-नहीं किसी का बुरा विचारूँ, नहीं किसी से वैर करूँ।
-सद्व्यवहार करूँ जग में सब, प्राणी-मात्र से प्रेम करूँ॥३॥
-
-मैत्री-भाव जगत में मेरा, सब जीवों से नित्य रहे।
-दीन-दुःखी जीवों पर मेरे, उर से करुणा-स्रोत बहे॥
-दुर्जन-विघ्न-विनाशक जन पर, क्षोभ नहीं मुझको आये।
-साम्य-भाव रक्खूँ मैं उन पर, ऐसी परिणति हो जाये॥४॥`
-  },
-  {
-    id: "fb_stuti_2",
-    title: "उवसग्गहरं स्तोत्र (Uvasaggaharam Stotra)",
-    category: "Stuti",
-    content: `उवसग्गहरं पासं, पासं वंदामि कम्म-घण-मुक्कम।
-विसहर-विस-निन्नासं, मंगल कल्लाण आवासं ॥१॥
-
-विसहर-फुलिंग मंतं, कंठे धारेइ जो सया मणुओ।
-तस्स गह-रोग-मारी, दुट्ठ-जरा जंति उवसामं ॥२॥
-
-चिट्ठउ दूरे मंतो, तुज्झ पणामो वि बहु-फलो होइ।
-नरतिरिएसु वि जीवो, पावेइ न दुक्ख-दोगच्चं ॥३॥
-
-तुह सम्मत्ते लद्धे, चिंतामणि-कप्पपायव-ब्भहिए।
-पावंति अविग्घेणं, जीवा अयरामरं ठाणं ॥४॥
-
-इअ संथुओ महायस!, भत्तिब्भर-निब्भरेण हिअएण।
-ता देव! दिज्ज बोहिं, भवे भवे पासजिणचंद! ॥५॥`
-  },
-  {
-    id: "fb_chalisa_1",
-    title: "महावीर चालीसा (Mahavir Chalisa)",
-    category: "Chalisa",
-    content: `॥ दोहा ॥
-शीश नवा अरिहंत को, सिद्धन करूँ प्रणाम।
-वीर जिनेश्वर देव का, सुमिरूँ पावन नाम॥
-
-॥ चौपाई ॥
-जय महावीर दयाला, संकट-हरन हरदम प्रतिपाला।
-कुण्डलपुर जनमे जग त्राता, त्रिशला नंदन जग-हित-दाता॥
-सिद्धारथ के राज-दुलारे, नैनन-तारे प्राण-प्यारे।
-दीक्षा ले सब राज गंवाया, बारह बरस घोर तप ठाया॥
-
-काँटों का उपसर्ग सहा मुख, विचलित हुए न पाए सब सुख।
-सिंह-वृत्ति धारण कर आये, केवलज्ञान परम पद पाये॥
-दिव्यध्वनि खिरती सुखदायी, समवशरण रचना मन भायी।
-अहिंसा का सन्देश दिया जग, मोक्ष-मार्ग दर्शाया पावन॥
-
-जो जन वीर का ध्यान लगावे, कष्ट रोग सब दूर नसावे।
-चालीसा पढ़ सुन मन लाये, महावीर वांछित फल पाये॥`
-  },
-  {
-    id: "fb_chalisa_2",
-    title: "पार्श्वनाथ चालीसा (Parshvanath Chalisa)",
-    category: "Chalisa",
-    content: `॥ दोहा ॥
-पार्श्वनाथ भगवान को, बारम्बार प्रणाम।
-जगत-तारक देव का, सुमिरूँ मंगल नाम॥
-
-॥ चौपाई ॥
-जय पार्श्वनाथ देवा, सुर-नर-मुनि कर रहे सेवा।
-काशी नगरी जन्म लिया प्रभु, वामा देवी नंदन विभु॥
-अश्वसेन के कुल उजियारे, कमठ मान-मर्दन अवतारे।
-हाथी के जीव को तारा, नवकार महामन्त्र सुनाया॥
-
-कमठ असुर ने मेह बरसाया, पाहन वृष्टि घोर कराया।
-धरणेन्द्र ने फण फैलाया, प्रभु सर पर छत्र बनाया॥
-अविचल ध्यान धरे जिनराया, केवलज्ञान परम पद पाया।
-सम्मेद शिखर से शिव पधारे, पावन चरण पूजें जग सारे॥
-
-जो पार्श्वनाथ का पाठ पढ़ेगा, संकट टरेगा रिद्धि बढ़ेगा।
-चालीसा जो मन से गावे, पार्श्व प्रभु का आशीष पावे॥`
-  },
-  {
-    id: "fb_aarti_1",
-    title: "जिनेन्द्र देव आरती (Jinendra Dev Aarti)",
-    category: "Aarti",
-    content: `जय जिनेन्द्र देव, स्वामी जय जिनेन्द्र देव।
-सुर-नर-मुनि-जन ध्यावें, सुर-नर-मुनि-जन ध्यावें, नित उठकर सहदेव॥
-॥ जय जिनेन्द्र देव... ॥
-
-ऋषभ देव जग-दाता, जग-हित उपकारी।
-भरत बाहुबली जनक, भरत बाहुबली जनक, मोह-मल्ल hary॥
-॥ जय जिनेन्द्र देव... ॥
-
-पार्श्वनाथ दुःख-भंजन, धरणेन्द्र-पद्मावती।
-संकट मोचन स्वामी, संकट मोचन स्वामी, सिद्ध-शिला वासी॥
-॥ जय जिनेन्द्र देव... ॥
-
-महावीर जिन स्वामी, शासन-नायक देवा।
-गौतम गणधर वन्दित, गौतम गणधर वन्दित, हम चाहत सेवा॥
-॥ जय जिनेन्द्र देव... ॥
-
-पंच-परमेष्ठी आरती, जो जन मन-लाये।
-कहे 'भक्त' अमर-पद, कहे 'भक्त' अमर-पद, साश्वत सुख पाये॥
-॥ जय जिनेन्द्र देव... ॥`
-  },
-  {
-    id: "fb_bhajan_1",
-    title: "मईया मोहे ऐसा वर दे (Maiya Mohe Aisa Var De)",
-    category: "Bhajan",
-    content: `जिनवाणी मईया मोहे ऐसा वर दे,
-ज्ञान का दीपक मेरे घट में धर दे॥
-जिनवाणी मईया मोहे ऐसा वर दे...
-
-राग और द्वेष की आंधी मिट जाये,
-सत्य अहिंसा की ज्योति जल जाये।
-मेरे मन मंदिर का अन्धेरा हर दे,
-ज्ञान का दीपक मेरे घट में धर दे॥
-जिनवाणी मईया मोहे ऐसा वर दे...
-
-परम पदारथ समयसार पाऊँ,
-आत्म-निधि पाकर तृप्त हो जाऊँ।
-समता का रस मेरे जीवन में भर दे,
-ज्ञान का दीपक मेरे घट में धर दे॥
-जिनवाणी मईया मोहे ऐसा वर दे...`
-  },
-  {
-    id: "fb_vidhan_1",
-    title: "सिद्धचक्र महामण्डल विधान (Siddhachakra Vidhan)",
-    category: "Vidhan",
-    content: `सिद्धचक्र महामण्डल विधान जैन धर्म का एक महान और कल्याणकारी अनुष्ठान है। यह विधान विशेष रूप से अष्टान्हिका पर्व के दिनों में (कार्तिक, फाल्गुन और आषाढ़ मास के अंत में) श्रद्धापूर्वक आयोजित किया जाता है।
-
-शास्त्रों में विधान का महत्त्व:
-श्रीपाल और मैनासुन्दरी की कथा इस विधान से घनिष्ठ रूप से जुड़ी हुई है। राजा श्रीपाल का कुष्ठ रोग भगवान सिद्ध परमेष्ठी की भक्ति और सिद्ध चक्र महामण्डल विधान के पवित्र जल (गन्धोदक) के प्रभाव से पूर्णतः दूर हो गया था।
-
-विधान की मूल रचना और अर्घ्य:
-सिद्धचक्र मण्डल में मूल रूप से ९ पद होते हैं - पंचपरमेष्ठी (अरिहंत, सिद्ध, आचार्य, उपाध्याय, साधु) और चार अनुयोग/रत्नत्रय देव (दर्शन, ज्ञान, चारित्र, तप)।
-
-विधान मंत्र:
-ॐ ह्रीं अनादि-सिद्धपरमेष्ठी-समूह! अत्र अवतर अवतर संवौषट्!
-ॐ ह्रीं श्रीं सिद्धपरमेष्ठीभ्यो अर्घ्यं निर्वपामीति स्वाहा।
-
-इस विधान के अर्घ्यों में सिद्धों की पावन अवस्था, उनके आठ गुणों (सम्यक्त्व, ज्ञान, दर्शन, वीर्य, सूक्ष्मत्व, अवगाहनत्व, अगुरुलघुत्व, अव्याबाधत्व) का अत्यंत विस्तारपूर्वक और भक्तिपूर्ण काव्यात्मक वर्णन होता है।`
-  }
-];
+const FALLBACK_AAGAMS = aagamsData;
 
 export default function AagamsPage() {
   const { language, toggleLanguage } = useLanguage();
@@ -225,10 +48,110 @@ export default function AagamsPage() {
   const [speechError, setSpeechError] = useState('');
   const recognitionRef = useRef<any>(null);
 
+  // New features
+  const [favorites, setFavorites] = useState<string[]>([]);
+  const [chantedLog, setChantedLog] = useState<string[]>([]);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [fontSize, setFontSize] = useState<number>(20); // default 20px
+  const [readerTheme, setReaderTheme] = useState<'parchment' | 'light' | 'dark' | 'midnight'>('parchment');
+  const [autoscroll, setAutoscroll] = useState(false);
+  const [scrollSpeed, setScrollSpeed] = useState<'slow' | 'medium' | 'fast'>('medium');
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [speechRate, setSpeechRate] = useState<number>(0.9);
+
   const [showAiModal, setShowAiModal] = useState(false);
   const [aiTitle, setAiTitle] = useState('');
   const [isAiGenerating, setIsAiGenerating] = useState(false);
   const [aiError, setAiError] = useState('');
+
+  const readerRef = useRef<HTMLDivElement>(null);
+
+  // Load Bookmarks & Chanted status from LocalStorage
+  useEffect(() => {
+    const savedFavorites = localStorage.getItem('aagam_bookmarks');
+    if (savedFavorites) {
+      setFavorites(JSON.parse(savedFavorites));
+    }
+    const savedChants = localStorage.getItem('aagam_chanted_log');
+    if (savedChants) {
+      setChantedLog(JSON.parse(savedChants));
+    }
+  }, []);
+
+  const handleToggleBookmark = (id: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    const updated = favorites.includes(id) 
+      ? favorites.filter(fav => fav !== id) 
+      : [...favorites, id];
+    setFavorites(updated);
+    localStorage.setItem('aagam_bookmarks', JSON.stringify(updated));
+  };
+
+  const handleToggleChanted = (id: string) => {
+    const updated = chantedLog.includes(id) 
+      ? chantedLog.filter(c => c !== id) 
+      : [...chantedLog, id];
+    setChantedLog(updated);
+    localStorage.setItem('aagam_chanted_log', JSON.stringify(updated));
+  };
+
+  // Hands-Free Autoscroll engine
+  useEffect(() => {
+    let intervalId: any;
+    if (autoscroll && selectedItem) {
+      const ms = scrollSpeed === 'slow' ? 70 : scrollSpeed === 'medium' ? 40 : 20;
+      intervalId = setInterval(() => {
+        if (readerRef.current) {
+          readerRef.current.scrollTop += 1;
+        }
+      }, ms);
+    }
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [autoscroll, selectedItem, scrollSpeed]);
+
+  // Handle Speech Synthesis TTS Chanting
+  const toggleTTSChant = () => {
+    if (isSpeaking) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+    } else {
+      if (!selectedItem) return;
+      window.speechSynthesis.cancel();
+      // clean content of formatting markers
+      const cleanText = selectedItem.content
+        .replace(/॥/g, '')
+        .replace(/ॐ ह्रीं श्रीं/g, 'ओम ह्रीम श्रीम')
+        .replace(/ॐ ह्रीं/g, 'ओम ह्रीम')
+        .replace(/स्वाहा/g, 'स्वाहा');
+
+      const utterance = new SpeechSynthesisUtterance(cleanText);
+      utterance.lang = 'hi-IN';
+      utterance.rate = speechRate;
+      utterance.onend = () => setIsSpeaking(false);
+      utterance.onerror = () => setIsSpeaking(false);
+      
+      window.speechSynthesis.speak(utterance);
+      setIsSpeaking(true);
+    }
+  };
+
+  // Update speech speed live
+  useEffect(() => {
+    if (isSpeaking && selectedItem) {
+      // restart with updated speed
+      toggleTTSChant();
+      toggleTTSChant();
+    }
+  }, [speechRate]);
+
+  // Cleanup speech on modal close / navigate
+  useEffect(() => {
+    return () => {
+      window.speechSynthesis.cancel();
+    };
+  }, []);
 
   const handleAiGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -295,8 +218,15 @@ export default function AagamsPage() {
 
     const q = query(collection(db, 'aagams'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setAagams(data.length > 0 ? data : FALLBACK_AAGAMS);
+      const firebaseDocs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const merged = [...FALLBACK_AAGAMS];
+      // append unique user-created documents
+      firebaseDocs.forEach((doc: any) => {
+        if (!merged.some(item => item.id === doc.id || item.title === doc.title)) {
+          merged.push(doc);
+        }
+      });
+      setAagams(merged);
       setLoading(false);
     }, (error) => {
       console.error('Error fetching aagams:', error);
@@ -312,9 +242,11 @@ export default function AagamsPage() {
       recognitionRef.current?.stop();
       setIsListening(false);
     } else {
-      recognitionRef.current.lang = 'hi-IN'; // Aagams are mostly Hindi
-      recognitionRef.current?.start();
-      setIsListening(true);
+      if (recognitionRef.current) {
+        recognitionRef.current.lang = 'hi-IN'; // Aagams are mostly Hindi
+        recognitionRef.current.start();
+        setIsListening(true);
+      }
     }
   };
 
@@ -335,203 +267,486 @@ export default function AagamsPage() {
   );
 
   return (
-    <div className="min-h-full p-6 pb-24 bg-gray-50 dark:bg-[#050505] text-gray-900 dark:text-gray-200 transition-colors duration-300">
-      <header className="flex items-center justify-between mb-8 pt-4">
-        <div className="flex items-center gap-4">
-          <button onClick={() => navigate(-1)} className="p-2 rounded-full bg-gray-200 dark:bg-white/5 hover:bg-gray-300 dark:hover:bg-white/10 transition-colors">
-            <ArrowLeft size={24} className="text-gray-700 dark:text-gray-300" />
+    <div className="min-h-full p-4 md:p-6 pb-28 bg-gray-50 dark:from-[#050505] dark:to-[#0d0d0d] text-gray-900 dark:text-gray-200 transition-colors duration-300">
+      
+      {/* Header */}
+      <header className="flex items-center justify-between mb-6 pt-4">
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={() => navigate(-1)} 
+            className="p-2.5 rounded-full bg-white dark:bg-white/5 border border-gray-150 dark:border-white/10 shadow-sm hover:scale-105 transition-all cursor-pointer"
+          >
+            <ArrowLeft size={20} className="text-gray-700 dark:text-gray-300" />
           </button>
-          <h1 className="text-3xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] flex items-center gap-3 drop-shadow-none dark:drop-shadow-[0_0_10px_rgba(255,109,0,0.5)]">
-            <ScrollText className="text-[#FF6D00] drop-shadow-none dark:drop-shadow-[0_0_8px_rgba(255,109,0,0.8)]" size={32} />
-            JIN VANI
-          </h1>
+          <div className="flex flex-col">
+            <h1 className="text-2xl md:text-3xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-saffron to-coral flex items-center gap-2 tracking-tight">
+              <ScrollText className="text-saffron animate-pulse shrink-0" size={28} />
+              JINVANI LIBRARY
+            </h1>
+            <span className="text-[10px] md:text-xs font-black tracking-widest text-[#FF806A] uppercase">
+              {language === 'en' ? 'Authentic Digambar Jain Shastras' : 'परम पूज्य दिगंबर जैन जिनवाणी भंडार'}
+            </span>
+          </div>
         </div>
         <button
           onClick={toggleLanguage}
-          className="w-10 h-10 bg-white/80 dark:bg-[#121212]/80 backdrop-blur-md border border-gray-200 dark:border-white/10 rounded-full flex items-center justify-center text-[#FF8A65] hover:bg-gray-100 dark:hover:bg-[#1A1A1A] transition-all shadow-sm"
+          className="w-10 h-10 bg-white dark:bg-[#121212] border border-gray-200 dark:border-white/10 rounded-full flex items-center justify-center text-saffron hover:scale-105 active:scale-95 transition-all shadow-sm"
         >
-          <span className="text-xs font-bold">{language === 'en' ? 'A/अ' : 'अ/A'}</span>
+          <span className="text-xs font-bold">{language === 'en' ? 'अ_H' : 'A_E'}</span>
         </button>
       </header>
 
-      <div className="relative mb-8 group">
-        <div className="absolute -inset-0.5 bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] rounded-2xl blur opacity-10 dark:opacity-20 group-hover:opacity-30 transition duration-500"></div>
+      {/* Intro info box */}
+      <div className="mb-6 bg-gradient-to-r from-saffron/10 to-coral/5 rounded-3xl p-5 border border-saffron/10 flex items-start gap-3.5 shadow-sm">
+        <div className="w-10 h-10 bg-saffron/10 text-saffron rounded-2xl flex items-center justify-center shrink-0 border border-saffron/10">
+          <Sparkles size={20} className="animate-pulse" />
+        </div>
+        <div>
+          <span className="text-[9px] font-black uppercase text-saffron tracking-wider block mb-0.5">
+            {language === 'en' ? 'Sacred Jinvani Repository' : 'परम पावन मन्दिर स्वाध्याय'}
+          </span>
+          <p className="text-xs text-gray-600 dark:text-gray-300 font-medium leading-relaxed">
+            {language === 'en' 
+              ? "All holy Pujans, Stutis, Vidhans and Chalisas are provided in full detail without any missing verses. Enable the Full-Screen reader below to start chanting."
+              : "समस्त पूजा, भक्ति, चालीसा एवं दशलक्षण/सिद्धचक्र विधान मंत्र यहाँ पूर्ण रूप में उपलब्ध हैं। स्वाध्याय या मंदिर जी में पाठ हेतु पूर्ण स्क्रीन रीडर सक्रिय करें।"}
+          </p>
+        </div>
+      </div>
+
+      {/* Bookmarked / Pin Section */}
+      {favorites.length > 0 && (
+        <div className="mb-6">
+          <h2 className="text-[10px] font-black text-saffron uppercase tracking-widest block mb-2.5 flex items-center gap-1.5">
+            <Star size={12} className="fill-saffron text-saffron" />
+            {language === 'en' ? 'Your Bookmarked Prayers' : 'आपके प्रिय पाठ / चालीसा'}
+          </h2>
+          <div className="flex gap-2 pb-2 overflow-x-auto scrollbar-hide">
+            {aagams
+              .filter(item => favorites.includes(item.id))
+              .map(item => (
+                <button
+                  key={`fav-${item.id}`}
+                  onClick={() => setSelectedItem(item)}
+                  className="px-4.5 py-3 rounded-2xl text-xs font-black bg-white dark:bg-[#121212] hover:bg-saffron/10 border border-saffron/20 transition-all flex items-center gap-2 whitespace-nowrap shadow-sm hover:scale-102"
+                >
+                  <BookOpen size={13} className="text-saffron" />
+                  <span className="max-w-[150px] truncate">{item.title}</span>
+                </button>
+              ))}
+          </div>
+        </div>
+      )}
+
+      {/* Search Input */}
+      <div className="relative mb-6 group">
+        <div className="absolute -inset-0.5 bg-gradient-to-r from-saffron to-coral rounded-2xl blur opacity-10 dark:opacity-20 group-hover:opacity-30 transition duration-500"></div>
         <div className="relative flex items-center">
-          <Search className="absolute left-4 text-[#FF8A65]" size={20} />
+          <Search className="absolute left-4 text-saffron" size={18} />
           <input
             type="text"
-            placeholder="खोजें..."
+            placeholder={language === 'en' ? "Search Pujans, Stotra, Bhajan..." : "पूजन, भक्ति, चालीसा खोजें..."}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-white/90 dark:bg-[#121212]/90 backdrop-blur-xl border border-gray-200 dark:border-white/10 rounded-2xl pl-12 pr-12 py-4 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FF6D00]/50 shadow-sm transition-all"
+            className="w-full bg-white/90 dark:bg-[#121212]/90 backdrop-blur-xl border border-gray-150 dark:border-white/5 rounded-2xl pl-11 pr-11 py-3.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-saffron/50 shadow-sm transition-all"
           />
           <button 
             onClick={toggleListening}
             className={cn(
-              "absolute right-4 p-2 rounded-full transition-all",
-              isListening ? "bg-red-500/20 text-red-500 animate-pulse" : "text-gray-400 hover:text-[#FF8A65] hover:bg-[#FF6D00]/10"
+              "absolute right-4 p-1.5 rounded-full transition-all cursor-pointer",
+              isListening ? "bg-red-500/20 text-red-500 animate-pulse" : "text-gray-400 hover:text-saffron hover:bg-saffron/10"
             )}
           >
-            {isListening ? <MicOff size={20} /> : <Mic size={20} />}
+            {isListening ? <MicOff size={18} /> : <Mic size={18} />}
           </button>
         </div>
         {speechError && (
-          <p className="text-red-500 text-sm mt-2 ml-2">{speechError}</p>
+          <p className="text-red-500 text-xs mt-1.5 ml-2">{speechError}</p>
         )}
       </div>
 
-      <div className="flex gap-3 mb-8 overflow-x-auto pb-4 scrollbar-hide">
+      {/* Category selector slider */}
+      <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2.5">
+        {language === 'en' ? 'Filter by Category' : 'श्रेणी अनुसार ग्रंथ चयन'}
+      </h2>
+      <div className="flex gap-2.5 mb-6 overflow-x-auto pb-2 scrollbar-hide">
         {categories.map(cat => (
           <button
             key={cat}
-            onClick={() => setActiveCat(cat)}
+            onClick={() => {
+              setActiveCat(cat);
+              setSearch('');
+            }}
             className={cn(
-              "px-6 py-2.5 rounded-full text-sm font-bold whitespace-nowrap transition-all duration-300",
+              "px-5 py-2.5 rounded-full text-xs font-black whitespace-nowrap transition-all duration-300 pointer-events-auto cursor-pointer",
               activeCat === cat 
-                ? "bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] text-black shadow-md dark:shadow-[0_0_15px_rgba(255,109,0,0.6)] scale-105" 
-                : "bg-white/80 dark:bg-[#121212]/80 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white border border-gray-200 dark:border-white/10 hover:border-[#FF6D00]/30"
+                ? "bg-gradient-to-r from-saffron to-coral text-white shadow-md shadow-saffron/20 scale-103" 
+                : "bg-white dark:bg-[#121212] text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-white/5 hover:border-saffron/30"
             )}
           >
-            {cat}
+            {language === 'en' ? cat : (
+              cat === 'Pujan' ? 'देव देव पूजा' :
+              cat === 'Stuti' ? 'स्तुति पाठ' :
+              cat === 'Vidhan' ? 'विधान संग्रह' :
+              cat === 'Chalisa' ? 'चालीसा संग्रह' :
+              cat === 'Bhajan' ? 'मधुर भजन' : 'मंगल आरती'
+            )}
           </button>
         ))}
       </div>
 
-      <div className="grid gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      {/* Aagams list */}
+      <div className="grid gap-3.5">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20 text-gray-500">
-            <Loader2 className="animate-spin mb-4" size={40} />
-            <p className="font-bold uppercase tracking-widest text-xs">Loading Aagams...</p>
+            <Loader2 className="animate-spin mb-4 text-saffron" size={40} />
+            <p className="font-bold tracking-widest text-[10px] uppercase text-saffron">Loading jin vani library...</p>
           </div>
         ) : filtered.length > 0 ? (
-          filtered.map(item => (
-            <div 
-              key={item.id} 
-              onClick={() => setSelectedItem(item)}
-              className="bg-white/80 dark:bg-[#121212]/80 backdrop-blur-xl p-5 rounded-[1.5rem] shadow-sm dark:shadow-[0_0_15px_rgba(0,0,0,0.5)] border border-gray-100 dark:border-white/5 flex items-center justify-between hover:shadow-md dark:hover:shadow-[0_0_20px_rgba(255,109,0,0.15)] hover:border-[#FF6D00]/30 transition-all duration-300 hover:-translate-y-1 group cursor-pointer"
-            >
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-[#FF6D00]/10 text-[#FF8A65] rounded-2xl flex items-center justify-center shrink-0 border border-[#FF6D00]/20 group-hover:scale-110 transition-transform duration-300">
-                  <BookOpen size={24} />
+          filtered.map((item, idx) => {
+            const isBookmarked = favorites.includes(item.id);
+            const isRead = chantedLog.includes(item.id);
+            return (
+              <div 
+                key={item.id} 
+                onClick={() => setSelectedItem(item)}
+                className="bg-white dark:bg-[#121212] p-4.5 rounded-2xl shadow-sm border border-gray-150 dark:border-white/5 flex items-center justify-between hover:border-saffron/40 hover:scale-[1.01] hover:shadow-md transition-all duration-300 group cursor-pointer relative overflow-hidden"
+              >
+                {/* Visual marker */}
+                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-saffron to-coral rounded-r-md opacity-20 group-hover:opacity-100 transition-opacity" />
+
+                <div className="flex items-center gap-4 relative z-10 w-[80%]">
+                  <div className="w-11 h-11 bg-saffron/5 text-saffron rounded-xl flex items-center justify-center shrink-0 border border-saffron/10 group-hover:scale-105 transition-all">
+                    {activeCat === 'Bhajan' ? <Music size={18} /> : <BookOpen size={18} />}
+                  </div>
+                  <div className="truncate">
+                    <h3 className="font-display font-bold text-gray-900 dark:text-gray-100 text-base leading-snug truncate group-hover:text-saffron transition-colors">
+                      {item.title}
+                    </h3>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-[9px] font-black tracking-wider text-saffron bg-saffron/10 px-2 py-0.5 rounded uppercase">
+                        {idx + 1}. {item.category}
+                      </span>
+                      {isRead && (
+                        <span className="text-[9px] font-bold text-green-500 bg-green-500/10 px-2 py-0.5 rounded flex items-center gap-1">
+                          <CheckCircle2 size={9} />
+                          {language === 'en' ? 'Read' : 'पठित'}
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-bold text-gray-900 dark:text-gray-100 text-lg leading-tight group-hover:text-black dark:group-hover:text-white transition-colors">{item.title}</h3>
-                  <span className="text-[10px] font-black tracking-widest text-[#FFD54F] bg-[#FFD54F]/10 border border-[#FFD54F]/20 px-2.5 py-1 rounded-md uppercase mt-1 inline-block">
-                    {item.category}
-                  </span>
+
+                <div className="flex items-center gap-2 shrink-0">
+                  <button 
+                    onClick={(e) => handleToggleBookmark(item.id, e)}
+                    className="p-2.5 rounded-full bg-gray-50 dark:bg-white/5 hover:text-saffron transition-colors cursor-pointer"
+                  >
+                    <Heart size={16} className={cn("transition-all", isBookmarked ? "fill-saffron text-saffron" : "text-gray-400")} />
+                  </button>
+                  <div className="p-2 bg-gray-50 dark:bg-white/5 rounded-full text-gray-400 group-hover:text-saffron transition-colors">
+                    <Info size={16} />
+                  </div>
                 </div>
               </div>
-              <div className="w-10 h-10 rounded-full bg-gray-50 dark:bg-white/5 flex items-center justify-center text-gray-400 group-hover:text-[#FF6D00] transition-colors">
-                <Info size={20} />
-              </div>
-            </div>
-          ))
+            );
+          })
         ) : (
-          <div className="text-center py-12 text-gray-500 font-bold tracking-wide">
-            इस श्रेणी में कुछ नहीं मिला।
+          <div className="text-center py-16 bg-white dark:bg-[#121212] rounded-3xl border border-dashed border-gray-200 dark:border-white/10 p-8">
+            <BookOpen className="mx-auto text-gray-300 dark:text-white/10 mb-4" size={44} />
+            <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-1">
+              {language === 'en' ? 'No scriptures found in this category' : 'इस श्रेणी में वर्तमान में कोई पाठ उपलब्ध नहीं है।'}
+            </p>
+            <p className="text-xs text-gray-400">
+              {language === 'en' 
+                ? "Try searching for others or use Jainism GPT to generate below" 
+                : "आप नीचे दिए गए दिव्य AI जनरेटर के माध्यम से नया पाठ जोड़ सकते हैं!"}
+            </p>
           </div>
         )}
       </div>
 
       {/* Divine AI Expansion Module */}
-      <div className="mt-8 bg-gradient-to-br from-[#121212]/90 to-[#221C0F]/90 backdrop-blur-xl border border-[#FF6D00]/25 rounded-[2.5rem] p-8 text-center shadow-[0_0_30px_rgba(255,109,0,0.05)] relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-24 h-24 bg-[#FFD54F]/5 rounded-full blur-xl" />
-        <h3 className="font-display font-black text-white text-lg tracking-wider mb-2 uppercase flex items-center justify-center gap-2">
-          <BookOpen size={20} className="text-[#FFD54F] animate-pulse" />
-          More {activeCat}s Needed?
+      <div className="mt-8 bg-gradient-to-br from-[#121212] to-[#201812] backdrop-blur-xl border border-saffron/20 rounded-[2rem] p-6 lg:p-8 text-center shadow-lg relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-28 h-28 bg-saffron/5 rounded-full blur-2xl pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-28 h-28 bg-coral/5 rounded-full blur-2xl pointer-events-none" />
+        
+        <h3 className="font-display font-black text-white text-base tracking-wider mb-2.5 uppercase flex items-center justify-center gap-2">
+          <Sparkles size={18} className="text-saffron animate-pulse" />
+          {language === 'en' ? `Missing a ${activeCat}?` : `नया ${activeCat} पाठ जोड़ें?`}
         </h3>
-        <p className="text-xs text-gray-400 max-w-sm mx-auto mb-4 leading-relaxed">
-          Need a specific traditional pujan, stotra, chalisa, or aarti? Ask Jainism GPT to generate and add it live to the temple library.
+        <p className="text-xs text-gray-400 max-w-sm mx-auto mb-4.5 leading-relaxed">
+          {language === 'en'
+            ? 'Need another traditional chant, vidhi or stotra? Ask Jainism GPT to research academic archives and sync it directly to your device.'
+            : 'क्या आप कोई विशिष्ट प्राचीन आरती, चालीसा या पूजन चाहते हैं? हमारे स्वायत्त जैन धर्म AI गुरु से इतिहास सम्मत शुद्ध पाठ निर्मित करवाएं।'}
         </p>
         <button
           onClick={() => setShowAiModal(true)}
-          className="px-6 py-2.5 bg-[#FF6D00] hover:bg-[#FFD54F] text-black font-black uppercase text-xs tracking-widest rounded-xl transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg shadow-[#FF6D00]/15"
+          className="px-6 py-3 bg-gradient-to-r from-saffron to-coral hover:scale-105 active:scale-95 text-white font-black uppercase text-xs tracking-widest rounded-xl transition-all shadow-md shadow-saffron/10 cursor-pointer"
         >
           ✨ AI Generate {activeCat}
         </button>
       </div>
 
-      {/* Content Modal */}
+      {/* Full-Screen Reading Modal View */}
       {selectedItem && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300">
-          <div className="bg-white dark:bg-[#121212] rounded-[2.5rem] w-full max-w-2xl overflow-hidden shadow-2xl dark:shadow-[0_0_50px_rgba(255,109,0,0.2)] border border-gray-200 dark:border-white/10 animate-in zoom-in-95 duration-300 max-h-[90vh] flex flex-col relative">
-            <div className="bg-gradient-to-br from-[#FF6D00] to-[#FFD54F] p-8 text-black relative shrink-0">
-              <button 
-                onClick={() => setSelectedItem(null)}
-                className="absolute top-6 right-6 p-2 bg-black/10 hover:bg-black/20 rounded-full transition-colors backdrop-blur-sm"
-              >
-                ✕
-              </button>
-              <div className="inline-block px-4 py-1.5 bg-black/10 backdrop-blur-md rounded-full text-[10px] font-black tracking-widest uppercase mb-3 border border-black/10">
-                {selectedItem.category}
-              </div>
-              <h2 className="text-3xl font-display font-black">{selectedItem.title}</h2>
-            </div>
+        <div className={cn(
+          "fixed inset-0 z-[100] flex flex-col transition-all",
+          isFullscreen ? "bg-[#FAF4E8]" : "bg-black/75 backdrop-blur-md p-2 sm:p-4 md:p-6"
+        )}>
+          <div className={cn(
+            "flex flex-col w-full h-full shadow-2xl relative transition-all overflow-hidden",
+            isFullscreen 
+              ? "rounded-none" 
+              : "rounded-[2rem] max-w-3xl mx-auto border border-gray-200 dark:border-white/10",
+            // Reader theme selectors
+            readerTheme === 'parchment' ? "bg-[#FAF4E8] text-amber-950" :
+            readerTheme === 'light' ? "bg-white text-gray-900" :
+            readerTheme === 'dark' ? "bg-[#161618] text-gray-200" : 
+            "bg-[#070709] text-gray-100" // midnight
+          )}>
             
-            <div className="p-8 overflow-y-auto bg-white dark:bg-[#121212]">
-              <div className="bg-gray-50 dark:bg-[#1A1A1A] p-8 rounded-3xl border border-gray-100 dark:border-white/5 shadow-inner">
-                <pre className="whitespace-pre-wrap font-sans text-lg leading-relaxed text-gray-800 dark:text-gray-200 text-center font-medium">
-                  {selectedItem.content}
-                </pre>
+            {/* Modal/Reader Header bar */}
+            <div className={cn(
+              "flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-5 border-b shrink-0",
+              readerTheme === 'parchment' ? "border-amber-200/50" :
+              readerTheme === 'light' ? "border-gray-150" :
+              readerTheme === 'dark' ? "border-white/5" : "border-saffron/10"
+            )}>
+              <div className="flex items-center gap-3.5">
+                <button 
+                  onClick={() => {
+                    setSelectedItem(null);
+                    window.speechSynthesis.cancel();
+                    setIsSpeaking(false);
+                  }}
+                  className="p-2 rounded-full border border-current/10 hover:bg-current/5 transition-transform shrink-0 cursor-pointer"
+                >
+                  <ArrowLeft size={16} />
+                </button>
+                <div className="truncate">
+                  <span className="text-[9px] font-black uppercase tracking-widest border border-current/20 px-2 py-0.5 rounded">
+                    {selectedItem.category}
+                  </span>
+                  <h2 className="text-lg md:text-xl font-display font-black truncate mt-1">{selectedItem.title}</h2>
+                </div>
+              </div>
+
+              {/* Bookmark & Chanted Indicators */}
+              <div className="flex items-center gap-2">
+                <button 
+                  onClick={() => handleToggleBookmark(selectedItem.id)}
+                  className="p-2 rounded-full border border-current/10 hover:bg-current/5 transition-colors cursor-pointer"
+                  title="Bookmark"
+                >
+                  <Heart size={16} className={favorites.includes(selectedItem.id) ? "fill-saffron text-saffron stroke-saffron" : "text-current"} />
+                </button>
+                <button 
+                  onClick={() => handleToggleChanted(selectedItem.id)}
+                  className={cn(
+                    "px-3 py-1.5 rounded-full border border-current/10 hover:bg-current/5 text-[10px] font-black uppercase flex items-center gap-1 cursor-pointer transition-all",
+                    chantedLog.includes(selectedItem.id) && "bg-green-500/10 text-green-600 border-green-500/20"
+                  )}
+                >
+                  <CheckCircle2 size={12} />
+                  {chantedLog.includes(selectedItem.id) ? (language === 'en' ? 'Chanted' : 'पूरा हुआ') : (language === 'en' ? 'Done' : 'चढ़ाया')}
+                </button>
+                <button 
+                  onClick={() => setIsFullscreen(!isFullscreen)}
+                  className="p-2 rounded-full border border-current/10 hover:bg-current/5 transition-colors cursor-pointer"
+                  title="Fullscreen Reader"
+                >
+                  {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+                </button>
               </div>
             </div>
+
+            {/* Typography Controls Panel */}
+            <div className={cn(
+              "p-4 px-5 border-b flex flex-wrap items-center justify-between gap-4 shrink-0 text-xs",
+              readerTheme === 'parchment' ? "bg-amber-500/5 border-amber-200/40" :
+              readerTheme === 'light' ? "bg-gray-50 border-gray-150" :
+              readerTheme === 'dark' ? "bg-white/5 border-white/5" : "bg-saffron/5 border-saffron/10"
+            )}>
+              {/* Size & Themes */}
+              <div className="flex items-center gap-3.5 flex-wrap">
+                <div className="flex items-center gap-1.5 border border-current/10 rounded-lg p-0.5">
+                  <button onClick={() => setFontSize(Math.max(14, fontSize - 2))} className="p-1 px-2.5 rounded hover:bg-current/10 font-black cursor-pointer"><ZoomOut size={13} /></button>
+                  <span className="text-[10px] font-black px-1">{fontSize}px</span>
+                  <button onClick={() => setFontSize(Math.min(32, fontSize + 2))} className="p-1 px-2.5 rounded hover:bg-current/10 font-black cursor-pointer"><ZoomIn size={13} /></button>
+                </div>
+
+                <div className="flex gap-1 border border-current/10 rounded-lg p-0.5">
+                  {(['parchment', 'light', 'dark', 'midnight'] as const).map(th => (
+                    <button 
+                      key={th}
+                      onClick={() => setReaderTheme(th)}
+                      className={cn(
+                        "px-2.5 py-1 text-[10px] font-bold rounded-md uppercase transition-colors shrink-0 cursor-pointer",
+                        readerTheme === th 
+                          ? "bg-saffron text-white" 
+                          : "text-current hover:bg-current/5"
+                      )}
+                    >
+                      {th}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Hands-free Scrolling & Speech Control */}
+              <div className="flex items-center gap-3.5 flex-wrap">
+                {/* Auto Scroll toggle */}
+                <div className="flex items-center gap-2 border border-current/10 rounded-lg p-1.5 px-3">
+                  <label className="flex items-center gap-1.5 cursor-pointer select-none">
+                    <input 
+                      type="checkbox" 
+                      checked={autoscroll} 
+                      onChange={(e) => setAutoscroll(e.target.checked)}
+                      className="accent-saffron cursor-pointer"
+                    />
+                    <span className="text-[10px] font-black uppercase tracking-wider">Auto-Scroll</span>
+                  </label>
+                  {autoscroll && (
+                    <select 
+                      value={scrollSpeed} 
+                      onChange={(e: any) => setScrollSpeed(e.target.value)}
+                      className="bg-transparent font-bold text-[10px] outline-none ml-1 cursor-pointer border-l border-current/10 pl-2 focus:ring-0"
+                    >
+                      <option value="slow" className="text-black">Slow</option>
+                      <option value="medium" className="text-black">Medium</option>
+                      <option value="fast" className="text-black">Fast</option>
+                    </select>
+                  )}
+                </div>
+
+                {/* TTS Reader */}
+                <div className="flex items-center gap-1.5 bg-saffron/10 border border-saffron/20 rounded-lg p-1 px-2.5 text-saffron shrink-0">
+                  <button 
+                    onClick={toggleTTSChant}
+                    className="flex items-center gap-1.5 font-bold text-[10px] uppercase cursor-pointer"
+                  >
+                    {isSpeaking ? <Pause size={12} className="animate-spin" /> : <Play size={12} />}
+                    <span>{isSpeaking ? (language === 'en' ? 'Stop Reciting' : 'पाठ बन्द करें') : (language === 'en' ? 'Listen Chanting' : 'पाठ श्रवण करें')}</span>
+                  </button>
+                  {isSpeaking && (
+                    <select 
+                      value={speechRate}
+                      onChange={(e) => setSpeechRate(parseFloat(e.target.value))}
+                      className="bg-transparent text-[10px] font-bold text-saffron outline-none cursor-pointer p-0 ml-1.5 border-l border-saffron/20 pl-2"
+                    >
+                      <option value="0.75" className="text-black">0.75x</option>
+                      <option value="0.9" className="text-black">0.9x</option>
+                      <option value="1.0" className="text-black">1.0x</option>
+                      <option value="1.2" className="text-black">1.2x</option>
+                    </select>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Holy Scripture Reading Board */}
+            <div 
+              ref={readerRef}
+              className="flex-1 overflow-y-auto p-6 md:p-10 leading-relaxed font-serif text-center relative select-text"
+            >
+              {/* Subtle visual aura illustration */}
+              <div className="absolute top-12 left-1/2 -translate-x-1/2 w-48 h-48 bg-mandala pointer-events-none opacity-5 dark:opacity-10 scale-[1.3]" />
+              
+              <div 
+                className="max-w-xl mx-auto space-y-6 relative z-10 transition-all text-center"
+                style={{ fontSize: `${fontSize}px` }}
+              >
+                {selectedItem.content.split('\n').map((line: string, index: number) => {
+                  const cleaned = line.trim();
+                  if (!cleaned) return <div key={`empty-${index}`} className="h-4" />;
+                  
+                  // Style headers differently
+                  const isTitleMarker = cleaned.startsWith('॥') || cleaned.startsWith('[') || cleaned.endsWith('॥');
+                  return (
+                    <p 
+                      key={`line-${index}`} 
+                      className={cn(
+                        "transition-all leading-loose break-words whitespace-pre-wrap select-text hover:text-saffron cursor-default",
+                        isTitleMarker 
+                          ? "text-saffron dark:text-saffron-light font-black tracking-wide my-4 text-center block uppercase text-base sm:text-lg border-y border-current/5 py-2.5" 
+                          : "font-semibold block"
+                      )}
+                    >
+                      {cleaned}
+                    </p>
+                  );
+                })}
+              </div>
+
+              {/* End of chapter visual flourish */}
+              <div className="mt-14 mb-8 flex flex-col items-center justify-center text-current/30 pointer-events-none">
+                <div className="w-16 h-0.5 bg-current/25 rounded mb-2" />
+                <span className="text-[10px] font-black uppercase tracking-widest text-[#FF806A]">इति शुभम् - धर्मो रक्षति रक्षितः</span>
+              </div>
+            </div>
+
           </div>
         </div>
       )}
 
       {/* AI Scripture Generation Modal */}
       {showAiModal && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[110] flex items-center justify-center p-4 animate-in fade-in duration-300">
-          <div className="bg-[#121212] rounded-[2.5rem] w-full max-w-md overflow-hidden shadow-2xl border border-white/10 p-8 flex flex-col relative animate-in zoom-in-95 duration-300">
+        <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-[110] flex items-center justify-center p-4 animate-in fade-in duration-300 pointer-events-auto">
+          <div className="bg-[#121212] rounded-[2rem] w-full max-w-md overflow-hidden shadow-2xl border border-white/10 p-6 sm:p-8 flex flex-col relative animate-in zoom-in-95 duration-300">
             <button 
               onClick={() => { setShowAiModal(false); setAiError(''); }}
-              className="absolute top-6 right-6 p-2 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white rounded-full transition-colors"
+              className="absolute top-6 right-6 p-2 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white rounded-full transition-colors cursor-pointer"
             >
               ✕
             </button>
-            <h2 className="text-2xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] mb-2 uppercase tracking-wide">
-              AI {activeCat} Generator
+            <h2 className="text-xl md:text-2xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-saffron to-coral mb-2.5 uppercase tracking-wide">
+              {activeCat} AI Generator
             </h2>
-            <p className="text-xs text-gray-400 mb-6 font-medium leading-relaxed">
-              Enter the title of the scripture you want to generate. Jainism GPT will research its traditional elements and write it beautifully in Hindi/English.
+            <p className="text-xs text-gray-400 mb-6 font-semibold leading-relaxed">
+              {language === 'en'
+                ? `Provide the title of the Digambar ${activeCat} you want to retrieve. Jainism GPT will fetch standard verses, translations and chants instantly.`
+                : `जिस ${activeCat} को आप चाहते हैं उसका नाम लिखें। जैन धर्म AI प्राचीन पाण्डुलिपियों से शुद्ध देवनागरी पाठ संकलित कर आपके समक्ष प्रस्तुत करेगा।`}
             </p>
             
-            <form onSubmit={handleAiGenerate} className="space-y-4">
+            <form onSubmit={handleAiGenerate} className="space-y-5">
               <div>
-                <label className="block text-[10px] font-black text-[#FF8A65] uppercase tracking-wider mb-2">Scripture Name / Title</label>
+                <label className="block text-[10px] font-black text-saffron uppercase tracking-wider mb-2">
+                  {language === 'en' ? 'Scripture Name / Title' : 'ग्रंथ / पाठ का शीर्षक'}
+                </label>
                 <input
                   type="text"
-                  placeholder="e.g. भगवान पार्श्वनाथ आरती"
+                  placeholder={language === 'en' ? "e.g. आदिनाथ भगवान आरती" : "जैसे: श्री पार्श्वनाथ अष्टक पूजा"}
                   value={aiTitle}
                   onChange={(e) => setAiTitle(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-gray-500 focus:border-[#FF6D00]/50 outline-none text-sm font-bold"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:border-saffron/50 outline-none text-sm font-bold"
                   required
                   disabled={isAiGenerating}
                 />
               </div>
               
               {aiError && (
-                <p className="text-red-500 text-xs font-semibold bg-red-500/10 border border-red-500/20 p-3 rounded-lg">{aiError}</p>
+                <p className="text-red-500 text-xs font-semibold bg-red-500/10 border border-red-500/20 p-3 rounded-lg leading-relaxed">{aiError}</p>
               )}
 
               <button
                 type="submit"
                 disabled={isAiGenerating}
-                className="w-full py-4 bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] text-black font-black uppercase text-xs tracking-widest rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center gap-2 shadow-lg shadow-[#FF6D00]/15"
+                className="w-full py-3.5 bg-gradient-to-r from-saffron to-coral text-white font-black uppercase text-xs tracking-widest rounded-xl hover:scale-102 active:scale-98 transition-all disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center gap-2 shadow-lg shadow-saffron/10 cursor-pointer"
               >
                 {isAiGenerating ? (
                   <>
-                    <Loader2 className="animate-spin" size={16} />
-                    GENERATING HOLY TEXT...
+                    <Loader2 className="animate-spin text-white" size={16} />
+                    {language === 'en' ? 'GENERATING HOLY TEXT...' : 'पवित्र पाठ संकलित हो रहा है...'}
                   </>
                 ) : (
-                  'ACTIVATE GENERATOR'
+                  language === 'en' ? 'ACTIVATE GENERATOR' : ' AI पाठ देववाणी सृजन करें'
                 )}
               </button>
             </form>
           </div>
         </div>
       )}
+
     </div>
   );
 }

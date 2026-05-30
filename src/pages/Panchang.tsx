@@ -5,6 +5,8 @@ import { hi } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { useLanguage } from '../contexts/LanguageContext';
+import { db } from '../firebase';
+import { collection, onSnapshot } from 'firebase/firestore';
 
 type PanchangDetails = {
   tithi: string;
@@ -439,16 +441,31 @@ export default function PanchangPage() {
   const [currentDate, setCurrentDate] = useState(new Date()); 
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
   const [loading, setLoading] = useState(true);
+  const [dbUpdates, setDbUpdates] = useState<Record<string, any>>({});
 
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 800);
-    return () => clearTimeout(timer);
+    const unsub = onSnapshot(collection(db, 'panchang'), (snapshot) => {
+      const updates: Record<string, any> = {};
+      snapshot.forEach((doc) => {
+        updates[doc.id] = doc.data();
+      });
+      setDbUpdates(updates);
+      setLoading(false);
+    }, (err) => {
+      console.error("Error reading live panchang overrides:", err);
+      setLoading(false);
+    });
+    return () => unsub();
   }, []);
 
   const getPanchangDetails = (date: Date): PanchangDetails => {
     const year = date.getFullYear();
     const month = date.getMonth();
     const day = date.getDate();
+    const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    const override = dbUpdates[dateKey];
+
+    let baseDetails: PanchangDetails;
 
     if (year === 2026) {
       const monthData = JAIN_DATA_2026[month] || {};
@@ -456,7 +473,7 @@ export default function PanchangPage() {
       const sun = getSunTime(date);
       const calculated = getCalculatedTithi(date);
 
-      return {
+      baseDetails = {
         tithi: calculated.tithi,
         paksha: calculated.paksha,
         festivals: dayData.festivals || [],
@@ -469,25 +486,50 @@ export default function PanchangPage() {
         samvat: 'विक्रम संवत 2083',
         vns: 'वीर निर्वाण संवत 2552-53'
       };
+    } else {
+      // Fallback for other years (Approximate calculation)
+      const fallback = getGenericTithi(date);
+      const sunFallback = getSunTime(date);
+
+      baseDetails = {
+        tithi: fallback.tithi,
+        paksha: fallback.paksha,
+        festivals: [],
+        kalyanak: [],
+        acharyaDarpan: [],
+        shubhMuhurat: ['सामान्य दिन'],
+        vrat: [],
+        sunrise: sunFallback.sunrise,
+        sunset: sunFallback.sunset,
+        samvat: `विक्रम संवत ${year + 57}`,
+        vns: `वीर निर्वाण संवत ${year + 527}`
+      };
     }
 
-    // Fallback for other years (Approximate calculation)
-    const fallback = getGenericTithi(date);
-    const sunFallback = getSunTime(date);
+    if (override) {
+      const parseStrVal = (val: any): string[] => {
+        if (!val) return [];
+        if (Array.isArray(val)) return val;
+        return String(val).split(',').map(s => s.trim()).filter(Boolean);
+      };
 
-    return {
-      tithi: fallback.tithi,
-      paksha: fallback.paksha,
-      festivals: [],
-      kalyanak: [],
-      acharyaDarpan: [],
-      shubhMuhurat: ['सामान्य दिन'],
-      vrat: [],
-      sunrise: sunFallback.sunrise,
-      sunset: sunFallback.sunset,
-      samvat: `विक्रम संवत ${year + 57}`,
-      vns: `वीर निर्वाण संवत ${year + 527}`
-    };
+      return {
+        ...baseDetails,
+        tithi: override.tithi || baseDetails.tithi,
+        paksha: override.paksha || baseDetails.paksha,
+        festivals: override.festivals ? parseStrVal(override.festivals) : baseDetails.festivals,
+        kalyanak: override.kalyanak ? parseStrVal(override.kalyanak) : baseDetails.kalyanak,
+        acharyaDarpan: override.acharyaDarpan ? parseStrVal(override.acharyaDarpan) : baseDetails.acharyaDarpan,
+        shubhMuhurat: override.shubhMuhurat ? parseStrVal(override.shubhMuhurat) : baseDetails.shubhMuhurat,
+        vrat: override.vrat ? parseStrVal(override.vrat) : baseDetails.vrat,
+        sunrise: override.sunrise || baseDetails.sunrise,
+        sunset: override.sunset || baseDetails.sunset,
+        samvat: override.samvat || baseDetails.samvat,
+        vns: override.vns || baseDetails.vns
+      };
+    }
+
+    return baseDetails;
   };
 
   const translations = {

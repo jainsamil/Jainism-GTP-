@@ -1,8 +1,17 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Search, MapPin, Compass, ShieldAlert, Navigation, Landmark, Calendar, BookOpen } from 'lucide-react';
+import { 
+  ArrowLeft, Search, MapPin, Compass, ShieldAlert, 
+  Navigation, Landmark, Calendar, BookOpen, Compass as MapIcon,
+  Sparkles, CheckCircle
+} from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { motion, AnimatePresence } from 'motion/react';
+
+interface NearbyTemple {
+  name: { en: string; hi: string };
+  distance: string;
+}
 
 interface TirthItem {
   id: string;
@@ -15,6 +24,9 @@ interface TirthItem {
   rulesHi: string[];
   coordinates: string;
   image: string;
+  lat: number;
+  lng: number;
+  nearby: NearbyTemple[];
 }
 
 const TIRTHS_DATA: TirthItem[] = [
@@ -44,7 +56,14 @@ const TIRTHS_DATA: TirthItem[] = [
       "पवित्र पहाड़ी पर प्लास्टिक या कचरा फैलाना निषेध है।"
     ],
     coordinates: "https://maps.google.com/?q=Sammed+Shikharji+Jharkhand",
-    image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&q=80&w=600"
+    image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&q=80&w=600",
+    lat: 24.0125,
+    lng: 86.2086,
+    nearby: [
+      { name: { en: "Gautam Swamy Tonk", hi: "गौतम स्वामी कूट" }, distance: "On Route" },
+      { name: { en: "Kunthunath Tonk", hi: "कुन्थुनाथ कूट" }, distance: "On Route" },
+      { name: { en: "Madhuban Dharamshala complex", hi: "मधुबन धर्मशाला संकुल" }, distance: "Base Camp" }
+    ]
   },
   {
     id: "palitana",
@@ -72,7 +91,14 @@ const TIRTHS_DATA: TirthItem[] = [
       "चमड़े के सामान तथा इलेक्ट्रॉनिक कैमरों का उपयोग प्रतिबंधित है।"
     ],
     coordinates: "https://maps.google.com/?q=Shatrunjaya+Palitana+Gujarat",
-    image: "https://images.unsplash.com/photo-1590073844006-33379778ae09?auto=format&fit=crop&q=80&w=600"
+    image: "https://images.unsplash.com/photo-1590073844006-33379778ae09?auto=format&fit=crop&q=80&w=600",
+    lat: 21.5000,
+    lng: 71.8333,
+    nearby: [
+      { name: { en: "Kumarpal Temple", hi: "कुमारपाल मंदिर" }, distance: "Top" },
+      { name: { en: "Chaumukha Mandir", hi: "चौमुख मंदिर" }, distance: "Top" },
+      { name: { en: "Jindas Atishay Kshetra", hi: "जिनदास अतिशय क्षेत्र" }, distance: "2 km" }
+    ]
   },
   {
     id: "dilwara",
@@ -100,7 +126,13 @@ const TIRTHS_DATA: TirthItem[] = [
       "चमड़े का सारा सामान बाहर क्लॉक रूम पर जमा करना होता है।"
     ],
     coordinates: "https://maps.google.com/?q=Dilwara+Temples+Mount+Abu",
-    image: "https://images.unsplash.com/photo-1596176530529-78163a4f7af2?auto=format&fit=crop&q=80&w=600"
+    image: "https://images.unsplash.com/photo-1596176530529-78163a4f7af2?auto=format&fit=crop&q=80&w=600",
+    lat: 24.6014,
+    lng: 72.7111,
+    nearby: [
+      { name: { en: "Achalgarh Digambar Jain Temple", hi: "अचलगढ़ दिगंबर जैन मंदिर" }, distance: "8 km" },
+      { name: { en: "Nakoda Parshvanath Tirth", hi: "नाकोडा पार्श्वनाथ तीर्थ" }, distance: "120 km" }
+    ]
   },
   {
     id: "girnar",
@@ -123,12 +155,18 @@ const TIRTHS_DATA: TirthItem[] = [
     ],
     rulesHi: [
       "कचरा फैलाना रोकें; बंदर अत्यधिक सक्रिय हैं और खाने का सामान छीन सकते हैं।",
-      "मजबूत पकड़ वाले जूते पहनें क्योंकि चढ़ाई बहुत तीव्र और खड़ी है।",
+      "मजूबत पकड़ वाले जूते पहनें क्योंकि चढ़ाई बहुत तीव्र और खड़ी है।",
       "तेज धूप से बचने के लिए आधी रात या भोर में चढ़ाई शुरू करना बहुत लोकप्रिय है।",
       "पहाड़ी के रास्ते में मौन तपस्या करते दिगंबर साधुओं का आदर करें।"
     ],
     coordinates: "https://maps.google.com/?q=Girnar+Jain+Temples+Junagadh",
-    image: "https://images.unsplash.com/photo-1627856013091-fed6e4e30025?auto=format&fit=crop&q=80&w=600"
+    image: "https://images.unsplash.com/photo-1627856013091-fed6e4e30025?auto=format&fit=crop&q=80&w=600",
+    lat: 21.5264,
+    lng: 70.4792,
+    nearby: [
+      { name: { en: "Rajul Caves", hi: "राजीमती गुफा" }, distance: "On Route" },
+      { name: { en: "Sahasavan", hi: "सहसावन केवलज्ञान भूमि" }, distance: "Girnar Base" }
+    ]
   },
   {
     id: "ranakpur",
@@ -155,7 +193,13 @@ const TIRTHS_DATA: TirthItem[] = [
       "मंदिर परिसर की शांति भंग न करें।"
     ],
     coordinates: "https://maps.google.com/?q=Ranakpur+Jain+Temple+Rajasthan",
-    image: "https://images.unsplash.com/photo-1563911302283-d2bc129e7570?auto=format&fit=crop&q=80&w=600"
+    image: "https://images.unsplash.com/photo-1563911302283-d2bc129e7570?auto=format&fit=crop&q=80&w=600",
+    lat: 25.1167,
+    lng: 73.4667,
+    nearby: [
+      { name: { en: "Parshvanath Devayatan", hi: "श्री पार्श्वनाथ देवायतन" }, distance: "Within Complex" },
+      { name: { en: "Sun Temple", hi: "सूर्य मंदिर रणकपुर" }, distance: "1 km" }
+    ]
   },
   {
     id: "shravanabelagola",
@@ -182,15 +226,103 @@ const TIRTHS_DATA: TirthItem[] = [
       "मुख्य चोटी के आस पास पवित्रता एवं मर्यादा का उल्लंघन न करें।"
     ],
     coordinates: "https://maps.google.com/?q=Gomateshwara+Shravanabelagola+Karnataka",
-    image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=600"
+    image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=600",
+    lat: 12.8582,
+    lng: 76.4718,
+    nearby: [
+      { name: { en: "Chandragiri Hill Basadi", hi: "चंद्रगिरि पहाड़ी जैन बस्तियाँ" }, distance: "0.5 km" },
+      { name: { en: "Bhandari Basti", hi: "भंडारी बस्ती" }, distance: "Village Base" }
+    ]
   }
 ];
+
+const SIMULATED_CITIES = [
+  { name: { en: "Indore (MP)", hi: "इन्दौर (म.प्र.)" }, lat: 22.7196, lng: 75.8577 },
+  { name: { en: "Delhi NCR", hi: "दिल्ली-एनसीआर" }, lat: 28.7041, lng: 77.1025 },
+  { name: { en: "Mumbai (MH)", hi: "मुंबई" }, lat: 19.0760, lng: 72.8777 },
+  { name: { en: "Jaipur (RJ)", hi: "जयपुर (राज.)" }, lat: 26.9124, lng: 75.7873 },
+  { name: { en: "Bangalore (KA)", hi: "बेंगलुरु" }, lat: 12.9716, lng: 77.5946 },
+  { name: { en: "Ahmedabad (GJ)", hi: "अहमदाबाद" }, lat: 23.0225, lng: 72.5714 }
+];
+
+function calculateHaversineDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
+  const R = 6371; // km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return (R * c).toFixed(1);
+}
 
 export default function TirthPage() {
   const navigate = useNavigate();
   const { language: lang } = useLanguage();
   const [search, setSearch] = useState('');
   const [selectedTirth, setSelectedTirth] = useState<TirthItem | null>(null);
+
+  // New interactive states
+  const [selectedCityIdx, setSelectedCityIdx] = useState<number>(0);
+  const [geoCoords, setGeoCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [useLiveGeo, setUseLiveGeo] = useState(false);
+  const [distanceInfo, setDistanceInfo] = useState<string | null>(null);
+
+  // Vandana Target Tracker State
+  const [vandanaCounters, setVandanaCounters] = useState<Record<string, number>>(() => {
+    try {
+      const saved = localStorage.getItem('tirth_vandana_counts');
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  const handleIncrementVandana = (tirthId: string) => {
+    const updated = {
+      ...vandanaCounters,
+      [tirthId]: (vandanaCounters[tirthId] || 0) + 1
+    };
+    setVandanaCounters(updated);
+    localStorage.setItem('tirth_vandana_counts', JSON.stringify(updated));
+  };
+
+  const calculateDistanceTo = (tirth: TirthItem) => {
+    let baseLat = SIMULATED_CITIES[selectedCityIdx].lat;
+    let baseLng = SIMULATED_CITIES[selectedCityIdx].lng;
+    let sourceName = lang === 'en' ? SIMULATED_CITIES[selectedCityIdx].name.en : SIMULATED_CITIES[selectedCityIdx].name.hi;
+
+    if (useLiveGeo && geoCoords) {
+      baseLat = geoCoords.lat;
+      baseLng = geoCoords.lng;
+      sourceName = lang === 'en' ? "Your Live Geolocation" : "आपकी वास्तविक लोकेशन";
+    }
+
+    const dist = calculateHaversineDistance(baseLat, baseLng, tirth.lat, tirth.lng);
+    setDistanceInfo(`${dist} km from ${sourceName}`);
+  };
+
+  const handleFetchLiveGeo = () => {
+    if (!navigator.geolocation) {
+      alert(lang === 'en' ? "Geolocation is not supported by your browser." : "आपका ब्राउज़र वास्तविक लोकेशन का समर्थन नहीं करता है।");
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setGeoCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setUseLiveGeo(true);
+        if (selectedTirth) {
+          const dist = calculateHaversineDistance(pos.coords.latitude, pos.coords.longitude, selectedTirth.lat, selectedTirth.lng);
+          setDistanceInfo(`${dist} km from ${lang === 'en' ? 'Your Live Geolocation' : 'आपकी वास्तविक लोकेशन'}`);
+        }
+      },
+      (err) => {
+        console.warn("Geolocation API error:", err);
+        alert(lang === 'en' ? "Unable to retrieve position (maybe framed sandbox restrictions). Please use simulated cities instead." : "लोकेशन प्राप्त करने में असमर्थ। कृपया सूची से अपनी पसंद का शहर चुनें।");
+      }
+    );
+  };
 
   const filtered = TIRTHS_DATA.filter(t => 
     t.name.en.toLowerCase().includes(search.toLowerCase()) ||
@@ -219,8 +351,8 @@ export default function TirthPage() {
           <span className="text-[9px] font-black tracking-wider text-orange-500 uppercase block mb-0.5">{lang === 'en' ? 'SPIRITUAL TRAVELS' : 'परम पावन यात्रा'}</span>
           <p className="text-xs text-gray-600 dark:text-gray-300 font-medium">
             {lang === 'en' 
-              ? "Discover the major Jain Siddha and Atishya Kshetras, containing ancient architectures, holy histories, and yatra protocols."
-              : "प्रमुख सिद्ध और अतिशय क्षेत्रों की वंदना करें, जिसमें प्राचीन शिल्प शास्त्र, धार्मिक इतिहास और आवश्यक नियम शामिल हैं।"}
+              ? "Discover major Jain Siddha and Atishya Kshetras, containing ancient architectures, holy histories, distance calculations and yatra protocols."
+              : "प्रमुख सिद्ध और अतिशय क्षेत्रों की वंदना करें, जिसमें प्राचीन शिल्प शास्त्र, वास्तविक दूरी गणक, धार्मिक इतिहास और नियम शामिल हैं।"}
           </p>
         </div>
       </div>
@@ -242,7 +374,10 @@ export default function TirthPage() {
         {filtered.map(tirth => (
           <div 
             key={tirth.id}
-            onClick={() => setSelectedTirth(tirth)}
+            onClick={() => {
+              setSelectedTirth(tirth);
+              setDistanceInfo(null);
+            }}
             className="bg-white dark:bg-[#121212] rounded-3xl overflow-hidden border border-gray-100 dark:border-white/5 shadow-sm hover:shadow-md dark:hover:shadow-[0_0_20px_rgba(255,109,0,0.15)] hover:border-orange-300 dark:hover:border-white/20 transition-all duration-300 cursor-pointer group"
           >
             {/* Image Placeholder Frame */}
@@ -267,9 +402,16 @@ export default function TirthPage() {
 
             {/* Quick Summary */}
             <div className="p-5">
-              <div className="flex items-center gap-1.5 text-xs text-gray-400 font-bold mb-2">
-                <MapPin size={14} className="text-orange-500" />
-                <span>{lang === 'en' ? tirth.region.en : tirth.region.hi}</span>
+              <div className="flex justify-between items-center mb-2">
+                <div className="flex items-center gap-1.5 text-xs text-gray-400 font-bold">
+                  <MapPin size={14} className="text-orange-500" />
+                  <span>{lang === 'en' ? tirth.region.en : tirth.region.hi}</span>
+                </div>
+                {vandanaCounters[tirth.id] > 0 && (
+                  <span className="text-[10px] bg-[#00E676]/15 text-[#00E676] px-2 py-0.5 rounded-full font-black uppercase tracking-wider">
+                    {lang === 'en' ? `${vandanaCounters[tirth.id]}x Visited` : `${vandanaCounters[tirth.id]} बार वंदना`}
+                  </span>
+                )}
               </div>
               <p className="text-xs text-gray-600 dark:text-gray-300 font-medium leading-relaxed mb-4 line-clamp-2">
                 {lang === 'en' ? tirth.significance.en : tirth.significance.hi}
@@ -290,23 +432,23 @@ export default function TirthPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-end justify-center pt-8"
+            className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-md flex items-end justify-center pt-8 pointer-events-auto"
           >
             <motion.div 
               initial={{ y: "100%" }}
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 180 }}
-              className="bg-white dark:bg-[#0d0d0d] w-full max-w-2xl rounded-t-[2.5rem] border-t border-gray-200 dark:border-white/10 shadow-2xl overflow-y-auto max-h-[90vh]"
+              className="bg-white dark:bg-[#0d0d0d] w-full max-w-2xl rounded-t-[2.5rem] border-t border-gray-200 dark:border-white/10 shadow-2xl overflow-y-auto max-h-[90vh] pb-32"
             >
-              <div className="sticky top-0 bg-white/90 dark:bg-[#0d0d0d]/90 backdrop-blur-md z-30 px-6 py-4 border-b border-gray-100 dark:border-white/5 flex items-center justify-between">
+              <div className="sticky top-0 bg-white/95 dark:bg-[#0d0d0d]/95 backdrop-blur-md z-30 px-6 py-4 border-b border-gray-100 dark:border-white/5 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Landmark className="text-[#FF6D00]" size={20} />
                   <span className="text-xs font-black text-gray-400 uppercase tracking-widest">{lang === 'en' ? 'Tirth Information' : 'तीर्थ विवरण'}</span>
                 </div>
                 <button 
                   onClick={() => setSelectedTirth(null)}
-                  className="px-4 py-1.5 rounded-full bg-gray-100 dark:bg-white/5 hover:bg-gray-200 text-xs font-bold transition-all"
+                  className="px-4 py-1.5 rounded-full bg-gray-100 dark:bg-white/5 hover:bg-gray-200 text-xs font-bold transition-all cursor-pointer"
                   id="btn-close-tirth-pop"
                 >
                   {lang === 'en' ? 'Close' : 'बंद करें'}
@@ -327,6 +469,117 @@ export default function TirthPage() {
                 {/* Banner image */}
                 <div className="h-48 rounded-2xl overflow-hidden shadow-inner border border-gray-100 dark:border-white/5">
                   <img src={selectedTirth.image} alt={selectedTirth.name.en} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                </div>
+
+                {/* Interactive Feature 1: Living/Simulated Distance Calculator */}
+                <div className="p-5 rounded-2xl bg-gradient-to-tr from-[#FF6D00]/5 to-transparent border border-[#FF6D00]/20 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-[#FF6D00]">
+                      <Compass size={18} className="animate-[pulse_1.5s_infinite]" />
+                      <span className="text-[10px] font-black uppercase tracking-wider">
+                        {lang === 'en' ? 'Distance Calculator' : 'पावन दूरी गणक'}
+                      </span>
+                    </div>
+                    <span className="text-[9px] uppercase font-bold text-gray-400">Haversine Method</span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-gray-400 uppercase block">
+                        {lang === 'en' ? 'Select Base City' : 'अपना मुख्य शहर चुनें'}
+                      </label>
+                      <select 
+                        disabled={useLiveGeo}
+                        value={selectedCityIdx}
+                        onChange={(e) => {
+                          setSelectedCityIdx(Number(e.target.value));
+                          setDistanceInfo(null);
+                        }}
+                        className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-[#FF6D00]"
+                      >
+                        {SIMULATED_CITIES.map((c, idx) => (
+                          <option key={idx} value={idx}>
+                            {lang === 'en' ? c.name.en : c.name.hi}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="flex flex-col justify-end">
+                      <button
+                        onClick={handleFetchLiveGeo}
+                        className="w-full bg-white dark:bg-white/5 hover:bg-orange-50 dark:hover:bg-[#FF6D00]/10 text-orange-600 dark:text-[#FFD54F] border border-[#FF6D00]/20 rounded-xl py-2 px-3 text-[10px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1 cursor-pointer"
+                      >
+                        <Sparkles size={12} /> {lang === 'en' ? 'Use Your Live Geolocation' : 'वास्तविक लाइव जीपीएस का उपयोग करें'}
+                      </button>
+                    </div>
+                  </div>
+
+                  {useLiveGeo && (
+                    <div className="flex items-center justify-between text-[10px] text-emerald-500 font-bold bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-3 py-2">
+                      <span>✓ GPS Tracking Active</span>
+                      <button 
+                        onClick={() => {
+                          setUseLiveGeo(false);
+                          setDistanceInfo(null);
+                        }}
+                        className="font-black text-red-500 hover:text-red-600 uppercase"
+                      >
+                        {lang === 'en' ? 'Reset' : 'रीसेट'}
+                      </button>
+                    </div>
+                  )}
+
+                  <button
+                    onClick={() => calculateDistanceTo(selectedTirth)}
+                    className="w-full bg-[#121212] dark:bg-white text-white dark:text-black hover:scale-[1.01] active:scale-95 py-2.5 px-4 rounded-xl text-xs font-black tracking-widest uppercase transition-all flex items-center justify-center gap-1 cursor-pointer"
+                  >
+                    🔍 {lang === 'en' ? 'CALCULATE ACCURATE DISTANCE' : 'दूरी की गणना करें'}
+                  </button>
+
+                  {distanceInfo && (
+                    <div className="animate-[fadeIn_0.5s_ease-out] bg-gradient-to-r from-orange-500 to-amber-500 text-black rounded-xl p-3.5 text-center font-black tracking-wide text-xs flex flex-col gap-0.5 shadow-md">
+                      <span className="text-[9px] uppercase tracking-widest opacity-80">{lang === 'en' ? 'Direct Air Distance' : 'सीधी वायुमंडलीय दूरी'}</span>
+                      <span className="text-lg">{distanceInfo}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Interactive Feature 2: Curated Must-Visit Nearby Temples */}
+                <div className="p-5 rounded-2xl bg-[#2962FF]/5 border border-[#2962FF]/10 space-y-3">
+                  <div className="flex items-center gap-2 text-[#2962FF]">
+                    <Landmark size={18} />
+                    <span className="text-[10px] font-black uppercase tracking-widest">
+                      {lang === 'en' ? 'Recommended Nearby Shrines & Temples' : 'आसपास के प्राचीन और सिद्ध जिनालय'}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-2.5">
+                    {selectedTirth.nearby.map((n, idx) => (
+                      <div key={idx} className="flex justify-between items-center px-4 py-2 bg-white/60 dark:bg-white/5 border border-white/10 rounded-xl text-xs font-bold shadow-sm">
+                        <span className="text-gray-800 dark:text-gray-100">{lang === 'en' ? n.name.en : n.name.hi}</span>
+                        <span className="text-[10px] text-orange-500 bg-orange-500/10 px-2.5 py-0.5 rounded-full font-black uppercase tracking-wider">{n.distance}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Interactive Feature 3: Personal Vandana Log Tracker */}
+                <div className="p-5 rounded-2xl bg-[#00E676]/5 border border-[#00E676]/10 flex flex-col sm:flex-row justify-between items-center gap-4">
+                  <div>
+                    <span className="text-[9px] text-[#00E676] font-black uppercase tracking-widest flex items-center gap-1.5 mb-1">
+                      <CheckCircle size={12} /> {lang === 'en' ? 'Your Spiritual Travel Diary' : 'आपकी पावन यात्रा डायरी'}
+                    </span>
+                    <h4 className="text-xs font-bold text-gray-700 dark:text-gray-200 leading-snug">
+                      {lang === 'en' ? 'Log your sacred pilgrim visits to boost your spiritual stats' : 'इस तीर्थ की कितनी बार वन्दना पूर्ण की है, उसका रिकॉर्ड रखें।'}
+                    </h4>
+                  </div>
+                  <button
+                    onClick={() => handleIncrementVandana(selectedTirth.id)}
+                    className="shrink-0 bg-[#00E676] hover:bg-[#00C853] text-black font-black uppercase tracking-widest text-[10px] px-4 py-2.5 rounded-xl border border-[#00E676]/30 shadow-md transition-all active:scale-95 cursor-pointer"
+                  >
+                    + {lang === 'en' ? 'ADD VISITED LOG' : 'वंदना रिकॉर्ड जोड़ें'}
+                  </button>
                 </div>
 
                 {/* Significance Section */}
@@ -379,11 +632,14 @@ export default function TirthPage() {
                   href={selectedTirth.coordinates}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full bg-[#FF6D00] text-white py-4 px-6 rounded-2xl flex items-center justify-center gap-2.5 font-bold shadow-lg shadow-orange-500/20 active:scale-98 transition-transform"
+                  className="w-full bg-[#FF6D00] text-white py-4 px-6 rounded-2xl flex items-center justify-center gap-2.5 font-bold shadow-lg shadow-orange-500/20 active:scale-98 transition-transform cursor-pointer"
                 >
                   <Navigation size={18} className="fill-white" />
                   <span>{lang === 'en' ? 'GET GPS NAVIGATION ROUTE' : 'गूगल मैप नेविगेशन मार्ग खोलें'}</span>
                 </a>
+
+                {/* Viewport safety bottom spacer */}
+                <div className="h-10 w-full" />
               </div>
             </motion.div>
           </motion.div>

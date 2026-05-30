@@ -39,9 +39,13 @@ app.post('/api/content', (req, res) => {
 // Gemini Scripture Generator Route
 app.post('/api/gemini/generate-scripture', async (req, res) => {
   try {
-    const { title, category } = req.body;
+    const { title, category, adminPassword } = req.body;
     if (!title || !category) {
       return res.status(400).json({ error: 'Title and category are required.' });
+    }
+
+    if (adminPassword !== 'admin123') {
+      return res.status(403).json({ error: 'Unauthorized: Invalid admin password.' });
     }
     
     if (!process.env.GEMINI_API_KEY) {
@@ -131,6 +135,90 @@ app.post('/api/admin/ai-generate-data', async (req, res) => {
   } catch (error: any) {
     console.error("AI Data Generation Error:", error);
     res.status(500).json({ error: error.message || 'Failed to generate AI data content' });
+  }
+});
+
+// AI Centralized NLP Maintenance Agent Endpoint
+app.post('/api/admin/nlp-agent-execute', async (req, res) => {
+  try {
+    const { prompt, image } = req.body;
+    if (!prompt) {
+      return res.status(400).json({ error: 'Prompt is required.' });
+    }
+
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(500).json({ error: 'Gemini API Key is not configured' });
+    }
+
+    const ai = new GoogleGenAI({
+      apiKey: process.env.GEMINI_API_KEY,
+      httpOptions: {
+        headers: {
+          'User-Agent': 'aistudio-build',
+        }
+      }
+    });
+
+    const nlpSystemInstruction = `You are the master autonomous Jainism GPT AI Admin Agent. Your task is to parse the developer prompt (representing natural language instructions, potentially with an uploaded image or screenshot) and determine which database transformation to perform on the Firestore database.
+
+You support these collections with their schemas:
+1. 'knowledge': { "q": { "en": "str", "hi": "str" }, "a": { "en": "str", "hi": "str" }, "category": "str" }
+2. 'tirthankars': { "name": { "en": "str", "hi": "str" }, "symbol": { "en": "str", "hi": "str" }, "desc": { "en": "str", "hi": "str" }, "number": 1-24, "kaal": "Past"|"Present"|"Future", "details": { "en": "str", "hi": "str" } }
+3. 'aagams': { "title": "str", "category": "Pujan"|"Stuti"|"Vidhan"|"Chalisa"|"Bhajan"|"Aarti", "content": "str" }
+4. 'history': { "title": { "en": "str", "hi": "str" }, "desc": { "en": "str", "hi": "str" }, "era": { "en": "str", "hi": "str" }, "detailedText": { "en": "str", "hi": "str" }, "image": "str" }
+5. 'festivals': { "name": { "en": "str", "hi": "str" }, "tithi": { "en": "str", "hi": "str" }, "desc": { "en": "str", "hi": "str" }, "significance": { "en": "str", "hi": "str" }, "rituals": { "en": "str", "hi": "str" }, "image": "str" }
+6. 'saints': { "name": { "en": "str", "hi": "str" }, "sect": { "en": "str", "hi": "str" }, "desc": { "en": "str", "hi": "str" }, "period": { "en": "str", "hi": "str" }, "image": "str" }
+7. 'vichaar': { "hi": "str", "en": "str", "source": "str" }
+8. 'media': { "title": { "en": "str", "hi": "str" }, "type": "story"|"audiobook"|"bhajan"|"video", "url": "str", "author": { "en": "str", "hi": "str" }, "desc": { "en": "str", "hi": "str" } }
+9. 'quiz': { "q": { "en": "str", "hi": "str" }, "options": { "hi": ["", "", "", ""], "en": ["", "", "", ""] }, "answer": 0-3, "explanation": { "en": "str", "hi": "str" } }
+10. 'panchang': { "tithi": "str", "paksha": "str", "festivals": ["str", ...], "kalyanak": ["str", ...], "acharyaDarpan": ["str", ...], "shubhMuhurat": ["str", ...], "vrat": ["str", ...], "sunrise": "str", "sunset": "str", "samvat": "str", "vns": "str" }
+
+Your action mapping:
+- If the instruction wants to add an event/item, set action: "add".
+- If the instruction wants to edit/update an item (like changing a panchang event format for a specific date like June 1, 2026), set action: "update" and set targetId to that date in YYYY-MM-DD format (e.g. "2026-06-01").
+- If the instruction wants to delete an item, set action: "delete".
+- If the instruction is general inquiry, chat, UI audit, static diagnostics, etc. (with or without image), set action: "reply".
+
+Return ONLY a single valid JSON object under this layout:
+{
+  "action": "add" | "update" | "delete" | "reply",
+  "targetCollection": "knowledge" | "tirthankars" | "aagams" | "history" | "festivals" | "saints" | "vichaar" | "media" | "quiz" | "panchang" | null,
+  "targetId": "string-id-or-date-key-like-2026-06-01" | null,
+  "payload": { ...schema-compliant data object... } | null,
+  "replyText": "masterful chat response speaking in the voice of the Autonomous Jainism GPT AI Admin Agent, detailing the action taken or results."
+}
+
+Do not wrap inside markdown code blocks, just return pure JSON.`;
+
+    const contents: any[] = [];
+    contents.push(prompt);
+
+    if (image) {
+      const matches = image.match(/^data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+);base64,(.+)$/);
+      if (matches && matches.length === 3) {
+        contents.push({
+          inlineData: {
+            data: matches[2],
+            mimeType: matches[1]
+          }
+        });
+      }
+    }
+
+    const response = await ai.models.generateContent({
+      model: "gemini-3.5-flash",
+      contents,
+      config: {
+        systemInstruction: nlpSystemInstruction,
+        responseMimeType: "application/json"
+      }
+    });
+
+    const parsedData = JSON.parse(response.text || '{}');
+    res.json({ success: true, ...parsedData });
+  } catch (error: any) {
+    console.error("NLP Agent Execution Error:", error);
+    res.status(500).json({ error: error.message || 'Failed NLP Agent transaction' });
   }
 });
 

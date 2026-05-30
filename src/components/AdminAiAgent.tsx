@@ -7,7 +7,7 @@ import {
   Camera, ArrowRight
 } from 'lucide-react';
 import { db } from '../firebase';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc, doc, setDoc, deleteDoc } from 'firebase/firestore';
 
 export default function AdminAiAgent() {
   const [unlocked, setUnlocked] = useState(false);
@@ -78,7 +78,7 @@ export default function AdminAiAgent() {
     setLogs(prev => [...prev, `[${timestamp}] ${msg}`]);
   };
 
-  const handleSendPrompt = (e: React.FormEvent) => {
+  const handleSendPrompt = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!prompt.trim() && !uploadedImage || isProcessing) return;
 
@@ -92,46 +92,62 @@ export default function AdminAiAgent() {
     setIsProcessing(true);
     addLog(`[COMMAND] Instruction: "${userText}"`);
 
-    setTimeout(() => {
-      let reply = '';
-      const textLower = userText.toLowerCase();
-
+    try {
       if (userImg) {
-        addLog("[AI AUDITOR] Commencing visual layout multimodal analysis...");
-        addLog("[AI AUDITOR] Running OCR & contrast evaluation...");
-        reply = `**Jai Jinendra Samil! I have successfully processed and analyzed your uploaded screenshot/image!** \n\nHere are my superpower visual check findings:\n\n1. **Color & Aesthetics Check**: You have paired deep charcoal (\`#050505\`) with highly polished warm saffron amber (\`#FF6D00\`). The visual hierarchy looks **extremely modern, balanced, and aesthetic**!\n2. **Where to Add Images**: If you are adding brand illustrations or banners, you can drop them in our \`public/\` folder and refer to them directly via \`/my_image.png\`. Feel free to update paths inside components like \`src/pages/Knowledge.tsx\` or \`src/pages/Home.tsx\`.\n3. **Where to Remove / Replace Images**: Keep large mock images at a minimum. We have already streamlined image fallbacks across profiles in \`src/pages/Chat.tsx\` to give our developers maximum speeds.\n4. **UI Contrast Audit**: Contrast ratio is **6.4:1** (meets WCAG AA standards). No bad layout patterns detected. Let me know what feature you want me to write next!`;
-      } else if (textLower.includes('github') || textLower.includes('push') || textLower.includes('git') || textLower.includes('deploy')) {
-        reply = 'Samil, I have scanned our local repository and checked the remote workspace. Building, compiling, running typescript type audits... Everything is verified! Stated commits are already pushed and up-to-date in your GitHub chamber.';
-        setSyncing(true);
-        simulateGitSync();
-      } else if (textLower.includes('image') || textLower.includes('upload') || textLower.includes('remove') || textLower.includes('banner')) {
-        addLog("[FILE INSPECTOR] Auditing asset folders...");
-        reply = `Here is my live checking feedback for image attachments, Samil:\n\n- **To Upload/Add Images**: Save them inside the \`public/images/\` directory and access them in your JSX as \`<img src="/images/your_file.png" referrerPolicy="no-referrer" />\`.\n- **To Remove Placeholder Images**: Inspect \`/src/pages/Media.tsx\` or \`/src/pages/Chat.tsx\` to replace or clear mock profile URLs.\n- **Optimized CDN Links**: Feel free to use secure Unsplash background resources inside the data lists under \`src/data/\` to ensure lightning-fast assets!`;
-      } else if (textLower.includes('audit') || textLower.includes('check') || textLower.includes('scan') || textLower.includes('problem') || textLower.includes('miss')) {
-        addLog("[SYSTEM DIAGNOSTIC] Initiating global file structural check...");
-        addLog("[LINTER] Executing static analysis check...");
-        addLog("[SEO] Verifying homepage keyword densities...");
-        reply = `**Live Workspace Health Scan Report for Samil Jain:**\n\n1. **Keywords Density (SEO)**: Checked homepage welcome widgets. Integrated 25 top search phrases (e.g., *Jainism GPT*, *Learn Jainism Online*) successfully into page headers and paragraphs to jumpstart Google indexing!\n2. **Auth Gate & Session Security**: Jainism GPT Chat is now fully secure. Only logged-in users under their unique verified profiles can see or launch private chats. Guest Mode is replaced with direct secure verification.\n3. **Bug Check**: All components build perfectly. No recursive loops or undefined properties.\n4. **Features Missing**: Everything requested operates smoothly. I highly recommend keeping other pages lightweight and leveraging local state caching!`;
-      } else if (textLower.includes('database') || textLower.includes('capacity') || textLower.includes('seed')) {
-        reply = 'Expanding indexing range. Security rules audited, database capacity established to unlimited capacity. Integrated automated caching support for seamless data query responses.';
-        addLog("[DATABASE] Clearing stale caches...");
-        addLog("[DATABASE] Sharding index references...");
-        addLog("[DATABASE] Storage limits scaled to UNLIMITED successfully.");
-      } else if (textLower.includes('bug') || textLower.includes('fix') || textLower.includes('repair')) {
-        reply = 'Initializing full-system static diagnostic checks... Scanned 14 source files. Linter is clean. Detected zero breaking states. All routes, language variables, and theme transitions are fully tuned!';
-        addLog("[LINTER] Executing static analysis check...");
-        addLog("[BUILD] Compiling target configurations...");
-        addLog("[SUCCESS] System build is fully green!");
+        addLog("[AI MASTER] Initiating multimodal visual/text parsing...");
+        addLog("[AI MASTER] Processing details with Gemini 3.5 Flash server...");
       } else {
-        reply = `I have received your command: "${userText}". I have verified that all page states inside the app are active. If you need me to construct structures, compile codes, or audit custom layout assets, type 'scan' or upload a screenshot diagram!`;
-        addLog("[NATURAL-LANGUAGE] Adjusting dialect reasoning vectors...");
-        setTraining(true);
-        setTimeout(() => setTraining(false), 2000);
+        addLog("[AI MASTER] Analyzing natural language command...");
       }
 
-      setMessages(prev => [...prev, { role: 'agent', text: reply }]);
+      // Fetch real-time AI NLP executor
+      const response = await fetch('/api/admin/nlp-agent-execute', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: userText, image: userImg })
+      });
+
+      const result = await response.json();
+      if (!result.success) {
+        throw new Error(result.error || 'Server NLP engine error');
+      }
+
+      const { action, targetCollection, targetId, payload, replyText } = result;
+
+      if (action && action !== 'reply' && targetCollection && payload) {
+        addLog(`[DB TRANSACTION] Executing action: "${action}" on collection: "${targetCollection}"`);
+        
+        if (action === 'add') {
+          await addDoc(collection(db, targetCollection), payload);
+          addLog(`[DB SUCCESS] Document added and indexed into Firestore collection "${targetCollection}" live!`);
+        } else if (action === 'update' && targetId) {
+          await setDoc(doc(db, targetCollection, targetId), payload, { merge: true });
+          addLog(`[DB SUCCESS] Document with ID "${targetId}" in "${targetCollection}" updated/merged live!`);
+        } else if (action === 'delete' && targetId) {
+          await deleteDoc(doc(db, targetCollection, targetId));
+          addLog(`[DB SUCCESS] Document with ID "${targetId}" deleted from "${targetCollection}" successfully!`);
+        }
+      } else if (action === 'delete' && targetCollection && targetId) {
+        addLog(`[DB TRANSACTION] Executing action: "delete" on collection "${targetCollection}" with ID "${targetId}"`);
+        await deleteDoc(doc(db, targetCollection, targetId));
+        addLog(`[DB SUCCESS] Document with ID "${targetId}" deleted successfully!`);
+      }
+
+      // Maintain visual GitHub trigger aesthetics
+      const textLower = userText.toLowerCase();
+      if (textLower.includes('github') || textLower.includes('push') || textLower.includes('git') || textLower.includes('deploy')) {
+        setSyncing(true);
+        simulateGitSync();
+      }
+
+      setMessages(prev => [...prev, { role: 'agent', text: replyText || `Command processed successfully. Database action: "${action || 'none'}"` }]);
+    } catch (error: any) {
+      console.error("NLP Executive Error:", error);
+      addLog(`[AI ERROR] Transaction failed: ${error.message || error}`);
+      setMessages(prev => [...prev, { role: 'agent', text: `🚨 **Autonomous Agent Alert**: I ran into an issue executing that database action. \n\n*Error details: ${error.message || 'Check connection or api limits'}*` }]);
+    } finally {
       setIsProcessing(false);
-    }, 1200);
+    }
   };
 
   const simulateGitSync = () => {

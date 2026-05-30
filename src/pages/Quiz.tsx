@@ -1,10 +1,78 @@
 import { useState, useEffect } from 'react';
-import { HelpCircle, CheckCircle2, XCircle, RefreshCcw, Award, Flame, ArrowLeft, Loader2 } from 'lucide-react';
+import { HelpCircle, CheckCircle2, XCircle, RefreshCcw, Award, Flame, ArrowLeft, Loader2, Sparkles } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 import { db } from '../firebase';
-import { collection, onSnapshot } from 'firebase/firestore';
+import { collection, onSnapshot, addDoc } from 'firebase/firestore';
+
+const FALLBACK_QUIZZES = [
+  {
+    id: 'fb_q_1',
+    q: { hi: 'जैन धर्म के प्रथम तीर्थंकर कौन हैं?', en: 'Who is the first Tirthankara of Jainism?' },
+    options: { 
+      hi: ['भगवान महावीर', 'भगवान आदिनाथ', 'भगवान पार्श्वनाथ', 'भगवान शांतिनाथ'], 
+      en: ['Lord Mahavira', 'Lord Adinath', 'Lord Parshvanath', 'Lord Shantinath'] 
+    },
+    answer: 1,
+    explanation: { 
+      hi: 'भगवान आदिनाथ (ऋषभदेव) वर्तमान चौबीसी के प्रथम तीर्थंकर हैं।', 
+      en: 'Lord Adinath (Rishabhdev) is the first Tirthankara of current era.' 
+    }
+  },
+  {
+    id: 'fb_q_2',
+    q: { hi: "जैन धर्म का मूल नारा 'जीयो और जीने दो' किसने दिया था?", en: "Who gave the supreme Jainism motto 'Live and Let Live'?" },
+    options: {
+      hi: ['भगवान ऋषभदेव', 'भगवान पार्श्वनाथ', 'आचार्य कुंदकुंद', 'भगवान महावीर'],
+      en: ['Lord Rishabhdev', 'Lord Parshvanath', 'Acharya Kundakunda', 'Lord Mahavira']
+    },
+    answer: 3,
+    explanation: {
+      hi: "भगवान महावीर ने सभी जीवों के समान अस्तित्व और अहिंसा पर जोर देते हुए 'जीयो और जीने दो' का संदेश दिया था।",
+      en: "Lord Mahavira preached 'Live and Let Live' emphasizing non-violence and equality of all living beings."
+    }
+  },
+  {
+    id: 'fb_q_3',
+    q: { hi: "णमोकार मंत्र में कुल कितने पद हैं?", en: "How many lines/salutations are there in the sacred Navkar Mantra?" },
+    options: {
+      hi: ['५ (Five)', '७ (Seven)', '९ (Nine)', '११ (Eleven)'],
+      en: ['5 (Five)', '7 (Seven)', '9 (Nine)', '11 (Eleven)']
+    },
+    answer: 0,
+    explanation: {
+      hi: "णमोकार मंत्र में ५ मुख्य पद हैं जो पंचपरमेष्ठी (अरिहंत, सिद्ध, आचार्य, उपाध्याय, साधु) को समर्पित हैं।",
+      en: "The Navkar Mantra consists of 5 main lines dedicated to the Pancha Parameshthi."
+    }
+  },
+  {
+    id: 'fb_q_4',
+    q: { hi: "प्रसिद्ध ग्रंथ 'समयसार' के रचयिता कौन हैं?", en: "Who is the author of the sacred text 'Samayasara'?" },
+    options: {
+      hi: ['आचार्य समंतभद्र', 'आचार्य पूज्यपाद', 'आचार्य कुंदकुंद', 'आचार्य वीरसेन'],
+      en: ['Acharya Samantabhadra', 'Acharya Pujyapada', 'Acharya Kundakunda', 'Acharya Veerasena']
+    },
+    answer: 2,
+    explanation: {
+      hi: "समयसार आचार्य कुंदकुंद देव द्वारा रचित दिगंबर परंपरा का अत्यंत महत्वपूर्ण आध्यात्मिक ग्रंथ है।",
+      en: "Samayasara is a preeminent spiritual treatise of the Digambara tradition written by Acharya Kundakunda."
+    }
+  },
+  {
+    id: 'fb_q_5',
+    q: { hi: "जैन धर्म में जमीकंद (जैसे आलू, प्याज) खाने का निषेध क्यों है?", en: "Why are root vegetables avoided in the Jain diet?" },
+    options: {
+      hi: ['यह स्वादिष्ट नहीं होते', 'इनमें अनंत सूक्ष्म जीव होते हैं', 'यह गर्म होते हैं', 'इनका धार्मिक महत्व नहीं है'],
+      en: ['They are not flavorful', 'They contain infinite microscopic living beings (Nigoda)', 'They are physically hot', 'They lack religious story']
+    },
+    answer: 1,
+    explanation: {
+      hi: "जमीकंद (कंदमूल) में अनंत साधारण वनस्पति जीव होते हैं। इन्हें उखाड़ने से पूरे पौधे का नाश होता है और सूक्ष्म जीवों की हिंसा होती है।",
+      en: "Root vegetables grow underground and contain infinite microscopic organisms (Nigoda). Consuming them violates the primary vow of Ahimsa."
+    }
+  }
+];
 
 export default function QuizPage() {
   const { language } = useLanguage();
@@ -16,14 +84,53 @@ export default function QuizPage() {
   const [score, setScore] = useState(0);
   const [showResult, setShowResult] = useState(false);
   const [hasAnswered, setHasAnswered] = useState(false);
+  const [isGeneratingAiQ, setIsGeneratingAiQ] = useState(false);
+
+  const generateAiPracticeQuestion = async () => {
+    setIsGeneratingAiQ(true);
+    try {
+      const response = await fetch('/api/admin/ai-generate-data', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          targetCollection: 'quiz',
+          prompt: 'Generate an engaging and authentic multi-choice question on Digambar Jain history, philosophy, Navkar Mantra, 24 Tirthankars, or basic rules of conduct. Include unique plausible options, the correct answer index, and a highly educational explanation.',
+          language: language === 'hi' ? 'Hindi & Hinglish' : 'English & Hindi'
+        })
+      });
+      const result = await response.json();
+      if (result.success && result.data) {
+        const newQ = {
+          id: 'ai_' + Date.now(),
+          ...result.data
+        };
+        // Save to Firestore automatically to persist the automated question
+        try {
+          await addDoc(collection(db, 'quiz'), result.data);
+        } catch (dbErr) {
+          console.warn("Could not auto-persist question to DB:", dbErr);
+        }
+        setQuestions(prev => [...prev, newQ]);
+        setCurrentQ(questions.length);
+        setSelected(null);
+        setHasAnswered(false);
+        setShowResult(false);
+      }
+    } catch (e) {
+      console.error("Failed to generate AI quiz question:", e);
+    } finally {
+      setIsGeneratingAiQ(false);
+    }
+  };
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'quiz'), (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setQuestions(data);
+      setQuestions(data.length > 0 ? data : FALLBACK_QUIZZES);
       setLoading(false);
     }, (error) => {
       console.error('Error fetching quiz:', error);
+      setQuestions(FALLBACK_QUIZZES);
       setLoading(false);
     });
     return () => unsubscribe();
@@ -85,13 +192,28 @@ export default function QuizPage() {
           </p>
         </div>
 
-        <button 
-          onClick={restart}
-          className="flex items-center gap-3 px-10 py-5 bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] text-black rounded-full font-black shadow-[0_0_20px_rgba(255,109,0,0.4)] hover:shadow-[0_0_30px_rgba(255,109,0,0.6)] transition-all active:scale-95 hover:scale-105 text-lg"
-        >
-          <RefreshCcw size={24} />
-          {language === 'hi' ? 'पुनः प्रयास करें' : 'TRY AGAIN'}
-        </button>
+        <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
+          <button 
+            onClick={restart}
+            className="w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-4 bg-white/5 border border-white/10 hover:bg-white/10 text-white rounded-full font-bold shadow-lg transition-all active:scale-95 hover:scale-105"
+          >
+            <RefreshCcw size={20} />
+            {language === 'hi' ? 'पुनः प्रयास करें' : 'TRY AGAIN'}
+          </button>
+
+          <button 
+            onClick={generateAiPracticeQuestion}
+            disabled={isGeneratingAiQ}
+            className="w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-4 bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] text-black rounded-full font-black shadow-[0_0_20px_rgba(255,109,0,0.4)] hover:shadow-[0_0_30px_rgba(255,109,0,0.6)] transition-all active:scale-95 hover:scale-105 disabled:opacity-50"
+          >
+            {isGeneratingAiQ ? (
+              <Loader2 className="animate-spin text-black" size={20} />
+            ) : (
+              <Sparkles size={20} className="text-black" />
+            )}
+            {language === 'hi' ? 'AI अभ्यास प्रश्न बनाएं' : 'GENERATE AI PRACTICE Q'}
+          </button>
+        </div>
       </div>
     );
   }
