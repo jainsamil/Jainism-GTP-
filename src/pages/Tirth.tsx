@@ -269,6 +269,13 @@ export default function TirthPage() {
   const [useLiveGeo, setUseLiveGeo] = useState(false);
   const [distanceInfo, setDistanceInfo] = useState<string | null>(null);
 
+  // Custom city input states
+  const [customCityInput, setCustomCityInput] = useState('');
+  const [isLocatingCustom, setIsLocatingCustom] = useState(false);
+  const [customLocateError, setCustomLocateError] = useState('');
+  const [customLocationName, setCustomLocationName] = useState('');
+  const [useCustomLoc, setUseCustomLoc] = useState(false);
+
   // Vandana Target Tracker State
   const [vandanaCounters, setVandanaCounters] = useState<Record<string, number>>(() => {
     try {
@@ -297,10 +304,50 @@ export default function TirthPage() {
       baseLat = geoCoords.lat;
       baseLng = geoCoords.lng;
       sourceName = lang === 'en' ? "Your Live Geolocation" : "आपकी वास्तविक लोकेशन";
+    } else if (useCustomLoc && geoCoords && customLocationName) {
+      baseLat = geoCoords.lat;
+      baseLng = geoCoords.lng;
+      sourceName = customLocationName;
     }
 
     const dist = calculateHaversineDistance(baseLat, baseLng, tirth.lat, tirth.lng);
     setDistanceInfo(`${dist} km from ${sourceName}`);
+  };
+
+  const handleCustomCityLocate = async () => {
+    if (!customCityInput.trim()) {
+      setCustomLocateError(lang === 'en' ? 'Please enter a city name' : 'कृपया शहर का नाम दर्ज करें');
+      return;
+    }
+    setIsLocatingCustom(true);
+    setCustomLocateError('');
+    try {
+      const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(customCityInput.trim())}, India`);
+      if (!response.ok) throw new Error('Network error');
+      const data = await response.json();
+      if (data && data.length > 0) {
+        const found = data[0];
+        const newCoords = { lat: parseFloat(found.lat), lng: parseFloat(found.lon) };
+        const displayName = found.display_name.split(',')[0] || customCityInput;
+        setGeoCoords(newCoords);
+        setCustomLocationName(displayName);
+        setUseCustomLoc(true);
+        setUseLiveGeo(false);
+        setCustomLocateError('');
+        
+        if (selectedTirth) {
+          const dist = calculateHaversineDistance(newCoords.lat, newCoords.lng, selectedTirth.lat, selectedTirth.lng);
+          setDistanceInfo(`${dist} km from ${displayName}`);
+        }
+      } else {
+        setCustomLocateError(lang === 'en' ? 'Location not found in India. Check spelling.' : 'भारत में स्थान नहीं मिला। वर्तनी की जाँच करें।');
+      }
+    } catch (err) {
+      console.error(err);
+      setCustomLocateError(lang === 'en' ? 'Could not geocode city. Try again.' : 'स्थान खोजने में विफलता। पुनः प्रयास करें।');
+    } finally {
+      setIsLocatingCustom(false);
+    }
   };
 
   const handleFetchLiveGeo = () => {
@@ -312,6 +359,7 @@ export default function TirthPage() {
       (pos) => {
         setGeoCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
         setUseLiveGeo(true);
+        setUseCustomLoc(false);
         if (selectedTirth) {
           const dist = calculateHaversineDistance(pos.coords.latitude, pos.coords.longitude, selectedTirth.lat, selectedTirth.lng);
           setDistanceInfo(`${dist} km from ${lang === 'en' ? 'Your Live Geolocation' : 'आपकी वास्तविक लोकेशन'}`);
@@ -319,7 +367,7 @@ export default function TirthPage() {
       },
       (err) => {
         console.warn("Geolocation API error:", err);
-        alert(lang === 'en' ? "Unable to retrieve position (maybe framed sandbox restrictions). Please use simulated cities instead." : "लोकेशन प्राप्त करने में असमर्थ। कृपया सूची से अपनी पसंद का शहर चुनें।");
+        alert(lang === 'en' ? "Unable to retrieve position. Please use manual selection or simulated lists." : "लोकेशन प्राप्त करने में असमर्थ। कृपया सूची अथवा मैनुअल सर्च का उपयोग करें।");
       }
     );
   };
@@ -489,7 +537,7 @@ export default function TirthPage() {
                         {lang === 'en' ? 'Select Base City' : 'अपना मुख्य शहर चुनें'}
                       </label>
                       <select 
-                        disabled={useLiveGeo}
+                        disabled={useLiveGeo || useCustomLoc}
                         value={selectedCityIdx}
                         onChange={(e) => {
                           setSelectedCityIdx(Number(e.target.value));
@@ -515,12 +563,41 @@ export default function TirthPage() {
                     </div>
                   </div>
 
-                  {useLiveGeo && (
+                  <div className="space-y-2 border-t border-gray-100 dark:border-white/5 pt-3">
+                    <label className="text-[10px] font-bold text-gray-400 uppercase block">
+                      {lang === 'en' ? 'Or Enter Custom Indian City / Town' : 'या भारत का कोई भी शहर / गाव खोजें'}
+                    </label>
+                    <div className="flex gap-2">
+                      <input 
+                        type="text"
+                        placeholder={lang === 'en' ? "e.g., Kolkata, Pune, Jabalpur..." : "जैसे: कोलकाता, पुणे, जबलपुर..."}
+                        value={customCityInput}
+                        onChange={(e) => setCustomCityInput(e.target.value)}
+                        className="flex-1 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-[#FF6D00] text-gray-900 dark:text-white"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') handleCustomCityLocate();
+                        }}
+                      />
+                      <button
+                        onClick={handleCustomCityLocate}
+                        disabled={isLocatingCustom}
+                        className="px-4 py-2 bg-gradient-to-r from-orange-500 to-amber-500 text-black text-xs font-black uppercase rounded-xl hover:opacity-90 active:scale-95 transition-all cursor-pointer disabled:opacity-50"
+                      >
+                        {isLocatingCustom ? '...' : (lang === 'en' ? 'Locate' : 'खोजें')}
+                      </button>
+                    </div>
+                    {customLocateError && (
+                      <p className="text-red-500 text-[10px] font-bold">{customLocateError}</p>
+                    )}
+                  </div>
+
+                  {(useLiveGeo || useCustomLoc) && (
                     <div className="flex items-center justify-between text-[10px] text-emerald-500 font-bold bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-3 py-2">
-                      <span>✓ GPS Tracking Active</span>
+                      <span>✓ {useLiveGeo ? (lang === 'en' ? 'GPS Tracking Active' : 'लाइव जीपीएस सक्रिय') : `${lang === 'en' ? 'Located' : 'खोजा गया'}: ${customLocationName}`}</span>
                       <button 
                         onClick={() => {
                           setUseLiveGeo(false);
+                          setUseCustomLoc(false);
                           setDistanceInfo(null);
                         }}
                         className="font-black text-red-500 hover:text-red-600 uppercase"
@@ -539,7 +616,7 @@ export default function TirthPage() {
 
                   {distanceInfo && (
                     <div className="animate-[fadeIn_0.5s_ease-out] bg-gradient-to-r from-orange-500 to-amber-500 text-black rounded-xl p-3.5 text-center font-black tracking-wide text-xs flex flex-col gap-0.5 shadow-md">
-                      <span className="text-[9px] uppercase tracking-widest opacity-80">{lang === 'en' ? 'Direct Air Distance' : 'सीधी वायुमंडलीय दूरी'}</span>
+                      <span className="text-[9px] uppercase tracking-widest opacity-80">{lang === 'en' ? 'Calculated Distance' : 'आकलन दूरी'}</span>
                       <span className="text-lg">{distanceInfo}</span>
                     </div>
                   )}

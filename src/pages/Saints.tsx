@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
-import { Users, Info, ArrowLeft, Loader2, Search, Mic, MicOff, Star } from 'lucide-react';
+import { Users, Info, ArrowLeft, Loader2, Search, Mic, MicOff, Star, Compass, Network, ArrowDown, Sparkles } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 import { db } from '../firebase';
 import { collection, onSnapshot } from 'firebase/firestore';
+import { lineageData, LineageNode } from '../data/lineageData';
+import { cn } from '../lib/utils';
 
 const FALLBACK_SAINTS = [
   {
@@ -123,10 +125,13 @@ const FALLBACK_SAINTS = [
 export default function SaintsPage() {
   const { language } = useLanguage();
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<'directory' | 'lineage'>('directory');
   const [saints, setSaints] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [isListening, setIsListening] = useState(false);
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>('mahavira');
+
   const recognitionRef = useRef<any>(null);
 
   useEffect(() => {
@@ -185,7 +190,6 @@ export default function SaintsPage() {
 
   const displaySaints = saints.length > 0 ? saints : FALLBACK_SAINTS;
 
-  // Multilingual NLP-inspired match function supporting Hindi, Hinglish, and English scripts
   const matchesSearch = (saint: any) => {
     if (!search.trim()) return true;
     const q = search.toLowerCase().trim();
@@ -197,12 +201,10 @@ export default function SaintsPage() {
     const sectEn = (saint.sect?.en || "").toLowerCase();
     const sectHi = (saint.sect?.hi || "").toLowerCase();
 
-    // Direct substring checks
     if (nameEn.includes(q) || nameHi.includes(q) || descEn.includes(q) || descHi.includes(q) || sectEn.includes(q) || sectHi.includes(q)) {
       return true;
     }
 
-    // Hinglish phonetics and common colloquial keyword aliases
     const phonetics: Record<string, string[]> = {
       "kunda": ["kundakunda", "kund", "कुंदकुंद", "कुन्दकुन्द"],
       "samanta": ["samantabhadra", "samant", "समंतभद्र", "समन्तभद्र"],
@@ -236,101 +238,261 @@ export default function SaintsPage() {
         </button>
         <h1 className="text-2xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] flex items-center gap-2 drop-shadow-none dark:drop-shadow-[0_0_10px_rgba(255,109,0,0.4)]">
           <Users className="text-[#FF6D00] shrink-0" size={26} />
-          {language === 'en' ? 'JAIN SAINTS DIRECTORY' : 'जैन श्रमण एवं संत निर्देशिका'}
+          {language === 'en' ? 'JAIN SAINTS & LINEAGE' : 'श्रमण निर्देशिका एवं गुरु परंपरा'}
         </h1>
       </header>
 
-      {/* Intro info box */}
-      <div className="mb-6 p-4 rounded-3xl bg-zinc-100 dark:bg-[#121212] border border-gray-200 dark:border-white/5 shadow-sm text-xs text-gray-600 dark:text-gray-300 font-medium leading-relaxed">
-        {language === 'en'
-          ? 'Jain ascetics (Sadhus and Sadhvis) follow pristine vows of non-violence, truth, non-stealing, absolute celibacy, and complete non-attachment. They serve as living representations of liberation and high spiritual scholarship.'
-          : 'जैन तीर्थंकरों की परंपरा में मुनिराज अहिंसा, सत्य, अचौर्य, ब्रह्मचर्य और पूर्ण अपरिग्रह के २८ मूलगुणों का कठिन पालन करते हैं। वे अध्यात्म, त्याग और आत्मज्ञान की जीवंत प्रतिमूर्ति हैं।'}
-      </div>
-
-      {/* High Tech Search with Typing & Voice */}
-      <div className="relative mb-6">
-        <Search className="absolute left-4 top-3.5 text-[#FF6D00]" size={20} />
-        <input 
-          type="text" 
-          placeholder={language === 'en' ? "Search Saint (e.g., Kundakunda, Vidyasagar)..." : "संत का नाम खोजें (जैसे: कुंदकुंद, विद्यासागर)..."}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full bg-white dark:bg-[#121212] border border-gray-200 dark:border-white/10 rounded-2xl py-3.5 pl-12 pr-12 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FF6D00]/50 shadow-sm transition-all"
-        />
-        <button 
-          onClick={toggleVoiceSearch}
-          className={`absolute right-3.5 top-2.5 p-1.5 rounded-xl transition-all ${isListening ? 'bg-red-500 text-white animate-pulse' : 'bg-gray-100 dark:bg-white/5 text-gray-400 hover:text-[#FF6D00]'}`}
-          title="Voice Search"
+      {/* Switcher Tab */}
+      <div className="flex p-1 mb-8 bg-gray-200/50 dark:bg-white/5 backdrop-blur-md rounded-2xl w-full max-w-md mx-auto shadow-sm">
+        <button
+          onClick={() => setActiveTab('directory')}
+          className={cn(
+            "flex-1 flex items-center justify-center gap-2 py-3 text-xs font-black tracking-wider uppercase rounded-xl transition-all duration-300 cursor-pointer",
+            activeTab === 'directory' 
+              ? "bg-[#FF6D00] text-white shadow-md shadow-[#FF6D00]/20" 
+              : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+          )}
         >
-          {isListening ? <MicOff size={16} /> : <Mic size={16} />}
+          <Users size={16} />
+          {language === 'en' ? 'Saints Directory' : 'संत निर्देशिका'}
+        </button>
+        <button
+          onClick={() => setActiveTab('lineage')}
+          className={cn(
+            "flex-1 flex items-center justify-center gap-2 py-3 text-xs font-black tracking-wider uppercase rounded-xl transition-all duration-300 cursor-pointer",
+            activeTab === 'lineage' 
+              ? "bg-[#FF6D00] text-white shadow-md shadow-[#FF6D00]/20" 
+              : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+          )}
+        >
+          <Network size={16} />
+          {language === 'en' ? 'Monk Lineage' : 'गुरु-शिष्य परंपरा'}
         </button>
       </div>
 
-      {/* Voice Status Alert */}
-      {isListening && (
-        <div className="mb-4 text-xs bg-red-500/10 text-red-500 font-black tracking-wider uppercase border border-red-500/20 rounded-xl px-4 py-2.5 flex items-center justify-between animate-pulse">
-          <span>🎙️ Listening now... speak saint's name</span>
-          <span className="w-2.5 h-2.5 bg-red-500 rounded-full animate-ping" />
-        </div>
-      )}
-
-      {/* Professional Compact List View */}
-      <div className="space-y-4">
-        {loading ? (
-          <div className="flex flex-col items-center justify-center py-12 text-gray-500">
-            <Loader2 className="animate-spin mb-3 text-[#FF6D00]" size={28} />
-            <p className="font-bold uppercase tracking-widest text-[10px]">Loading Saints Database...</p>
+      {activeTab === 'directory' ? (
+        /* ==================== SAINTS DIRECTORY SECTION ==================== */
+        <div className="space-y-6 animate-in fade-in duration-300">
+          {/* Intro info box */}
+          <div className="p-4 rounded-3xl bg-zinc-100 dark:bg-[#121212] border border-gray-200 dark:border-white/5 shadow-sm text-xs text-gray-600 dark:text-gray-300 font-medium leading-relaxed">
+            {language === 'en'
+              ? 'Jain ascetics (Sadhus and Sadhvis) follow pristine vows of non-violence, truth, non-stealing, absolute celibacy, and complete non-attachment. They serve as living representations of liberation and high spiritual scholarship.'
+              : 'जैन तीर्थंकरों की परंपरा में मुनिराज अहिंसा, सत्य, अचौर्य, ब्रह्मचर्य और पूर्ण अपरिग्रह के २८ मूलगुणों का कठिन पालन करते हैं। वे अध्यात्म, त्याग और आत्मज्ञान की जीवंत प्रतिमूर्ति हैं।'}
           </div>
-        ) : filteredSaints.length > 0 ? (
-          filteredSaints.map((saint: any, idx) => (
-            <div 
-              key={idx} 
-              className="bg-white dark:bg-[#111] border border-gray-100 dark:border-white/5 rounded-3xl p-5 hover:border-[#FF6D00]/40 dark:hover:shadow-[0_0_20px_rgba(255,109,0,0.15)] hover:shadow-lg transition-all duration-300 flex flex-col md:flex-row gap-5"
-            >
-              {/* Photo component */}
-              <div className="w-24 h-24 md:w-32 md:h-32 rounded-2xl md:rounded-3xl overflow-hidden border border-gray-100 dark:border-white/10 shrink-0 shadow-sm relative group self-center md:self-start">
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10" />
-                <img 
-                  src={saint.image} 
-                  alt={saint.name?.en} 
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                  referrerPolicy="no-referrer" 
-                />
+
+          {/* Search Bar */}
+          <div className="relative group">
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] rounded-2xl blur opacity-10 dark:opacity-20 group-hover:opacity-30 transition duration-500 animate-pulse"></div>
+            <div className="relative">
+              <Search className="absolute left-4 top-3.5 text-[#FF6D00]" size={18} />
+              <input 
+                type="text" 
+                placeholder={language === 'en' ? "Search Saint (e.g., Kundakunda, Vidyasagar)..." : "संत का नाम खोजें (जैसे: कुंदकुंद, विद्यासागर)..."}
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full bg-white dark:bg-[#121212] border border-gray-200 dark:border-white/10 rounded-2xl py-3.5 pl-12 pr-12 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FF6D00]/50 shadow-sm transition-all"
+              />
+              <button 
+                onClick={toggleVoiceSearch}
+                className={`absolute right-3.5 top-2.5 p-1.5 rounded-xl transition-all cursor-pointer ${isListening ? 'bg-red-500 text-white animate-pulse' : 'bg-gray-100 dark:bg-white/5 text-gray-400 hover:text-[#FF6D00]'}`}
+                title="Voice Search"
+              >
+                {isListening ? <MicOff size={16} /> : <Mic size={16} />}
+              </button>
+            </div>
+          </div>
+
+          {/* Voice Status Alert */}
+          {isListening && (
+            <div className="text-xs bg-red-500/10 text-red-500 font-black tracking-wider uppercase border border-red-500/20 rounded-xl px-4 py-2.5 flex items-center justify-between animate-pulse">
+              <span>🎙️ Listening now... speak saint's name</span>
+              <span className="w-2.5 h-2.5 bg-red-500 rounded-full animate-ping" />
+            </div>
+          )}
+
+          {/* Directory List */}
+          <div className="space-y-4">
+            {loading ? (
+              <div className="flex flex-col items-center justify-center py-12 text-gray-500">
+                <Loader2 className="animate-spin mb-3 text-[#FF6D00]" size={28} />
+                <p className="font-bold uppercase tracking-widest text-[10px]">Loading Saints Database...</p>
               </div>
+            ) : filteredSaints.length > 0 ? (
+              filteredSaints.map((saint: any, idx) => (
+                <div 
+                  key={idx} 
+                  className="bg-white dark:bg-[#111] border border-gray-100 dark:border-white/5 rounded-3xl p-5 hover:border-[#FF6D00]/40 hover:shadow-lg transition-all duration-300 flex flex-col md:flex-row gap-5"
+                >
+                  <div className="w-24 h-24 md:w-32 md:h-32 rounded-2xl md:rounded-3xl overflow-hidden border border-gray-100 dark:border-white/10 shrink-0 shadow-sm relative group self-center md:self-start bg-zinc-100 dark:bg-zinc-900">
+                    <img 
+                      src={saint.image} 
+                      alt={saint.name?.en} 
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                      referrerPolicy="no-referrer" 
+                    />
+                  </div>
 
-              {/* Text content details */}
-              <div className="flex-1 space-y-2">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="font-display font-black text-lg md:text-xl text-gray-900 dark:text-white leading-tight">
-                    {language === 'en' ? saint.name?.en : saint.name?.hi}
-                  </h3>
-                  {saint.period && (
-                    <span className="text-[10px] px-2.5 py-0.5 rounded-md bg-orange-100 dark:bg-[#FF6D00]/10 text-orange-600 dark:text-[#FFD54F] font-bold">
-                      {language === 'en' ? saint.period.en : saint.period.hi}
-                    </span>
-                  )}
+                  <div className="flex-1 space-y-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h3 className="font-display font-black text-lg md:text-xl text-gray-900 dark:text-white leading-tight">
+                        {language === 'en' ? saint.name?.en : saint.name?.hi}
+                      </h3>
+                      {saint.period && (
+                        <span className="text-[10px] px-2.5 py-0.5 rounded-md bg-orange-100 dark:bg-[#FF6D00]/10 text-orange-600 dark:text-[#FFD54F] font-bold">
+                          {language === 'en' ? saint.period.en : saint.period.hi}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-1.5">
+                      <Star className="text-yellow-500 shrink-0" size={12} />
+                      <span className={`text-[9px] font-black uppercase tracking-wider text-transparent bg-clip-text bg-gradient-to-r ${saint.color || 'from-orange-500 to-amber-600'}`}>
+                        {language === 'en' ? saint.sect?.en : saint.sect?.hi}
+                      </span>
+                    </div>
+
+                    <p className="text-xs text-gray-600 dark:text-gray-300 font-medium leading-relaxed">
+                      {language === 'en' ? saint.desc?.en : saint.desc?.hi}
+                    </p>
+                  </div>
                 </div>
-
-                <div className="flex items-center gap-1.5">
-                  <Star className="text-yellow-500 shrink-0" size={12} />
-                  <span className={`text-[9px] font-black uppercase tracking-wider text-transparent bg-clip-text bg-gradient-to-r ${saint.color || 'from-orange-500 to-amber-600'}`}>
-                    {language === 'en' ? saint.sect?.en : saint.sect?.hi}
-                  </span>
-                </div>
-
-                <p className="text-xs text-gray-600 dark:text-gray-300 font-medium leading-relaxed">
-                  {language === 'en' ? saint.desc?.en : saint.desc?.hi}
-                </p>
+              ))
+            ) : (
+              <div className="text-center py-12 rounded-3xl bg-white dark:bg-[#121212] border border-gray-100 dark:border-white/5 text-gray-500 text-xs font-bold tracking-wider">
+                {language === 'en' ? 'No matching saints found.' : 'कोई मिलान मुनिराज नहीं मिले।'}
+              </div>
+            )}
+          </div>
+        </div>
+      ) : (
+        /* ==================== LINEAGE MAPS (GURU-PARAMPARA) ==================== */
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 shadow-sm transition-all duration-300 animate-in fade-in">
+          
+          {/* Vertical Node Lineage Tracker Chain */}
+          <div className="lg:col-span-5 space-y-4">
+            <div className="p-4 p-4.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 mb-5 text-xs text-amber-800 dark:text-amber-400 font-bold flex items-start gap-2">
+              <Sparkles className="shrink-0 mt-0.5 animate-pulse text-amber-600" size={15} />
+              <div>
+                <strong className="block uppercase text-[10px] tracking-wider mb-0.5 font-black">Digambar Monk Lineage (अनवरत गुरु परंपरा)</strong>
+                {language === 'en' 
+                  ? 'Click successive nodes to view the historical details & unbroken lineage connecting Mahavira to Gandharas down to the 21st century.'
+                  : 'तीर्थंकर महावीर से लेकर वर्तमान आचार्यों तक की अक्षुण्ण गुरु परंपरा देखने के लिए चरणों पर क्लिक करें।'}
               </div>
             </div>
-          ))
-        ) : (
-          <div className="text-center py-12 rounded-3xl bg-white dark:bg-[#121212] border border-gray-100 dark:border-white/5 text-gray-500 text-xs font-bold tracking-wider">
-            {language === 'en' ? 'No matching saints found.' : 'कोई मिलान मुनिराज नहीं मिले।'}
+
+            <div className="relative pl-6 border-l-2 border-dashed border-[#FF6D00]/30 space-y-6">
+              {lineageData.map((node, index) => {
+                const isSelected = selectedNodeId === node.id;
+                return (
+                  <div key={node.id} className="relative group">
+                    
+                    {/* Circle Node Pin */}
+                    <div className={cn(
+                      "absolute -left-[31px] top-1.5 w-4.5 h-4.5 rounded-full border-2 transition-all duration-300 flex items-center justify-center",
+                      isSelected 
+                        ? "bg-[#FF6D00] border-[#FFD54F] scale-110 shadow-md shadow-[#FF6D00]/30" 
+                        : "bg-white dark:bg-[#050505] border-[#FF6D00]/50 group-hover:border-[#FF6D00]"
+                    )}>
+                      {isSelected && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
+                    </div>
+
+                    {/* Step Card link */}
+                    <button
+                      onClick={() => setSelectedNodeId(node.id)}
+                      className={cn(
+                        "w-full p-3.5 rounded-2xl border text-left transition-all duration-300 cursor-pointer flex items-center justify-between",
+                        isSelected
+                          ? "bg-white dark:bg-[#151515] border-[#FF6D00] shadow-sm text-[#FF6D00] dark:text-[#FFD54F]"
+                          : "bg-white/60 dark:bg-white/[0.02] border-transparent hover:bg-white dark:hover:bg-white/5"
+                      )}
+                    >
+                      <div>
+                        <span className="text-[9px] font-black uppercase tracking-wider text-gray-400 block mb-0.5">
+                          {node.period[language]}
+                        </span>
+                        <h3 className="font-display font-black text-xs text-gray-800 dark:text-gray-200">
+                          {node.name[language]}
+                        </h3>
+                      </div>
+                      <span className="text-[10px] text-gray-500 font-bold bg-gray-100 dark:bg-white/5 px-2.5 py-0.5 rounded-md self-center">
+                        {index + 1}
+                      </span>
+                    </button>
+
+                    {/* succession arrow separator */}
+                    {index < lineageData.length - 1 && (
+                      <div className="absolute -bottom-4.5 left-[-23px] text-gray-400/50 pointer-events-none">
+                        <ArrowDown size={10} />
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        )}
-      </div>
+
+          {/* Expanded Selected Node Detail Panel */}
+          <div className="lg:col-span-7">
+            {(() => {
+              const node = lineageData.find(n => n.id === selectedNodeId);
+              if (!node) return null;
+              return (
+                <div className="bg-white dark:bg-[#121212] border border-gray-250/20 dark:border-white/5 p-6 rounded-[2rem] shadow-sm relative overflow-hidden sticky top-6">
+                  <div className="absolute top-0 right-0 w-36 h-36 bg-[#FF6D00]/5 rounded-full blur-3xl pointer-events-none" />
+                  
+                  <div className="mb-5 pb-3 border-b border-gray-100 dark:border-white/5">
+                    <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-md bg-[#FF6D00]/10 text-[#FF6D00]">
+                      {node.phase[language]}
+                    </span>
+                    <h2 className="text-xl font-display font-black text-gray-900 dark:text-white mt-1.5 leading-snug">
+                      {node.name[language]}
+                    </h2>
+                    <p className="text-[11px] font-bold text-[#FF8A65] mt-0.5">
+                      {node.period[language]}
+                    </p>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div>
+                      <h4 className="text-[10px] font-black uppercase tracking-wider text-gray-400 mb-1">
+                        {language === 'en' ? 'Position / Status' : 'पदवी / भूमिका'}
+                      </h4>
+                      <p className="text-xs font-semibold text-gray-800 dark:text-gray-200 bg-gray-50 dark:bg-white/5 p-3 rounded-xl border border-gray-100 dark:border-white/5 leading-relaxed">
+                        {node.role[language]}
+                      </p>
+                    </div>
+
+                    <div>
+                      <h4 className="text-[10px] font-black uppercase tracking-wider text-gray-400 mb-1">
+                        {language === 'en' ? 'Traditional Importance' : 'परंपरा सम्मत इतिहास'}
+                      </h4>
+                      <p className="text-xs font-semibold text-gray-600 dark:text-gray-300 leading-relaxed p-1">
+                        {node.desc[language]}
+                      </p>
+                    </div>
+
+                    {/* Unbroken Lineage Chain Info Seal */}
+                    <div className="p-4 rounded-2xl bg-zinc-100/50 dark:bg-white/[0.02] border border-gray-150/40 dark:border-white/5 flex items-start gap-3 mt-6">
+                      <div className="p-2 rounded-xl bg-orange-500/10 text-orange-600 shrink-0 mt-0.5 border border-orange-500/10">
+                        <Star size={14} className="fill-orange-600/20" />
+                      </div>
+                      <div className="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed font-semibold">
+                        {language === 'en'
+                          ? 'This unbroken Digambar chain guarantees that the original values of self-realization, absolute nudity (Nirgranthatva) and non-injury are preserved exactly as taught by Mahavira.'
+                          : 'यह अखंड दिगंबर श्रमण परंपरा सुनिश्चित करती है कि आत्म-कल्याण, निर्ग्रंथता (दिगंबरत्व) एवं अपरिग्रह के प्राचीन पवित्र सिद्धांत आदि काल से सीधे आज तक आप तक पहुंचे हैं।'}
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+              );
+            })()}
+          </div>
+
+        </div>
+      )}
 
     </div>
   );
 }
+

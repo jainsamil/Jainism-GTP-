@@ -1,9 +1,10 @@
 {
   "name": "Jainism GPT",
-  "description": "An AI assistant knowledgeable about Jainism, its principles, history, and practices.",
+  "description": "An AI assistant knowledgeable about Jainism, its principles, history, and practices, offering voice search and accurate tirth distance calculators.",
   "requestFramePermissions": [
     "microphone",
-    "camera"
+    "camera",
+    "geolocation"
   ],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"

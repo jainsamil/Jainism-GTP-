@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { User, Camera, Instagram, Bookmark, Award, Settings, LogOut, BookOpen, ShieldAlert, Info, Edit2, Check, X, Download } from 'lucide-react';
+import { User, Camera, Instagram, Award, Settings, LogOut, BookOpen, ShieldAlert, Info, Edit2, Check, X, Download } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { useAuth } from '../contexts/AuthContext';
@@ -158,15 +158,7 @@ export default function ProfilePage() {
           </div>
           <span className="text-gray-400 dark:text-gray-500 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">›</span>
         </button>
-        <button onClick={() => navigate('/aagams')} className="w-full flex items-center justify-between p-5 border-b border-gray-100 dark:border-white/5 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group">
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-2xl bg-[#F50057]/10 text-[#C51162] dark:text-[#FF80AB] flex items-center justify-center border border-[#F50057]/20 group-hover:scale-110 transition-transform">
-              <Bookmark size={20} className="group-hover:drop-shadow-[0_0_8px_rgba(255,128,171,0.4)] dark:group-hover:drop-shadow-[0_0_8px_rgba(255,128,171,0.8)]" />
-            </div>
-            <span className="font-bold text-gray-700 dark:text-gray-200 tracking-wide">My Bookmarks</span>
-          </div>
-          <span className="text-gray-400 dark:text-gray-500 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">›</span>
-        </button>
+
         <button onClick={() => setShowAbout(true)} className="w-full flex items-center justify-between p-5 border-b border-gray-100 dark:border-white/5 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group">
           <div className="flex items-center gap-4">
             <div className="w-10 h-10 rounded-2xl bg-[#00E676]/10 text-[#00C853] dark:text-[#69F0AE] flex items-center justify-center border border-[#00E676]/20 group-hover:scale-110 transition-transform">

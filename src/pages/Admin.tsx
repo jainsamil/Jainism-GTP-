@@ -54,14 +54,7 @@ export default function AdminPage() {
     recentSignups: []
   });
 
-  const hasAdminAccess = localStorage.getItem('adminAccess') === 'true';
-
-  useEffect(() => {
-    // Clear admin access on unmount (navigation away)
-    return () => {
-      localStorage.removeItem('adminAccess');
-    };
-  }, []);
+  const [hasAdminAccess, setHasAdminAccess] = useState(localStorage.getItem('adminAccess') === 'true');
 
   useEffect(() => {
     if (role === 'admin' || hasAdminAccess) {
@@ -380,7 +373,7 @@ export default function AdminPage() {
     setLoginError('');
     if (password === 'admin123') {
       localStorage.setItem('adminAccess', 'true');
-      window.location.reload();
+      setHasAdminAccess(true);
     } else {
       setLoginError('Invalid password.');
     }
@@ -425,11 +418,7 @@ export default function AdminPage() {
             >
               LOGIN WITH PASSWORD
             </button>
-            <div className="pt-2">
-              <p className="text-[10.5px] text-gray-500 font-semibold tracking-wider hover:text-gray-400 transition-colors cursor-help">
-                Forgot password? Admin: <span className="text-amber-500 underline font-black">admin123</span> | AI: <span className="text-amber-500 underline font-black">samil123</span>
-              </p>
-            </div>
+            {/* Removed hardcoded password hints for security */}
           </form>
         </div>
       </div>
@@ -481,6 +470,7 @@ export default function AdminPage() {
             <button 
               onClick={() => {
                 localStorage.removeItem('adminAccess');
+                setHasAdminAccess(false);
                 auth.signOut();
                 navigate('/');
               }}

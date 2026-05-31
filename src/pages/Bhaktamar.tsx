@@ -1,108 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, BookOpen, Volume2, Sparkles, Heart, HeartOff, HelpCircle, CheckCircle2, ChevronRight, Play, Pause, Bookmark } from 'lucide-react';
+import { ArrowLeft, BookOpen, Volume2, Sparkles, Heart, HeartOff, HelpCircle, CheckCircle2, ChevronRight, Play, Pause, Bookmark, Loader2 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { motion, AnimatePresence } from 'motion/react';
-
-interface ShlokaData {
-  number: number;
-  sanskrit: string;
-  hindi: string;
-  english: string;
-  benefit: { en: string; hi: string };
-  riddhi: string;
-}
-
-const BHAKTAMAR_DATA: ShlokaData[] = [
-  {
-    number: 1,
-    sanskrit: "भक्तामर-प्रणत-मौलि-मणि-प्रभाणा-मुद्योतकं दलित-पाप-तमो-वितानम्। सम्यक्-प्रणम्य जिन-पाद-युगं युगादा-वालम्बनं भव-जले पततां जनानाम्॥ १ ॥",
-    hindi: "भक्तों के मुकुट मणियों की कांति को विकसित करने वाले, पाप अंधकार को नष्ट करने वाले भगवान आदिनाथ के युगल चरणों को बारम्बार नमस्कार हो।",
-    english: "Bowing down to the pair of lotus feet of the first Tirthankar Adinath, which illuminate the dark layers of sin like shining crown gems of deep worshipers.",
-    benefit: {
-      en: "Destruction of obstacles, removal of sudden life blockages and negative vibrations.",
-      hi: "सभी विघ्न-बाधाओं और संकटों का शमन, मन की शुद्धि एवं समृद्धि।"
-    },
-    riddhi: "ॐ ह्रीं अर्हं णमो अरिहंताणं णमो जिणाणं ह्रीं नमः स्वाहा।"
-  },
-  {
-    number: 2,
-    sanskrit: "यः संस्तुतः सकल-वाङ् मय-तत्त्व-बोधा-दुद्भूत-बुद्धि-पटुभिः सुर-लोक-नाथैः। स्तोत्रैर्जगत्-त्रितय-चित्त-हरैरुदारैः, स्तोष्ये किलाहमपि तं प्रथमं जिनेन्द्रम्॥ २ ॥",
-    hindi: "देवराज इन्द्रों द्वारा उत्कृष्ट बुद्धियुक्त स्तोत्रों से स्तुत आदि जिनेन्द्र की मैं तुच्छ बुद्धिधारी भी स्तुति करने का संकल्प करता हूँ।",
-    english: "Praised by celestial kings possessing immense intellectual depth, I, with my modest intellect, proceed to sing worship of the first Adinath Lord.",
-    benefit: {
-      en: "Enhancement of cognitive memory, wisdom, and success in educational affairs.",
-      hi: "स्मरण शक्ति की वृद्धि, बुद्धिमत्ता का विकास, एकाग्रता प्राप्ति।"
-    },
-    riddhi: "ॐ ह्रीं अर्हं णमो सिद्धानं णमो ओहिजिणाणं ह्रीं नमः स्वाहा।"
-  },
-  {
-    number: 3,
-    sanskrit: "बुद्ध्या विनापि विबुध-अर्च्य-पाद-पीठ, स्तोतुं समुद्यत-मतिर्विगत-त्रपोऽहम्। बालं विहाय जल-संस्थित-मिन्दु-बिम्ब-मन्यः क इच्छति जनः सहसा ग्रहीतुम्॥ ३ ॥",
-    hindi: "हे देव! बुद्धिहीन होने पर भी मैं आपके पूज्य चरणकमल की स्तुति करने के लिए उद्यत हुआ हूँ; जैसे कोई बालक जल में पड़ने वाले चंद्रमा के बिम्ब को पकड़ने के लिए अनायास मचल पड़ता है।",
-    english: "Even without adequate intellect, my mind is driven to praise your worshiped feet; just as an innocent child reaches out to catch the reflection of the moon in water.",
-    benefit: {
-      en: "Curing legal battles, getting justice, and releasing negative emotional burdens of guilt.",
-      hi: "मुकदमे-विवाद में न्याय एवं विजय प्राप्ति, मन से अपराध-बोध व आशंका का निवारण।"
-    },
-    riddhi: "ॐ ह्रीं अर्हं णमो अरिहंताणं णमो केवलनाणाणं ह्रीं नमः स्वाहा।"
-  },
-  {
-    number: 4,
-    sanskrit: "वक्तुं गुणान् गुण-समुद्र शशांक-कान्तान्, कस्ते क्षमः सुर-गुरु-प्रतिमोऽपि बुद्ध्या। कल्पान्त-काल-पवनोद्धत-नक्र-चक्रं, को वा तरीतुमलमम्बुनिधिं भुजाभ्याम्॥ ४ ॥",
-    hindi: "गुणों के समुद्र! साक्षात् बृहस्पति के समान बुद्धिमान पुरुष भी आपके चंद्र समान निष्पाप गुणों का वर्णन नहीं कर सकता। प्रलय काल की आंधी से उछलते मगरमच्छों वाले महासमुद्र को कौन अपनी भुजाओं से तैरकर पार कर सकता है?",
-    english: "Deep ocean of virtues! Even Brihaspati (the preceptor of gods) cannot describe your spotless glory. Who indeed can cross a storm-tossed ocean infested with crocodiles by raw arm power?",
-    benefit: {
-      en: "Freedom from water phobias, deep travel protections, and overcoming anxiety of natural disasters.",
-      hi: "जल के भय से मुक्ति, सुरक्षित यात्रा, बाढ़ व प्राकृतिक आपदाओं से रक्षा।"
-    },
-    riddhi: "ॐ ह्रीं अर्हं णमो अरिहंताणं णमो विउल मतीणं ह्रीं नमः स्वाहा।"
-  },
-  {
-    number: 5,
-    sanskrit: "सोऽहं तथापि तव भक्ति-वशान्मुनीश, कर्तुं स्तवं विगत-शक्तिरपि प्रवृत्तः। प्रीत्यात्म-वीर्यमविचार्य मृगो मृगेन्द्रं, नाभ्येति किं निज-शिशोः परिपालनार्थम्॥ ५ ॥",
-    hindi: "हे मुनीश! यद्यपि मैं शक्तिहीन हूँ, फिर भी आपकी भक्ति मुझे आपकी चर्चा करने को प्रेरित करती है। क्या एक कोमल हिरणी अपने नन्हे बच्चे की रक्षा के लिए अपनी शक्ति को भूलकर महाबलवान सिंह के सामने नहीं खड़ी हो जाती?",
-    english: "Though powerless, I enter your praise purely by the force of my love. Does not a gentle deer step forward and face a lion to protect her newborn fawn?",
-    benefit: {
-      en: "Prevention of accidents, driving away bad dreams, and protection of children.",
-      hi: "दुस्वप्नों का नाश, अकाल व आकस्मिक दुर्घटनाओं से सुरक्षा एवं संतान की रक्षा।"
-    },
-    riddhi: "ॐ ह्रीं अर्हं णमो अरिहंताणं णमो विउल बुद्धीणं ह्रीं नमः स्वाहा।"
-  },
-  {
-    number: 6,
-    sanskrit: "अल्प-श्रुतं श्रुतवतां परिहास-धाम, त्वद्-भक्तिरेव मुखरी-कुरुते बलान्माम्। यत्कोकिलः किल मधौ मधुरं विरौति, तच्चाम्र-चारु-कलिका-निकरैक-हेतुः॥ ६ ॥",
-    hindi: "मेरी अल्पावस्था की बुद्धि का लोग परिहास करेंगे, किंतु देव! आपकी अगाध भक्ति मुझे बलपूर्वक स्तुति करने को विवश कर रही है; ठीक वैसे ही जैसे वसंत में कोयल आम की कली देख मधु स्वर उठाती है।",
-    english: "Though my words appear simple, my devotion pushes me to speak, just as the black cuckoo is compelled to sing sweet melodies upon seeing the tender mango buds.",
-    benefit: {
-      en: "Enhancement of speech power, overcoming stuttering, and clearing sound and throat issues.",
-      hi: "वाक् शुद्धि, जिह्वा की स्पष्टता, संगीत और भाषण कला में सफलता।"
-    },
-    riddhi: "ॐ ह्रीं अर्हं णमो आयरियाणं णमो केवलजिणाणं ह्रीं नमः स्वाहा।"
-  },
-  {
-    number: 7,
-    sanskrit: "नास्तं कदाचिदुपयाति न राहु-गम्यः, स्पष्टी-करोति सहसा युगपज्जगन्ति। नाम्भोधरोदर-निरुद्ध-महाप्रभावः, सूर्यातिशायि-महिमा जगदीश्वरोऽसौ॥ ७ ॥",
-    hindi: "जगत के स्वामी! आपके महिमामयी दिव्य प्रकाश को मेघ नहीं रोक सकते, राहु ग्रसित नहीं कर सकता। आपका ज्ञान सूर्य एक साथ पूरे लोकालोक को प्रकाशित करता है, अतः इसकी महिमा प्रत्यक्ष सूर्य से भी बढ़कर है।",
-    english: "O Lord of the Universe! Your grand omniscience sun never sets, is never eclipsed by Rahu, and cannot be blocked by clouds. It illuminates the entire universe simultaneously, far surpassing the physical sun.",
-    benefit: {
-      en: "Curing eye disorders, skin conditions, clearing dark thoughts, and enhancing positive aura.",
-      hi: "नेत्र रोगों और विकार का शमन, चर्म रोग निवारण, एवं तेज व सकारात्मक ऊर्जा का विकास।"
-    },
-    riddhi: "ॐ ह्रीं अर्हं णमो लोयपइवयाणं ह्रीं नमः स्वाहा।"
-  },
-  {
-    number: 48,
-    sanskrit: "स्तोत्र-स्रजं तव जिनेन्द्र गुणैर्निबद्धां, भक्त्या मया विविध-वर्ण-विचित्र-पुष्पाम्। धत्ते जनो य इह कण्ठ-गतामजस्रं, तं मानतुंगमवशा समुपैति लक्ष्मीः॥ ४८ ॥",
-    hindi: "जो पुरुष विविध गुणों से युक्त इस स्तोत्र रूपी पुष्पमाला को कंठस्थ कर आदरपूर्वक धारण करता है, उस मानतुंग (श्रेष्ठ मनुष्य) के पास लक्ष्मी (वैभव) स्वयं खिंची चली आती है।",
-    english: "The devotee who constantly wears this beautiful garland of verses woven from your glorious virtues with deep devotion becomes highly respected, and divine prosperity (Lakshmi) seeks him out automatically.",
-    benefit: {
-      en: "Gaining ultimate prosperity, honors from administration, and wish fulfillment.",
-      hi: "सर्व सिध्दि प्राप्ति, सुख-संपदा का आगमन, और वैभव की प्राप्ति।"
-    },
-    riddhi: "ॐ ह्रीं अर्हं णमो अरिहंताणं णमो केवलनाणाणं ह्रीं नमः स्वाहा।"
-  }
-];
+import { BHAKTAMAR_DATA, ShlokaData } from '../data/bhaktamarData';
 
 export default function BhaktamarPage() {
   const navigate = useNavigate();
@@ -111,7 +12,12 @@ export default function BhaktamarPage() {
   const [selectedShloka, setSelectedShloka] = useState<ShlokaData>(BHAKTAMAR_DATA[0]);
   const [favorites, setFavorites] = useState<number[]>([]);
   const [completedList, setCompletedList] = useState<number[]>([]);
-  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const [audioLoading, setAudioLoading] = useState(false);
+  const [audioError, setAudioError] = useState<string | null>(null);
+  const [audioTime, setAudioTime] = useState(0);
+  const [audioDuration, setAudioDuration] = useState(0);
+  const audioInstanceRef = useRef<HTMLAudioElement | null>(null);
   const [activeTab, setActiveTab] = useState<'hindi' | 'english' | 'remedy' | 'jap'>('hindi');
 
   // Jap / Mala Counter States
@@ -157,36 +63,108 @@ export default function BhaktamarPage() {
     localStorage.setItem('bhaktamar_completed', JSON.stringify(updated));
   };
 
-  // TTS recitation
-  const playTTSChant = () => {
-    if (isSpeaking) {
-      window.speechSynthesis.cancel();
-      setIsSpeaking(false);
-      return;
-    }
-
-    const textToSpeak = selectedShloka.sanskrit;
-    const utterance = new SpeechSynthesisUtterance(textToSpeak);
-    utterance.lang = 'hi-IN'; // Sanskrit / Hindi voice
-    
-    utterance.onend = () => {
-      setIsSpeaking(false);
-    };
-
-    utterance.onerror = () => {
-      setIsSpeaking(false);
-    };
-
-    setIsSpeaking(true);
-    window.speechSynthesis.speak(utterance);
-  };
-
-  // Clean up speech synthesis on unmount
+  // Authentic Audio Streaming Controller Setup
   useEffect(() => {
+    const audio = new Audio();
+    audioInstanceRef.current = audio;
+
+    const handlePlay = () => setIsPlayingAudio(true);
+    const handlePause = () => setIsPlayingAudio(false);
+    const handleEnded = () => setIsPlayingAudio(false);
+    const handleTimeUpdate = () => setAudioTime(audio.currentTime);
+    const handleDurationChange = () => setAudioDuration(audio.duration || 0);
+    const handleLoadStart = () => {
+      setAudioLoading(true);
+      setAudioError(null);
+    };
+    const handleCanPlay = () => {
+      setAudioLoading(false);
+    };
+    const handleError = (e: any) => {
+      console.error("Bhaktamar audio loading error:", e);
+      setAudioLoading(false);
+      setAudioError("Primary stotra stream offline. Switching to standby relaxation stream...");
+      
+      const standbyUrl = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3";
+      setTimeout(() => {
+        if (audioInstanceRef.current) {
+          audioInstanceRef.current.src = standbyUrl;
+          audioInstanceRef.current.load();
+          const playPromise = audioInstanceRef.current.play();
+          if (playPromise !== undefined) {
+            playPromise.catch(err => {
+              if (err.name === 'AbortError') {
+                console.log("Standby play aborted gracefully.");
+              } else {
+                console.error("Standby play failed:", err);
+                setAudioError("Standby playback failed.");
+              }
+            });
+          }
+        }
+      }, 1000);
+    };
+
+    audio.addEventListener('play', handlePlay);
+    audio.addEventListener('pause', handlePause);
+    audio.addEventListener('ended', handleEnded);
+    audio.addEventListener('timeupdate', handleTimeUpdate);
+    audio.addEventListener('durationchange', handleDurationChange);
+    audio.addEventListener('loadstart', handleLoadStart);
+    audio.addEventListener('canplay', handleCanPlay);
+    audio.addEventListener('error', handleError);
+
+    // Load authentic complete Bhaktamar Stotra audio
+    audio.src = "https://archive.org/download/BhaktamarStotra_201306/Bhaktamar%20Stotra.mp3";
+    audio.load();
+
     return () => {
-      window.speechSynthesis.cancel();
+      audio.pause();
+      audio.removeEventListener('play', handlePlay);
+      audio.removeEventListener('pause', handlePause);
+      audio.removeEventListener('ended', handleEnded);
+      audio.removeEventListener('timeupdate', handleTimeUpdate);
+      audio.removeEventListener('durationchange', handleDurationChange);
+      audio.removeEventListener('loadstart', handleLoadStart);
+      audio.removeEventListener('canplay', handleCanPlay);
+      audio.removeEventListener('error', handleError);
+      audioInstanceRef.current = null;
     };
   }, []);
+
+  const toggleBhaktamarPlay = () => {
+    const audio = audioInstanceRef.current;
+    if (!audio) return;
+    if (isPlayingAudio) {
+      audio.pause();
+    } else {
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(err => {
+          if (err.name === 'AbortError') {
+            console.log("Bhaktamar play request aborted gracefully.");
+          } else {
+            console.error("Bhaktamar audio active trigger error:", err);
+          }
+        });
+      }
+    }
+  };
+
+  const handleSeek = (time: number) => {
+    const audio = audioInstanceRef.current;
+    if (audio) {
+      audio.currentTime = time;
+      setAudioTime(time);
+    }
+  };
+
+  const formatTime = (seconds: number) => {
+    if (isNaN(seconds)) return "00:00";
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
 
   return (
     <div className="min-h-full p-6 pb-26 bg-gradient-to-b from-gray-50 to-gray-100 dark:from-[#050505] dark:to-[#0d0d0d] text-gray-900 dark:text-gray-100 transition-colors duration-300">
@@ -228,8 +206,6 @@ export default function BhaktamarPage() {
               key={st.number}
               onClick={() => {
                 setSelectedShloka(st);
-                window.speechSynthesis.cancel();
-                setIsSpeaking(false);
               }}
               className={`px-4.5 py-3 rounded-2xl text-sm font-black whitespace-nowrap transition-all duration-300 flex items-center gap-1.5 border relative cursor-pointer ${
                 isSelected 
@@ -287,18 +263,54 @@ export default function BhaktamarPage() {
             {selectedShloka.sanskrit}
           </h2>
 
-          <button 
-            onClick={playTTSChant}
-            className={`mt-4 mx-auto px-5 py-2.5 rounded-full flex items-center gap-2 font-bold text-xs shadow-sm transition-all border cursor-pointer ${
-              isSpeaking 
-                ? 'bg-red-500 text-white border-red-400 animate-pulse' 
-                : 'bg-gray-100 dark:bg-white/10 text-[#FF6D00] border-[#FF6D00]/20 hover:scale-103'
-            }`}
-            id="tts-play-btn"
-          >
-            {isSpeaking ? <Pause size={14} /> : <Volume2 size={14} />}
-            <span>{isSpeaking ? (lang === 'en' ? 'Stop Listening' : 'श्रवण रोकें') : (lang === 'en' ? 'Listen Recitation' : 'काव्य पाठ श्रवण करें')}</span>
-          </button>
+          <div className="mt-6 flex flex-col items-center justify-center p-4 bg-orange-500/5 dark:bg-orange-500/10 rounded-2xl border border-orange-500/10 max-w-md mx-auto relative z-10">
+            <div className="flex items-center gap-3 w-full justify-between mb-3">
+              <span className="text-[10px] font-black uppercase text-orange-500 tracking-widest flex items-center gap-1">
+                <Volume2 size={12} className="animate-pulse" />
+                {lang === 'en' ? 'Authentic Stotra Audio' : 'उच्च-गुणवत्ता वास्तविक स्वर पाठ'}
+              </span>
+              {audioLoading && (
+                <span className="text-[9px] font-bold bg-[#FF6D00]/20 text-[#FFD54F] px-2 py-0.5 rounded-full flex items-center gap-1 animate-pulse">
+                  <Loader2 size={10} className="animate-spin" /> Loading...
+                </span>
+              )}
+            </div>
+
+            <div className="flex items-center gap-4 w-full">
+              <button 
+                onClick={toggleBhaktamarPlay}
+                className={`w-11 h-11 rounded-full flex items-center justify-center shadow-md border cursor-pointer shrink-0 transition-transform hover:scale-105 ${
+                  isPlayingAudio 
+                    ? 'bg-orange-500 border-orange-400 text-white animate-pulse' 
+                    : 'bg-white dark:bg-white/10 border-orange-500/20 text-[#FF6D00]'
+                }`}
+                id="shloka-play-btn"
+              >
+                {isPlayingAudio ? <Pause size={18} className="fill-white" /> : <Play size={18} className="fill-[#FF6D00] ml-0.5" />}
+              </button>
+
+              <div className="flex-1">
+                {audioError ? (
+                  <p className="text-[11px] text-amber-500 font-bold animate-pulse leading-normal">{audioError}</p>
+                ) : (
+                  <div className="space-y-1">
+                    <input 
+                      type="range"
+                      min={0}
+                      max={audioDuration || 100}
+                      value={audioTime}
+                      onChange={(e) => handleSeek(Number(e.target.value))}
+                      className="w-full h-1 bg-gray-200 dark:bg-white/10 rounded-lg appearance-none cursor-pointer accent-[#FF6D00] outline-none"
+                    />
+                    <div className="flex justify-between text-[10px] text-gray-400 dark:text-gray-500 font-mono">
+                      <span>{formatTime(audioTime)}</span>
+                      <span>{formatTime(audioDuration)}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Translation tabs selector */}

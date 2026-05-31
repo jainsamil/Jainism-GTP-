@@ -99,7 +99,7 @@ app.post('/api/admin/ai-generate-data', async (req, res) => {
     });
 
     const schemaInfo = {
-      knowledge: `{ "q": { "en": "question english", "hi": "question hindi" }, "a": { "en": "answer english", "hi": "answer hindi" }, "category": "custom category" }`,
+      knowledge: `{ "question": { "en": "question english", "hi": "question hindi" }, "jainReason": { "en": "spiritual basis and traditional jain explanation in english", "hi": "spiritual basis and traditional jain explanation in hindi" }, "scienceReason": { "en": "scientific logic or medical analysis in english", "hi": "scientific logic or medical analysis in hindi" }, "category": "custom category" }`,
       tirthankars: `{ "name": { "en": "", "hi": "" }, "symbol": { "en": "", "hi": "" }, "color": { "en": "", "hi": "" }, "birthPlace": { "en": "", "hi": "" }, "height": { "en": "", "hi": "" }, "age": { "en": "", "hi": "" }, "desc": { "en": "", "hi": "" }, "image": "https://images.unsplash.com/photo-1609137144814-7f1543faf743?auto=format&fit=crop&q=80&w=600" }`,
       aagams: `{ "title": { "en": "", "hi": "" }, "author": { "en": "", "hi": "" }, "sect": { "en": "", "hi": "" }, "category": { "en": "", "hi": "" }, "desc": { "en": "", "hi": "" }, "content": { "en": "", "hi": "" } }`,
       history: `{ "title": { "en": "", "hi": "" }, "era": { "en": "", "hi": "" }, "desc": { "en": "", "hi": "" }, "detailedText": { "en": "", "hi": "" }, "image": "https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=600" }`,
@@ -162,7 +162,7 @@ app.post('/api/admin/nlp-agent-execute', async (req, res) => {
     const nlpSystemInstruction = `You are the master autonomous Jainism GPT AI Admin Agent. Your task is to parse the developer prompt (representing natural language instructions, potentially with an uploaded image or screenshot) and determine which database transformation to perform on the Firestore database.
 
 You support these collections with their schemas:
-1. 'knowledge': { "q": { "en": "str", "hi": "str" }, "a": { "en": "str", "hi": "str" }, "category": "str" }
+1. 'knowledge': { "question": { "en": "str", "hi": "str" }, "jainReason": { "en": "str", "hi": "str" }, "scienceReason": { "en": "str", "hi": "str" }, "category": "str" }
 2. 'tirthankars': { "name": { "en": "str", "hi": "str" }, "symbol": { "en": "str", "hi": "str" }, "desc": { "en": "str", "hi": "str" }, "number": 1-24, "kaal": "Past"|"Present"|"Future", "details": { "en": "str", "hi": "str" } }
 3. 'aagams': { "title": "str", "category": "Pujan"|"Stuti"|"Vidhan"|"Chalisa"|"Bhajan"|"Aarti", "content": "str" }
 4. 'history': { "title": { "en": "str", "hi": "str" }, "desc": { "en": "str", "hi": "str" }, "era": { "en": "str", "hi": "str" }, "detailedText": { "en": "str", "hi": "str" }, "image": "str" }

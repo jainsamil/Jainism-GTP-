@@ -111,58 +111,58 @@ export default function HomePage() {
         })}
       </div>
 
-      {/* Elegant SEO Search Engine Relevancy & Welcome Card */}
-      <div className="mt-10 bg-white/40 dark:bg-[#121212]/40 backdrop-blur-xl rounded-[2rem] border border-gray-200 dark:border-white/5 p-6 md:p-8 shadow-sm">
-        <h3 className="text-sm font-black uppercase tracking-[0.2em] text-[#FF6D00] dark:text-[#FFD54F] mb-4 flex items-center gap-2">
-          <Sparkles size={16} /> Welcome to Jainism GPT
+      {/* Elegant Welcome & About Card (SEO Optimized & Beautifully Structured) */}
+      <div className="mt-10 bg-gradient-to-br from-white to-gray-50 dark:from-[#121212] dark:to-[#1a120a] backdrop-blur-xl rounded-[2rem] border border-[#FF6D00]/10 dark:border-white/5 p-6 md:p-8 shadow-sm hover:border-[#FF6D00]/25 transition-all duration-300">
+        <h3 className="text-sm font-black uppercase tracking-[0.22em] text-[#FF6D00] dark:text-[#FFD54F] mb-4 flex items-center gap-2">
+          <Sparkles size={16} className="text-[#FF6D00] animate-pulse" /> Welcome to Jainism GPT
         </h3>
         
-        <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed font-semibold mb-4">
-          Welcome to the premier, official <strong className="text-gray-900 dark:text-white">Jainism Website</strong> dedicated to pure spiritual growth, daily reflection, and community guidance. Through this online portal, you can easily <strong className="text-gray-900 dark:text-white">Learn Jainism Online</strong>. Engage directly with our interactive <strong className="text-gray-900 dark:text-white">Jain Religion AI chatbot</strong>, also known as the <strong className="text-gray-900 dark:text-white">Jainism GPT</strong> (or referred to by searchers as <strong className="text-gray-900 dark:text-white">Jainism AI</strong>, <strong className="text-gray-900 dark:text-white">Jain GPT</strong>, <strong className="text-gray-900 dark:text-white">Jain Ai agent</strong>, <strong className="text-gray-900 dark:text-white">Jain Chay Bot</strong>, or simply <strong className="text-gray-900 dark:text-white">Jain Ai</strong>). Receive authentic <strong className="text-gray-900 dark:text-white">divine wisdom</strong> extracted verbatim from classical scriptures.
+        <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed font-semibold mb-4">
+          Welcome to the official, premier <strong className="text-gray-900 dark:text-white font-bold">Jainism Website</strong> dedicated to pure spiritual growth, daily reflection, and community guidance. Through this online portal, you can easily <strong className="text-gray-900 dark:text-white font-bold">Learn Jainism Online</strong>. Engage directly with our interactive <strong className="text-amber-600 dark:text-[#FFD54F] font-bold">Jain Religion AI Chatbot</strong>, also known as the <strong className="text-gray-900 dark:text-white font-bold">Jainism GPT</strong> (or referred to as <strong className="text-gray-900 dark:text-white font-bold">Jain GPT</strong>, <strong className="text-gray-900 dark:text-white font-bold">Jainism AI</strong>, <strong className="text-gray-900 dark:text-white font-bold">Jain AI Agent</strong>, <strong className="text-gray-900 dark:text-white font-bold">Jain Chat Bot</strong>, or simply <strong className="text-gray-900 dark:text-white font-bold">Jain AI</strong>). Receive authentic, pure <strong className="text-gray-900 dark:text-white font-bold">Divine Wisdom</strong> extracted verbatim from classical scriptures, offering support for your spiritual inquiries.
         </p>
 
-        <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed font-semibold mb-4">
-          Conceived and developed for our community by <strong className="text-[#FF6D00] dark:text-[#FFD54F]">Samil Jain</strong> (often referred to simply as <strong className="text-gray-900 dark:text-white">Samil</strong>), this platform is designed to answer complex <strong className="text-gray-900 dark:text-white">Jainism questions and answers</strong>. Inside you will find resources covering:
+        <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed font-semibold mb-4">
+          Conceived and developed for the global community by <strong className="text-[#FF6D00] dark:text-[#FFD54F] font-black">Samil Jain</strong> (often known simply as <strong className="text-gray-900 dark:text-white font-bold">Samil</strong>), this platform is specifically optimized to provide accurate <strong className="text-gray-900 dark:text-white font-bold">Jainism Questions and Answers</strong>. Inside, you will discover curated spiritual resources covering:
         </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-semibold text-gray-500 dark:text-gray-400 mb-6 pl-2">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#FF6D00]" />
-              <span>Deep <strong className="text-gray-700 dark:text-gray-300">Jainism philosophy</strong> & standard <strong className="text-gray-700 dark:text-gray-300">Jainism principles</strong></span>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-semibold text-gray-600 dark:text-gray-400 mb-6 pl-2">
+          <div className="space-y-2.5">
+            <div className="flex items-center gap-2.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#FF6D00] shrink-0" />
+              <span>Deep <strong className="text-gray-800 dark:text-gray-300 font-bold">Jainism Philosophy</strong> and timeless <strong className="text-gray-800 dark:text-gray-300 font-bold">Jainism Principles</strong></span>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#FFD54F]" />
-              <span>The core teachings of Ahimsa (<strong className="text-gray-700 dark:text-gray-300">Ahinsa in Jainism</strong>)</span>
+            <div className="flex items-center gap-2.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#FFD54F] shrink-0" />
+              <span>The supreme path of Ahimsa (<strong className="text-gray-800 dark:text-gray-300 font-bold">Ahinsa in Jainism</strong> / Compassion)</span>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#FF6D00]" />
-              <span>Eternal <strong className="text-gray-700 dark:text-gray-300">Mahavira teachings</strong> & 24 <strong className="text-gray-700 dark:text-gray-300">Jain Tirthankaras</strong></span>
+            <div className="flex items-center gap-2.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#FF6D00] shrink-0" />
+              <span>The timeless teachings of Lord Mahavira (<strong className="text-gray-800 dark:text-gray-300 font-bold">Mahavira Teachings</strong>) and the 24 <strong className="text-gray-800 dark:text-gray-300 font-bold">Jain Tirthankaras</strong></span>
             </div>
           </div>
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#FFD54F]" />
-              <span>Reciting the sacred, pure <strong className="text-gray-700 dark:text-gray-300">Navkar Mantra</strong></span>
+          <div className="space-y-2.5">
+            <div className="flex items-center gap-2.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#FFD54F] shrink-0" />
+              <span>Sacred chanting guidelines for the divine <strong className="text-gray-800 dark:text-gray-300 font-bold">Navkar Mantra</strong></span>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#FF6D00]" />
-              <span>Sect differences of <strong className="text-gray-700 dark:text-gray-300">Digambar and Shvetambar</strong> lineages</span>
+            <div className="flex items-center gap-2.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#FF6D00] shrink-0" />
+              <span>Sectarian lineages and mutual respect across <strong className="text-gray-800 dark:text-gray-300 font-bold">Digambar and Shvetambar</strong> traditions</span>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#FFD54F]" />
-              <span>Preserved <strong className="text-gray-700 dark:text-gray-300">Jainism scriptures</strong> and canonical agamas</span>
+            <div className="flex items-center gap-2.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#FFD54F] shrink-0" />
+              <span>Preserved <strong className="text-gray-800 dark:text-gray-300 font-bold">Jainism Scriptures</strong> and verified canonical Agamas</span>
             </div>
           </div>
         </div>
 
-        <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed font-semibold">
-          Additionally, this smart web application tracks historical events detailing <strong className="text-gray-900 dark:text-white">Jain history</strong>, guides you through significant <strong className="text-gray-900 dark:text-white">Jain festivals</strong> and vrats, and integrates an accurate, live <strong className="text-gray-900 dark:text-white">Jain panchang</strong>. All elements are structured with extreme precision, providing a cohesive companion as you ascend your spiritual path.
+        <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed font-semibold">
+          Additionally, this smart spiritual portal details major events in <strong className="text-gray-900 dark:text-white font-bold">Jain History</strong>, reminds you of sacred <strong className="text-gray-900 dark:text-white font-bold">Jain Festivals</strong> and holy Vrats (fasts), and lists an accurate, live <strong className="text-gray-900 dark:text-white font-bold">Jain Panchang</strong>. Every page is tailored with meticulous care to maximize visibility on search results, serving as a unified spiritual companion as you walk your divine path.
         </p>
 
         <div className="mt-6 pt-4 border-t border-gray-200 dark:border-white/5 flex items-center justify-between">
-          <span className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">SEO Index Relevancy V2</span>
-          <span className="text-[10px] text-emerald-500 font-extrabold uppercase tracking-widest">Optimized for Google Crawler</span>
+          <span className="text-[10px] text-[#FF6D00] dark:text-[#FFD54F] uppercase tracking-widest font-black">Jai Jinendra</span>
+          <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold">Developed with Devotion by Samil Jain</span>
         </div>
       </div>
     </div>

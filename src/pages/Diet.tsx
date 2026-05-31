@@ -136,6 +136,196 @@ const RECIPES: Recipe[] = [
       hi: "पर्युषण महापर्व के दिनों में सूक्ष्म जीवों की रक्षा के लिए हरी पत्तियां, सब्जियां और गीली वनस्पति पूरी तरह त्याग दी जाती हैं।"
     },
     image: "https://images.unsplash.com/photo-1601050690597-df056fb4ce78?auto=format&fit=crop&q=80&w=400"
+  },
+  {
+    id: "r4",
+    name: { en: "Rajasthani Ker Sangri Sabji", hi: "शाही मारवाड़ी केर सांगरी" },
+    category: "Festive Special (पारंपरिक भोजन)",
+    time: "40 Mins",
+    ingredients: [
+      "1/2 cup Dried Ker berries (washed & soaked overnight)",
+      "1 cup Sangri beans (boiled)",
+      "2 tbsp Mustard oil or Ghee",
+      "Spices: Fennel seeds (Saunf), carom, asafoetida, dry mango powder (amchur), turmeric, red chili, coriander powder, salt",
+      "No root vegetables or fresh green ginger are used"
+    ],
+    ingredientsHi: [
+      "१/२ कप सूखे केर बेरी (धोकर रातभर भिगोए हुए)",
+      "१ कप सांगरी फली (उबले हुए)",
+      "२ बड़े चम्मच सरसों का तेल या घी",
+      "मसाले: सौंफ, अजवाइन, शुद्ध हींग, अमचूर पाउडर, हल्दी, कुटी लाल मिर्च, पिसा धनिया, नमक"
+    ],
+    instructions: [
+      "Wash ker and sangri multiple times in filtered water to remove sand dust.",
+      "In a traditional wok, heat oil or ghee. Crackle fennel seeds, add a generous pinch of asafoetida.",
+      "Add boiled ker sangri together. Saute gently on medium flame.",
+      "Sprinkle coriander, chili powder, turmeric, salt, and dry mango powder.",
+      "Simmer for 15 minutes with a splash of filtered water until the berries absorb the spiced tanginess."
+    ],
+    instructionsHi: [
+      "केर और सांगरी को धूल मिटाने के लिए ३-४ बार साफ मर्यादित जल से धो लें।",
+      "कड़ाही में तेल या शुद्ध घी गर्म करें। सौंफ तड़काएं और प्रचुर मात्रा में शुद्ध हींग डालें।",
+      "उगले हुए केर और सांगरी डालें। मध्यम आंच पर धीरे-धीरे भूनें।",
+      "धनिया, मिर्च पाउडर, हल्दी, नमक और पर्याप्त अमचूर पाउडर छिड़कें।",
+      "थोड़ा मर्यादित पानी छिड़क कर १५ मिनट के लिए ढककर पकाएं ताकि सांगरी मसालों का तीखा स्वाद सोख ले।"
+    ],
+    tips: {
+      en: "Ker Sangri is a royal desert dry delicacy that stays fresh for days and is perfectly suited for traveling and fasting seasons.",
+      hi: "केर सांगरी एक शाश्वत शाही राजस्थानी व्यंजन है जो कई दिनों तक खराब नहीं होता, अतः यात्रा और व्रत के दिनों के लिए सर्वोत्तम माना जाता है।"
+    },
+    image: "https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&q=80&w=400"
+  },
+  {
+    id: "r5",
+    name: { en: "Crispy Yellow Moong Dal Cheela", hi: "कर्करा पीली मूंगदाल चीला (हेल्दी नाश्ता)" },
+    category: "Daily Satvik (रोज का भोजन)",
+    time: "15 Mins",
+    ingredients: [
+      "1 cup Split yellow Moong dal (soaked for 3 hours)",
+      "1-2 Fresh green chilies",
+      "1/2 inch Grated fresh ginger",
+      "A pinch of Turmeric and Salt",
+      "Ghee for cooking on flat iron griddle"
+    ],
+    ingredientsHi: [
+      "१ कप पीली मूंग दाल (३ घंटे पानी में भिगोई)",
+      "१-२ बारीक कटी हरी मिर्च",
+      "१/२ इंच कद्दूकस की हुई ताजी अदरक",
+      "चुटकी भर हल्दी और नमक",
+      "लोहे के तवे पर चीला सेंकने के लिए शुद्ध गाय का घी"
+    ],
+    instructions: [
+      "Grind the soaked yellow dal into a coarse, smooth flowy batter along with green chilies and grated ginger.",
+      "Beat the batter by hand for 3 minutes to incorporate air, making it fluffy and light.",
+      "Stir in salt and turmeric.",
+      "Pour a ladle of batter over a hot flat iron griddle, spread in spiral rounds.",
+      "Drizzle ghee around borders and cook until golden brown and super crispy. Serve hot with pure mint chutney."
+    ],
+    instructionsHi: [
+      "भीगी हुई मूंग दाल को हरी मिर्च और अदरक के साथ ग्राइंडर में दरदरा पीस लें।",
+      "बैटर को हाथ से ३ मिनट तक अच्छी तरह फेंटें ताकि वह हल्का और हवादार हो जाए।",
+      "स्वादानुसार नमक और हल्दी मिलाएं।",
+      "गर्म तवे पर एक चमचा बैटर डालकर गोलाई में फैलाएं।",
+      "किनारों पर शुद्ध घी लगाएं और सुनहरा व कुरकुरा होने तक दोनों तरफ से अच्छी तरह सेकें। ताजी पुदीना-धनिया चटनी संग परोसें।"
+    ],
+    tips: {
+      en: "This is an instant protein-rich breakfast option that contains zero fermentations or unhealthy root products.",
+      hi: "बिना खमीर उठाए बनने वाला यह एक सुपाच्य प्रोटीन युक्त पौष्टिक नाश्ता है, जिसमें किसी भी कंद का अंश नहीं होता।"
+    },
+    image: "https://images.unsplash.com/photo-1601050690597-df056fb4ce78?auto=format&fit=crop&q=80&w=400"
+  },
+  {
+    id: "r6",
+    name: { en: "Traditional Dal Baati (Panchmel Style)", hi: "पारंपरिक दाल बाती (सात्विक पंचमेल)" },
+    category: "Festive Special (पारंपरिक भोजन)",
+    time: "45 Mins",
+    ingredients: [
+      "2 cups Coarse whole wheat flour (Atta)",
+      "1/2 cup Semolina (Suji)",
+      "1/4 cup Melted cow ghee (for shortening)",
+      "1 cup Mixed lentils (Moong, Toor, Chana)",
+      "Spices: Fennel seeds, carom seeds, ginger, hing, salt, lemon juice"
+    ],
+    ingredientsHi: [
+      "२ कप दरदरा गेहूं का आटा",
+      "१/२ कप महीन सूजी",
+      "१/४ कप गाय का घी (मोयन हेतु)",
+      "१ कप पंचमेल मिक्स दाल",
+      "मसाले: सौंफ, अजवाइन, अदरक, शुद्ध हींग, नमक, नींबू का रस"
+    ],
+    instructions: [
+      "Mix wheat flour, semolina, ghee, carom seeds, and salt. Knead tightly using warm filtered water.",
+      "Shape into round dumplings (Baati). Bake in a clay tandoor or oven until cracks appear on the crust.",
+      "Boil the mixed lentils. Temper with ghee, cumin seeds, grated ginger, and a strong pinch of hing.",
+      "Bath the roasted hot baatis in melted pure ghee until soft.",
+      "Serve the rich ghee baati with thick hot Panchmel Dal."
+    ],
+    instructionsHi: [
+      "गेहूं का आटा, सूजी, मोयन का घी, अजवाइन और नमक को मिला लें। गुनगुने मर्यादित जल की सहायता से कड़ा आटा गूंथ लें।",
+      "मध्यम आकार के गोल गोले (बाती) बनाएं। बाटी कंडे की आंच या आवन पर दरारें आने तक अच्छी तरह सेकें।",
+      "पंचमेल अरहर-मूंग दाल को उबालें। घी में जीरा, बारीक घिसा अदरक और हींग तड़काकर दाल को छौंकें।",
+      "सिकी बाटी को दबाकर पिघले गरम घी में डुबोएं।",
+      "गर्मागर्म घी लगी बाटी को गाढ़ी सात्विक दाल संग परोसें।"
+    ],
+    tips: {
+      en: "Always crush the baked wheat dumplings slightly before dipping in ghee; this helps absorb ghee deeply into core layers.",
+      hi: "सिकी हुई बाटी को हमेशा बीच से हल्का फोड़कर घी में डुबोना चाहिए ताकि घी अंदरूनी परत तक भली-भांति समा जाए।"
+    },
+    image: "https://images.unsplash.com/photo-1601050690597-df056fb4ce78?auto=format&fit=crop&q=80&w=400"
+  },
+  {
+    id: "r7",
+    name: { en: "Aromatic Almond Cardamom Halwa", hi: "शाही बादाम इलायची शीरा" },
+    category: "Festive Special (पारंपरिक भोजन)",
+    time: "20 Mins",
+    ingredients: [
+      "1 cup Sweet almonds (soaked, skins removed & ground)",
+      "1/2 cup Thick cream milk (or almond milk if dairy-free)",
+      "1/2 cup Cow's pure ghee",
+      "2/3 cup Organic cane sugar or Mishri powder",
+      "Spices: Ground green cardamom seeds, saffron strings"
+    ],
+    ingredientsHi: [
+      "१ कप मीठी बादाम (भिगोकर, छिलका उतरे और दरदरे पिसे हुए)",
+      "१/२ कप मलाईदार दूध",
+      "१/२ कप शुद्ध देसी घी",
+      "२/३ कप पिसी मिश्री या गन्ने की खांड",
+      "मसाले: पिसी हरी इलायची, केसर के धागे"
+    ],
+    instructions: [
+      "Soak almonds in warm water, peel off skin and grind into rough thick paste.",
+      "Heat pure ghee in a thick-bottom pan. Fry the almond paste on very low heat.",
+      "Stir constantly for 10-12 minutes until it turns pale pink and releases a warm toasted aroma.",
+      "Pour milk and organic sugar. Simmer until the ghee separates from side borders.",
+      "Stir cardamom powder and saffron. Serve warm during daytime festive treats."
+    ],
+    instructionsHi: [
+      "बादाम को गुनगुने मर्यादित पानी में भिगोकर छिलका उतारें और दरदरा पेस्ट बना लें।",
+      "कड़ाही में शुद्ध देसी घी गर्म करें। बादाम पेस्ट को एकदम धीमी लौ पर भूनना शुरू करें।",
+      "लगातार १०-१२ मिनट चलाएं जब तक कि बादाम का पेस्ट हल्का गुलाबी न हो जाए और घी न छोड़ दे।",
+      "दूध और मिश्री पाउडर मिलाएं। मध्यम आंच पर तब तक पकाएं जब तक सारा शीरा कड़ाही के किनारों को छोड़ने न लगे।",
+      "इलायची पाउडर और केसर छिड़कें। सात्विक प्रसाद तैयार है।"
+    ],
+    tips: {
+      en: "Roasting the almond paste on low flame is the secret to preventing bitterness and obtaining a uniform velvety grain.",
+      hi: "बादाम के शीरे को हमेशा धीमी-मध्यम आंच पर ही सेकें, जिससे वह जले नहीं और उसका दानेदार रेशमी स्वाद खिलकर आये।"
+    },
+    image: "https://images.unsplash.com/photo-1626132647523-66f5bf380027?auto=format&fit=crop&q=80&w=400"
+  },
+  {
+    id: "r8",
+    name: { en: "Refreshing Pearl Guava Chutney", hi: "मर्यादित अमरुद की चटनी" },
+    category: "Daily Satvik (रोज का भोजन)",
+    time: "10 Mins",
+    ingredients: [
+      "2 Fresh ripe white guavas (seeds scrapped check carefully)",
+      "1 cup Fresh mint and coriander leaves",
+      "1-2 Green chilies",
+      "Spices: Cumin powder, rock salt (Sendha Namak), lemon juice"
+    ],
+    ingredientsHi: [
+      "२ ताजे पके अमरुद (बीज भाग निकालकर ध्यान से चेक करें)",
+      "१ कप ताजी पुदीना व धनिया पत्ती",
+      "१-२ कटी हरी मिर्च",
+      "मसाले: भुना जीरा पाउडर, सेंधा नमक, ताजे नींबू का रस"
+    ],
+    instructions: [
+      "Wash guavas, cut in half, scrap the seed cavity (to avoid small worms if any). Slice the flesh.",
+      "In a traditional mechanical stone pestle or grinder, spin guava slices with mint, chilies, cumin powder and salt.",
+      "Grind into a thick tangy savory chutney paste.",
+      "Squeeze fresh lemon juice on top. Serve as a cooling digestive side with rotis or cheelas."
+    ],
+    instructionsHi: [
+      "अमरुद स्वच्छ कर बीच का बीज वाला कठोर हिस्सा निकालकर अलग कर दें। शेष पल्प के छोटे टुकड़े काटें।",
+      "मर्यादित ग्राइंडर या सिलबट्टे में अमरुद, पुदीना, धनिया पत्ती, मिर्च, भुना जीरा और सेंधा नमक मिलाएं।",
+      "चटनी को दरदरा गाढ़ा पीस लें।",
+      "ऊपर से नींबू का रस मिलाएं। चीले या रोटी के साथ एक बेहतरीन सुपाच्य पाचक चटनी।"
+    ],
+    tips: {
+      en: "Guavas are a great replacement for tomatoes when tomatoes are scarce or during specific fasting-oriented grain restricted days.",
+      hi: "अमरुद की चटनी अत्यंत पौष्टिक और पाचक होती है, जिसे सात्विक भोजन के साथ साइड डिश के रूप में परोसा जाता है।"
+    },
+    image: "https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&q=80&w=400"
   }
 ];
 
@@ -181,7 +371,7 @@ export default function DietPage() {
       {/* Tabs */}
       <div className="flex bg-white dark:bg-[#121212] p-1 border border-gray-200/50 dark:border-white/5 rounded-2xl mb-6">
         <button 
-          onClick={() => setActiveTab('rules')}
+          onClick={() => { setActiveTab('rules'); setSelectedRecipe(null); }}
           className={`flex-1 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-colors ${
             activeTab === 'rules' ? 'bg-orange-500 text-white shadow-sm' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-200'
           }`}
@@ -190,7 +380,7 @@ export default function DietPage() {
           {lang === 'en' ? 'Diet Rules' : 'आहार नियम'}
         </button>
         <button 
-          onClick={() => setActiveTab('recipes')}
+          onClick={() => { setActiveTab('recipes'); setSelectedRecipe(null); }}
           className={`flex-1 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-colors ${
             activeTab === 'recipes' ? 'bg-orange-500 text-white shadow-sm' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-200'
           }`}
@@ -199,7 +389,7 @@ export default function DietPage() {
           {lang === 'en' ? 'Recipes' : 'व्यंजन विधि'}
         </button>
         <button 
-          onClick={() => setActiveTab('audit')}
+          onClick={() => { setActiveTab('audit'); setSelectedRecipe(null); }}
           className={`flex-1 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-colors ${
             activeTab === 'audit' ? 'bg-orange-500 text-white shadow-sm' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-200'
           }`}
@@ -247,110 +437,159 @@ export default function DietPage() {
                 : "सूर्यास्त के उपरांत वाष्पीकरण थमने और अंधकार छाने से वायुमंडल में अनगिनत सूक्ष्म कीट व जीवाणु उत्पन्न होते हैं। कृत्रिम प्रकाश या रात्रि में भोजन पकाने या खाने से वे भोजन में समा सकते हैं, जिससे महान जीव हिंसा होती है। अतः रात्रि भोजन त्याज्य है।"}
             </p>
           </div>
+
+          {/* Shastra-based Abhakhsya Guide (Abhakhsya Tyag) */}
+          <div className="p-5 bg-red-500/5 dark:bg-red-500/10 rounded-3xl border border-red-500/20 shadow-sm space-y-4">
+            <div className="flex items-center gap-2.5 text-red-600 dark:text-red-400">
+              <ShieldAlert size={20} />
+              <h2 className="text-base font-black uppercase tracking-wider">{lang === 'en' ? 'The Five Forbidden Categories (Abhakhsya)' : 'पंच उदुम्बर एवं मूल अवगुण त्याग (अभक्ष्य)'}</h2>
+            </div>
+            <div className="text-xs text-gray-650 dark:text-gray-300 font-semibold leading-relaxed space-y-3">
+              <p>
+                {lang === 'en'
+                  ? "According to Digambar Ratnakaranda Shravakachara shastras, an ideal spiritual householder avoids several toxic and highly violent items known as 'Abhakhsya' (un-consumable items):"
+                  : "दिगंबर श्रावकाचार ग्रंथों (जैसे रत्नकरण्ड श्रावकाचार) के अनुसार, आत्मा की पवित्रता और अहिंसा महाव्रत के रक्षार्थ प्रत्येक श्रावक को इन मूल अवगुणों व अभक्ष्य पदार्थों का आजीवन त्याग करना चाहिए:"}
+              </p>
+              <ul className="list-disc list-inside space-y-2">
+                <li>
+                  <strong>{lang === 'en' ? "Honey (Madhu):" : "मधु (शहद) त्याग:"}</strong>{" "}
+                  {lang === 'en'
+                    ? "Collection of honey destroys whole hives with millions of developing sibling bee larvae. Even a tiny droplet represents supreme violence."
+                    : "शहद की एक बूंद प्राप्त करने के लिए भी पूरे छत्ते को निचोड़ा जाता है जिससे लाखों मधुमक्खियों के अंडों, शिशुओं तथा जीवों का तत्क्षण विनाश होता है।"}
+                </li>
+                <li>
+                  <strong>{lang === 'en' ? "Alcohol (Madya):" : "मद्य (शराब/नशा) त्याग:"}</strong>{" "}
+                  {lang === 'en'
+                    ? "Fermentation is a high multiplication process of microscopic bacteria, leading to absolute loss of self-control, reason, and non-violence."
+                    : "मदिरा खमीर उठने की सड़न क्रिया से बनती है जिसमें अनगिनत सम्मूर्छन जीव प्रतिपल पैदा होते हैं, यह आत्म-नियंत्रण व विवेक शून्य कर हिंसक प्रवृत्तियों को जन्म देती है।"}
+                </li>
+                <li>
+                  <strong>{lang === 'en' ? "Five Udambar Fruits:" : "पंच उदुम्बर फल त्याग:"}</strong>{" "}
+                  {lang === 'en'
+                    ? "Fruits belonging to the fig family (Gular, Anjeer, Pipal, Banyan fruit, Pakar) contain visible, active colonies of insects and must be rejected."
+                    : "पीपल, बड़, उमर, कठूमर और पाकर (गूलर व अंजीर आदि) के फलों में त्रस जीव साफ संचरण करते हैं, इसलिए इनका सेवन पूर्ण वर्जित है।"}
+                </li>
+                <li>
+                  <strong>{lang === 'en' ? "Dvidala Dosh (Dairy + Pulses combination):" : "द्विदल दोष (कच्चा दही + दाल संयोग):"}</strong>{" "}
+                  {lang === 'en'
+                    ? "Mixing uncooked/raw pulses (lentils, chickpea flour) with raw curds or milk causes instantaneous, unstoppable bacterial growth. Pulses should be consumed with processed/well-cooked buttermilk if needed."
+                    : "कच्चे दाल के आटे (बेसन) या दालों के साथ कच्चा दूध/दही मिला देने से 'द्विदल' दोष उत्पन्न होता है जिससे असंख्यात त्रस जीव पैदा होने लगते हैं। सदा गर्म मथी गई छाछ के साथ ही मसालेदार कढ़ी आदि लें।"}
+                </li>
+              </ul>
+            </div>
+          </div>
         </div>
       )}
 
       {/* Tab 2: Satvik Recipes */}
       {activeTab === 'recipes' && (
         <div className="space-y-4 animate-in fade-in duration-300">
-          <div className="grid gap-4">
-            {RECIPES.map(recipe => (
-              <div 
-                key={recipe.id}
-                onClick={() => setSelectedRecipe(recipe)}
-                className="bg-white dark:bg-[#121212] rounded-3xl overflow-hidden border border-gray-100 dark:border-white/5 shadow-sm hover:shadow-md cursor-pointer flex group"
-              >
-                <div className="w-1/3 h-32 bg-gray-200 dark:bg-[#1A1A1A] relative shrink-0">
-                  <img src={recipe.image} alt={recipe.name.en} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" referrerPolicy="no-referrer" />
-                </div>
-                <div className="p-4 flex-1 flex flex-col justify-between min-w-0">
-                  <div>
-                    <span className="text-[8px] font-black text-orange-500 uppercase tracking-widest block mb-1">
-                      {recipe.category}
-                    </span>
-                    <h3 className="font-bold text-sm text-gray-800 dark:text-white truncate">
-                      {lang === 'en' ? recipe.name.en : recipe.name.hi}
-                    </h3>
-                  </div>
-                  <div className="flex justify-between items-center text-[10px] text-gray-400 font-bold mt-2">
-                    <span>⏱️ {recipe.time}</span>
-                    <span className="text-orange-500 uppercase tracking-wider font-black">{lang === 'en' ? 'View details' : 'विस्तार से पढ़ें'} →</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Details Dialog overlay */}
-          <AnimatePresence>
-            {selectedRecipe && (
-              <motion.div 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-end justify-center"
-              >
-                <motion.div 
-                  initial={{ y: "100%" }}
-                  animate={{ y: 0 }}
-                  exit={{ y: "100%" }}
-                  className="bg-white dark:bg-[#0d0d0d] w-full max-w-2xl rounded-t-[2.5rem] border-t border-gray-200 dark:border-white/10 shadow-2xl overflow-y-auto max-h-[85vh] p-6 space-y-6"
+          {!selectedRecipe ? (
+            <div className="grid gap-4">
+              {RECIPES.map(recipe => (
+                <div 
+                  key={recipe.id}
+                  onClick={() => setSelectedRecipe(recipe)}
+                  className="bg-white dark:bg-[#121212] rounded-3xl overflow-hidden border border-gray-100 dark:border-white/5 shadow-sm hover:shadow-md cursor-pointer flex group"
                 >
-                  <div className="flex items-center justify-between border-b border-gray-100 dark:border-white/5 pb-4">
+                  <div className="w-1/3 h-32 bg-gray-200 dark:bg-[#1A1A1A] relative shrink-0">
+                    <img src={recipe.image} alt={recipe.name.en} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" referrerPolicy="no-referrer" />
+                  </div>
+                  <div className="p-4 flex-1 flex flex-col justify-between min-w-0">
                     <div>
-                      <span className="text-[8px] font-black tracking-widest text-[#FF6D00] block mb-1 uppercase">JAIN SATVIK DELICACY</span>
-                      <h2 className="text-xl font-display font-black text-gray-900 dark:text-white">
-                        {lang === 'en' ? selectedRecipe.name.en : selectedRecipe.name.hi}
-                      </h2>
+                      <span className="text-[8px] font-black text-orange-500 uppercase tracking-widest block mb-1">
+                        {recipe.category}
+                      </span>
+                      <h3 className="font-bold text-sm text-gray-800 dark:text-white truncate">
+                        {lang === 'en' ? recipe.name.en : recipe.name.hi}
+                      </h3>
                     </div>
-                    <button 
-                      onClick={() => setSelectedRecipe(null)}
-                      className="px-4 py-1.5 bg-gray-100 dark:bg-white/5 text-xs font-bold rounded-full text-gray-500 hover:bg-gray-200"
-                      id="close-recipe-btn"
-                    >
-                      {lang === 'en' ? 'Close' : 'बंद करें'}
-                    </button>
+                    <div className="flex justify-between items-center text-[10px] text-gray-400 font-bold mt-2">
+                      <span>⏱️ {recipe.time}</span>
+                      <span className="text-orange-500 uppercase tracking-wider font-black">{lang === 'en' ? 'View details' : 'विस्तार से पढ़ें'} →</span>
+                    </div>
                   </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            /* Selected Recipe Detail View inside the flowing layout */
+            <div className="bg-white dark:bg-[#121212] rounded-3xl border border-gray-200/50 dark:border-white/5 p-6 shadow-sm space-y-6 animate-in fade-in zoom-in-95 duration-200">
+              <div className="flex items-center justify-between border-b border-gray-100 dark:border-white/5 pb-4">
+                <div>
+                  <span className="text-[8px] font-black tracking-widest text-[#FF6D00] block mb-1 uppercase">JAIN SATVIK DELICACY</span>
+                  <h2 className="text-lg md:text-xl font-display font-black text-gray-900 dark:text-white">
+                    {lang === 'en' ? selectedRecipe.name.en : selectedRecipe.name.hi}
+                  </h2>
+                </div>
+                <button 
+                  onClick={() => setSelectedRecipe(null)}
+                  className="px-4 py-1.5 bg-gray-100 dark:bg-white/5 text-xs font-bold rounded-full text-gray-500 dark:text-gray-300 hover:bg-gray-250 dark:hover:bg-white/10 cursor-pointer transition-colors"
+                >
+                  {lang === 'en' ? '← Back' : '← वापस'}
+                </button>
+              </div>
 
-                  {/* Ingredients */}
-                  <div>
-                    <h4 className="text-xs font-black uppercase text-orange-500 tracking-wider mb-2 flex items-center gap-1.5">
-                      <Utensils size={14} />
-                      {lang === 'en' ? 'Ingredients List' : 'आवश्यक खाद्य सामग्री'}
-                    </h4>
-                    <ul className="text-xs text-gray-700 dark:text-gray-300 font-medium space-y-1.5 list-disc list-inside">
-                      {lang === 'en' 
-                        ? selectedRecipe.ingredients.map((ing, i) => <li key={i}>{ing}</li>)
-                        : selectedRecipe.ingredientsHi.map((ing, i) => <li key={i}>{ing}</li>)
-                      }
-                    </ul>
-                  </div>
+              {/* Optional Recipe Large Image */}
+              {selectedRecipe.image && (
+                <div className="w-full h-48 md:h-64 rounded-2xl overflow-hidden bg-gray-100 dark:bg-white/5">
+                  <img 
+                    src={selectedRecipe.image} 
+                    alt={selectedRecipe.name.en} 
+                    className="w-full h-full object-cover" 
+                    referrerPolicy="no-referrer"
+                  />
+                </div>
+              )}
 
-                  {/* Preparation Instructions */}
-                  <div>
-                    <h4 className="text-xs font-black uppercase text-orange-500 tracking-wider mb-2 flex items-center gap-1.5">
-                      <BookOpen size={14} />
-                      {lang === 'en' ? 'Step-by-step Instructions' : 'बनाने की सरल विधि'}
-                    </h4>
-                    <ol className="text-xs text-gray-600 dark:text-gray-300 font-medium space-y-2 list-decimal list-inside">
-                      {lang === 'en' 
-                        ? selectedRecipe.instructions.map((ins, i) => <li key={i} className="pl-1">{ins}</li>)
-                        : selectedRecipe.instructionsHi.map((ins, i) => <li key={i} className="pl-1">{ins}</li>)
-                      }
-                    </ol>
-                  </div>
+              {/* Ingredients */}
+              <div className="space-y-2">
+                <h4 className="text-xs font-black uppercase text-orange-500 tracking-wider flex items-center gap-1.5">
+                  <Utensils size={14} />
+                  {lang === 'en' ? 'Ingredients List' : 'आवश्यक खाद्य सामग्री'}
+                </h4>
+                <ul className="text-xs text-gray-700 dark:text-gray-300 font-medium space-y-2 list-disc list-inside bg-gray-50 dark:bg-[#1a1a1a]/40 p-4 rounded-2xl border border-gray-100 dark:border-white/5">
+                  {lang === 'en' 
+                    ? selectedRecipe.ingredients.map((ing, i) => <li key={i}>{ing}</li>)
+                    : selectedRecipe.ingredientsHi.map((ing, i) => <li key={i}>{ing}</li>)
+                  }
+                </ul>
+              </div>
 
-                  {/* Satvik Tip box */}
-                  <div className="p-4 bg-orange-500/5 dark:bg-orange-500/10 border border-orange-500/20 rounded-2xl">
-                    <span className="text-[8px] font-black tracking-widest text-[#FF6D00] block mb-1 uppercase">{lang === 'en' ? 'SATVIK JAIN COOKING ADVICE' : 'सात्विक पाक कला रहस्य'}</span>
-                    <p className="text-xs text-gray-700 dark:text-gray-200 font-bold leading-relaxed">
-                      {lang === 'en' ? selectedRecipe.tips.en : selectedRecipe.tips.hi}
-                    </p>
-                  </div>
-                </motion.div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+              {/* Preparation Instructions */}
+              <div className="space-y-2">
+                <h4 className="text-xs font-black uppercase text-orange-500 tracking-wider flex items-center gap-1.5">
+                  <BookOpen size={14} />
+                  {lang === 'en' ? 'Step-by-step Instructions' : 'बनाने की सरल विधि'}
+                </h4>
+                <ol className="text-xs text-gray-650 dark:text-gray-300 font-medium space-y-2.5 list-decimal list-inside bg-gray-50 dark:bg-[#1a1a1a]/40 p-4 rounded-2xl border border-gray-100 dark:border-white/5">
+                  {lang === 'en' 
+                    ? selectedRecipe.instructions.map((ins, i) => <li key={i} className="pl-1 leading-relaxed">{ins}</li>)
+                    : selectedRecipe.instructionsHi.map((ins, i) => <li key={i} className="pl-1 leading-relaxed">{ins}</li>)
+                  }
+                </ol>
+              </div>
+
+              {/* Satvik Tip box */}
+              <div className="p-4 bg-orange-500/5 dark:bg-orange-500/10 border border-orange-500/20 rounded-2xl">
+                <span className="text-[8px] font-black tracking-widest text-[#FF6D00] block mb-1 uppercase">
+                  {lang === 'en' ? 'SATVIK JAIN COOKING ADVICE' : 'सात्विक पाक कला रहस्य'}
+                </span>
+                <p className="text-xs text-gray-700 dark:text-gray-200 font-bold leading-relaxed">
+                  {lang === 'en' ? selectedRecipe.tips.en : selectedRecipe.tips.hi}
+                </p>
+              </div>
+
+              <div className="flex justify-end pt-2">
+                <button 
+                  onClick={() => setSelectedRecipe(null)}
+                  className="px-5 py-2.5 bg-gray-100 dark:bg-white/5 text-xs font-bold rounded-xl text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/10 cursor-pointer transition-colors"
+                >
+                  {lang === 'en' ? 'Back to Recipes List' : 'व्यंजनों की सूची पर वापस जाएँ'}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -445,6 +684,7 @@ export default function DietPage() {
           </div>
         </div>
       )}
+
     </div>
   );
 }

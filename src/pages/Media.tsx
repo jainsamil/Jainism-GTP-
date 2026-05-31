@@ -25,7 +25,21 @@ export default function MediaPage() {
     audiobooks: fallbackMediaData.audiobooks,
   });
   const [loading, setLoading] = useState(true);
+  const [audioError, setAudioError] = useState<string | null>(null);
+  const [audioLoading, setAudioLoading] = useState(false);
+  const [activeUrl, setActiveUrl] = useState<string>('');
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const previousUrlRef = useRef<string>('');
+  const currentTrackRef = useRef<any>(null);
+
+  // Synchronize track reference and activeUrl safely when currentTrack changes
+  useEffect(() => {
+    currentTrackRef.current = currentTrack;
+    if (currentTrack) {
+      setActiveUrl(currentTrack.url);
+      setAudioError(null);
+    }
+  }, [currentTrack]);
 
   useEffect(() => {
     // Initialize with fallback first so user has immediate feedback
@@ -69,28 +83,113 @@ export default function MediaPage() {
     return () => unsubscribe();
   }, []);
 
+  // Setup single Audio instance with event listeners on mount
   useEffect(() => {
-    if (!currentTrack) return;
-    
-    if (!audioRef.current) {
-      audioRef.current = new Audio(currentTrack.url);
-      audioRef.current.onended = () => setIsPlaying(false);
-    } else {
-      audioRef.current.src = currentTrack.url;
-    }
-    
-    if (isPlaying) {
-      audioRef.current.play().catch(e => console.error("Audio play error:", e));
-    } else {
-      audioRef.current.pause();
-    }
+    const audio = new Audio();
+    audioRef.current = audio;
 
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
+    const handlePlay = () => setIsPlaying(true);
+    const handlePause = () => setIsPlaying(false);
+    const handleEnded = () => setIsPlaying(false);
+    const handleLoadStart = () => {
+      setAudioLoading(true);
+      setAudioError(null);
+    };
+    const handleCanPlay = () => {
+      setAudioLoading(false);
+      setAudioError(null);
+    };
+    const handleError = (e: any) => {
+      console.error("Audio element error detected:", e);
+      setAudioLoading(false);
+      
+      const track = currentTrackRef.current;
+      if (track && !audio.src.includes("soundhelix.com")) {
+        setAudioError("Primary audio stream unavailable. Retrying with stable standby source...");
+        
+        // Auto-fallback execution
+        const backups: Record<string, string> = {
+          fb_story_1: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+          fb_story_2: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
+          fb_story_3: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
+          fb_story_4: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3",
+          fb_story_5: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3",
+          fb_story_6: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+          fb_story_7: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
+          fb_story_8: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
+          fb_story_9: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3",
+          fb_story_10: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3",
+          fb_bhajan_1: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3",
+          fb_bhajan_2: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3",
+          fb_bhajan_3: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3",
+          fb_bhajan_4: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3",
+          fb_bhajan_5: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3",
+          fb_bhajan_6: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3",
+          fb_bhajan_7: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3",
+          fb_bhajan_8: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3",
+          fb_bhajan_9: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3",
+          fb_bhajan_10: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3",
+        };
+        const fallbackUrl = backups[track.id] || "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3";
+        
+        setTimeout(() => {
+          // Verify user is still listening to the same track that failed
+          if (currentTrackRef.current && currentTrackRef.current.id === track.id) {
+            console.log("Switching to fallback URL:", fallbackUrl);
+            setActiveUrl(fallbackUrl);
+          }
+        }, 1000);
+      } else {
+        setAudioError("Failed to play track. Please check your internet connection.");
       }
     };
-  }, [currentTrack, isPlaying]);
+
+    audio.addEventListener('play', handlePlay);
+    audio.addEventListener('pause', handlePause);
+    audio.addEventListener('ended', handleEnded);
+    audio.addEventListener('loadstart', handleLoadStart);
+    audio.addEventListener('canplay', handleCanPlay);
+    audio.addEventListener('error', handleError);
+
+    return () => {
+      audio.pause();
+      audio.removeEventListener('play', handlePlay);
+      audio.removeEventListener('pause', handlePause);
+      audio.removeEventListener('ended', handleEnded);
+      audio.removeEventListener('loadstart', handleLoadStart);
+      audio.removeEventListener('canplay', handleCanPlay);
+      audio.removeEventListener('error', handleError);
+      audioRef.current = null;
+    };
+  }, []);
+
+  // Handle URL changes & Play/Pause states securely
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio || !activeUrl) return;
+
+    if (previousUrlRef.current !== activeUrl) {
+      setAudioError(null);
+      audio.src = activeUrl;
+      previousUrlRef.current = activeUrl;
+      audio.load();
+    }
+
+    if (isPlaying) {
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(err => {
+          if (err.name === 'AbortError') {
+            console.log("Playback interrupted by load or pause (expected behavior).");
+          } else {
+            console.error("Audio playback error:", err);
+          }
+        });
+      }
+    } else {
+      audio.pause();
+    }
+  }, [activeUrl, isPlaying]);
 
   const togglePlay = () => {
     setIsPlaying(!isPlaying);
@@ -175,9 +274,18 @@ export default function MediaPage() {
           <div className="flex-1 min-w-0 relative z-10">
             <div className="flex items-center gap-2 text-[#FF8A65] mb-1">
               <span className="text-[9px] font-bold tracking-widest uppercase drop-shadow-[0_0_5px_rgba(255,138,101,0.5)]">Now Playing</span>
+              {audioLoading && (
+                <span className="text-[9px] font-bold bg-[#FF6D00]/20 text-[#FFD54F] px-2 py-0.5 rounded-full flex items-center gap-1 animate-pulse">
+                  <Loader2 size={10} className="animate-spin" /> Load...
+                </span>
+              )}
             </div>
             <h3 className="text-base font-black text-white truncate drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{currentTrack.title}</h3>
-            <p className="text-xs text-gray-400 font-medium truncate">{currentTrack.artist || currentTrack.author || 'Story'} • {currentTrack.duration || `${currentTrack.chapters} chapters`}</p>
+            {audioError ? (
+              <p className="text-xs text-amber-400 font-bold animate-pulse truncate">{audioError}</p>
+            ) : (
+              <p className="text-xs text-gray-400 font-medium truncate">{currentTrack.artist || currentTrack.author || 'Story'} • {currentTrack.duration || `${currentTrack.chapters} chapters`}</p>
+            )}
           </div>
           
           <div className="flex items-center gap-3 relative z-10 shrink-0">

@@ -61,6 +61,7 @@ export default function AagamsPage() {
 
   const [showAiModal, setShowAiModal] = useState(false);
   const [aiTitle, setAiTitle] = useState('');
+  const [adminPassword, setAdminPassword] = useState('');
   const [isAiGenerating, setIsAiGenerating] = useState(false);
   const [aiError, setAiError] = useState('');
 
@@ -156,13 +157,17 @@ export default function AagamsPage() {
   const handleAiGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!aiTitle.trim()) return;
+    if (!adminPassword.trim()) {
+      setAiError(language === 'en' ? 'Admin passcode is required.' : 'प्रशासक पासवर्ड आवश्यक है।');
+      return;
+    }
     setIsAiGenerating(true);
     setAiError('');
     try {
       const response = await fetch('/api/gemini/generate-scripture', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: aiTitle, category: activeCat }),
+        body: JSON.stringify({ title: aiTitle, category: activeCat, adminPassword }),
       });
       const data = await response.json();
       if (response.ok && data.content) {
@@ -174,6 +179,7 @@ export default function AagamsPage() {
         };
         await addDoc(collection(db, 'aagams'), newDoc);
         setAiTitle('');
+        setAdminPassword('');
         setShowAiModal(false);
       } else {
         setAiError(data.error || 'Failed to generate scripture');
@@ -718,6 +724,21 @@ export default function AagamsPage() {
                   placeholder={language === 'en' ? "e.g. आदिनाथ भगवान आरती" : "जैसे: श्री पार्श्वनाथ अष्टक पूजा"}
                   value={aiTitle}
                   onChange={(e) => setAiTitle(e.target.value)}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:border-saffron/50 outline-none text-sm font-bold"
+                  required
+                  disabled={isAiGenerating}
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-black text-saffron uppercase tracking-wider mb-2">
+                  {language === 'en' ? 'Admin Access Passcode' : 'प्रशासक पासवर्ड (Admin Passcode)'}
+                </label>
+                <input
+                  type="password"
+                  placeholder={language === 'en' ? "Enter Access Passcode" : "पासकोड दर्ज करें"}
+                  value={adminPassword}
+                  onChange={(e) => setAdminPassword(e.target.value)}
                   className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:border-saffron/50 outline-none text-sm font-bold"
                   required
                   disabled={isAiGenerating}

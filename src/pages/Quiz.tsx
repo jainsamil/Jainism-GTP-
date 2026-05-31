@@ -126,7 +126,19 @@ export default function QuizPage() {
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'quiz'), (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setQuestions(data.length > 0 ? data : FALLBACK_QUIZZES);
+      
+      const merged = [...data];
+      FALLBACK_QUIZZES.forEach(seed => {
+        const isDuplicate = data.some((d: any) => 
+          (d.q?.en && d.q.en === seed.q?.en) || 
+          (d.q?.hi && d.q.hi === seed.q?.hi)
+        );
+        if (!isDuplicate) {
+          merged.push(seed);
+        }
+      });
+
+      setQuestions(merged);
       setLoading(false);
     }, (error) => {
       console.error('Error fetching quiz:', error);

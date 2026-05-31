@@ -107,7 +107,7 @@ export default function TirthankarsPage() {
   const navigate = useNavigate();
   const [activeCat, setActiveCat] = useState<'Past' | 'Present' | 'Future' | 'Videh'>('Present');
   const [search, setSearch] = useState('');
-  const { language: lang } = useLanguage();
+  const { language: lang, toggleLanguage } = useLanguage();
   const [selectedT, setSelectedT] = useState<any>(null);
   const [tirthankars, setTirthankars] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -117,7 +117,19 @@ export default function TirthankarsPage() {
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'tirthankars'), (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setTirthankars(data.length > 0 ? data : FALLBACK_TIRTHANKARS);
+      
+      const merged = [...data];
+      FALLBACK_TIRTHANKARS.forEach(seed => {
+        const isDuplicate = data.some((d: any) => 
+          (d.name?.en && d.name.en === seed.name?.en) || 
+          (d.name?.hi && d.name.hi === seed.name?.hi)
+        );
+        if (!isDuplicate) {
+          merged.push(seed);
+        }
+      });
+
+      setTirthankars(merged);
       setLoading(false);
     }, (error) => {
       console.error('Error fetching tirthankars:', error);
@@ -215,15 +227,26 @@ export default function TirthankarsPage() {
   return (
     <div className="min-h-full p-6 pb-26 bg-gradient-to-b from-gray-50 to-gray-100 dark:from-[#050505] dark:to-[#0d0d0d] text-gray-900 dark:text-gray-100 transition-colors duration-300">
       
-      {/* Header */}
-      <header className="flex items-center gap-4 mb-6 pt-4">
-        <button onClick={() => navigate(-1)} className="p-2 rounded-full bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 shadow-sm hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">
-          <ArrowLeft size={22} className="text-gray-700 dark:text-gray-300" />
+      {/* Header with Language Translation Toggle */}
+      <header className="flex justify-between items-center gap-4 mb-6 pt-4 w-full">
+        <div className="flex items-center gap-4">
+          <button onClick={() => navigate(-1)} className="p-2 rounded-full bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 shadow-sm hover:bg-gray-100 dark:hover:bg-white/10 transition-colors cursor-pointer">
+            <ArrowLeft size={22} className="text-gray-700 dark:text-gray-300" />
+          </button>
+          <h1 className="text-2xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] flex items-center gap-2 drop-shadow-none dark:drop-shadow-[0_0_10px_rgba(255,109,0,0.4)]">
+            <Library className="text-[#FF6D00] shrink-0" size={26} />
+            {lang === 'en' ? '24 TIRTHANKARS DIRECTORY' : '२४ तीर्थंकर भगवंत निर्देशिका'}
+          </h1>
+        </div>
+        
+        {/* Module Specific Language Selection Toggle */}
+        <button
+          onClick={toggleLanguage}
+          className="px-4 py-2 bg-white/80 dark:bg-[#121212]/80 backdrop-blur-md border border-gray-200 dark:border-white/10 rounded-full flex items-center justify-center text-[#FF8A65] hover:bg-gray-100 dark:hover:bg-[#1A1A1A] transition-all shadow-sm font-bold text-xs cursor-pointer"
+          title="Toggle Language"
+        >
+          {lang === 'en' ? 'हिंदी (HI)' : 'English (EN)'}
         </button>
-        <h1 className="text-2xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] flex items-center gap-2 drop-shadow-none dark:drop-shadow-[0_0_10px_rgba(255,109,0,0.4)]">
-          <Library className="text-[#FF6D00] shrink-0" size={26} />
-          {lang === 'en' ? '24 TIRTHANKARS DIRECTORY' : '२४ तीर्थंकर भगवंत निर्देशिका'}
-        </h1>
       </header>
 
       {/* Intro Box */}
@@ -278,54 +301,62 @@ export default function TirthankarsPage() {
         ))}
       </div>
 
-      {/* Simple, standard list of Tirthankaras */}
-      <div className="space-y-4">
+      {/* Premium responsive grid card layout for 24 Tirthankars */}
+      <div className="w-full">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-12 text-gray-400">
             <Loader2 className="animate-spin mb-3 text-[#FF6D00]" size={28} />
             <p className="font-semibold text-xs tracking-widest uppercase">Loading Directory...</p>
           </div>
         ) : filtered.length > 0 ? (
-          filtered.map(t => (
-            <div 
-              key={t.id} 
-              onClick={() => setSelectedT(t)}
-              className="bg-white dark:bg-[#111] border border-gray-100 dark:border-white/5 rounded-3xl p-5 hover:border-[#FF6D00]/40 hover:shadow-md transition-all duration-300 flex items-center gap-4 cursor-pointer"
-            >
-              {/* Micro-image preview */}
-              <div className="w-14 h-14 rounded-2xl overflow-hidden border border-gray-100 dark:border-white/10 shrink-0 shadow-sm">
-                <img 
-                  src={getTirthankarPhoto(t.id)} 
-                  alt={t.name?.en} 
-                  className="w-full h-full object-cover" 
-                  referrerPolicy="no-referrer" 
-                />
-              </div>
-
-              {/* Data text Details */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] px-2 py-0.5 rounded-md bg-orange-50 dark:bg-[#FF6D00]/10 text-orange-600 dark:text-[#FFD54F] font-black">
-                    #{t.number}
-                  </span>
-                  <h3 className="font-display font-black text-sm text-gray-900 dark:text-white truncate">
-                    {lang === 'en' ? t.name?.en : t.name?.hi}
-                  </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 justify-center items-stretch w-full max-w-7xl mx-auto">
+            {filtered.map(t => (
+              <div 
+                key={t.id} 
+                onClick={() => setSelectedT(t)}
+                className="group bg-white dark:bg-[#121212]/80 backdrop-blur-md border border-gray-200/50 dark:border-white/5 rounded-3xl overflow-hidden hover:border-[#FF6D00]/50 dark:hover:border-[#FFD54F]/50 hover:shadow-[0_8px_30px_rgba(255,109,0,0.15)] transition-all duration-500 cursor-pointer flex flex-col justify-between hover:-translate-y-1 relative"
+              >
+                {/* Card Image and Saffron overlay */}
+                <div className="h-40 relative w-full overflow-hidden shrink-0">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-10" />
+                  <img 
+                    src={getTirthankarPhoto(t.id)} 
+                    alt={t.name?.en} 
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                    referrerPolicy="no-referrer" 
+                  />
+                  <div className="absolute top-4 left-4 z-20 flex items-center gap-1.5">
+                    <span className="text-[10px] uppercase font-black tracking-wider px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-sm text-[#FFD54F] border border-white/10">
+                      #{t.number}
+                    </span>
+                    <span className="text-[9px] uppercase font-black tracking-wider px-2.5 py-1 rounded-full bg-orange-600 text-white border border-orange-500">
+                      {lang === 'en' ? t.kaal : (t.kaal === 'Past' ? 'भूतकाल' : t.kaal === 'Present' ? 'वर्तमान' : 'भविष्य')}
+                    </span>
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-2 mt-1 text-xs text-gray-500 dark:text-gray-400 font-medium">
-                  <Star size={11} className="text-yellow-500 shrink-0" />
-                  <span className="truncate">
-                    {lang === 'en' ? 'Symbol:' : 'चिह्न:'} {lang === 'en' ? t.symbol?.en : t.symbol?.hi}
-                  </span>
+                {/* Card Body content */}
+                <div className="p-5 flex-1 flex flex-col justify-between">
+                  <div>
+                    <h3 className="font-display font-black text-base text-gray-900 dark:text-white group-hover:text-[#FF6D00] dark:group-hover:text-[#FFD54F] transition-colors leading-snug">
+                      {lang === 'en' ? t.name?.en : t.name?.hi}
+                    </h3>
+                    <div className="flex items-center gap-2 mt-2 px-3 py-1.5 rounded-xl bg-orange-50/50 dark:bg-orange-500/5 border border-orange-100/30 dark:border-orange-500/10 text-xs text-gray-600 dark:text-gray-400 font-semibold w-fit">
+                      <Star size={13} className="text-yellow-500 fill-yellow-500" />
+                      <span>
+                        {lang === 'en' ? 'Symbol:' : 'चिह्न:'} <strong className="text-gray-900 dark:text-gray-200">{lang === 'en' ? t.symbol?.en : t.symbol?.hi}</strong>
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-4 pt-3 border-t border-gray-100 dark:border-white/5 flex items-center justify-between text-xs font-bold text-orange-600 dark:text-[#FFD54F]">
+                    <span>{lang === 'en' ? 'View Divine Details' : 'दर्शन व गाथा जानें'}</span>
+                    <span className="text-sm font-black group-hover:translate-x-1.5 transition-transform">→</span>
+                  </div>
                 </div>
               </div>
-
-              <span className="text-xs font-black text-[#FF6D00] hover:translate-x-1 transition-transform shrink-0">
-                →
-              </span>
-            </div>
-          ))
+            ))}
+          </div>
         ) : (
           <div className="text-center py-12 rounded-3xl bg-white dark:bg-[#121212] border border-gray-100 dark:border-white/5 text-gray-500 text-xs font-bold tracking-wider">
             {lang === 'en' ? 'No Tirthankars found matching search.' : 'खोज से मिलता जुलता कोई तीर्थंकर नहीं मिला।'}
@@ -335,8 +366,8 @@ export default function TirthankarsPage() {
 
       {/* Structural Details View Overlay Modal */}
       {selectedT && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-300">
-          <div className="bg-white dark:bg-[#121212] rounded-t-[2.5rem] sm:rounded-[2.5rem] w-full max-w-lg overflow-hidden shadow-2xl border border-gray-200 dark:border-white/10 animate-in slide-in-from-bottom-full sm:zoom-in-95 duration-300 max-h-[90vh] flex flex-col relative">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300">
+          <div className="bg-white dark:bg-[#121212] rounded-[2.5rem] w-full max-w-lg overflow-hidden shadow-2xl border border-gray-200 dark:border-white/10 animate-in zoom-in-95 duration-300 max-h-[90vh] flex flex-col relative">
             <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-[#FF6D00]/5 to-transparent pointer-events-none" />
             
             {/* Top Bar Banner with High-Quality Idol Statue Photo background */}
