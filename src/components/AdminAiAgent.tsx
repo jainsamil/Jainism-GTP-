@@ -95,7 +95,7 @@ export default function AdminAiAgent() {
     try {
       if (userImg) {
         addLog("[AI MASTER] Initiating multimodal visual/text parsing...");
-        addLog("[AI MASTER] Processing details with Gemini 3.5 Flash server...");
+        addLog("[AI MASTER] Processing details with Jainism Wisdom Server...");
       } else {
         addLog("[AI MASTER] Analyzing natural language command...");
       }
@@ -174,7 +174,7 @@ export default function AdminAiAgent() {
     setWriteSuccess(false);
     setWriteError('');
     setGeneratedPayload(null);
-    addLog(`[AI LAB] Contacting server Gemini API to construct beautiful data for "${selectedCollection}" ...`);
+    addLog(`[AI LAB] Contacting server Jainism Wisdom Engine to construct beautiful data for "${selectedCollection}" ...`);
 
     try {
       const response = await fetch('/api/admin/ai-generate-data', {
@@ -196,7 +196,7 @@ export default function AdminAiAgent() {
       }
     } catch (e: any) {
       console.error(e);
-      setWriteError(e.message || 'Error generating content with Gemini');
+      setWriteError(e.message || 'Error generating content with Jainism Wisdom Engine');
       addLog(`[ERROR] AI schema construction failed: ${e.message}`);
     } finally {
       setIsGenerating(false);

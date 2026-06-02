@@ -4,6 +4,7 @@ import { ArrowLeft, BookOpen, Volume2, Sparkles, Heart, HeartOff, HelpCircle, Ch
 import { useLanguage } from '../contexts/LanguageContext';
 import { motion, AnimatePresence } from 'motion/react';
 import { BHAKTAMAR_DATA, ShlokaData } from '../data/bhaktamarData';
+import SectionAiAgent from '../components/SectionAiAgent';
 
 export default function BhaktamarPage() {
   const navigate = useNavigate();
@@ -461,6 +462,7 @@ export default function BhaktamarPage() {
           )}
         </div>
       </div>
+      <SectionAiAgent section="bhaktamar" />
     </div>
   );
 }

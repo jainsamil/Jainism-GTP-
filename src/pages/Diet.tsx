@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, BookOpen, ShieldAlert, CheckCircle2, Apple, Utensils, HelpCircle, Heart, Search, ListFilter, AlertTriangle } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { motion, AnimatePresence } from 'motion/react';
+import SectionAiAgent from '../components/SectionAiAgent';
 
 interface Recipe {
   id: string;
@@ -685,6 +686,7 @@ export default function DietPage() {
         </div>
       )}
 
+      <SectionAiAgent section="diet" />
     </div>
   );
 }

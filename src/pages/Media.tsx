@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { db } from '../firebase';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { fallbackMediaData } from '../data/mediaData';
+import SectionAiAgent from '../components/SectionAiAgent';
 
 const tabs: { id: 'stories' | 'bhajans' | 'audiobooks', label: string, icon: any }[] = [
   { id: 'stories', label: 'Stories', icon: PlaySquare },
@@ -422,6 +423,7 @@ export default function MediaPage() {
           </div>
         )}
       </div>
+      <SectionAiAgent section="media" />
     </div>
   );
 }

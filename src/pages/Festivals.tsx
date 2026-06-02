@@ -5,6 +5,7 @@ import { db } from '../firebase';
 import { collection, onSnapshot, query } from 'firebase/firestore';
 import { useLanguage } from '../contexts/LanguageContext';
 import { festivalsData as FALLBACK_FESTIVALS } from '../data/festivalsData';
+import SectionAiAgent from '../components/SectionAiAgent';
 
 export default function FestivalsPage() {
   const navigate = useNavigate();
@@ -207,6 +208,7 @@ export default function FestivalsPage() {
           </div>
         )}
       </div>
+      <SectionAiAgent section="festivals" />
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { User, Camera, Instagram, Award, Settings, LogOut, BookOpen, ShieldAlert, Info, Edit2, Check, X, Download } from 'lucide-react';
+import { User, Camera, Instagram, Award, Settings, LogOut, BookOpen, ShieldAlert, Info, Edit2, Check, X, Download, Compass, Code, Milestone, Sparkles, Database } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { useAuth } from '../contexts/AuthContext';
@@ -16,6 +16,7 @@ export default function ProfilePage() {
   const [bio, setBio] = useState('Lead Developer & Spiritual Seeker');
   const [isEditing, setIsEditing] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
+  const [aboutTab, setAboutTab] = useState<'origin' | 'tech' | 'features'>('origin');
   const [showInstallModal, setShowInstallModal] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -181,57 +182,286 @@ export default function ProfilePage() {
 
       {/* About Us Modal */}
       {showAbout && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
-          <div className="bg-white dark:bg-[#121212] border border-gray-200 dark:border-white/10 rounded-[2rem] p-6 w-full max-w-md shadow-xl dark:shadow-[0_0_40px_rgba(255,109,0,0.2)] relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-[#FF6D00]/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-300 overflow-y-auto">
+          <div className="bg-white dark:bg-[#121212] border border-gray-200 dark:border-white/10 rounded-[2.5rem] p-6 w-full max-w-xl shadow-xl dark:shadow-[0_0_50px_rgba(255,109,0,0.25)] relative overflow-hidden my-8">
+            <div className="absolute top-0 right-0 w-48 h-48 bg-[#FF6D00]/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
             
-            <div className="flex justify-between items-center mb-6 relative z-10">
-              <h2 className="text-2xl font-display font-black text-gray-900 dark:text-white flex items-center gap-2">
-                <Info className="text-[#FF6D00]" />
-                ABOUT US
-              </h2>
+            <div className="flex justify-between items-center mb-6 relative z-10 border-b border-gray-100 dark:border-white/5 pb-4">
+              <div>
+                <h2 className="text-2xl font-display font-black text-gray-900 dark:text-white flex items-center gap-2 tracking-wide">
+                  <Sparkles className="text-[#FF6D00]" />
+                  JAINISM GPT
+                </h2>
+                <div className="text-[10px] uppercase tracking-widest text-[#FF6D00] dark:text-[#FFD54F] font-black mt-1">
+                  Version 2.4.0 (Divinity Edition)
+                </div>
+              </div>
               <button 
                 onClick={() => setShowAbout(false)}
-                className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-white/10 transition-colors"
+                className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-white/10 transition-colors"
               >
                 ✕
               </button>
             </div>
+
+            {/* Segmented Controller inside the About Us Dialog */}
+            <div className="flex border-b border-gray-100 dark:border-white/5 mb-6 overflow-x-auto gap-2 pb-2 scrollbar-none relative z-10">
+              <button
+                onClick={() => setAboutTab('origin')}
+                className={`flex items-center gap-1.5 px-3.5 py-2 text-[10px] font-black uppercase tracking-wider rounded-xl transition-all shrink-0 ${
+                  aboutTab === 'origin'
+                    ? 'bg-gradient-to-r from-[#FF6D00] to-[#FF9100] text-white shadow-sm'
+                    : 'text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 bg-gray-50 dark:bg-white/5'
+                }`}
+              >
+                <Compass size={12} />
+                About & Genesis
+              </button>
+              
+              <button
+                onClick={() => setAboutTab('features')}
+                className={`flex items-center gap-1.5 px-3.5 py-2 text-[10px] font-black uppercase tracking-wider rounded-xl transition-all shrink-0 ${
+                  aboutTab === 'features'
+                    ? 'bg-gradient-to-r from-[#FF6D00] to-[#FF9100] text-white shadow-sm'
+                    : 'text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 bg-gray-50 dark:bg-white/5'
+                }`}
+              >
+                <Milestone size={12} />
+                Feature Almanac
+              </button>
+
+              <button
+                onClick={() => setAboutTab('tech')}
+                className={`flex items-center gap-1.5 px-3.5 py-2 text-[10px] font-black uppercase tracking-wider rounded-xl transition-all shrink-0 ${
+                  aboutTab === 'tech'
+                    ? 'bg-gradient-to-r from-[#FF6D00] to-[#FF9100] text-white shadow-sm'
+                    : 'text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 bg-gray-50 dark:bg-white/5'
+                }`}
+              >
+                <Code size={12} />
+                Tech & Stack
+              </button>
+            </div>
             
-            <div className="space-y-4 text-gray-600 dark:text-gray-300 relative z-10">
-              <div className="p-4 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5">
-                <h3 className="text-[#FF6D00] dark:text-[#FFD54F] font-bold mb-2">Jainism GPT</h3>
-                <p className="text-sm leading-relaxed">
-                  A comprehensive platform for spiritual seekers to explore Jainism through AI-powered chat, multimedia, knowledge base, and interactive learning.
-                </p>
-              </div>
+            <div className="space-y-4 text-gray-600 dark:text-gray-300 relative z-10 max-h-[350px] overflow-y-auto pr-1">
               
-              <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5">
-                  <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest block mb-1">Created By</span>
-                  <span className="font-bold text-gray-900 dark:text-white">Samil Jain</span>
+              {/* TAB 1: ORIGIN & GENESIS DETAILS */}
+              {aboutTab === 'origin' && (
+                <div className="space-y-4 animate-in fade-in duration-200">
+                  <div className="p-4 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5">
+                    <h4 className="text-gray-900 dark:text-white font-black text-xs uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                      <Compass size={14} className="text-[#FF6D00]" />
+                      Main Motive & Core Need
+                    </h4>
+                    <p className="text-xs leading-relaxed font-semibold text-gray-500 dark:text-gray-400">
+                      We identified a critical need for an authentic, structured, and completely secure autonomous digital ecosystem for exploring pure Jain canonical wisdom. **Jainism GPT** is built for daily Swadhyay, ensuring pristine traditional knowledge remains untampered and freely accessible to everyone worldwide, regardless of geographical distance or lineage constraints.
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3.5">
+                    <div className="p-3.5 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5">
+                      <span className="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest block mb-1">Developer</span>
+                      <span className="font-extrabold text-sm text-gray-900 dark:text-white block">Samil Jain</span>
+                    </div>
+                    <div className="p-3.5 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5">
+                      <span className="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest block mb-1">Creation Year</span>
+                      <span className="font-extrabold text-sm text-[#FF6D00] dark:text-[#FFD54F] block">2024</span>
+                    </div>
+                  </div>
+
+                  <div className="p-4 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5">
+                    <table className="text-xs font-semibold w-full text-gray-500 dark:text-gray-400">
+                      <tbody>
+                        <tr className="border-b border-gray-100 dark:border-white/5">
+                          <td className="py-2 text-gray-400 font-bold">Official Launch Date:</td>
+                          <td className="py-2 text-gray-900 dark:text-white text-right font-black">25 July 2024</td>
+                        </tr>
+                        <tr className="border-b border-gray-100 dark:border-white/5">
+                          <td className="py-2 text-gray-400 font-bold">Auspicious Launch Day:</td>
+                          <td className="py-2 text-[#FF6D00] dark:text-[#FFD54F] text-right font-bold">Thursday (गुरुवार)</td>
+                        </tr>
+                        <tr>
+                          <td className="py-2 text-gray-400 font-bold">Primary Target:</td>
+                          <td className="py-2 text-[#00C853] dark:text-[#69F0AE] text-right font-black">Universal Spiritual Swadhyay</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
-                <div className="p-4 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5">
-                  <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest block mb-1">Version</span>
-                  <span className="font-bold text-gray-900 dark:text-white">1.0.0</span>
+              )}
+
+              {/* TAB 2: ACTIVATED FEATURES ALMANAC */}
+              {aboutTab === 'features' && (
+                <div className="space-y-4 animate-in fade-in duration-200">
+                  <div className="p-4 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5">
+                    <h4 className="text-gray-900 dark:text-white font-black text-xs uppercase tracking-wider mb-3.5 flex items-center gap-1.5 text-[#FF6D00]">
+                      <Milestone size={14} />
+                      Explain Features One by One (काम और विवरण)
+                    </h4>
+                    
+                    <div className="space-y-4 text-xs font-semibold">
+                      <div className="p-3 bg-gray-100/50 dark:bg-white/5 rounded-xl border border-gray-200/50 dark:border-white/5">
+                        <div className="font-extrabold text-[#FF6D00] text-[13px] mb-1">1. Autonomous AI Jain Chatbot</div>
+                        <p className="text-gray-500 dark:text-gray-400 font-medium leading-relaxed">
+                          <strong className="text-gray-800 dark:text-gray-300">काम (Function):</strong> Spiritual doubts resolution & canonical companion guide.
+                          <br />
+                          <strong className="text-gray-800 dark:text-gray-300">विवरण (Description):</strong> Lets users ask questions about deep Jain philosophy, rules, and daily habits. The AI scans theological references to construct authentic scriptural answers, aiding pure self-motivated Swadhyay.
+                        </p>
+                      </div>
+
+                      <div className="p-3 bg-gray-100/50 dark:bg-white/5 rounded-xl border border-gray-200/50 dark:border-white/5">
+                        <div className="font-extrabold text-[#FF6D00] text-[13px] mb-1">2. Divine Pathshala (Chapters & Quizzes)</div>
+                        <p className="text-gray-500 dark:text-gray-400 font-medium leading-relaxed">
+                          <strong className="text-gray-800 dark:text-gray-300">काम (Function):</strong> Educational moral reading & self-assessment loops.
+                          <br />
+                          <strong className="text-gray-800 dark:text-gray-300">विवरण (Description):</strong> Guides users through beautiful slides on Jain pillars, moral scriptures, historical Tirthankaras information, and ends with live high-contrast multiple-choice quizzes to evaluate spiritual growth.
+                        </p>
+                      </div>
+
+                      <div className="p-3 bg-gray-100/50 dark:bg-white/5 rounded-xl border border-gray-200/50 dark:border-white/5">
+                        <div className="font-extrabold text-[#FF6D00] text-[13px] mb-1">3. Jain Scriptures & Agamas Library</div>
+                        <p className="text-gray-500 dark:text-gray-400 font-medium leading-relaxed">
+                          <strong className="text-gray-800 dark:text-gray-200">काम (Function):</strong> Interactive digitised scripture browser.
+                          <br />
+                          <strong className="text-gray-800 dark:text-gray-300">विवरण (Description):</strong> Implements a responsive read-only search and look-up index of traditional compilations like the Tattvartha Sutra, Bhaktamar Stotra, and Namokar Mantra, providing standard daily chanting verses.
+                        </p>
+                      </div>
+
+                      <div className="p-3 bg-gray-100/50 dark:bg-white/5 rounded-xl border border-gray-200/50 dark:border-white/5">
+                        <div className="font-extrabold text-[#FF6D00] text-[13px] mb-1">4. Live India Time, Panchang & Vrat Clock</div>
+                        <p className="text-gray-500 dark:text-gray-400 font-medium leading-relaxed">
+                          <strong className="text-gray-800 dark:text-gray-300">काम (Function):</strong> Auspicious timing calculation & reminders.
+                          <br />
+                          <strong className="text-gray-800 dark:text-gray-300">विवरण (Description):</strong> Features an active clock synced securely to India Standard Time (IST) indicating tithis, historical events, fasting calendars (such as Pachkhan and Parvadhiraj Paryushan), and daily spiritually uplifting thoughts.
+                        </p>
+                      </div>
+
+                      <div className="p-3 bg-gray-100/50 dark:bg-white/5 rounded-xl border border-gray-200/50 dark:border-white/5">
+                        <div className="font-extrabold text-[#FF6D00] text-[13px] mb-1">5. Jaap (Chanting) Counter</div>
+                        <p className="text-gray-500 dark:text-gray-400 font-medium leading-relaxed">
+                          <strong className="text-gray-800 dark:text-gray-300">काम (Function):</strong> Devotional chanting assistance tracker.
+                          <br />
+                          <strong className="text-gray-800 dark:text-gray-300">विवरण (Description):</strong> Tracks Navkar Mantra chanting with interactive click actions, sound triggers, and a persistent stats history system stored safely to track your focus streaks.
+                        </p>
+                      </div>
+
+                      <div className="p-3 bg-gray-100/50 dark:bg-white/5 rounded-xl border border-gray-200/50 dark:border-white/5">
+                        <div className="font-extrabold text-[#FF6D00] text-[13px] mb-1">6. Tapas (Fasting) Tracker</div>
+                        <p className="text-gray-500 dark:text-gray-400 font-medium leading-relaxed">
+                          <strong className="text-gray-800 dark:text-gray-300">काम (Function):</strong> Penance logging & wellness diary.
+                          <br />
+                          <strong className="text-gray-800 dark:text-gray-300">विवरण (Description):</strong> Allows devotees to keep record books of standard fast days like Upvas, Ekasana, Biyasana, or Ayambil with customized feedback notes on inner peace and mindfulness.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-              
-              <div className="p-4 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5">
-                <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest block mb-1">Creation Date</span>
-                <span className="font-bold text-gray-900 dark:text-white">March 2026</span>
-              </div>
-              
-              <div className="p-4 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5">
-                <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest block mb-2">Key Features</span>
-                <ul className="text-sm space-y-2">
-                  <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-[#FF6D00]"></span> AI Chat Assistant</li>
-                  <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-[#FF6D00]"></span> Multimedia (Bhajans, Stories)</li>
-                  <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-[#FF6D00]"></span> Jain Knowledge Base</li>
-                  <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-[#FF6D00]"></span> Pathshala & Quizzes</li>
-                </ul>
+              )}
+
+              {/* TAB 3: ADVANCED TECHNOLOGY STACK */}
+              {aboutTab === 'tech' && (
+                <div className="space-y-4 animate-in fade-in duration-200">
+                  <div className="p-4 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5">
+                    <h4 className="text-gray-900 dark:text-white font-black text-xs uppercase tracking-wider mb-3 flex items-center gap-1.5 text-blue-600 dark:text-blue-400">
+                      <Code size={14} />
+                      Programming Language & UI Framework
+                    </h4>
+                    
+                    <div className="space-y-4 text-xs font-semibold">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-gray-100 dark:border-white/5 pb-2.5 gap-1">
+                        <div>
+                          <p className="text-gray-900 dark:text-white font-black">TypeScript 5.x</p>
+                          <p className="text-gray-400 font-medium text-[10px]">Strict Static Type Safety</p>
+                        </div>
+                        <p className="text-gray-400 dark:text-gray-500 sm:text-right text-[11px] leading-relaxed max-w-sm">
+                          Features strict interfaces and type protection across all scriptures, profiles, and pathshala assets to protect against any unexpected runtime failures or system halts.
+                        </p>
+                      </div>
+
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-gray-100 dark:border-white/5 pb-2.5 gap-1">
+                        <div>
+                          <p className="text-gray-900 dark:text-white font-black">React 18</p>
+                          <p className="text-gray-400 font-medium text-[10px]">Dynamic Hook & Context States</p>
+                        </div>
+                        <p className="text-gray-400 dark:text-gray-500 sm:text-right text-[11px] leading-relaxed max-w-sm">
+                          Utilizes native functional state machines and custom contexts to power instant user-interface renders, route controls, active quizzes, and sound playbacks.
+                        </p>
+                      </div>
+
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-gray-100 dark:border-white/5 pb-2.5 gap-1">
+                        <div>
+                          <p className="text-gray-900 dark:text-white font-black">Tailwind CSS</p>
+                          <p className="text-gray-400 font-medium text-[10px]">Utility Utility-First Design Engine</p>
+                        </div>
+                        <p className="text-gray-400 dark:text-gray-500 sm:text-right text-[11px] leading-relaxed max-w-sm">
+                          Adopts customized responsive layouts styled in pristine saffron hues, containing unified spacing rhythms and beautiful, glare-free dark / light mode transitions.
+                        </p>
+                      </div>
+
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                        <div>
+                          <p className="text-gray-900 dark:text-white font-black">Vite Bundler</p>
+                          <p className="text-gray-400 font-medium text-[10px]">High-efficiency Build Compiler</p>
+                        </div>
+                        <p className="text-gray-400 dark:text-gray-500 sm:text-right text-[11px] leading-relaxed max-w-sm">
+                          Triggers specialized tree-shaking and compiles typescript files to optimize browser memory and load times.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-4 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5">
+                    <h4 className="text-gray-900 dark:text-white font-black text-xs uppercase tracking-wider mb-3 flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
+                      <Database size={14} />
+                      Data Storage & Spiritual AI Intelligence
+                    </h4>
+                    
+                    <div className="space-y-4 text-xs font-semibold">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-gray-100 dark:border-white/5 pb-2.5 gap-1">
+                        <div>
+                          <p className="text-gray-900 dark:text-white font-black">Jainism GPT Secure Cloud</p>
+                          <p className="text-gray-400 font-medium text-[10px]">Persistent NoSQL Database Connection</p>
+                        </div>
+                        <p className="text-gray-400 dark:text-gray-500 sm:text-right text-[11px] leading-relaxed max-w-sm">
+                          Provides stable, remote cloud record-keeping for your high-score quizzes, customized notes, profile data, jaap counters, and vrat plans.
+                        </p>
+                      </div>
+
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                        <div>
+                          <p className="text-gray-900 dark:text-white font-black">Jainism Wisdom Engine V5</p>
+                          <p className="text-gray-400 font-medium text-[10px]">Deep Philosophical Context Processing</p>
+                        </div>
+                        <p className="text-gray-400 dark:text-gray-500 sm:text-right text-[11px] leading-relaxed max-w-sm">
+                          Acts as the cognitive core to evaluate scripture documents and reply back to spiritual queries with genuine scriptures context server-side.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+            </div>
+
+            {/* Redirection to Samil's Instagram */}
+            <div className="mt-8 pt-4 border-t border-gray-100 dark:border-white/5 flex flex-col items-center gap-3 relative z-10">
+              <p className="text-[10px] text-gray-400 dark:text-gray-500 tracking-wider text-center font-bold uppercase select-none">
+                Connect Directly with the Developer of Jainism GPT
+              </p>
+              <a 
+                href="https://instagram.com/_officialsamiljain_" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-pink-500 via-red-500 to-amber-500 text-white rounded-2xl text-xs font-black tracking-wider shadow-md hover:shadow-lg hover:scale-[1.02] transform transition-all uppercase"
+              >
+                <Instagram size={16} />
+                Follow @_officialsamiljain_
+              </a>
+              <div className="text-[9px] uppercase tracking-widest text-[#FF6D00] dark:text-[#FFD54F] font-black mt-2 select-none">
+                Jai Jinendra - जय जिनेन्द्र
               </div>
             </div>
+
           </div>
         </div>
       )}

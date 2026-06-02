@@ -16,8 +16,8 @@ import {
 } from 'firebase/firestore';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
-
 import { useLanguage } from '../contexts/LanguageContext';
+import SectionAiAgent from '../components/SectionAiAgent';
 
 export default function PathshalaPage() {
   const { theme } = useTheme();
@@ -1826,6 +1826,7 @@ export default function PathshalaPage() {
           </div>
         </div>
       )}
+      <SectionAiAgent section="pathshala" />
     </div>
   );
 }

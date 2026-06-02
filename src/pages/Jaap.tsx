@@ -3,6 +3,7 @@ import { ArrowLeft, RotateCcw, Volume2, VolumeX, Sparkles, Award, Play, Pause, C
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { motion, AnimatePresence } from 'motion/react';
+import SectionAiAgent from '../components/SectionAiAgent';
 
 const MANTRAS = [
   { id: 'navkar', text: 'नमोकार महामंत्र', enText: 'Navkar Mahamantra', full: 'णमो अरिहंताणं णमो सिद्धाणं णमो आयरियाणं णमो उवज्झायाणं णमो लोए सव्वसाहूणं। ऐसो पंचणमोयारो सव्वपावप्पणासणो मंगलाणं च सव्वेसिं पडमम हवई मंगलम।' },
@@ -372,6 +373,8 @@ export default function JaapPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <SectionAiAgent section="jaap" />
     </div>
   );
 }

@@ -3,6 +3,7 @@ import { Landmark, Clock, ArrowLeft, Search, Filter, MapPin, Globe } from 'lucid
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { historyData, HeritageItem } from '../data/historyData';
+import SectionAiAgent from '../components/SectionAiAgent';
 
 export default function HistoryPage() {
   const { language } = useLanguage();
@@ -311,6 +312,7 @@ export default function HistoryPage() {
           </div>
         </div>
       )}
+      <SectionAiAgent section="history" />
     </div>
   );
 }

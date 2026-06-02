@@ -3,6 +3,7 @@ import { HelpCircle, CheckCircle2, XCircle, RefreshCcw, Award, Flame, ArrowLeft,
 import { cn } from '../lib/utils';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
+import SectionAiAgent from '../components/SectionAiAgent';
 import { db } from '../firebase';
 import { collection, onSnapshot, addDoc } from 'firebase/firestore';
 
@@ -343,6 +344,8 @@ export default function QuizPage() {
             : (language === 'hi' ? 'परिणाम देखें' : 'VIEW RESULTS')}
         </button>
       )}
+
+      <SectionAiAgent section="quiz" />
     </div>
   );
 }

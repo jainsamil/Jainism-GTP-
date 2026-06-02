@@ -4,6 +4,7 @@ import { cn } from '../lib/utils';
 import { db } from '../firebase';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { FALLBACK_VICHAARS, getDeterministicVichaar } from '../data/vichaarData';
+import SectionAiAgent from '../components/SectionAiAgent';
 
 export default function VichaarPage() {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -176,6 +177,7 @@ export default function VichaarPage() {
           <Share2 size={28} className="group-hover:drop-shadow-[0_0_8px_rgba(130,177,255,0.8)]" />
         </button>
       </div>
+      <SectionAiAgent section="vichaar" />
     </div>
   );
 }

@@ -6,6 +6,7 @@ import { collection, onSnapshot, query } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { tirthankarData } from '../data/tirthankars';
+import SectionAiAgent from '../components/SectionAiAgent';
 
 // Panch Kalyanaka Tithis for 24 Tirthankaras
 const KALYANAK_DATES: Record<string, { n: string; hi: string; tithi: string; hiTithi: string }[]> = {
@@ -458,6 +459,7 @@ export default function TirthankarsPage() {
         </div>
       )}
 
+      <SectionAiAgent section="tirthankars" />
     </div>
   );
 }

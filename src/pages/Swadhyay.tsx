@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, BookOpen, ScrollText, Calendar, Plus, Save, Trash2, Edit2, CheckCircle2, FileText, Bookmark, Target, Timer, Play, Pause, RotateCcw, Sparkles } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { motion, AnimatePresence } from 'motion/react';
+import SectionAiAgent from '../components/SectionAiAgent';
 
 interface SwadhyayLog {
   id: string;
@@ -571,6 +572,7 @@ export default function SwadhyayPage() {
           </div>
         )}
       </div>
+      <SectionAiAgent section="swadhyay" />
     </div>
   );
 }

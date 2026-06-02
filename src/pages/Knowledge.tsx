@@ -11,6 +11,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 import { knowledgeData as FALLBACK_KNOWLEDGE } from '../data/knowledgeBase';
 import { livingGuideData, LivingGuideCategory } from '../data/livingGuide';
+import SectionAiAgent from '../components/SectionAiAgent';
 
 const IconMap: Record<string, any> = {
   Home,
@@ -137,7 +138,7 @@ export default function KnowledgePage() {
     setLogs(prev => [...prev, `[COMMAND] Instruction: "${currentPrompt}"`]);
 
     try {
-      setLogs(prev => [...prev, "[AI MASTER] Contacting Gemini 3.5 Flash server for content structuring..."]);
+      setLogs(prev => [...prev, "[AI MASTER] Contacting Jainism Wisdom Server for content structuring..."]);
       
       const response = await fetch('/api/admin/nlp-agent-execute', {
         method: 'POST',
@@ -609,7 +610,7 @@ export default function KnowledgePage() {
                 {isProcessing && (
                   <div className="flex items-center gap-2 text-amber-500 italic animate-pulse">
                     <Loader2 size={12} className="animate-spin" />
-                    <span>Gemini AI is parsing details, creating structured schema, and pushing to Firebase...</span>
+                    <span>Jainism Wisdom Engine is parsing details, creating structured schema, and pushing to Firebase...</span>
                   </div>
                 )}
                 <div ref={terminalEndRef} />
@@ -653,12 +654,13 @@ export default function KnowledgePage() {
                   </div>
                 </div>
               </form>
-            </div>
-          )}
-        </div>
-      )}
-
-    </div>
-  );
-}
+             </div>
+           )}
+         </div>
+       )}
+ 
+      <SectionAiAgent section="knowledge" />
+     </div>
+   );
+ }
 

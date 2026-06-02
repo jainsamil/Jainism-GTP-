@@ -6,6 +6,7 @@ import { db } from '../firebase';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { lineageData, LineageNode } from '../data/lineageData';
 import { cn } from '../lib/utils';
+import SectionAiAgent from '../components/SectionAiAgent';
 
 const FALLBACK_SAINTS = [
   {
@@ -492,6 +493,7 @@ export default function SaintsPage() {
         </div>
       )}
 
+      <SectionAiAgent section="saints" />
     </div>
   );
 }

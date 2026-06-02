@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   MessageSquare, BookOpen, Users, GraduationCap, 
-  Library, ScrollText, Calendar, Quote, 
+  Library, ScrollText, Calendar, Quote,
   PlaySquare, Landmark, HelpCircle, PartyPopper,
   Disc, Navigation, Flame, FileText, Heart, Utensils,
   Sparkles
@@ -15,6 +15,23 @@ export default function HomePage() {
   const [settings, setSettings] = useState({ quizEnabled: true, mediaEnabled: true });
   const [vichaars, setVichaars] = useState<Vichaar[]>(FALLBACK_VICHAARS);
   const [dailyVichaar, setDailyVichaar] = useState<Vichaar>(FALLBACK_VICHAARS[0]);
+  const [indiaTime, setIndiaTime] = useState('');
+  
+  useEffect(() => {
+    const updateClock = () => {
+      const options: Intl.DateTimeFormatOptions = {
+        timeZone: 'Asia/Kolkata',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+      };
+      setIndiaTime(new Date().toLocaleTimeString('en-US', options));
+    };
+    updateClock();
+    const interval = setInterval(updateClock, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     const unsubVichaars = onSnapshot(collection(db, 'vichaar'), (snapshot) => {
@@ -71,23 +88,49 @@ export default function HomePage() {
     <div className="min-h-full p-6 pt-16 pb-24">
       <header className="text-center mb-6 relative flex justify-center items-center">
         <div>
-          <h1 className="text-4xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] tracking-tight drop-shadow-[0_0_15px_rgba(255,109,0,0.5)]">
+          <h1 className="text-4xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] tracking-tight drop-shadow-[0_0_15px_rgba(255,109,0,0.3)]">
             JAINISM GPT
           </h1>
-          <p className="text-[10px] text-[#FF8A65] mt-2 font-bold tracking-[0.2em] uppercase drop-shadow-[0_0_5px_rgba(255,138,101,0.5)]">Divine Wisdom • By Samil Jain</p>
+          <p className="text-[10px] text-[#FF8A65] mt-2 font-bold tracking-[0.2em] uppercase">Divine Wisdom • By Samil Jain</p>
         </div>
       </header>
 
-      <Link to="/vichaar" className="block mb-8 bg-white/80 dark:bg-[#121212]/80 backdrop-blur-xl rounded-3xl p-6 text-gray-900 dark:text-white border border-gray-200 dark:border-white/10 shadow-sm dark:shadow-[0_0_30px_rgba(255,109,0,0.15)] relative overflow-hidden group hover:border-[#FF6D00]/50 transition-all duration-500">
+      <Link to="/vichaar" className="block mb-8 bg-white/80 dark:bg-[#121212]/80 backdrop-blur-xl rounded-3xl p-5 text-gray-900 dark:text-white border border-gray-200 dark:border-white/10 shadow-sm dark:shadow-[0_0_30px_rgba(255,109,0,0.15)] relative overflow-hidden group hover:border-[#FF6D00]/50 transition-all duration-300">
         <div className="absolute top-0 right-0 w-40 h-40 bg-[#FF6D00]/10 dark:bg-[#FF6D00]/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-[#FF6D00]/20 dark:group-hover:bg-[#FF6D00]/40 group-hover:scale-150 transition-all duration-700" />
         <div className="relative z-10">
-          <div className="flex items-center gap-2 mb-3 opacity-90">
-            <Quote size={16} className="text-[#FF6D00] dark:text-[#FFD54F] drop-shadow-none dark:drop-shadow-[0_0_5px_rgba(255,213,79,0.8)]" />
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#FF6D00] dark:text-[#FFD54F] drop-shadow-none dark:drop-shadow-[0_0_5px_rgba(255,213,79,0.5)]">Daily Vichaar (Thought of the Day)</span>
+          {/* Inline header layout: Title on left, beautifully downsized clock on right */}
+          <div className="flex items-center justify-between gap-4 mb-3 border-b border-gray-150 dark:border-white/5 pb-2.5">
+            <div className="flex items-center gap-2">
+              <Quote size={15} className="text-[#FF6D00] dark:text-[#FFD54F] shrink-0" />
+              <span className="text-[10px] font-black uppercase tracking-[0.18em] text-[#FF6D00] dark:text-[#FFD54F]">
+                Daily Vichaar (Thought of the Day)
+              </span>
+            </div>
+
+            {/* Extremely compact, non-intrusive live IST clock */}
+            <div className="flex items-center gap-1.5 px-2.5 py-0.5 bg-[#FF6D00]/5 dark:bg-white/5 border border-[#FF6D00]/10 dark:border-white/10 rounded-full shrink-0 select-none">
+              <span className="relative flex h-1.5 w-1.5 shrink-0">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-600"></span>
+              </span>
+              <span className="text-[10px] font-mono font-black text-gray-800 dark:text-gray-300 tracking-wider">
+                {indiaTime || '00:00:00 AM'}
+              </span>
+              <span className="text-[8px] font-black uppercase text-gray-400 dark:text-gray-500 tracking-wider hidden sm:inline">IST</span>
+            </div>
           </div>
-          <p className="text-xl font-bold leading-snug mb-2 text-gray-900 dark:text-white drop-shadow-none dark:drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">"{dailyVichaar.hi}"</p>
-          <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">"{dailyVichaar.en}"</p>
-          <div className="mt-3 text-[10px] uppercase font-black tracking-widest text-[#FFD54F]">Source: {dailyVichaar.source}</div>
+
+          <div>
+            <p className="text-base sm:text-lg font-bold leading-snug mb-1 text-gray-900 dark:text-white drop-shadow-none dark:drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+              "{dailyVichaar.hi}"
+            </p>
+            <p className="text-xs text-gray-650 dark:text-gray-400 font-medium leading-relaxed italic">
+              "{dailyVichaar.en}"
+            </p>
+            <div className="mt-2 text-[9px] uppercase font-black tracking-widest text-[#FFD54F]">
+              Source: <span className="text-gray-500 dark:text-gray-400 font-bold">{dailyVichaar.source}</span>
+            </div>
+          </div>
         </div>
       </Link>
 
@@ -122,7 +165,7 @@ export default function HomePage() {
         </p>
 
         <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed font-semibold mb-4">
-          Conceived and developed for the global community by <strong className="text-[#FF6D00] dark:text-[#FFD54F] font-black">Samil Jain</strong> (often known simply as <strong className="text-gray-900 dark:text-white font-bold">Samil</strong>), this platform is specifically optimized to provide accurate <strong className="text-gray-900 dark:text-white font-bold">Jainism Questions and Answers</strong>. Inside, you will discover curated spiritual resources covering:
+          Conceived and developed for the global community by <strong className="text-[#FF6D00] dark:text-[#FFD54F] font-black">Samil Jain</strong>, this platform is specifically optimized to provide accurate <strong className="text-gray-900 dark:text-white font-bold">Jainism Questions and Answers</strong>. Inside, you will discover curated spiritual resources covering:
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-semibold text-gray-600 dark:text-gray-400 mb-6 pl-2">
@@ -160,9 +203,9 @@ export default function HomePage() {
           Additionally, this smart spiritual portal details major events in <strong className="text-gray-900 dark:text-white font-bold">Jain History</strong>, reminds you of sacred <strong className="text-gray-900 dark:text-white font-bold">Jain Festivals</strong> and holy Vrats (fasts), and lists an accurate, live <strong className="text-gray-900 dark:text-white font-bold">Jain Panchang</strong>. Every page is tailored with meticulous care to maximize visibility on search results, serving as a unified spiritual companion as you walk your divine path.
         </p>
 
-        <div className="mt-6 pt-4 border-t border-gray-200 dark:border-white/5 flex items-center justify-between">
-          <span className="text-[10px] text-[#FF6D00] dark:text-[#FFD54F] uppercase tracking-widest font-black">Jai Jinendra</span>
-          <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold">Developed with Devotion by Samil Jain</span>
+        <div className="mt-8 pt-4 border-t border-gray-200 dark:border-white/5 flex items-center justify-between">
+          <span className="text-[10px] text-[#FF6D00] dark:text-[#FFD54F] uppercase tracking-[0.2em] font-black">Jai Jinendra - जय जिनेन्द्र</span>
+          <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold select-none">Developed with Devotion by Samil Jain</span>
         </div>
       </div>
     </div>

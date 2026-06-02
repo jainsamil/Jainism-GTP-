@@ -4,7 +4,8 @@ import {
   Send, Sparkles, Loader2, Mic, Image as ImageIcon, Volume2, VolumeX, 
   Brain, Search, BookOpen, X, Plus, Camera, File, Lightbulb, Telescope, 
   Globe, ArrowLeft, FileText, Menu, Trash2, MessageSquare, PlusCircle, 
-  LogOut, ShieldAlert, User, ShieldCheck
+  LogOut, ShieldAlert, User, ShieldCheck, Languages, Compass, Music,
+  Cpu, RefreshCw, Zap, CheckCircle2, Sliders, Activity, Eye, ClipboardCheck
 } from 'lucide-react';
 import Markdown from 'react-markdown';
 import { cn } from '../lib/utils';
@@ -45,17 +46,86 @@ export default function ChatPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [showSmartTools, setShowSmartTools] = useState(false);
   const [selectedFile, setSelectedFile] = useState<{ data: string, mimeType: string, url?: string, name: string, isImage: boolean } | null>(null);
-  const [activeContext, setActiveContext] = useState<'think' | 'research' | 'study' | 'web' | null>(null);
+  const [activeContext, setActiveContext] = useState<'think' | 'research' | 'study' | 'web' | 'sutra' | 'muhurat' | 'chanting' | 'anekantavada' | 'verification' | null>(null);
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [speechError, setSpeechError] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  // New High-Level System Controls (Locked dynamically to the latest upgrade model)
+  const [selectedModel, setSelectedModel] = useState<'gemini-3.5-flash' | 'gemini-flash-latest' | 'gemini-3.1-pro-preview'>('gemini-flash-latest');
+  const [toolsTab, setToolsTab] = useState<'modes' | 'dhyana'>('modes');
+  const [breathPhase, setBreathPhase] = useState<'in' | 'hold' | 'out' | null>(null);
+  const [breathTimer, setBreathTimer] = useState<number>(0);
+  const [latencyStatus, setLatencyStatus] = useState<string>('Connected');
+
+  // Breathing loop effect for dynamic Pranayama (Breath Timer)
+  useEffect(() => {
+    let interval: any;
+    if (breathPhase) {
+      interval = setInterval(() => {
+        setBreathTimer((prev) => {
+          if (prev <= 1) {
+            // Cycle phases: 4s IN, 4s HOLD, 4s OUT
+            if (breathPhase === 'in') {
+              setBreathPhase('hold');
+              return 4;
+            } else if (breathPhase === 'hold') {
+              setBreathPhase('out');
+              return 4;
+            } else {
+              setBreathPhase('in');
+              return 4;
+            }
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } else {
+      setBreathTimer(0);
+    }
+    return () => clearInterval(interval);
+  }, [breathPhase]);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const docInputRef = useRef<HTMLInputElement>(null);
   const chatRef = useRef<any>(null);
+
+  // Synthesizes a beautiful traditional brass temple gong sound using Web Audio API
+  const playTempleGong = () => {
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const now = ctx.currentTime;
+      
+      // Beautiful layered brass frequency cluster
+      const frequencies = [293.66, 440.00, 587.33, 659.25]; // D4, A4, D5, E5
+      const gains = [0.4, 0.2, 0.15, 0.1];
+
+      frequencies.forEach((freq, idx) => {
+        const osc = ctx.createOscillator();
+        const gainNode = ctx.createGain();
+        
+        osc.type = idx === 1 ? 'triangle' : 'sine';
+        osc.frequency.setValueAtTime(freq, now);
+        
+        gainNode.gain.setValueAtTime(gains[idx], now);
+        // Exponential decay for metal sustain finish
+        gainNode.gain.exponentialRampToValueAtTime(0.001, now + 2.5);
+        
+        osc.connect(gainNode);
+        gainNode.connect(ctx.destination);
+        
+        osc.start(now);
+        osc.stop(now + 2.5);
+      });
+    } catch (e) {
+      console.error("Audio context sound failed:", e);
+    }
+  };
 
   // Subscribe to user chats from Firestore
   useEffect(() => {
@@ -252,9 +322,12 @@ export default function ChatPage() {
     setShowSmartTools(false);
   };
 
-  const setContext = (ctx: 'think' | 'research' | 'study' | 'web') => {
+  const setContext = (ctx: 'think' | 'research' | 'study' | 'web' | 'sutra' | 'muhurat' | 'chanting' | 'anekantavada' | 'verification' | null) => {
     setActiveContext(ctx);
     setShowSmartTools(false);
+    if (ctx === 'chanting') {
+      playTempleGong();
+    }
   };
 
   const startListening = () => {
@@ -347,9 +420,14 @@ export default function ChatPage() {
       }
 
       let finalPrompt = textToSend || 'Analyze this.';
-      if (contextToSend === 'think') finalPrompt = `[Context: Please think deeply and provide a comprehensive, detailed analysis] ${finalPrompt}`;
-      if (contextToSend === 'research') finalPrompt = `[Context: Provide historical context and scriptural references (Aagams)] ${finalPrompt}`;
-      if (contextToSend === 'study') finalPrompt = `[Context: Explain this concept as if you are teaching a student in a Jain Pathshala, breaking it down simply] ${finalPrompt}`;
+      if (contextToSend === 'think') finalPrompt = `[Context: Please think deeply and provide an advanced philosophical reasoning with high-level references] ${finalPrompt}`;
+      if (contextToSend === 'research') finalPrompt = `[Context: Provide precise traditional historical context and direct scriptural references from historical Jain Agamas] ${finalPrompt}`;
+      if (contextToSend === 'study') finalPrompt = `[Context: Explain this moral concept or question step-by-step like a divine Pathshala lesson designed for a clear understanding, breaking it down cleanly with sub-headings] ${finalPrompt}`;
+      if (contextToSend === 'sutra') finalPrompt = `[Context: Decode and translate ancient Sanskrit or Prakrit scriptures, verses, or mantras. Provide word-by-word meaning, pronunciation, elegant Hindi and English translations, and spiritual significance] ${finalPrompt}`;
+      if (contextToSend === 'muhurat') finalPrompt = `[Context: Provide authentic advice on tithi calculations, historical fasting schedules, Pachkhan rules, and daily spiritually uplifting ritual steps from Jain scriptures] ${finalPrompt}`;
+      if (contextToSend === 'chanting') finalPrompt = `[Context: Spiritual chanting assistance. Provide chanting guides, benefits of the specified mantra, proper pronunciation, and recommendations on chanting count and speed] ${finalPrompt}`;
+      if (contextToSend === 'anekantavada') finalPrompt = `[Context: Analyze this metaphysical/spiritual question using the supreme Jain theory of Anekantavada & Syadvada. Dissect it with multiple Canonical standpoints (Nayas), specifically: 1. Dravyarthika Naya (Substantive standpoint), 2. Paryayarthika Naya (Modal standpoint), and other relevant linguistic/logical perspectives, highlighting the synthesis of contradictions] ${finalPrompt}`;
+      if (contextToSend === 'verification') finalPrompt = `[Context: Strictly verify and cross-reference this spiritual doubt or practice against standard authentic Jain canonical texts/Agamas (Siddhant Shastra). Quote exact verses, sutras, or gathas if possible (under standard Digambaras/Shvetambaras traditions) with their original sources and structural cross-checks as references] ${finalPrompt}`;
 
       newParts.push({ text: finalPrompt });
 
@@ -364,7 +442,7 @@ export default function ChatPage() {
       }
 
       const responseStream = await ai.models.generateContentStream({
-        model: 'gemini-2.5-flash', // Automatically updated to latest high performance flash model
+        model: selectedModel,
         contents,
         config
       });
@@ -382,6 +460,7 @@ export default function ChatPage() {
           return loadedMsgs;
         });
       }
+      playTempleGong();
     } catch (error) {
       console.error('Error sending message:', error);
       setMessages((prev) => [
@@ -391,18 +470,18 @@ export default function ChatPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [input, isLoading, selectedFile, activeContext, messages, currentSessionId]);
+  }, [input, isLoading, selectedFile, activeContext, messages, currentSessionId, selectedModel]);
 
   useEffect(() => {
-    if (!chatRef.current) {
-      chatRef.current = ai.chats.create({
-        model: 'gemini-2.5-flash',
-        config: {
-          systemInstruction: 'You are a knowledgeable, respectful, and insightful expert on Jainism. You provide accurate information about Jain philosophy, history, Tirthankaras, Agamas, ethics (Ahimsa, Anekantavada, Aparigraha), and practices. Answer questions clearly, compassionately, and objectively. Start your first response with "Jai Jinendra!" if appropriate.',
-        },
-      });
-    }
+    chatRef.current = ai.chats.create({
+      model: selectedModel,
+      config: {
+        systemInstruction: 'You are a knowledgeable, respectful, and insightful expert on Jainism. You provide accurate information about Jain philosophy, history, Tirthankaras, Agamas, ethics (Ahimsa, Anekantavada, Aparigraha), and practices. Answer questions clearly, compassionately, and objectively. Start your first response with "Jai Jinendra!" if appropriate.',
+      },
+    });
+  }, [selectedModel]);
 
+  useEffect(() => {
     if (initialPrompt && !isLoading && messages.length === 0) {
       handleSend(initialPrompt);
       navigate(location.pathname, { replace: true, state: {} });
@@ -659,75 +738,329 @@ export default function ChatPage() {
       <footer className="shrink-0 relative w-full bg-white/90 dark:bg-[#0A0A0A]/90 backdrop-blur-2xl border-t border-gray-200 dark:border-white/10 p-4 pb-safe z-40 shadow-[0_-10px_30px_rgba(0,0,0,0.05)] dark:shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
         {/* Smart Tools overlay */}
         {showSmartTools && (
-          <div className="absolute bottom-full left-0 w-full bg-white/95 dark:bg-[#121212]/95 backdrop-blur-3xl rounded-t-[2rem] shadow-[0_-20px_50px_rgba(0,0,0,0.1)] dark:shadow-[0_-20px_50px_rgba(0,0,0,0.8)] p-6 z-50 border-t border-gray-200 dark:border-white/10 animate-in slide-in-from-bottom-4">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-black text-gray-900 dark:text-white tracking-wide">SMART TOOLS</h3>
-              <button onClick={() => setShowSmartTools(false)} className="p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-white/10 rounded-full transition-colors">
-                <X size={24} />
+          <div className="absolute bottom-[108%] left-4 right-4 w-[calc(100%-2rem)] max-w-lg mx-auto bg-white/98 dark:bg-[#080808]/98 backdrop-blur-3xl rounded-[2.5rem] shadow-[0_25px_60px_rgba(255,109,0,0.25)] border-2 border-[#FF6D00]/40 p-5 z-50 animate-in fade-in zoom-in-95 slide-in-from-bottom-6 duration-300">
+            <div className="flex justify-between items-center mb-4 pb-2.5 border-b border-gray-100 dark:border-white/5">
+              <div>
+                <h3 className="text-sm font-black text-[#FF6D00] uppercase tracking-wider flex items-center gap-1.5">
+                  <Sparkles size={16} className="text-[#FFD54F] animate-pulse" />
+                  Jain Wisdom Engine Co-Pilot (स्मार्ट टूल्स)
+                </h3>
+                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mt-0.5">High-Level Spiritual Swadhyay Helpers</p>
+              </div>
+              <button 
+                onClick={() => setShowSmartTools(false)} 
+                className="w-7 h-7 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-white/10 rounded-full text-gray-400 hover:text-[#FF6D00] transition-colors text-sm font-black"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Smart Tools Tabs */}
+            <div className="flex gap-1.5 bg-gray-100 dark:bg-white/5 p-1 rounded-2xl mb-4 border border-gray-200/50 dark:border-white/10">
+              <button
+                onClick={() => setToolsTab('modes')}
+                className={cn(
+                  "flex-1 py-1.5 text-[10px] font-black uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-1.5",
+                  toolsTab === 'modes' 
+                    ? "bg-gradient-to-r from-[#FF6D00] to-[#FF8A65] text-white shadow-md shadow-[#FF6D00]/25" 
+                    : "text-gray-500 hover:text-gray-900 dark:hover:text-white"
+                )}
+              >
+                <Sliders size={12} /> Spiritual Modes
+              </button>
+              <button
+                onClick={() => setToolsTab('dhyana')}
+                className={cn(
+                  "flex-1 py-1.5 text-[10px] font-black uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-1.5",
+                  toolsTab === 'dhyana' 
+                    ? "bg-gradient-to-r from-[#FF6D00] to-[#FF8A65] text-white shadow-md shadow-[#FF6D00]/25" 
+                    : "text-gray-500 hover:text-gray-900 dark:hover:text-white"
+                )}
+              >
+                <Brain size={12} /> Dhyana Room
               </button>
             </div>
             
-            <div className="grid grid-cols-3 gap-4 mb-8">
-              <button onClick={() => { cameraInputRef.current?.click(); setShowSmartTools(false); }} className="flex flex-col items-center gap-3 p-4 rounded-3xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 hover:border-[#FF6D00]/50 hover:bg-[#FF6D00]/10 transition-all shadow-sm dark:shadow-[0_0_15px_rgba(0,0,0,0.5)] group">
-                <Camera className="text-[#FF8A65] group-hover:drop-shadow-[0_0_8px_rgba(255,138,101,0.4)] dark:group-hover:drop-shadow-[0_0_8px_rgba(255,138,101,0.8)] transition-all" size={28} />
-                <span className="text-[10px] font-bold text-gray-500 dark:text-gray-300 tracking-widest group-hover:text-gray-900 dark:group-hover:text-white">CAMERA</span>
-              </button>
-              <button onClick={() => { fileInputRef.current?.click(); setShowSmartTools(false); }} className="flex flex-col items-center gap-3 p-4 rounded-3xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 hover:border-[#FF6D00]/50 hover:bg-[#FF6D00]/10 transition-all shadow-sm dark:shadow-[0_0_15px_rgba(0,0,0,0.5)] group">
-                <ImageIcon className="text-[#FF8A65] group-hover:drop-shadow-[0_0_8px_rgba(255,138,101,0.4)] dark:group-hover:drop-shadow-[0_0_8px_rgba(255,138,101,0.8)] transition-all" size={28} />
-                <span className="text-[10px] font-bold text-gray-500 dark:text-gray-300 tracking-widest group-hover:text-gray-900 dark:group-hover:text-white">PHOTOS</span>
-              </button>
-              <button onClick={() => { docInputRef.current?.click(); setShowSmartTools(false); }} className="flex flex-col items-center gap-3 p-4 rounded-3xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 hover:border-[#FF6D00]/50 hover:bg-[#FF6D00]/10 transition-all shadow-sm dark:shadow-[0_0_15px_rgba(0,0,0,0.5)] group">
-                <File className="text-[#FF8A65] group-hover:drop-shadow-[0_0_8px_rgba(255,138,101,0.4)] dark:group-hover:drop-shadow-[0_0_8px_rgba(255,138,101,0.8)] transition-all" size={28} />
-                <span className="text-[10px] font-bold text-gray-500 dark:text-gray-300 tracking-widest group-hover:text-gray-900 dark:group-hover:text-white">FILES</span>
-              </button>
-            </div>
-            
-            <div className="space-y-3">
-              <button onClick={() => setActiveContext('think')} className="w-full flex items-center gap-4 p-3 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/5 hover:border-[#FF6D00]/30 hover:bg-[#FF6D00]/5 dark:hover:bg-white/10 transition-all text-left group">
-                <div className="w-12 h-12 rounded-2xl bg-[#FF6D00]/10 flex items-center justify-center shrink-0 group-hover:bg-[#FF6D00]/20 transition-colors border border-[#FF6D00]/20">
-                  <Lightbulb className="text-[#FF8A65] group-hover:drop-shadow-[0_0_8px_rgba(255,138,101,0.4)] dark:group-hover:drop-shadow-[0_0_8px_rgba(255,138,101,0.8)]" size={24} />
-                </div>
+            {/* TAB CONTENT: SPIRITUAL MODES */}
+            {toolsTab === 'modes' && (
+              <div className="space-y-4 animate-in fade-in duration-200">
+                {/* Multimedia Attachments */}
                 <div>
-                  <div className="font-bold text-gray-900 dark:text-white text-sm mb-0.5 tracking-wide">THINK LONGER</div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">Apply deep analytical search to your prompt</div>
+                  <span className="text-[9px] font-black uppercase text-[#FF6D00]/85 tracking-widest block mb-2">Multimedia Attachments</span>
+                  <div className="grid grid-cols-3 gap-2">
+                    <button 
+                      onClick={() => { cameraInputRef.current?.click(); setShowSmartTools(false); }}
+                      className="flex items-center justify-center gap-1.5 py-2 px-1 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 hover:border-[#FF6D00]/50 hover:bg-[#FF6D00]/10 hover:scale-[1.01] transition-all text-[11px] font-bold text-gray-700 dark:text-gray-300 shadow-sm"
+                    >
+                      <Camera size={13} className="text-[#FF8A65]" />
+                      <span>Camera</span>
+                    </button>
+                    <button 
+                      onClick={() => { fileInputRef.current?.click(); setShowSmartTools(false); }}
+                      className="flex items-center justify-center gap-1.5 py-2 px-1 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 hover:border-[#FF6D00]/50 hover:bg-[#FF6D00]/10 hover:scale-[1.01] transition-all text-[11px] font-bold text-gray-700 dark:text-gray-300 shadow-sm"
+                    >
+                      <ImageIcon size={13} className="text-[#FF8A65]" />
+                      <span>Photos</span>
+                    </button>
+                    <button 
+                      onClick={() => { docInputRef.current?.click(); setShowSmartTools(false); }}
+                      className="flex items-center justify-center gap-1.5 py-2 px-1 rounded-xl bg-gray-50 dark:bg-white/5 border border-[#FF6D00]/15 dark:border-white/10 hover:border-[#FF6D00]/50 hover:bg-[#FF6D00]/10 hover:scale-[1.01] transition-all text-[11px] font-bold text-gray-700 dark:text-gray-300 shadow-sm"
+                    >
+                      <File size={13} className="text-[#FF8A65]" />
+                      <span>Files</span>
+                    </button>
+                  </div>
                 </div>
-              </button>
-              
-              <button onClick={() => setActiveContext('research')} className="w-full flex items-center gap-4 p-3 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/5 hover:border-[#FF6D00]/30 hover:bg-[#FF6D00]/5 dark:hover:bg-white/10 transition-all text-left group">
-                <div className="w-12 h-12 rounded-2xl bg-[#FF6D00]/10 flex items-center justify-center shrink-0 group-hover:bg-[#FF6D00]/20 transition-colors border border-[#FF6D00]/20">
-                  <Telescope className="text-[#FF8A65] group-hover:drop-shadow-[0_0_8px_rgba(255,138,101,0.4)] dark:group-hover:drop-shadow-[0_0_8px_rgba(255,138,101,0.8)]" size={24} />
-                </div>
+
+                {/* Grid of Spiritual Helper Modes */}
                 <div>
-                  <div className="font-bold text-gray-900 dark:text-white text-sm mb-0.5 tracking-wide">DEEP RESEARCH</div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">Consult scriptures and historical Agamas context</div>
+                  <span className="text-[9px] font-black uppercase text-[#FF6D00]/85 tracking-widest block mb-1.5">Active Spiritual Modes (उच्चतम टूल्स)</span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[160px] overflow-y-auto pr-1">
+                    
+                    <button 
+                      onClick={() => setContext('think')}
+                      className={cn(
+                        "flex flex-col items-start p-2 rounded-xl border text-left transition-all hover:scale-[1.01]",
+                        activeContext === 'think' 
+                          ? "bg-[#FF6D00]/15 border-[#FF6D00] shadow-[0_0_15px_rgba(255,109,0,0.2)]" 
+                          : "bg-gray-50/50 dark:bg-white/5 border-gray-100 dark:border-white/10 hover:border-[#FF6D00]/30 hover:bg-[#FF6D00]/5"
+                      )}
+                    >
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <Lightbulb size={13} className="text-[#FF8A65]" />
+                        <span className="text-[10px] font-extrabold text-gray-900 dark:text-white uppercase tracking-wider">Think Longer</span>
+                      </div>
+                      <span className="text-[9px] text-gray-400 font-semibold leading-normal">Deep reasoning logic for absolute query analysis</span>
+                    </button>
+
+                    <button 
+                      onClick={() => setContext('research')}
+                      className={cn(
+                        "flex flex-col items-start p-2 rounded-xl border text-left transition-all hover:scale-[1.01]",
+                        activeContext === 'research' 
+                          ? "bg-[#FF6D00]/15 border-[#FF6D00] shadow-[0_0_15px_rgba(255,109,0,0.2)]" 
+                          : "bg-gray-50/50 dark:bg-white/5 border-gray-100 dark:border-white/10 hover:border-[#FF6D00]/30 hover:bg-[#FF6D00]/5"
+                      )}
+                    >
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <Telescope size={13} className="text-[#FF8A65]" />
+                        <span className="text-[10px] font-extrabold text-gray-900 dark:text-white uppercase tracking-wider">Deep Research</span>
+                      </div>
+                      <span className="text-[9px] text-gray-400 font-semibold leading-normal">Scan & fetch scriptures and historical Aagams</span>
+                    </button>
+
+                    <button 
+                      onClick={() => setContext('anekantavada')}
+                      className={cn(
+                        "flex flex-col items-start p-2 rounded-xl border text-left transition-all hover:scale-[1.01]",
+                        activeContext === 'anekantavada' 
+                          ? "bg-[#FF6D00]/15 border-[#FF6D00] shadow-[0_0_15px_rgba(255,109,0,0.2)]" 
+                          : "bg-gray-50/50 dark:bg-white/5 border-gray-100 dark:border-white/10 hover:border-[#FF6D00]/30 hover:bg-[#FF6D00]/5"
+                      )}
+                    >
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <Brain size={13} className="text-[#FF8A65]" />
+                        <span className="text-[10px] font-extrabold text-gray-900 dark:text-white uppercase tracking-wider">Anekantavada View</span>
+                      </div>
+                      <span className="text-[9px] text-gray-400 font-semibold leading-normal">Multi-perspective analytical view of thoughts</span>
+                    </button>
+
+                    <button 
+                      onClick={() => setContext('verification')}
+                      className={cn(
+                        "flex flex-col items-start p-2 rounded-xl border text-left transition-all hover:scale-[1.01]",
+                        activeContext === 'verification' 
+                          ? "bg-[#FF6D00]/15 border-[#FF6D00] shadow-[0_0_15px_rgba(255,109,0,0.2)]" 
+                          : "bg-gray-50/50 dark:bg-white/5 border-gray-100 dark:border-white/10 hover:border-[#FF6D00]/30 hover:bg-[#FF6D00]/5"
+                      )}
+                    >
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <ClipboardCheck size={13} className="text-[#FF8A65]" />
+                        <span className="text-[10px] font-extrabold text-gray-900 dark:text-white uppercase tracking-wider">Agama Verifier</span>
+                      </div>
+                      <span className="text-[9px] text-gray-400 font-semibold leading-normal">Fact-check queries against authentic historical canons</span>
+                    </button>
+
+                    <button 
+                      onClick={() => setContext('study')}
+                      className={cn(
+                        "flex flex-col items-start p-2 rounded-xl border text-left transition-all hover:scale-[1.01]",
+                        activeContext === 'study' 
+                          ? "bg-[#FF6D00]/15 border-[#FF6D00] shadow-[0_0_15px_rgba(255,109,0,0.2)]" 
+                          : "bg-gray-50/50 dark:bg-white/5 border-gray-100 dark:border-white/10 hover:border-[#FF6D00]/30 hover:bg-[#FF6D00]/5"
+                      )}
+                    >
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <BookOpen size={13} className="text-[#FF8A65]" />
+                        <span className="text-[10px] font-extrabold text-gray-900 dark:text-white uppercase tracking-wider">Pathshala Mode</span>
+                      </div>
+                      <span className="text-[9px] text-gray-400 font-semibold leading-normal">Interactive breakdowns with lessons & morals</span>
+                    </button>
+
+                    <button 
+                      onClick={() => setContext('sutra')}
+                      className={cn(
+                        "flex flex-col items-start p-2 rounded-xl border text-left transition-all hover:scale-[1.01]",
+                        activeContext === 'sutra' 
+                          ? "bg-[#FF6D00]/15 border-[#FF6D00] shadow-[0_0_15px_rgba(255,109,0,0.2)]" 
+                          : "bg-gray-50/50 dark:bg-white/5 border-gray-100 dark:border-white/10 hover:border-[#FF6D00]/30 hover:bg-[#FF6D00]/5"
+                      )}
+                    >
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <Languages size={13} className="text-[#FF8A65]" />
+                        <span className="text-[10px] font-extrabold text-gray-900 dark:text-white uppercase tracking-wider">Sutra Decoder</span>
+                      </div>
+                      <span className="text-[9px] text-gray-400 font-semibold leading-normal">Sanskrit & Prakrit word translation & meaning</span>
+                    </button>
+
+                    <button 
+                      onClick={() => setContext('muhurat')}
+                      className={cn(
+                        "flex flex-col items-start p-2 rounded-xl border text-left transition-all hover:scale-[1.01]",
+                        activeContext === 'muhurat' 
+                          ? "bg-[#FF6D00]/15 border-[#FF6D00] shadow-[0_0_15px_rgba(255,109,0,0.2)]" 
+                          : "bg-gray-50/50 dark:bg-white/5 border-gray-100 dark:border-white/10 hover:border-[#FF6D00]/30 hover:bg-[#FF6D00]/5"
+                      )}
+                    >
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <Compass size={13} className="text-[#FF8A65]" />
+                        <span className="text-[10px] font-extrabold text-gray-900 dark:text-white uppercase tracking-wider">Muhurat & Vrat</span>
+                      </div>
+                      <span className="text-[9px] text-gray-400 font-semibold leading-normal">Fast guides, Pachkhan, tithis and daily rules</span>
+                    </button>
+
+                    <button 
+                      onClick={() => setContext('web')}
+                      className={cn(
+                        "flex flex-col items-start p-2 rounded-xl border text-left transition-all hover:scale-[1.01]",
+                        activeContext === 'web' 
+                          ? "bg-[#FF6D00]/15 border-[#FF6D00] shadow-[0_0_15px_rgba(255,109,0,0.2)]" 
+                          : "bg-gray-50/50 dark:bg-white/5 border-gray-100 dark:border-white/10 hover:border-[#FF6D00]/30 hover:bg-[#FF6D00]/5"
+                      )}
+                    >
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <Globe size={13} className="text-[#FF8A65]" />
+                        <span className="text-[10px] font-extrabold text-gray-900 dark:text-white uppercase tracking-wider">Real-Time Web</span>
+                      </div>
+                      <span className="text-[9px] text-gray-400 font-semibold leading-normal">Enable authentic Real-Time Web grounding context</span>
+                    </button>
+                    
+                  </div>
                 </div>
-              </button>
-              
-              <button onClick={() => setActiveContext('study')} className="w-full flex items-center gap-4 p-3 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/5 hover:border-[#FF6D00]/30 hover:bg-[#FF6D00]/5 dark:hover:bg-white/10 transition-all text-left group">
-                <div className="w-12 h-12 rounded-2xl bg-[#FF6D00]/10 flex items-center justify-center shrink-0 group-hover:bg-[#FF6D00]/20 transition-colors border border-[#FF6D00]/20">
-                  <BookOpen className="text-[#FF8A65] group-hover:drop-shadow-[0_0_8px_rgba(255,138,101,0.4)] dark:group-hover:drop-shadow-[0_0_8px_rgba(255,138,101,0.8)]" size={24} />
+              </div>
+            )}
+
+            {/* TAB CONTENT: DHYANA ROOM */}
+            {toolsTab === 'dhyana' && (
+              <div className="space-y-4 animate-in fade-in duration-200">
+                
+                {/* Pranayama Interactive Breathing Loop */}
+                <div className="bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-4 flex flex-col items-center justify-center text-center">
+                  <span className="text-[9px] font-black uppercase text-[#FF6D00] tracking-widest mb-3 block">Pranayama Shanti (प्राणायाम / श्वास नियंत्रण)</span>
+                  
+                  {breathPhase ? (
+                    <div className="flex flex-col items-center justify-center space-y-3.5 py-2">
+                      <div className={cn(
+                        "w-20 h-20 rounded-full flex flex-col items-center justify-center relative border border-[#FF6D00]/40 transition-all duration-[4000ms] ease-in-out",
+                        breathPhase === 'in' && "scale-125 bg-[#FF6D00]/10 shadow-[0_0_20px_rgba(255,109,0,0.4)] border-[#FF6D00]",
+                        breathPhase === 'hold' && "scale-125 bg-amber-500/15 shadow-[0_0_25px_rgba(245,158,11,0.5)] border-amber-500",
+                        breathPhase === 'out' && "scale-95 bg-white/5 border-gray-550"
+                      )}>
+                        <span className="text-[10px] font-black uppercase text-[#FF6D00] font-mono tracking-wider animate-pulse">
+                          {breathTimer}s
+                        </span>
+                      </div>
+                      
+                      <div>
+                        <p className="text-xs font-extrabold text-gray-900 dark:text-white uppercase tracking-wider">
+                          {breathPhase === 'in' && 'Breathe In (श्वास लें)'}
+                          {breathPhase === 'hold' && 'Hold Breath (कुंभक)'}
+                          {breathPhase === 'out' && 'Exhale (रेचक)'}
+                        </p>
+                        <p className="text-[9px] text-gray-400 mt-0.5 uppercase tracking-widest font-semibold">Keep mind calm before philosophical discussion</p>
+                      </div>
+
+                      <button 
+                        onClick={() => setBreathPhase(null)}
+                        className="py-1 px-4 border border-rose-500/30 hover:bg-rose-500/10 text-rose-500 rounded-full text-[9px] font-extrabold uppercase tracking-wider transition-all"
+                      >
+                        Stop Practice
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-3 py-1 flex flex-col items-center">
+                      <p className="text-[10px] text-gray-400 font-semibold max-w-xs leading-relaxed">
+                        Practice 4-4-4 Pranayama (Inhale, Hold, Exhale) to stabilize concentration & cultivate pure spiritual mindfulness.
+                      </p>
+                      <button 
+                        onClick={() => setBreathPhase('in')}
+                        className="py-2 px-6 bg-gradient-to-r from-[#FF6D00] to-[#FF8A65] text-white rounded-full text-[10px] font-black uppercase tracking-widest shadow-md hover:scale-105 active:scale-95 transition-all"
+                      >
+                        Start Breathing Lesson
+                      </button>
+                    </div>
+                  )}
                 </div>
+
+                {/* Mantra Bell & Gong */}
                 <div>
-                  <div className="font-bold text-gray-900 dark:text-white text-sm mb-0.5 tracking-wide">STUDY AND LEARN</div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">Enable Pathshala mode for simple breakdowns</div>
+                  <span className="text-[9px] font-black uppercase text-[#FF6D00]/85 tracking-widest block mb-2">Spiritual Sound Chimes</span>
+                  <button 
+                    onClick={() => { playTempleGong(); }}
+                    className="w-full flex items-center justify-between p-3 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 hover:border-[#FF6D00]/50 hover:bg-[#FF6D00]/5 hover:scale-[1.01] transition-all text-xs font-bold text-gray-700 dark:text-gray-300"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <Music size={15} className="text-[#FF8A65] animate-bounce" />
+                      <div className="text-left">
+                        <span className="text-[10px] font-black text-gray-900 dark:text-white uppercase tracking-wider block">Navkar Mantra Spiritual Bell (कंस घंटा)</span>
+                        <span className="text-[9px] text-gray-400 font-medium leading-normal block">Plays a sacred traditional high-vibration pure brass temple bell gong</span>
+                      </div>
+                    </div>
+                    <span className="py-1 px-2.5 bg-amber-500/10 border border-amber-500/20 rounded-full text-[8px] font-black text-amber-500 uppercase">Listen</span>
+                  </button>
                 </div>
-              </button>
-            </div>
+
+              </div>
+            )}
+
           </div>
         )}
 
         <div className="absolute bottom-full left-0 w-full px-4 pb-2 flex flex-wrap items-end gap-2">
           {activeContext && (
-            <div className="flex items-center gap-2 bg-[#FF6D00]/10 dark:bg-[#FF6D00]/20 border border-[#FF6D00]/50 text-[#E65100] dark:text-[#FFD54F] px-3 py-1.5 rounded-full text-[10px] tracking-wider font-bold shadow-[0_0_10px_rgba(255,109,0,0.2)] dark:shadow-[0_0_10px_rgba(255,109,0,0.3)] animate-in fade-in slide-in-from-bottom-2">
+            <div 
+              onClick={activeContext === 'chanting' ? playTempleGong : undefined}
+              className={cn(
+                "flex items-center gap-2 bg-[#FF6D00]/10 dark:bg-[#FF6D00]/20 border border-[#FF6D00]/50 text-[#E65100] dark:text-[#FFD54F] px-3 py-1.5 rounded-full text-[10px] tracking-wider font-bold shadow-[0_0_10px_rgba(255,109,0,0.2)] dark:shadow-[0_0_10px_rgba(255,109,0,0.3)] animate-in fade-in slide-in-from-bottom-2",
+                activeContext === 'chanting' && "cursor-pointer hover:bg-[#FF6D00]/30 active:scale-95 transition-all"
+              )}
+            >
               {activeContext === 'think' && <Lightbulb size={14} />}
               {activeContext === 'research' && <Telescope size={14} />}
               {activeContext === 'study' && <BookOpen size={14} />}
+              {activeContext === 'sutra' && <Languages size={14} />}
+              {activeContext === 'muhurat' && <Compass size={14} />}
+              {activeContext === 'web' && <Globe size={14} />}
+              {activeContext === 'anekantavada' && <Brain size={14} />}
+              {activeContext === 'verification' && <ClipboardCheck size={14} />}
+              {activeContext === 'chanting' && <Music size={14} className="animate-bounce" />}
               <span>
                 {activeContext === 'think' && 'THINK LONGER'}
                 {activeContext === 'research' && 'DEEP RESEARCH'}
                 {activeContext === 'study' && 'STUDY & LEARN'}
+                {activeContext === 'sutra' && 'SUTRA DECODER'}
+                {activeContext === 'muhurat' && 'MUHURAT & VRAT'}
+                {activeContext === 'web' && 'REAL-TIME WEB'}
+                {activeContext === 'anekantavada' && 'ANEKANTAVADA VIEW'}
+                {activeContext === 'verification' && 'AGAMA VERIFIER'}
+                {activeContext === 'chanting' && 'DYNAMIC JAPA BELL (TAP)'}
               </span>
-              <button onClick={() => setActiveContext(null)} className="hover:text-gray-900 dark:hover:text-white ml-1 transition-colors"><X size={14} /></button>
+              <button 
+                onClick={(e) => { e.stopPropagation(); setActiveContext(null); }} 
+                className="hover:text-red-500 text-gray-500 ml-1.5 transition-colors p-0.5"
+              >
+                <X size={14} />
+              </button>
             </div>
           )}
           {selectedFile && (
@@ -735,7 +1068,7 @@ export default function ChatPage() {
               {selectedFile.isImage ? (
                 <img src={selectedFile.url} alt="Selected" className="h-16 w-16 object-cover rounded-xl border-2 border-[#FF6D00]" />
               ) : (
-                <div className="h-16 w-16 bg-white dark:bg-[#1A1A1A] rounded-xl border-2 border-[#FF6D00] flex flex-col items-center justify-center p-1 text-center">
+                <div className="h-16 w-16 bg-white dark:bg-[#1A1A1A] rounded-xl border-2 border-[#FF6D00] flex flex-col items-center justify-center p-1 text-center font-semibold">
                   <FileText size={20} className="text-[#FF8A65] mb-1" />
                   <span className="text-[8px] text-gray-600 dark:text-gray-300 truncate w-full px-1">{selectedFile.name}</span>
                 </div>

@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { motion, AnimatePresence } from 'motion/react';
+import SectionAiAgent from '../components/SectionAiAgent';
 
 interface NearbyTemple {
   name: { en: string; hi: string };
@@ -722,6 +723,7 @@ export default function TirthPage() {
           </motion.div>
         )}
       </AnimatePresence>
+      <SectionAiAgent section="tirth" />
     </div>
   );
 }

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Clock, MapPin, Calendar, Heart, Shield, CheckCircle2, Award, Info, RefreshCw } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { motion } from 'motion/react';
+import SectionAiAgent from '../components/SectionAiAgent';
 
 interface CityPreset {
   name: { en: string; hi: string };
@@ -314,6 +315,7 @@ export default function FastingPage() {
           );
         })}
       </div>
+      <SectionAiAgent section="fasting" />
     </div>
   );
 }

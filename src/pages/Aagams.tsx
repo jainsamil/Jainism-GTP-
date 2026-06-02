@@ -29,6 +29,7 @@ import { db } from '../firebase';
 import { collection, onSnapshot, query, addDoc } from 'firebase/firestore';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
+import SectionAiAgent from '../components/SectionAiAgent';
 
 import { aagamsData } from '../data/aagamsData';
 
@@ -768,6 +769,7 @@ export default function AagamsPage() {
         </div>
       )}
 
+      <SectionAiAgent section="aagams" />
     </div>
   );
 }

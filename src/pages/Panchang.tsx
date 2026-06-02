@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { useLanguage } from '../contexts/LanguageContext';
 import { db } from '../firebase';
+import SectionAiAgent from '../components/SectionAiAgent';
 import { collection, onSnapshot } from 'firebase/firestore';
 
 type PanchangDetails = {
@@ -817,6 +818,7 @@ export default function PanchangPage() {
           </div>
         </div>
       )}
+      <SectionAiAgent section="panchang" />
     </div>
   );
 }
