@@ -60,19 +60,8 @@ function Layout({ children }: { children: React.ReactNode }) {
 
       {/* Global Toggles */}
       {!isAdmin && (
-        <div className="absolute top-4 right-4 pt-safe flex items-center gap-2 z-50">
-          {/* Theme Toggle - Only on Home Screen */}
-          {location.pathname === '/' && (
-            <button
-              onClick={toggleTheme}
-              className="w-10 h-10 bg-white/80 dark:bg-[#121212]/80 backdrop-blur-md border border-gray-200 dark:border-white/10 rounded-full flex items-center justify-center text-[#FF8A65] hover:bg-gray-100 dark:hover:bg-[#1A1A1A] transition-all shadow-sm"
-              title="Toggle Theme"
-            >
-              {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
-            </button>
-          )}
-          
-          {/* Language Toggle - Everywhere EXCEPT Home Screen, Admin, Media, Profile, Tirthankars, Panchang, Chat, Pathshala, Aagams */}
+        <div className="fixed top-4 right-4 pt-safe flex items-center gap-2 z-50">
+          {/* Language Toggle - Everywhere EXCEPT Home Screen, Admin, Media, Profile, Tirthankars, Panchang, Chat, Pathshala, Daily Vichaar, Aagams, Knowledge, History, Quiz, Festivals, Tirth, Fasting, Swadhyay, Bhaktamar, Diet */}
           {location.pathname !== '/' && 
            location.pathname !== '/chat' && 
            location.pathname !== '/media' && 
@@ -80,7 +69,18 @@ function Layout({ children }: { children: React.ReactNode }) {
            location.pathname !== '/tirthankars' && 
            location.pathname !== '/panchang' && 
            location.pathname !== '/pathshala' && 
-           location.pathname !== '/aagams' && (
+           location.pathname !== '/vichaar' && 
+           location.pathname !== '/jaap' && 
+           location.pathname !== '/aagams' && 
+           location.pathname !== '/knowledge' && 
+           location.pathname !== '/history' && 
+           location.pathname !== '/quiz' && 
+           location.pathname !== '/festivals' && 
+           location.pathname !== '/tirth' && 
+           location.pathname !== '/fasting' && 
+           location.pathname !== '/swadhyay' && 
+           location.pathname !== '/bhaktamar' && 
+           location.pathname !== '/diet' && (
             <button
               onClick={toggleLanguage}
               className="w-10 h-10 bg-white/80 dark:bg-[#121212]/80 backdrop-blur-md border border-gray-200 dark:border-white/10 rounded-full flex items-center justify-center text-[#FF8A65] hover:bg-gray-100 dark:hover:bg-[#1A1A1A] transition-all shadow-sm"
@@ -92,16 +92,16 @@ function Layout({ children }: { children: React.ReactNode }) {
         </div>
       )}
 
-      <main className={cn("flex-1 overflow-y-auto relative z-10", (!isAdmin && !isChat) ? "pb-20" : "")}>
+      <main className={cn("flex-1 overflow-y-auto relative", (!isAdmin && !isChat) ? "pb-20" : "")}>
         {children}
         {!isAdmin && !isChat && <Footer />}
       </main>
 
-      {/* Global Ask AI Button */}
-      {!isChat && !isAdmin && (
+      {/* Global Ask AI Button - Only on Homepage */}
+      {location.pathname === '/' && (
         <button
           onClick={() => navigate('/chat')}
-          className="absolute bottom-24 right-6 w-14 h-14 bg-gradient-to-tr from-[#FF6D00] to-[#FFD54F] rounded-full shadow-[0_0_20px_rgba(255,109,0,0.6)] flex items-center justify-center text-black animate-pulse hover:scale-110 transition-all z-50 border border-white/20"
+          className="absolute bottom-24 right-6 w-14 h-14 bg-gradient-to-tr from-[#FF6D00] to-[#FFD54F] rounded-full shadow-[0_0_20px_rgba(255,109,0,0.6)] flex items-center justify-center text-black animate-pulse hover:scale-110 transition-all z-50 border border-white/20 hover:cursor-pointer"
         >
           <Sparkles size={24} className="drop-shadow-[0_0_5px_rgba(255,255,255,0.8)]" />
         </button>

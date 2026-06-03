@@ -5,13 +5,15 @@ import {
   Library, ScrollText, Calendar, Quote,
   PlaySquare, Landmark, HelpCircle, PartyPopper,
   Disc, Navigation, Flame, FileText, Heart, Utensils,
-  Sparkles
+  Sparkles, Sun, Moon
 } from 'lucide-react';
 import { db } from '../firebase';
 import { collection, query, limit, doc, onSnapshot } from 'firebase/firestore';
 import { FALLBACK_VICHAARS, getDeterministicVichaar, Vichaar } from '../data/vichaarData';
+import { useTheme } from '../contexts/ThemeContext';
 
 export default function HomePage() {
+  const { theme, toggleTheme } = useTheme();
   const [settings, setSettings] = useState({ quizEnabled: true, mediaEnabled: true });
   const [vichaars, setVichaars] = useState<Vichaar[]>(FALLBACK_VICHAARS);
   const [dailyVichaar, setDailyVichaar] = useState<Vichaar>(FALLBACK_VICHAARS[0]);
@@ -93,6 +95,14 @@ export default function HomePage() {
           </h1>
           <p className="text-[10px] text-[#FF8A65] mt-2 font-bold tracking-[0.2em] uppercase">Divine Wisdom • By Samil Jain</p>
         </div>
+        
+        <button
+          onClick={toggleTheme}
+          className="absolute right-0 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 dark:bg-[#121212]/80 backdrop-blur-md border border-gray-200 dark:border-white/10 rounded-full flex items-center justify-center text-[#FF8A65] hover:bg-gray-100 dark:hover:bg-[#1A1A1A] transition-all shadow-sm cursor-pointer z-50"
+          title="Toggle Theme"
+        >
+          {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
+        </button>
       </header>
 
       <Link to="/vichaar" className="block mb-8 bg-white/80 dark:bg-[#121212]/80 backdrop-blur-xl rounded-3xl p-5 text-gray-900 dark:text-white border border-gray-200 dark:border-white/10 shadow-sm dark:shadow-[0_0_30px_rgba(255,109,0,0.15)] relative overflow-hidden group hover:border-[#FF6D00]/50 transition-all duration-300">

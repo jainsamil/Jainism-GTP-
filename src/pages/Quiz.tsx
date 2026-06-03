@@ -76,7 +76,7 @@ const FALLBACK_QUIZZES = [
 ];
 
 export default function QuizPage() {
-  const { language } = useLanguage();
+  const { language, toggleLanguage } = useLanguage();
   const navigate = useNavigate();
   const [questions, setQuestions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -252,17 +252,24 @@ export default function QuizPage() {
 
   return (
     <div className="min-h-full p-6 pb-24 bg-[#050505] text-gray-200">
-      <header className="flex items-center justify-between mb-8 pt-4">
+      <header className="sticky top-0 z-40 bg-[#050505]/95 backdrop-blur-md -mx-6 px-6 py-4 mb-8 border-b border-white/5 flex items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <button onClick={() => navigate(-1)} className="p-2 rounded-full bg-white/5 hover:bg-white/10 transition-colors">
             <ArrowLeft size={24} className="text-gray-300" />
           </button>
-          <h1 className="text-3xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] flex items-center gap-3 drop-shadow-[0_0_10px_rgba(255,109,0,0.5)]">
+          <h1 className="text-2xl md:text-3xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] flex items-center gap-3 drop-shadow-[0_0_10px_rgba(255,109,0,0.5)]">
             <HelpCircle className="text-[#FF6D00] drop-shadow-[0_0_8px_rgba(255,109,0,0.8)]" size={32} />
             {language === 'hi' ? 'दैनिक क्विज़' : 'DAILY QUIZ'}
           </h1>
         </div>
         <div className="flex items-center gap-3">
+          <button
+            onClick={toggleLanguage}
+            className="px-4 py-2 bg-white/5 hover:bg-white/10 backdrop-blur-md border border-white/10 rounded-full flex items-center justify-center text-[#FF8A65] transition-all shadow-sm font-bold text-xs cursor-pointer"
+            title="Toggle Language"
+          >
+            {language === 'en' ? 'हिंदी (HI)' : 'English (EN)'}
+          </button>
           <span className="bg-[#121212]/80 px-4 py-1.5 rounded-full text-sm font-black text-[#FFD54F] shadow-[0_0_10px_rgba(255,213,79,0.1)] border border-[#FFD54F]/20 tracking-widest">
             {currentQ + 1} / {questions.length}
           </span>

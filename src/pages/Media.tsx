@@ -39,8 +39,30 @@ export default function MediaPage() {
     if (currentTrack) {
       setActiveUrl(currentTrack.url);
       setAudioError(null);
+
+      // Cleanly update browser tab document title so there's never any workspace reference
+      document.title = `${currentTrack.title} • Play`;
+
+      // Scrub out AI Studio workspace URLs from phone bluetooth, active play notifications, & lockscreen controls
+      if ('mediaSession' in navigator) {
+        try {
+          navigator.mediaSession.metadata = new MediaMetadata({
+            title: currentTrack.title || 'Jain Audio',
+            artist: currentTrack.narrator || 'Samil Swadhyay',
+            album: activeTab === 'bhajans' ? 'Jain Bhajanamrit' : activeTab === 'audiobooks' ? 'Jain Swadhyay' : 'Shravak Katha Path',
+            artwork: [
+              { src: 'https://images.unsplash.com/photo-1609137144813-f66fcc430f80?q=80&w=120&auto=format&fit=crop', sizes: '128x128', type: 'image/jpeg' },
+              { src: 'https://images.unsplash.com/photo-1609137144813-f66fcc430f80?q=80&w=256&auto=format&fit=crop', sizes: '256x256', type: 'image/jpeg' }
+            ]
+          });
+        } catch (err) {
+          console.warn("MediaSession assignment failed or unsupported:", err);
+        }
+      }
+    } else {
+      document.title = "Jainism GPT";
     }
-  }, [currentTrack]);
+  }, [currentTrack, activeTab]);
 
   useEffect(() => {
     // Initialize with fallback first so user has immediate feedback
@@ -244,6 +266,56 @@ export default function MediaPage() {
     (item.author && item.author.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
+  const playNextTrack = () => {
+    const list = filteredContent.length > 0 ? filteredContent : mediaData[activeTab];
+    if (list.length === 0) return;
+    const currentIndex = list.findIndex((t: any) => t.id === currentTrackRef.current?.id);
+    if (currentIndex === -1) {
+      setCurrentTrack(list[0]);
+    } else {
+      const nextIndex = (currentIndex + 1) % list.length;
+      setCurrentTrack(list[nextIndex]);
+    }
+    setIsPlaying(true);
+  };
+
+  const playPrevTrack = () => {
+    const list = filteredContent.length > 0 ? filteredContent : mediaData[activeTab];
+    if (list.length === 0) return;
+    const currentIndex = list.findIndex((t: any) => t.id === currentTrackRef.current?.id);
+    if (currentIndex === -1) {
+      setCurrentTrack(list[list.length - 1]);
+    } else {
+      const prevIndex = (currentIndex - 1 + list.length) % list.length;
+      setCurrentTrack(list[prevIndex]);
+    }
+    setIsPlaying(true);
+  };
+
+  useEffect(() => {
+    if ('mediaSession' in navigator && currentTrack) {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: currentTrack.title || 'Jainism Audio',
+        artist: currentTrack.artist || currentTrack.author || 'Divine Wisdom',
+        album: activeTab === 'stories' ? 'Stories & Kathaye' : activeTab === 'bhajans' ? 'Devotional Bhajans' : 'Jain Audio Books',
+        artwork: [
+          { src: currentTrack.thumbnail || "https://picsum.photos/seed/mahavir/512/512", sizes: '512x512', type: 'image/jpeg' }
+        ]
+      });
+
+      navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
+
+      navigator.mediaSession.setActionHandler('play', () => {
+        setIsPlaying(true);
+      });
+      navigator.mediaSession.setActionHandler('pause', () => {
+        setIsPlaying(false);
+      });
+      navigator.mediaSession.setActionHandler('previoustrack', playPrevTrack);
+      navigator.mediaSession.setActionHandler('nexttrack', playNextTrack);
+    }
+  }, [currentTrack, isPlaying, activeTab, filteredContent]);
+
   return (
     <div className="min-h-full p-6 pb-24 bg-[#050505] text-gray-200">
       <header className="flex items-center gap-4 mb-8 pt-4">
@@ -290,16 +362,16 @@ export default function MediaPage() {
           </div>
           
           <div className="flex items-center gap-3 relative z-10 shrink-0">
-            <button className="text-gray-400 hover:text-white transition-colors">
+            <button onClick={playPrevTrack} className="text-gray-400 hover:text-white transition-colors cursor-pointer" title="Previous Track">
               <SkipBack size={20} />
             </button>
             <button 
               onClick={togglePlay}
-              className="w-12 h-12 rounded-full bg-gradient-to-br from-[#FF6D00] to-[#FFD54F] text-black flex items-center justify-center shadow-[0_0_15px_rgba(255,109,0,0.5)] hover:scale-110 transition-transform"
+              className="w-12 h-12 rounded-full bg-gradient-to-br from-[#FF6D00] to-[#FFD54F] text-black flex items-center justify-center shadow-[0_0_15px_rgba(255,109,0,0.5)] hover:scale-110 transition-transform cursor-pointer"
             >
               {isPlaying ? <Pause size={20} className="fill-black" /> : <Play size={20} className="fill-black ml-1" />}
             </button>
-            <button className="text-gray-400 hover:text-white transition-colors">
+            <button onClick={playNextTrack} className="text-gray-400 hover:text-white transition-colors cursor-pointer" title="Next Track">
               <SkipForward size={20} />
             </button>
           </div>

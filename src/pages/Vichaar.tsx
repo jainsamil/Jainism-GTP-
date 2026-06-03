@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Quote, Share2, Heart, ChevronLeft, ChevronRight, Copy, Check, Loader2 } from 'lucide-react';
+import { Quote, Share2, Heart, ChevronLeft, ChevronRight, Copy, Check, Loader2, ArrowLeft } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { db } from '../firebase';
 import { collection, onSnapshot } from 'firebase/firestore';
@@ -7,6 +8,7 @@ import { FALLBACK_VICHAARS, getDeterministicVichaar } from '../data/vichaarData'
 import SectionAiAgent from '../components/SectionAiAgent';
 
 export default function VichaarPage() {
+  const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [liked, setLiked] = useState<Record<number, boolean>>({});
   const [copied, setCopied] = useState(false);
@@ -94,9 +96,17 @@ export default function VichaarPage() {
 
   return (
     <div className="min-h-full p-6 pb-24 bg-[#050505] flex flex-col text-gray-200">
-      <header className="flex items-center justify-between mb-8 pt-4 shrink-0">
+      <header className="flex items-center gap-4 mb-8 pt-4 shrink-0">
+        <button 
+          onClick={() => navigate('/')} 
+          className="p-2.5 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition-all cursor-pointer shadow-md"
+          title="Back to Home"
+          id="btn-back-to-home"
+        >
+          <ArrowLeft size={22} className="text-gray-300" />
+        </button>
         <h1 className="text-3xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] flex items-center gap-3 drop-shadow-[0_0_10px_rgba(255,109,0,0.5)]">
-          <Quote className="text-[#FF6D00] drop-shadow-[0_0_8px_rgba(255,109,0,0.8)]" size={32} />
+          <Quote className="text-[#FF6D00] drop-shadow-[0_0_8px_rgba(255,109,0,0.8)]" size={28} />
           DAILY VICHAAR
         </h1>
       </header>

@@ -134,6 +134,17 @@ export default function AagamsPage() {
       utterance.onend = () => setIsSpeaking(false);
       utterance.onerror = () => setIsSpeaking(false);
       
+      // Auto-assign premium Google / neural / high-quality Hindi voice if available
+      const allVoices = window.speechSynthesis.getVoices();
+      const premiumVoice = allVoices.find(v => 
+        (v.lang.startsWith('hi') || v.lang.startsWith('sa')) && 
+        (v.name.toLowerCase().includes('google') || v.name.toLowerCase().includes('neural') || v.name.toLowerCase().includes('natural'))
+      ) || allVoices.find(v => v.lang.startsWith('hi') || v.lang.startsWith('sa'));
+      
+      if (premiumVoice) {
+        utterance.voice = premiumVoice;
+      }
+
       window.speechSynthesis.speak(utterance);
       setIsSpeaking(true);
     }
@@ -272,6 +283,35 @@ export default function AagamsPage() {
     item.category === activeCat && 
     item.title.toLowerCase().includes(search.toLowerCase())
   );
+
+  // Helper variables and handlers for Next / Previous item navigation inside the Jinvani reader
+  const activeList = selectedItem ? aagams.filter(item => item.category === selectedItem.category) : [];
+
+  const currentIndex = selectedItem ? activeList.findIndex(item => item.id === selectedItem.id) : -1;
+  const hasPrev = currentIndex > 0;
+  const hasNext = currentIndex !== -1 && currentIndex < activeList.length - 1;
+
+  const handlePrevItem = () => {
+    if (hasPrev) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+      setSelectedItem(activeList[currentIndex - 1]);
+      if (readerRef.current) {
+        readerRef.current.scrollTop = 0;
+      }
+    }
+  };
+
+  const handleNextItem = () => {
+    if (hasNext) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+      setSelectedItem(activeList[currentIndex + 1]);
+      if (readerRef.current) {
+        readerRef.current.scrollTop = 0;
+      }
+    }
+  };
 
   return (
     <div className="min-h-full p-4 md:p-6 pb-28 bg-gray-50 dark:from-[#050505] dark:to-[#0d0d0d] text-gray-900 dark:text-gray-200 transition-colors duration-300">
@@ -497,14 +537,14 @@ export default function AagamsPage() {
       {/* Full-Screen Reading Modal View */}
       {selectedItem && (
         <div className={cn(
-          "fixed inset-0 z-[100] flex flex-col transition-all",
-          isFullscreen ? "bg-[#FAF4E8]" : "bg-black/75 backdrop-blur-md p-2 sm:p-4 md:p-6"
+          "fixed inset-0 z-[120] flex flex-col justify-center items-center transition-all",
+          isFullscreen ? "bg-[#FAF4E8]" : "bg-black/75 backdrop-blur-md p-3 sm:p-4"
         )}>
           <div className={cn(
-            "flex flex-col w-full h-full shadow-2xl relative transition-all overflow-hidden",
+            "flex flex-col w-full shadow-2xl relative transition-all overflow-hidden border",
             isFullscreen 
-              ? "rounded-none" 
-              : "rounded-[2rem] max-w-3xl mx-auto border border-gray-200 dark:border-white/10",
+              ? "h-full rounded-none border-transparent" 
+              : "h-full sm:h-[88dvh] max-w-3xl rounded-[2rem] border-gray-200 dark:border-white/10",
             // Reader theme selectors
             readerTheme === 'parchment' ? "bg-[#FAF4E8] text-amber-950" :
             readerTheme === 'light' ? "bg-white text-gray-900" :
@@ -514,55 +554,59 @@ export default function AagamsPage() {
             
             {/* Modal/Reader Header bar */}
             <div className={cn(
-              "flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-5 border-b shrink-0",
+              "flex items-center justify-between gap-2.5 p-4 md:p-5 border-b shrink-0 min-w-0 w-full",
               readerTheme === 'parchment' ? "border-amber-200/50" :
               readerTheme === 'light' ? "border-gray-150" :
               readerTheme === 'dark' ? "border-white/5" : "border-saffron/10"
             )}>
-              <div className="flex items-center gap-3.5">
+              <div className="flex items-center gap-2 md:gap-3.5 min-w-0 flex-1">
                 <button 
                   onClick={() => {
                     setSelectedItem(null);
                     window.speechSynthesis.cancel();
                     setIsSpeaking(false);
                   }}
-                  className="p-2 rounded-full border border-current/10 hover:bg-current/5 transition-transform shrink-0 cursor-pointer"
+                  className="p-1.5 md:p-2 rounded-full border border-current/10 hover:bg-current/5 transition-transform shrink-0 cursor-pointer"
                 >
                   <ArrowLeft size={16} />
                 </button>
-                <div className="truncate">
-                  <span className="text-[9px] font-black uppercase tracking-widest border border-current/20 px-2 py-0.5 rounded">
+                <div className="min-w-0 truncate">
+                  <span className="text-[9px] font-black uppercase tracking-widest border border-current/20 px-1.5 py-0.5 rounded">
                     {selectedItem.category}
                   </span>
-                  <h2 className="text-lg md:text-xl font-display font-black truncate mt-1">{selectedItem.title}</h2>
+                  <h2 className="text-sm md:text-base lg:text-lg font-display font-black truncate mt-1" title={selectedItem.title}>
+                    {selectedItem.title}
+                  </h2>
                 </div>
               </div>
 
               {/* Bookmark & Chanted Indicators */}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 md:gap-2 shrink-0">
                 <button 
                   onClick={() => handleToggleBookmark(selectedItem.id)}
-                  className="p-2 rounded-full border border-current/10 hover:bg-current/5 transition-colors cursor-pointer"
+                  className="p-1.5 md:p-2 rounded-full border border-current/10 hover:bg-current/5 transition-colors cursor-pointer shrink-0"
                   title="Bookmark"
                 >
-                  <Heart size={16} className={favorites.includes(selectedItem.id) ? "fill-saffron text-saffron stroke-saffron" : "text-current"} />
+                  <Heart size={15} className={favorites.includes(selectedItem.id) ? "fill-saffron text-saffron stroke-saffron" : "text-current"} />
                 </button>
                 <button 
                   onClick={() => handleToggleChanted(selectedItem.id)}
                   className={cn(
-                    "px-3 py-1.5 rounded-full border border-current/10 hover:bg-current/5 text-[10px] font-black uppercase flex items-center gap-1 cursor-pointer transition-all",
-                    chantedLog.includes(selectedItem.id) && "bg-green-500/10 text-green-600 border-green-500/20"
+                    "px-3 py-1.5 rounded-full border text-[10px] md:text-xs font-black uppercase flex items-center gap-1.5 cursor-pointer transition-all shrink-0 shadow-sm",
+                    chantedLog.includes(selectedItem.id) 
+                      ? "bg-green-600 border-transparent text-white hover:bg-green-700 scale-[1.03]" 
+                      : "bg-[#00C853]/10 border-[#00C853]/30 text-green-700 dark:text-green-400 hover:bg-[#00C853]/20"
                   )}
                 >
-                  <CheckCircle2 size={12} />
-                  {chantedLog.includes(selectedItem.id) ? (language === 'en' ? 'Chanted' : 'पूरा हुआ') : (language === 'en' ? 'Done' : 'चढ़ाया')}
+                  <CheckCircle2 size={12} className={chantedLog.includes(selectedItem.id) ? "text-white" : "text-[#00C853] shrink-0"} />
+                  <span>{chantedLog.includes(selectedItem.id) ? (language === 'en' ? 'Chanted' : 'पूरा हुआ') : (language === 'en' ? 'Done' : 'चढ़ाया')}</span>
                 </button>
                 <button 
                   onClick={() => setIsFullscreen(!isFullscreen)}
-                  className="p-2 rounded-full border border-current/10 hover:bg-current/5 transition-colors cursor-pointer"
+                  className="p-1.5 md:p-2 rounded-full border border-current/10 hover:bg-current/5 transition-colors cursor-pointer shrink-0"
                   title="Fullscreen Reader"
                 >
-                  {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+                  {isFullscreen ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
                 </button>
               </div>
             </div>
@@ -690,6 +734,47 @@ export default function AagamsPage() {
                 <div className="w-16 h-0.5 bg-current/25 rounded mb-2" />
                 <span className="text-[10px] font-black uppercase tracking-widest text-[#FF806A]">इति शुभम् - धर्मो रक्षति रक्षितः</span>
               </div>
+            </div>
+
+            {/* Jinvani Reader Next/Previous Navigation Footer */}
+            <div className={cn(
+              "p-4 sm:p-5 pb-safe border-t flex items-center justify-between gap-4 shrink-0 font-medium",
+              readerTheme === 'parchment' ? "bg-amber-500/5 border-amber-200/40 text-amber-950" :
+              readerTheme === 'light' ? "bg-gray-50 border-gray-150 text-gray-900" :
+              readerTheme === 'dark' ? "bg-white/5 border-white/5 text-gray-200" :
+              "bg-saffron/5 border-saffron/10 text-gray-100" // midnight
+            )}>
+              <button
+                onClick={handlePrevItem}
+                disabled={!hasPrev}
+                className={cn(
+                  "flex items-center gap-2 px-4 py-2.5 rounded-xl border text-xs font-black uppercase transition-all cursor-pointer",
+                  hasPrev
+                    ? "border-current/15 hover:bg-current/10 active:scale-95 text-current"
+                    : "opacity-35 cursor-not-allowed text-current/30 border-current/5"
+                )}
+              >
+                <ArrowLeft size={14} />
+                {language === 'en' ? 'Previous' : 'पिछला पाठ'}
+              </button>
+
+              <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-saffron">
+                {currentIndex + 1} / {activeList.length}
+              </span>
+
+              <button
+                onClick={handleNextItem}
+                disabled={!hasNext}
+                className={cn(
+                  "flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-black uppercase transition-all cursor-pointer",
+                  hasNext
+                    ? "bg-gradient-to-r from-saffron to-coral text-white select-none hover:scale-103 active:scale-97 shadow-md shadow-saffron/10"
+                    : "bg-current/5 text-current/30 cursor-not-allowed opacity-35"
+                )}
+              >
+                {language === 'en' ? 'Next' : 'अगला पाठ'}
+                <ArrowLeft size={14} className="rotate-180" />
+              </button>
             </div>
 
           </div>

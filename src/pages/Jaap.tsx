@@ -154,8 +154,21 @@ export default function JaapPage() {
   };
 
   const handleReset = () => {
-    if (window.confirm(lang === 'en' ? 'Are you sure you want to reset current Mala counts?' : 'क्या आप वर्तमान माला संख्या रीसेट करना चाहते हैं?')) {
+    const resetBeads = window.confirm(lang === 'en' ? 'Do you want to reset current Mala beads count?' : 'क्या आप वर्तमान माला जाप संख्या (Beads Count) रीसेट करना चाहते हैं?');
+    if (resetBeads) {
       setCount(0);
+      
+      const resetAll = window.confirm(lang === 'en' ? 'Do you also want to completely clear and reset all lifetime totals and completed malas to 0?' : 'क्या आप कुल सामूहिक जाप (All Lifetime Totals - 13) और माला संख्या को भी बिल्कुल शून्य (0) करना चाहते हैं?');
+      if (resetAll) {
+        setCount(0);
+        setTotalCounts(0);
+        setMalas(0);
+        setStreak(0);
+        localStorage.removeItem('jaap_total_count');
+        localStorage.removeItem('jaap_total_malas');
+        localStorage.removeItem('jaap_streak');
+        localStorage.removeItem('jaap_last_session');
+      }
     }
   };
 
@@ -171,6 +184,18 @@ export default function JaapPage() {
       utterance.lang = 'hi-IN';
       utterance.rate = 0.75;
       utterance.onend = () => setIsPlayingChant(false);
+      
+      // Auto-assign premium Google / neural / high-quality Hindi voice if available
+      const allVoices = window.speechSynthesis.getVoices();
+      const premiumVoice = allVoices.find(v => 
+        (v.lang.startsWith('hi') || v.lang.startsWith('sa')) && 
+        (v.name.toLowerCase().includes('google') || v.name.toLowerCase().includes('neural') || v.name.toLowerCase().includes('natural'))
+      ) || allVoices.find(v => v.lang.startsWith('hi') || v.lang.startsWith('sa'));
+      
+      if (premiumVoice) {
+        utterance.voice = premiumVoice;
+      }
+
       window.speechSynthesis.speak(utterance);
     }
   };
@@ -232,9 +257,32 @@ export default function JaapPage() {
           </div>
         </div>
 
-        <div className="bg-white/75 dark:bg-[#121212]/75 backdrop-blur-md rounded-2xl p-3 border border-gray-200/50 dark:border-white/5 text-center shadow-sm">
+        <div className="bg-white/75 dark:bg-[#121212]/75 backdrop-blur-md rounded-2xl p-3 border border-gray-200/50 dark:border-white/5 text-center shadow-sm relative group">
           <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-0.5">{lang === 'en' ? 'Total counts' : 'कुल जाप'}</span>
-          <span className="text-lg font-black text-gray-800 dark:text-white">{totalCounts}</span>
+          <div className="flex items-center justify-center gap-1.5 mt-0.5">
+            <span className="text-lg font-black text-gray-800 dark:text-white">{totalCounts}</span>
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                const resetAll = window.confirm(lang === 'en' ? 'Do you want to completely reset and clear your total counts and malas back to 0?' : 'क्या आप अपने कुल जाप (Total counts) और मालाओं की संख्या को पूर्ण रूप से शून्य (0) करना चाहते हैं?');
+                if (resetAll) {
+                  setCount(0);
+                  setTotalCounts(0);
+                  setMalas(0);
+                  setStreak(0);
+                  localStorage.removeItem('jaap_total_count');
+                  localStorage.removeItem('jaap_total_malas');
+                  localStorage.removeItem('jaap_streak');
+                  localStorage.removeItem('jaap_last_session');
+                }
+              }}
+              className="p-1 rounded-md text-gray-400 hover:text-red-500 hover:bg-red-500/10 transition-all cursor-pointer"
+              title={lang === 'en' ? "Reset Totals to 0" : "कुल जाप शून्य करें"}
+              id="btn-reset-totals"
+            >
+              <RotateCcw size={13} className="shrink-0" />
+            </button>
+          </div>
         </div>
       </div>
 
