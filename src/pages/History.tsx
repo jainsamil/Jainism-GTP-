@@ -47,12 +47,24 @@ export default function HistoryPage() {
   }, [repositoryItems, searchQuery, selectedCategory, selectedState, language]);
 
   const introText = {
-    hi: "जैन धर्म भारत का एक गौरवमयी प्राचीन धर्म है। यह पवित्र इतिहास विभाग हमारी प्राचीन वीतराग संस्कृति, गुफाओं, शिलालेखों और देशव्यापी भव्य प्रतिमाओं की गवाही देता है। नीचे दी गई समय-सारणी ऐतिहासिक कालों को दर्शाती है, तथा डिजिटल गैलरी से आप संपूर्ण ३५०+ धरोहरों की खोज कर सकते हैं।",
-    en: "Jainism is one of India's most ancient path of spiritual purification. This repository chronicles our sacred heritage, rock-cut inscriptions, caves, and towering monolithic colossuses representing absolute non-possession. Explore the core timeline below, or search the complete digital catalog of 350+ monumental relics."
+    en: "Explore the ancient heritage, historical monuments, prehistoric caves, and scriptures testifying to the rich legacy of Jain history.",
+    hi: "जैन धर्म भारत का एक गौरवमयी प्राचीन धर्म है। यह पवित्र इतिहास विभाग हमारी प्राचीन वीतराग संस्कृति, गुफाओं, शिलालेखों और देशव्यापी भव्य प्रतिमाओं की गवाही देता है। नीचे दी गई समय-सारणी ऐतिहासिक कालों को दर्शाती है, तथा डिजिटल गैलरी से आप प्राचीन धरोहरों की खोज कर सकते हैं।"
   };
 
   return (
     <div className="min-h-full p-6 pb-24 bg-[#050505] text-gray-200">
+      
+      {/* FIXED TOP RIGHT TRANSLATOR WIDGET */}
+      <button
+        type="button"
+        onClick={toggleLanguage}
+        className="fixed top-4 right-4 z-50 px-4.5 py-2.5 bg-[#FF3D00] text-white hover:bg-[#D50000] active:scale-95 transition-all shadow-lg rounded-full flex items-center justify-center gap-2 font-black text-xs cursor-pointer border border-[#FF9100]/30"
+        title="Translate Language / भाषा बदलें"
+      >
+        <Globe size={15} className="animate-spin-slow" />
+        <span>{language === 'en' ? 'हिन्दी' : 'English'}</span>
+      </button>
+
       <header className="sticky top-0 z-40 bg-[#050505]/95 backdrop-blur-md -mx-6 px-6 py-4 mb-8 border-b border-white/5 flex items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <button onClick={() => navigate(-1)} className="p-2 rounded-full bg-white/5 hover:bg-white/10 transition-colors">
@@ -63,18 +75,10 @@ export default function HistoryPage() {
             {language === 'hi' ? 'जैन इतिहास व धरोहर' : 'HERITAGE & HISTORY'}
           </h1>
         </div>
-
-        <button
-          onClick={toggleLanguage}
-          className="px-4 py-2 bg-white/5 hover:bg-white/10 backdrop-blur-md border border-white/10 rounded-full flex items-center justify-center text-[#FF8A65] transition-all shadow-sm font-bold text-xs cursor-pointer"
-          title="Toggle Language"
-        >
-          {language === 'en' ? 'हिंदी (HI)' : 'English (EN)'}
-        </button>
       </header>
 
       <p className="text-gray-400 mb-10 leading-relaxed font-medium bg-[#121212]/80 p-5 rounded-2xl border border-white/5 shadow-[0_0_15px_rgba(0,0,0,0.5)] text-sm">
-        {introText[language]}
+        {language === 'hi' ? introText.hi : introText.en}
       </p>
 
       {/* SECTION 1: Major Epochs Timeline */}

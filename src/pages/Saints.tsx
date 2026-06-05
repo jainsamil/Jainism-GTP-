@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Users, Info, ArrowLeft, Loader2, Search, Mic, MicOff, Star, Compass, Network, ArrowDown, Sparkles } from 'lucide-react';
+import { Users, Info, ArrowLeft, Loader2, Search, Mic, MicOff, Star, Compass, Network, ArrowDown, Sparkles, Shield, AlertTriangle, Bell, MapPin, Navigation, Globe } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 import { db } from '../firebase';
@@ -124,9 +124,9 @@ const FALLBACK_SAINTS = [
 ];
 
 export default function SaintsPage() {
-  const { language } = useLanguage();
+  const { language, toggleLanguage } = useLanguage();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'directory' | 'lineage'>('directory');
+  const [activeTab, setActiveTab] = useState<'directory' | 'lineage' | 'vihar'>('directory');
   const [saints, setSaints] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -232,42 +232,67 @@ export default function SaintsPage() {
   return (
     <div className="min-h-full p-6 pb-26 bg-gradient-to-b from-gray-50 to-gray-100 dark:from-[#050505] dark:to-[#0d0d0d] text-gray-900 dark:text-gray-100 transition-colors duration-300">
       
+      {/* FIXED TOP RIGHT TRANSLATOR WIDGET */}
+      <button
+        type="button"
+        onClick={toggleLanguage}
+        className="fixed top-4 right-4 z-50 px-4.5 py-2.5 bg-[#FF3D00] text-white hover:bg-[#D50000] active:scale-95 transition-all shadow-lg rounded-full flex items-center justify-center gap-2 font-black text-xs cursor-pointer border border-[#FF9100]/30"
+        title="Translate Language / भाषा बदलें"
+      >
+        <Globe size={15} className="animate-spin-slow" />
+        <span>{language === 'en' ? 'हिन्दी' : 'English'}</span>
+      </button>
+
       {/* Header */}
-      <header className="flex items-center gap-4 mb-6 pt-4">
-        <button onClick={() => navigate(-1)} className="p-2 rounded-full bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 shadow-sm hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">
-          <ArrowLeft size={22} className="text-gray-700 dark:text-gray-300" />
-        </button>
-        <h1 className="text-2xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] flex items-center gap-2 drop-shadow-none dark:drop-shadow-[0_0_10px_rgba(255,109,0,0.4)]">
-          <Users className="text-[#FF6D00] shrink-0" size={26} />
-          {language === 'en' ? 'JAIN SAINTS & LINEAGE' : 'श्रमण निर्देशिका एवं गुरु परंपरा'}
-        </h1>
+      <header className="sticky top-0 z-40 bg-gray-50/95 dark:bg-[#050505]/95 backdrop-blur-md -mx-6 -mt-6 px-6 pt-6 pb-4 mb-6 border-b border-gray-200/50 dark:border-white/5 flex items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <button onClick={() => navigate(-1)} className="p-2 rounded-full bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 shadow-sm hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">
+            <ArrowLeft size={22} className="text-gray-700 dark:text-gray-300" />
+          </button>
+          <h1 className="text-xl md:text-2xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] flex items-center gap-2 drop-shadow-none dark:drop-shadow-[0_0_10px_rgba(255,109,0,0.4)]">
+            <Users className="text-[#FF6D00] shrink-0" size={26} />
+            {language === 'en' ? 'JAIN SAINTS & LINEAGE' : 'श्रमण निर्देशिका एवं गुरु परंपरा'}
+          </h1>
+        </div>
       </header>
 
       {/* Switcher Tab */}
-      <div className="flex p-1 mb-8 bg-gray-200/50 dark:bg-white/5 backdrop-blur-md rounded-2xl w-full max-w-md mx-auto shadow-sm">
+      <div className="flex flex-wrap p-1 mb-8 bg-gray-200/50 dark:bg-white/5 backdrop-blur-md rounded-2xl w-full max-w-lg mx-auto shadow-sm gap-1 md:flex-nowrap">
         <button
           onClick={() => setActiveTab('directory')}
           className={cn(
-            "flex-1 flex items-center justify-center gap-2 py-3 text-xs font-black tracking-wider uppercase rounded-xl transition-all duration-300 cursor-pointer",
+            "flex-1 min-w-[100px] flex items-center justify-center gap-1.5 py-3 text-[10px] md:text-xs font-black tracking-wider uppercase rounded-xl transition-all duration-300 cursor-pointer",
             activeTab === 'directory' 
-              ? "bg-[#FF6D00] text-white shadow-md shadow-[#FF6D00]/20" 
+              ? "bg-[#FF6D00] text-white shadow-md" 
               : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
           )}
         >
-          <Users size={16} />
-          {language === 'en' ? 'Saints Directory' : 'संत निर्देशिका'}
+          <Users size={14} />
+          {language === 'en' ? 'Directory' : 'संत निर्देशिका'}
         </button>
         <button
           onClick={() => setActiveTab('lineage')}
           className={cn(
-            "flex-1 flex items-center justify-center gap-2 py-3 text-xs font-black tracking-wider uppercase rounded-xl transition-all duration-300 cursor-pointer",
+            "flex-1 min-w-[100px] flex items-center justify-center gap-1.5 py-3 text-[10px] md:text-xs font-black tracking-wider uppercase rounded-xl transition-all duration-300 cursor-pointer",
             activeTab === 'lineage' 
-              ? "bg-[#FF6D00] text-white shadow-md shadow-[#FF6D00]/20" 
+              ? "bg-[#FF6D00] text-white shadow-md" 
               : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
           )}
         >
-          <Network size={16} />
-          {language === 'en' ? 'Monk Lineage' : 'गुरु-शिष्य परंपरा'}
+          <Network size={14} />
+          {language === 'en' ? 'Lineage' : 'गुरु परंपरा'}
+        </button>
+        <button
+          onClick={() => setActiveTab('vihar')}
+          className={cn(
+            "flex-1 min-w-[100px] flex items-center justify-center gap-1.5 py-3 text-[10px] md:text-xs font-black tracking-wider uppercase rounded-xl transition-all duration-300 cursor-pointer",
+            activeTab === 'vihar' 
+              ? "bg-[#FF6D00] text-white shadow-md" 
+              : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+          )}
+        >
+          <Compass size={14} />
+          {language === 'en' ? 'Vihar Tracker' : 'विहार सेवा-सुरक्षा'}
         </button>
       </div>
 
@@ -489,6 +514,259 @@ export default function SaintsPage() {
               );
             })()}
           </div>
+
+        </div>
+      )}
+
+      {/* ==================== VIHAR SAFETY & SECURITY TRACKER TAB ==================== */}
+      {activeTab === 'vihar' && (
+        <div className="space-y-6 animate-in fade-in duration-300">
+          
+          {/* Informational Alerts panel */}
+          <div className="p-5 rounded-3xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-800 dark:text-amber-400 font-semibold space-y-2">
+            <div className="flex items-center gap-2.5">
+              <Shield className="text-amber-600 shrink-0" size={18} />
+              <h3 className="font-extrabold uppercase tracking-wide text-xs">
+                {language === 'en' ? 'Sadhus Vihar Safety Guidelines' : 'विहार सुरक्षा व सावधानी निर्देश'}
+              </h3>
+            </div>
+            <p className="leading-relaxed text-[11px]">
+              {language === 'en'
+                ? 'Jain Saints travel strictly on foot without phones, making highway crossings extremely risky. Shravaks (followers) coordinate using this live portal to offer route security and resting arrangements.'
+                : 'जैन साधु-संत अपरिग्रह महाव्रत के पालना हेतु धातु, वाहन व मोबाइल सर्वथा त्यागी होते हैं। वे केवल नग्न पदयात्री होते हैं, जिससे हाईवे मार्ग पर दुर्घटना का खतरा रहता है। श्रावक इस पोर्टल के माध्यम से सुरक्षा दल संचालित करते हैं।'}
+            </p>
+          </div>
+
+          {/* Quick Simulated States: Emergency Alerts triggering */}
+          {(() => {
+            const [isVolunteerActive, setIsVolunteerActive] = useState(false);
+            const [alertBroadcastText, setAlertBroadcastText] = useState('');
+            const [localAlerts, setLocalAlerts] = useState([
+              { id: 'al-1', title: { en: 'Heavy Rain & Fog Alert near Salem NH-44', hi: 'सलेम नेशनल हाईवे पर मूसलाधार बारिश व कोहरा' }, time: '10 Mins ago', priority: 'high' },
+              { id: 'al-2', title: { en: 'Night halt secured at Parasnath Dharamshala', hi: 'रात्रि विश्राम स्थल सम्मेद शिखरजी तराई में सुनिश्चित' }, time: '1 hour ago', priority: 'normal' }
+            ]);
+            const [viharRoutes, setViharRoutes] = useState([
+              {
+                id: 'vr-1',
+                saintName: { en: "108 Pujya Muni Shri Prasanna Sagar Ji Maharaj", hi: "१०८ पूज्य मुनि श्री प्रसन्न सागर जी महाराज" },
+                groupSize: "Muni + 3 Sevaks",
+                currentLoc: { en: "Salem Highway Bypass, South India", hi: "सलेम हाईवे बाईपास, दक्षिण भारत" },
+                direction: { en: "Heading towards Bangalore (Melmaruvathur to Bangalore)", hi: "बेंगलुरु की ओर अग्रसर (मेलमरुवत्तूर से बेंगलुरु)" },
+                status: "active",
+                safetyLevel: "vigilant", // safe, vigilant, critical
+                upcomingHalt: { en: "Krishnagiri Digambar Jin Mandir", hi: "कृष्णगिरि दिगंबर जिन मंदिर धर्मशाला" },
+                escorts: 12,
+                contact: "+91 94440 22391"
+              },
+              {
+                id: 'vr-2',
+                saintName: { en: "Aryika Mata Sangha (11 Aryan Mothers led by Aryika Vishuddha Mati M.Ji)", hi: "आर्यिका माता संघ (११ आर्यिका माताएं - आर्यिका विशुद्ध मति जी)" },
+                groupSize: "11 Mothers + 7 Shravaks",
+                currentLoc: { en: "Mandar Hill Highway Intersection, Bihar", hi: "मंदारगिरि हाईवे तिराहा, बिहार-झारखंड सीमा" },
+                direction: { en: "Heading towards Sammed Shikharji (Siddhakshetra)", hi: "सम्मेद शिखरजी सिद्धक्षेत्र की ओर विहार" },
+                status: "active",
+                safetyLevel: "safe",
+                upcomingHalt: { en: "Deoghar Digambar Jain Bhavan", hi: "देवघर दिगंबर जैन धर्मशाला" },
+                escorts: 34,
+                contact: "+91 91700 88200"
+              },
+              {
+                id: 'vr-3',
+                saintName: { en: "Yugeshwar Archarya Shri Vardhaman Sagar Ji Parampara", hi: "युगेश्वर आचार्य श्री वर्धमान सागर जी महाराज संघ" },
+                groupSize: "Acharya Dev + 8 Digambar Monks",
+                currentLoc: { en: "NH-21 Highway Toll plaza, Bharatpur Bypass", hi: "एनएच-२१ हाईवे टोल प्लाजा, भरतपुर बाईपास राजस्थान" },
+                direction: { en: "Heading towards Jaipur Kshetra", hi: "जयपुर अतिशय क्षेत्र की ओर मंगल विहार" },
+                status: "active",
+                safetyLevel: "critical",
+                upcomingHalt: { en: "Bharatpur Shravak Sangh Bhavan", hi: "भरतपुर जैन श्रावक संघ भवन" },
+                escorts: 8,
+                contact: "+91 98290 11400"
+              }
+            ]);
+
+            const triggerLocalAlert = (e: React.FormEvent) => {
+              e.preventDefault();
+              if (!alertBroadcastText.trim()) return;
+              const newAlert = {
+                id: String(Date.now()),
+                title: { en: `ALERT from User: ${alertBroadcastText}`, hi: `श्रावक अलर्ट: ${alertBroadcastText}` },
+                time: 'Just now',
+                priority: 'high'
+              };
+              setLocalAlerts([newAlert, ...localAlerts]);
+              setAlertBroadcastText('');
+              alert(language === 'en' ? '🚀 High priority warning broadcasted to surrounding youth within 15km!' : '🚀 आपके क्षेत्र के सभी स्थानीय जैन युवाओं को सुरक्षा अलर्ट भेज दिया गया है!');
+            };
+
+            const joinEscortGroup = (routeId: string) => {
+              setViharRoutes(prev => prev.map(r => {
+                if (r.id === routeId) {
+                  return { ...r, escorts: r.escorts + 1 };
+                }
+                return r;
+              }));
+              alert(language === 'en' ? '🙋 You registered as an active highway escort guard for this saint! Walk safe.' : '🙋 आप इस संघ के सुरक्षा एस्कॉर्ट दल में शामिल हो गए हैं! आपका नाम जोड़ा गया।');
+            };
+
+            return (
+              <div className="space-y-6">
+
+                {/* Volunteer Action Box */}
+                <div className="p-6 bg-white dark:bg-[#121212] border border-gray-150 dark:border-white/5 rounded-3xl shadow-sm space-y-4">
+                  <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
+                    <div>
+                      <span className="text-[9px] font-black tracking-widest text-[#FF6D00] block uppercase">{language === 'en' ? 'JOIN LOCAL SAFETY BRIGADE' : 'स्थानीय युवा सुरक्षा वाहिनी'}</span>
+                      <h3 className="font-extrabold text-sm text-gray-850 dark:text-white mt-0.5">{language === 'en' ? 'Active Guard Status Registration' : 'सक्रिय विहार रक्षक रजिस्टर'}</h3>
+                    </div>
+                    <button
+                      onClick={() => setIsVolunteerActive(!isVolunteerActive)}
+                      className={cn(
+                        "px-4 py-2 rounded-full text-xs font-black uppercase tracking-wider cursor-pointer shadow-xs border transition-all",
+                        isVolunteerActive 
+                          ? "bg-emerald-500 text-white border-transparent" 
+                          : "bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-white/10"
+                      )}
+                    >
+                      {isVolunteerActive 
+                        ? (language === 'en' ? '🟢 Registered Active' : '🟢 सक्रिय सेवादार चालू')
+                        : (language === 'en' ? '⚪ Mark Me Active' : '⚪ सक्रिय रक्षक सेवा जुड़ें')}
+                    </button>
+                  </div>
+                  <p className="text-[11px] text-gray-500 font-semibold leading-relaxed">
+                    {language === 'en'
+                      ? 'By marking yourself active, you will receive real-time SMS & Vibration alerts when walking saints bypass highways intersecting your city ( Salem, Pune, Madurai, Salem ).'
+                      : 'सक्रिय सेवा ऑन करने पर आपके ५-१५ किमी सीमा में संतों के हाईवे पार करते समय आपके पास ऑटोमैटिक कंपन सूचना पहुंचाई जाएगी ताकि आप तुरंत गाड़ी लेकर पहुंच सकें।'}
+                  </p>
+                </div>
+
+                {/* Broadcast Distress Alert Form */}
+                <div className="p-5 bg-red-500/5 dark:bg-red-500/10 border border-red-550/20 rounded-3xl space-y-4 shadow-inner">
+                  <div className="flex items-center gap-2 text-red-600 dark:text-red-400">
+                    <AlertTriangle size={18} />
+                    <h3 className="font-black uppercase tracking-wider text-xs">
+                      {language === 'en' ? 'Rapid Highway Hazard Broadcast' : 'आपातकालीन हाईवे खतरा ब्रॉडकास्ट'}
+                    </h3>
+                  </div>
+                  <form onSubmit={triggerLocalAlert} className="flex gap-2">
+                    <input 
+                      type="text"
+                      placeholder={language === 'en' ? 'Describe immediate hazard: heavy trucks, dark road, blind turn...' : 'खतरा लिखें: घना कोहरा, सड़क मरम्मत, बिना लाइट की सड़क...'}
+                      value={alertBroadcastText}
+                      onChange={(e) => setAlertBroadcastText(e.target.value)}
+                      className="flex-1 bg-white dark:bg-[#151515] text-xs font-semibold px-4 py-3 rounded-2xl border border-red-500/20 text-gray-800 dark:text-white placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-red-500"
+                    />
+                    <button 
+                      type="submit"
+                      className="px-4 py-3 bg-red-600 hover:bg-red-700 text-white text-xs font-black rounded-2xl uppercase tracking-wider shadow-md shrink-0 cursor-pointer"
+                    >
+                      🚨 Alert
+                    </button>
+                  </form>
+                </div>
+
+                {/* Local Highway Alerts Panel */}
+                <div className="bg-white dark:bg-[#121212] border border-gray-150 dark:border-white/5 rounded-3xl p-5 space-y-3.5">
+                  <h4 className="text-[10px] font-black uppercase tracking-widest text-gray-450 flex items-center gap-1.5 leading-none">
+                    <Bell size={13} className="text-red-500" />
+                    {language === 'en' ? 'Active Local Warnings & Signals (15km)' : 'परिक्षेत्र सुरक्षा चेतावनी बुलेटिन (15 किमी)'}
+                  </h4>
+                  <div className="space-y-2">
+                    {localAlerts.map(la => (
+                      <div key={la.id} className="p-3 bg-gray-50 dark:bg-[#1a1a1a]/30 border border-gray-100 dark:border-white/5 rounded-2xl flex justify-between items-center text-xs">
+                        <div className="flex items-start gap-2 max-w-[80%]">
+                          <span className={cn("inline-block w-2 h-2 rounded-full mt-1.5 shrink-0", la.priority === 'high' ? 'bg-red-500 animate-pulse' : 'bg-orange-400')} />
+                          <div>
+                            <p className="font-bold text-gray-800 dark:text-gray-200">{language === 'en' ? la.title.en : la.title.hi}</p>
+                            <span className="text-[9px] text-gray-400 font-medium">{la.time}</span>
+                          </div>
+                        </div>
+                        <span className="text-[10px] font-black tracking-widest uppercase text-gray-400">ALERT</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Active Vihar Routes Tracker */}
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center px-1">
+                    <span className="text-[10px] font-black text-gray-450 uppercase tracking-widest">{language === 'en' ? 'ACTIVE HIGHWAY VIHAR CONSTRUCTS' : 'सक्रिय मुनि विहार मंडल'}</span>
+                    <span className="text-xs font-black text-orange-500">LIVE GPS</span>
+                  </div>
+
+                  <div className="grid gap-4.5">
+                    {viharRoutes.map(vr => (
+                      <div key={vr.id} className="bg-white dark:bg-[#121212] border border-gray-150 dark:border-white/5 rounded-[2rem] p-6 shadow-xs space-y-4">
+                        
+                        <div className="flex justify-between items-start gap-3">
+                          <div>
+                            <span className={cn(
+                              "inline-block px-2.5 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest mb-1.5",
+                              vr.safetyLevel === 'safe' && 'bg-emerald-500/15 text-emerald-500',
+                              vr.safetyLevel === 'vigilant' && 'bg-amber-500/15 text-amber-500',
+                              vr.safetyLevel === 'critical' && 'bg-red-500/15 text-red-500'
+                            )}>
+                              {vr.safetyLevel === 'safe' && (language === 'en' ? '🟢 Safe Trail Route' : '🟢 सुरक्षित हाईवे एस्कॉर्ट लाइव')}
+                              {vr.safetyLevel === 'vigilant' && (language === 'en' ? '🟡 Traffic Vigilance Active' : '🟡 भारी ट्रैफिक - वाहन एस्कॉर्ट वांछित')}
+                              {vr.safetyLevel === 'critical' && (language === 'en' ? '🔴 DENSE HIGHWAY: CRITICAL SAFETY' : '🔴 अत्यंत संकरा हाईवे: त्वरित सुरक्षा सहाय्य')}
+                            </span>
+                            <h4 className="text-sm font-black text-gray-850 dark:text-white leading-tight">
+                              {language === 'en' ? vr.saintName.en : vr.saintName.hi}
+                            </h4>
+                            <p className="text-[10px] text-gray-400 font-bold mt-1">
+                              👥 {vr.groupSize}
+                            </p>
+                          </div>
+                          
+                          <div className="text-right shrink-0">
+                            <span className="text-[9px] font-bold text-[#FFA726] bg-amber-500/5 px-2.5 py-1 rounded-xl block">
+                              🔋 {vr.escorts} Guards
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Location Details and upcoming halt */}
+                        <div className="p-4 bg-gray-50/50 dark:bg-[#1c1c1c]/40 border border-gray-100 dark:border-white/5 rounded-2xl grid md:grid-cols-2 gap-4 text-xs font-semibold">
+                          <div>
+                            <span className="text-[8px] tracking-widest text-gray-400 uppercase block mb-0.5">{language === 'en' ? 'CURRENT LOCATION' : 'वर्तमान लाइव स्थान'}</span>
+                            <p className="text-gray-850 dark:text-gray-200">📍 {language === 'en' ? vr.currentLoc.en : vr.currentLoc.hi}</p>
+                            <span className="text-[10px] text-gray-500 font-medium block mt-1">{language === 'en' ? vr.direction.en : vr.direction.hi}</span>
+                          </div>
+                          <div>
+                            <span className="text-[8px] tracking-widest text-gray-400 uppercase block mb-0.5">{language === 'en' ? 'UPCOMING NIGHT HALT / DHARAMSHALA' : 'आगामी रात्रि विश्राम स्थल'}</span>
+                            <span className="text-emerald-500 font-bold">🏢 {language === 'en' ? vr.upcomingHalt.en : vr.upcomingHalt.hi}</span>
+                            <span className="text-[10px] text-gray-450 font-medium block mt-1">{language === 'en' ? 'Food & Ahar arrangements secured.' : 'चौका व्यवस्था पूर्ण की जा चुकी है।'}</span>
+                          </div>
+                        </div>
+
+                        {/* Quick Trigger action buttons */}
+                        <div className="pt-2 border-t border-gray-150/50 dark:border-white/5 flex flex-wrap gap-2.5 justify-between items-center text-[10px]">
+                          <div className="text-[#656565] font-extrabold">
+                            🚨 {language === 'en' ? 'Sevak Helpline:' : 'सेवादार संपर्क:'} {vr.contact}
+                          </div>
+                          <div className="flex items-center gap-2 w-full sm:w-auto">
+                            <button
+                              onClick={() => joinEscortGroup(vr.id)}
+                              className="flex-1 sm:flex-initial px-4 py-2 bg-[#FF6D00] hover:bg-[#E65100] text-white font-black rounded-xl uppercase tracking-wider text-[9px] cursor-pointer text-center"
+                            >
+                              🙋 {language === 'en' ? 'Join Escort Team' : 'सुरक्षा सेवा जोड़ें'}
+                            </button>
+                            <a
+                              href={`tel:${vr.contact}`}
+                              className="flex-1 sm:flex-initial px-4 py-2 bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-gray-300 font-black rounded-xl uppercase tracking-wider text-[9px] hover:bg-gray-200 dark:hover:bg-white/10 cursor-pointer text-center border border-gray-150/40 dark:border-white/5"
+                            >
+                              📞 {language === 'en' ? 'Call Sevak' : 'सेवादार को कॉल करें'}
+                            </a>
+                          </div>
+                        </div>
+
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+              </div>
+            );
+          })()}
 
         </div>
       )}

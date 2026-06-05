@@ -230,6 +230,78 @@ Do not wrap inside markdown code blocks, just return pure JSON.`;
   }
 });
 
+// Manuscript Scanning Live OCR & Translation Endpoint
+app.post('/api/manuscript/translate-image', async (req, res) => {
+  try {
+    const { image } = req.body;
+    if (!image) {
+      return res.status(400).json({ error: 'Image data is required.' });
+    }
+
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(500).json({ error: 'Gemini API Key is not configured in Secrets.' });
+    }
+
+    const ai = new GoogleGenAI({
+      apiKey: process.env.GEMINI_API_KEY,
+      httpOptions: {
+        headers: {
+          'User-Agent': 'aistudio-build',
+        }
+      }
+    });
+
+    const matches = image.match(/^data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+);base64,(.+)$/);
+    if (!matches || matches.length !== 3) {
+      return res.status(400).json({ error: 'Invalid base64 image encoding format.' });
+    }
+
+    const imageMime = matches[1];
+    const imageBase64 = matches[2];
+
+    const prompt = `Analyze this ancient Jain manuscript page image.
+Your objective:
+1. Act as a Jainology research scholar and perform professional OCR to detect original Sanskritic/Prakrit/Devnagari verses (Dharmic Sutras, Gathas, or Chants).
+2. Translate the detected text with utmost precision and devotion into Hindi (literalHi) and English (literalEn).
+3. Extract the underlying "Scientific / Mathematical Core" of this script (for example, connect it to physical atomism, cosmic structures, microbial life cells, energy balance, math series, etc.) in rich Hindi (scientificHi).
+4. Classify the source language (src) as Prakrit or Sanskrit.
+5. Provide the original detected text (originText) accurately.
+
+Return ONLY a single valid JSON object following this exact schema:
+{
+  "literalHi": "हिंदी गाथा अनुवाद",
+  "literalEn": "English literal verse translation",
+  "scientificHi": "वैज्ञानिक सम्बन्ध एवं भौतिक विश्लेषण विवरण (हिंदी में)",
+  "src": "Prakrit / Sanskrit",
+  "originText": "मल देवनागरी मूल गाथा श्लोक पाठ"
+}
+
+Do not wrap the JSON in Markdown code block blocks. Just return the clean JSON string directly.`;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-3.5-flash",
+      contents: [
+        {
+          inlineData: {
+            data: imageBase64,
+            mimeType: imageMime
+          }
+        },
+        prompt
+      ],
+      config: {
+        responseMimeType: "application/json"
+      }
+    });
+
+    const parsed = JSON.parse(response.text || '{}');
+    res.json({ success: true, result: parsed });
+  } catch (error: any) {
+    console.error("Manuscript Image Translation error:", error);
+    res.status(500).json({ error: error.message || 'Failed to analyze manuscript image.' });
+  }
+});
+
 // Socket.io
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id);

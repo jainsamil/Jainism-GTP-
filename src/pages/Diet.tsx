@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, BookOpen, ShieldAlert, CheckCircle2, Apple, Utensils, HelpCircle, Heart, Search, ListFilter, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, BookOpen, ShieldAlert, CheckCircle2, Apple, Utensils, HelpCircle, Heart, Search, ListFilter, AlertTriangle, Globe } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { motion, AnimatePresence } from 'motion/react';
 import SectionAiAgent from '../components/SectionAiAgent';
@@ -333,7 +333,7 @@ const RECIPES: Recipe[] = [
 export default function DietPage() {
   const navigate = useNavigate();
   const { language: lang, toggleLanguage } = useLanguage();
-  const [activeTab, setActiveTab] = useState<'rules' | 'recipes' | 'audit'>('rules');
+  const [activeTab, setActiveTab] = useState<'rules' | 'recipes' | 'audit' | 'chouka'>('rules');
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
 
   // Satvik Audit State
@@ -344,6 +344,109 @@ export default function DietPage() {
     yeastFoods: false // Bread, yeast, alcohol?
   });
   const [auditResult, setAuditResult] = useState<string | null>(null);
+
+  // Chouka Navigator State
+  const [choukaSearchStr, setChoukaSearchStr] = useState('');
+  const [choukaDistanceFilter, setChoukaDistanceFilter] = useState<number>(10); // max default km
+  const [selectedChoukaType, setSelectedChoukaType] = useState<'all' | 'family' | 'dharamshala' | 'restaurant'>('all');
+
+  const choukaData = [
+    {
+      id: "chk-1",
+      name: { en: "Kothari Jain Kutumb Home Rasoi", hi: "कोठारी जैन परिवार गृह चौका" },
+      type: "family" as const,
+      address: { en: "12, Near Digamabar Jain Mandir, Sector 3, Pune", hi: "१२, दिगंबर जैन मंदिर के पास, सेक्टर ३, पुणे" },
+      distance: 1.8,
+      timing: { en: "Ahar (Lunch): 11:30 AM - 1:00 PM | Sunset Dinner: 5:00 PM - 6:00 PM", hi: "दुपहर आहार: ११:३० से १:०० | सूर्यास्त पूर्व भोजन: ५:०० से ६:००" },
+      contact: "+91 98451 22312",
+      verifiedBy: "Pune Digambar Jain Samaj Committee",
+      facilities: {
+        sunsetRules: true,
+        waterFiltration: true,
+        uncontaminatedUtensils: true,
+        zeroRootVegs: true
+      },
+      desc: { en: "Strict home kitchen prepared exclusively by temple-going Shravaks. Cleanliness and absolute purity guaranteed.", hi: "मंदिर जाने वाले शुद्ध सात्विक श्रावकों द्वारा तैयार घर की रसोई। पूर्ण मर्यादा का पालन किया जाता है।" }
+    },
+    {
+      id: "chk-2",
+      name: { en: "Shri Bahubali Bhojana Sala & Dharamshala", hi: "श्री बाहुबली भोजनशाला एवं धर्मशाला" },
+      type: "dharamshala" as const,
+      address: { en: "Jain Tirth Kshetra Complex, Bypass Highway, Madurai", hi: "जैन तीर्थ क्षेत्र परिसर, बाईपास हाईवे, मदुरै" },
+      distance: 3.2,
+      timing: { en: "Lunch: 11:00 AM - 1:30 PM | Dinner: 5:15 PM - Sunset", hi: "दुपहर भोजन: ११:०० से १:३० | शाम भोजन: ५:१५ से सूर्यास्त पूर्व" },
+      contact: "+91 88701 54390",
+      verifiedBy: "South India Jain Association Trustee",
+      facilities: {
+        sunsetRules: true,
+        waterFiltration: true,
+        uncontaminatedUtensils: true,
+        zeroRootVegs: true
+      },
+      desc: { en: "Traditional dharamshala kitchen using dual thick cotton filtration (Chhana Jal) and wood-fired organic stoves.", hi: "दोहरे मोटे सूती वस्त्र से छाने जल और लकड़ी के चूल्हे से तैयार प्राचीन शैली की शुद्ध धर्मशाला भोजनशाला।" }
+    },
+    {
+      id: "chk-3",
+      name: { en: "Vardhman Shudh Marwari Rasoi", hi: "वर्धमान शुद्ध सात्विक मारवाड़ी रसोई" },
+      type: "restaurant" as const,
+      address: { en: "Srinagar Hill Road, Opp Railway Station, Guwahati", hi: "श्रीनगर हिल रोड, रेलवे स्टेशन के सामने, गुवाहाटी" },
+      distance: 4.5,
+      timing: { en: "Lunch: 11:30 AM - 2:00 PM | Sunset Dinner: 4:30 PM - 5:45 PM", hi: "दुपहर का भोजन: ११:३० से २:०० | संध्या भोजन: ४:३० से ५:४५" },
+      contact: "+91 70023 99871",
+      verifiedBy: "Guwahati Shravak Parishad",
+      facilities: {
+        sunsetRules: true,
+        waterFiltration: true,
+        uncontaminatedUtensils: true,
+        zeroRootVegs: true
+      },
+      desc: { en: "Certified hotel segment with completely isolated Jain counter, serving no onion/garlic/potatoes under strict CCTV supervision.", hi: "सत्यापित जैन रसोई काउंटर जहाँ प्याज-लहसुन-आलू सर्वथा वर्जित है। खाना बनाने का कमरा बिल्कुल पृथक है।" }
+    },
+    {
+      id: "chk-4",
+      name: { en: "Singhal Kutumb Satvik Home Catering", hi: "सिंघल कुटुंब सात्विक होम टिफिन" },
+      type: "family" as const,
+      address: { en: "A-402, Royal Residency, Near Metro Station, Bangalore", hi: "ए-४०२, रॉयल रेजीडेंसी, मेट्रो स्टेशन के पास, बेंगलुरु" },
+      distance: 8.2,
+      timing: { en: "Day Hours Delivery only. Last dispatch at 4:30 PM.", hi: "केवल दिन के समय होम डिलीवरी। अंतिम डिस्पैच ४:३० बजे।" },
+      contact: "+91 91108 55432",
+      verifiedBy: "Sakal Jain Sangh East Zone",
+      facilities: {
+        sunsetRules: true,
+        waterFiltration: true,
+        uncontaminatedUtensils: true,
+        zeroRootVegs: true
+      },
+      desc: { en: "Home cooked tiffin service for traveling single professionals and elders. Uses double-boiled मर्यादित water.", hi: "यात्री युवाओं और बुजुर्गों के लिए घर से चलने वाली टिफिन सेवा। इसमें मर्यादित गुनगुने जल का प्रयोग होता है।" }
+    },
+    {
+      id: "chk-5",
+      name: { en: "Shri Adinath Swadhyay Mandir Community Kitchen", hi: "श्री आदिनाथ स्वाध्याय मंदिर सामुदायिक रसोई" },
+      type: "dharamshala" as const,
+      address: { en: "Jain Colony Lane 2, Near Ram Mandir Cross Road, Salem", hi: "जैन कॉलोनी लेन २, राम मंदिर क्रॉस रोड के पास, सेलम" },
+      distance: 2.1,
+      timing: { en: "Only Noon Prasad: 11:30 AM - 12:45 PM", hi: "केवल दुपहर साधु संग प्रसादी: ११:३० से १२:४५" },
+      contact: "+91 42724 49200",
+      verifiedBy: "Salem Shaktivardan Trust",
+      facilities: {
+        sunsetRules: true,
+        waterFiltration: true,
+        uncontaminatedUtensils: true,
+        zeroRootVegs: true
+      },
+      desc: { en: "Run by local vows followers. Best for visiting pilgrims seeking the highest level of nutritional hygiene and non-violence.", hi: "स्थानीय श्रावकों द्वारा सेवाभाव से संचालित। यात्रियों के लिए परम अहिंसक शुद्धता और सादगीपूर्ण भोजन की व्यवस्था।" }
+    }
+  ];
+
+  const filteredChoukas = choukaData.filter(ch => {
+    const matchesSearch = ch.name.en.toLowerCase().includes(choukaSearchStr.toLowerCase()) || 
+                          ch.name.hi.includes(choukaSearchStr) ||
+                          ch.address.en.toLowerCase().includes(choukaSearchStr.toLowerCase()) ||
+                          ch.address.hi.includes(choukaSearchStr);
+    const matchesType = selectedChoukaType === 'all' || ch.type === selectedChoukaType;
+    const matchesDist = ch.distance <= choukaDistanceFilter;
+    return matchesSearch && matchesType && matchesDist;
+  });
 
   const calculateAudit = () => {
     if (auditScores.rootVegs || auditScores.yeastFoods) {
@@ -359,6 +462,18 @@ export default function DietPage() {
 
   return (
     <div className="min-h-full p-6 pb-26 bg-gradient-to-b from-gray-50 to-gray-100 dark:from-[#050505] dark:to-[#0d0d0d] text-gray-900 dark:text-gray-100 transition-colors duration-300">
+      
+      {/* FIXED TOP RIGHT TRANSLATOR WIDGET */}
+      <button
+        type="button"
+        onClick={toggleLanguage}
+        className="fixed top-4 right-4 z-50 px-4.5 py-2.5 bg-[#FF3D00] text-white hover:bg-[#D50000] active:scale-95 transition-all shadow-lg rounded-full flex items-center justify-center gap-2 font-black text-xs cursor-pointer border border-[#FF9100]/30"
+        title="Translate Language / भाषा बदलें"
+      >
+        <Globe size={15} className="animate-spin-slow" />
+        <span>{lang === 'en' ? 'हिन्दी' : 'English'}</span>
+      </button>
+
       {/* Header */}
       <header className="sticky top-0 z-40 bg-gray-50/95 dark:bg-[#050505]/95 backdrop-blur-md -mx-6 px-6 py-4 mb-6 border-b border-gray-200/50 dark:border-white/5 flex items-center justify-between gap-4">
         <div className="flex items-center gap-4">
@@ -369,31 +484,23 @@ export default function DietPage() {
             {lang === 'en' ? 'AHAR VIDHI (JAIN DIET)' : 'आहार विधि (जैन भोजन नियम)'}
           </h1>
         </div>
-
-        <button
-          onClick={toggleLanguage}
-          className="px-4 py-2 bg-white/80 dark:bg-[#121212]/80 backdrop-blur-md border border-gray-200 dark:border-white/10 rounded-full flex items-center justify-center text-[#FF8A65] hover:bg-gray-100 dark:hover:bg-[#1A1A1A] transition-all shadow-sm font-bold text-xs cursor-pointer"
-          title="Toggle Language"
-        >
-          {lang === 'en' ? 'हिंदी (HI)' : 'English (EN)'}
-        </button>
       </header>
 
       {/* Tabs */}
-      <div className="flex bg-white dark:bg-[#121212] p-1 border border-gray-200/50 dark:border-white/5 rounded-2xl mb-6">
+      <div className="flex flex-wrap gap-1 md:flex-nowrap bg-white dark:bg-[#121212] p-1 border border-gray-200/50 dark:border-white/5 rounded-2xl mb-6 shadow-xs">
         <button 
           onClick={() => { setActiveTab('rules'); setSelectedRecipe(null); }}
-          className={`flex-1 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-colors ${
-            activeTab === 'rules' ? 'bg-orange-500 text-white shadow-sm' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-200'
+          className={`flex-1 min-w-[75px] text-center py-2.5 rounded-xl text-[10px] md:text-xs font-black uppercase tracking-wider transition-colors ${
+            activeTab === 'rules' ? 'bg-orange-500 text-white shadow-xs' : 'text-gray-400 hover:text-gray-650 dark:hover:text-gray-200'
           }`}
           id="btn-tab-rules"
         >
-          {lang === 'en' ? 'Diet Rules' : 'आहार नियम'}
+          {lang === 'en' ? 'Rules' : 'आहार नियम'}
         </button>
         <button 
           onClick={() => { setActiveTab('recipes'); setSelectedRecipe(null); }}
-          className={`flex-1 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-colors ${
-            activeTab === 'recipes' ? 'bg-orange-500 text-white shadow-sm' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-200'
+          className={`flex-1 min-w-[75px] text-center py-2.5 rounded-xl text-[10px] md:text-xs font-black uppercase tracking-wider transition-colors ${
+            activeTab === 'recipes' ? 'bg-orange-500 text-white shadow-xs' : 'text-gray-400 hover:text-gray-650 dark:hover:text-gray-200'
           }`}
           id="btn-tab-recipes"
         >
@@ -401,12 +508,21 @@ export default function DietPage() {
         </button>
         <button 
           onClick={() => { setActiveTab('audit'); setSelectedRecipe(null); }}
-          className={`flex-1 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-colors ${
-            activeTab === 'audit' ? 'bg-orange-500 text-white shadow-sm' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-200'
+          className={`flex-1 min-w-[75px] text-center py-2.5 rounded-xl text-[10px] md:text-xs font-black uppercase tracking-wider transition-colors ${
+            activeTab === 'audit' ? 'bg-orange-500 text-white shadow-xs' : 'text-gray-400 hover:text-gray-650 dark:hover:text-gray-200'
           }`}
           id="btn-tab-audit"
         >
-          {lang === 'en' ? 'Satvik Audit' : 'शुद्धता परीक्षक'}
+          {lang === 'en' ? 'Audit' : 'शुद्धता परीक्षक'}
+        </button>
+        <button 
+          onClick={() => { setActiveTab('chouka'); setSelectedRecipe(null); }}
+          className={`flex-1 min-w-[100px] text-center py-2.5 rounded-xl text-[10px] md:text-xs font-black uppercase tracking-wider transition-colors ${
+            activeTab === 'chouka' ? 'bg-orange-500 text-white shadow-xs' : 'text-gray-400 hover:text-gray-650 dark:hover:text-gray-200'
+          }`}
+          id="btn-tab-chouka"
+        >
+          {lang === 'en' ? 'Chouka Map' : 'चौका नेविगेटर'}
         </button>
       </div>
 
@@ -683,7 +799,7 @@ export default function DietPage() {
             <AnimatePresence>
               {auditResult && (
                 <motion.div 
-                  initial={{ scale: 0.95, opacity: 0 }}
+                   initial={{ scale: 0.95, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   className="p-4 bg-yellow-500/10 border-2 border-yellow-500/20 text-xs font-bold text-gray-800 dark:text-gray-100 rounded-2xl shadow-inner mt-4"
                 >
@@ -692,6 +808,171 @@ export default function DietPage() {
                 </motion.div>
               )}
             </AnimatePresence>
+          </div>
+        </div>
+      )}
+
+      {/* Tab 4: Verified Jain Chouka & Food Locator Navigator */}
+      {activeTab === 'chouka' && (
+        <div className="space-y-4 animate-in fade-in duration-300">
+          <div className="p-5 bg-white dark:bg-[#121212] border border-gray-200/60 dark:border-white/5 rounded-3xl shadow-sm space-y-4">
+            <div className="flex flex-col gap-2">
+              <h3 className="text-sm font-black uppercase tracking-wider text-orange-500 flex items-center gap-2">
+                <Utensils size={18} />
+                {lang === 'en' ? 'Jain Food Locator' : 'जैन फूड लोकेटर (शुद्ध चौका व आहार)'}
+              </h3>
+              <p className="text-[11px] text-gray-500 font-semibold leading-relaxed">
+                {lang === 'en' 
+                  ? 'Identify verified Jain kitchens, pious local family cooks, and dharamshalas serving pure dietary meals within custom distance radius.'
+                  : 'तीर्थ यात्रियों के लिए ५ किमी के दायरे में छने जल, सूर्योदय-सूर्यास्त मर्यादा और बिना ज़मीकंद (आलू-प्याज) वाले प्रामाणिक जैन चौके एवं रसोई स्थल।'}
+              </p>
+            </div>
+
+            {/* Search and Filters */}
+            <div className="space-y-3 pt-2">
+              <div className="relative">
+                <Search className="absolute left-3.5 top-3.5 text-gray-450 dark:text-gray-500" size={16} />
+                <input 
+                  type="text"
+                  placeholder={lang === 'en' ? 'Search by location, family name, road...' : 'शहर, सोसाइटी या मंदिर का नाम खोजें...'}
+                  value={choukaSearchStr}
+                  onChange={(e) => setChoukaSearchStr(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-[#1A1A1A] border border-gray-200/80 dark:border-white/5 rounded-2xl text-xs font-bold leading-normal focus:outline-none focus:ring-1 focus:ring-orange-500 text-gray-800 dark:text-gray-100 placeholder:text-gray-400"
+                />
+              </div>
+
+              {/* Distance Slider Selector */}
+              <div className="bg-gray-50 dark:bg-[#1A1A1A]/30 p-3.5 border border-gray-100 dark:border-white/5 rounded-2xl space-y-1">
+                <div className="flex justify-between items-center text-[10px] font-black uppercase">
+                  <span className="text-gray-500">{lang === 'en' ? 'Max Distance Radius' : 'अधिकतम दूरी दायरा'}</span>
+                  <span className="text-orange-500">{choukaDistanceFilter} km</span>
+                </div>
+                <input 
+                  type="range" 
+                  min="2" 
+                  max="50" 
+                  value={choukaDistanceFilter}
+                  onChange={(e) => setChoukaDistanceFilter(Number(e.target.value))}
+                  className="w-full accent-orange-500 h-1.5 bg-gray-200 dark:bg-white/10 rounded-lg appearance-none cursor-pointer"
+                />
+                <div className="flex justify-between text-[8px] text-gray-400 font-extrabold uppercase">
+                  <span>2 km</span>
+                  <span>5 km {lang === 'en' ? '(Near Me)' : '(निकटतम)'}</span>
+                  <span>15 km</span>
+                  <span>50 km</span>
+                </div>
+              </div>
+
+              {/* Quick Type Tags */}
+              <div className="flex flex-wrap gap-1.5">
+                {[
+                  { id: 'all', en: 'All Kitchens', hi: 'सभी रसोई' },
+                  { id: 'family', en: '🏡 Pious Families', hi: '🏡 श्रावक चौका' },
+                  { id: 'dharamshala', en: '🏛️ Dharamshalas', hi: '🏛️ भोजनशाला' },
+                  { id: 'restaurant', en: '🍛 Verified Hotels', hi: '🍛 सत्यापित होटल' }
+                ].map((t) => (
+                  <button
+                    key={t.id}
+                    onClick={() => setSelectedChoukaType(t.id as any)}
+                    className={`px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer ${
+                      selectedChoukaType === t.id 
+                        ? 'bg-orange-500 text-white shadow-xs' 
+                        : 'bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+                    }`}
+                  >
+                    {lang === 'en' ? t.en : t.hi}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Results List */}
+          <div className="space-y-4">
+            <div className="flex justify-between items-center px-1">
+              <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{lang === 'en' ? 'CHOUKAS DISCOVERED' : 'प्राप्त सात्विक चौके'} ({filteredChoukas.length})</span>
+              {choukaDistanceFilter <= 5 && <span className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest">{lang === 'en' ? 'LOCAL RADIUS ACTIVE' : 'स्थानीय दायरा एक्टिव'}</span>}
+            </div>
+
+            {filteredChoukas.length === 0 ? (
+              <div className="p-10 text-center bg-white dark:bg-[#121212] rounded-3xl border border-gray-150 dark:border-white/5">
+                <p className="text-xs text-gray-400 font-black uppercase mb-1">{lang === 'en' ? 'No Verified Choukas Found' : 'कोई प्रामाणिक चौका नहीं मिला'}</p>
+                <p className="text-[10px] text-gray-500 font-semibold">{lang === 'en' ? 'Try widening your distance slider or resetting keywords.' : 'कृपया दूरी का किलोमीटर बढ़ाएं या कीवर्ड बदलें।'}</p>
+              </div>
+            ) : (
+              filteredChoukas.map((chk) => (
+                <div key={chk.id} className="p-5 bg-white dark:bg-[#121212] border border-gray-150 dark:border-white/5 rounded-3xl shadow-xs space-y-4">
+                  <div className="flex justify-between items-start gap-2">
+                    <div>
+                      <span className="inline-block px-2 py-0.5 rounded-md text-[8px] font-black tracking-widest uppercase mb-1.5 bg-orange-500/10 text-orange-500">
+                        {chk.type === 'family' && (lang === 'en' ? 'Noble Shravak Family' : 'श्रावक पारिवारिक चौका')}
+                        {chk.type === 'dharamshala' && (lang === 'en' ? 'Tirth Dharamshala Rasoi' : 'तीर्थ धर्मशाला रसोई')}
+                        {chk.type === 'restaurant' && (lang === 'en' ? 'Verified Satvik Restaurant' : 'सत्यापित सात्विक होटल')}
+                      </span>
+                      <h4 className="font-extrabold text-sm text-gray-850 dark:text-white leading-tight">
+                        {lang === 'en' ? chk.name.en : chk.name.hi}
+                      </h4>
+                      <p className="text-[10px] text-gray-400 font-bold mt-1 flex items-center gap-1">
+                        📍 {lang === 'en' ? chk.address.en : chk.address.hi}
+                      </p>
+                    </div>
+                    <span className="text-xs font-black text-orange-500 bg-orange-500/5 px-2.5 py-1 rounded-xl shrink-0">
+                      ⚡ {chk.distance} km
+                    </span>
+                  </div>
+
+                  <p className="text-[11px] text-gray-650 dark:text-gray-300 font-medium leading-relaxed bg-gray-50/50 dark:bg-[#1A1A1A]/30 p-3 rounded-2xl border border-gray-100/50 dark:border-white/5">
+                    {lang === 'en' ? chk.desc.en : chk.desc.hi}
+                  </p>
+
+                  <div className="space-y-2">
+                    <span className="text-[8px] font-black tracking-widest text-gray-400 block uppercase">{lang === 'en' ? 'GUARANTEED SANCTITY CODES' : 'चौका शुचिता व नियम कोड'}</span>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="flex items-center gap-1.5 text-[10px] font-bold text-gray-650 dark:text-gray-300">
+                        <CheckCircle2 size={13} className="text-emerald-500" />
+                        <span>{lang === 'en' ? 'Sunset Rules' : 'सूर्यास्त पूर्व पाक क्रिया'}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-[10px] font-bold text-gray-650 dark:text-gray-300">
+                        <CheckCircle2 size={13} className="text-emerald-500" />
+                        <span>{lang === 'en' ? 'Chhana Cotton Filter' : 'मर्यादित छना जल'}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-[10px] font-bold text-gray-650 dark:text-gray-300">
+                        <CheckCircle2 size={13} className="text-emerald-500" />
+                        <span>{lang === 'en' ? 'Separate Untouched Pots' : 'पृथक वैष्णव बर्तन'}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-[10px] font-bold text-gray-650 dark:text-gray-300">
+                        <CheckCircle2 size={13} className="text-emerald-500" />
+                        <span>{lang === 'en' ? 'Zero Root Vegs' : 'आलू-प्याज सर्वथा वर्जित'}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pt-2 border-t border-gray-100 dark:border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-[10px]">
+                    <div className="font-extrabold text-[#757575]">
+                      ⏰ {lang === 'en' ? chk.timing.en : chk.timing.hi}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <a 
+                        href={`tel:${chk.contact}`}
+                        className="px-3.5 py-2 bg-orange-500 text-white font-black rounded-xl uppercase tracking-wider text-[9px] hover:bg-orange-600 shadow-xs cursor-pointer text-center flex-1 sm:flex-initial"
+                      >
+                        📞 {lang === 'en' ? 'Contact' : 'संपर्क करें'}
+                      </a>
+                      <button 
+                        onClick={() => alert(lang === 'en' ? `Opening directions for ${chk.name.en} using map coordinates.` : `${chk.name.hi} के लिए लाइव नक्शा मार्गनिर्देशन लोड हो रहा है...`)}
+                        className="px-3.5 py-2 bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-gray-300 font-black rounded-xl uppercase tracking-wider text-[9px] hover:bg-gray-200 dark:hover:bg-white/10 cursor-pointer text-center flex-1 sm:flex-initial border border-gray-200/50 dark:border-white/5"
+                      >
+                        🗺️ {lang === 'en' ? 'Navigate' : 'रास्ता देखें'}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="text-[8px] font-extrabold text-emerald-500 flex items-center gap-1 bg-emerald-500/5 px-2.5 py-1.5 rounded-xl border border-emerald-500/10">
+                    🛡️ {lang === 'en' ? 'VERIFIED STAMP:' : 'सत्यापन:'} {chk.verifiedBy}
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
       )}

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { HelpCircle, CheckCircle2, XCircle, RefreshCcw, Award, Flame, ArrowLeft, Loader2, Sparkles } from 'lucide-react';
+import { HelpCircle, CheckCircle2, XCircle, RefreshCcw, Award, Flame, ArrowLeft, Loader2, Sparkles, Globe } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
@@ -252,6 +252,18 @@ export default function QuizPage() {
 
   return (
     <div className="min-h-full p-6 pb-24 bg-[#050505] text-gray-200">
+      
+      {/* FIXED TOP RIGHT TRANSLATOR WIDGET */}
+      <button
+        type="button"
+        onClick={toggleLanguage}
+        className="fixed top-4 right-4 z-50 px-4.5 py-2.5 bg-[#FF3D00] text-white hover:bg-[#D50000] active:scale-95 transition-all shadow-lg rounded-full flex items-center justify-center gap-2 font-black text-xs cursor-pointer border border-[#FF9100]/30"
+        title="Translate Language / भाषा बदलें"
+      >
+        <Globe size={15} className="animate-spin-slow" />
+        <span>{language === 'en' ? 'हिन्दी' : 'English'}</span>
+      </button>
+
       <header className="sticky top-0 z-40 bg-[#050505]/95 backdrop-blur-md -mx-6 px-6 py-4 mb-8 border-b border-white/5 flex items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <button onClick={() => navigate(-1)} className="p-2 rounded-full bg-white/5 hover:bg-white/10 transition-colors">
@@ -262,14 +274,7 @@ export default function QuizPage() {
             {language === 'hi' ? 'दैनिक क्विज़' : 'DAILY QUIZ'}
           </h1>
         </div>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={toggleLanguage}
-            className="px-4 py-2 bg-white/5 hover:bg-white/10 backdrop-blur-md border border-white/10 rounded-full flex items-center justify-center text-[#FF8A65] transition-all shadow-sm font-bold text-xs cursor-pointer"
-            title="Toggle Language"
-          >
-            {language === 'en' ? 'हिंदी (HI)' : 'English (EN)'}
-          </button>
+        <div className="flex items-center gap-3 font-semibold">
           <span className="bg-[#121212]/80 px-4 py-1.5 rounded-full text-sm font-black text-[#FFD54F] shadow-[0_0_10px_rgba(255,213,79,0.1)] border border-[#FFD54F]/20 tracking-widest">
             {currentQ + 1} / {questions.length}
           </span>

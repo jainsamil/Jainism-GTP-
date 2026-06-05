@@ -171,6 +171,81 @@
         "submittedAt": { "type": "string" }
       },
       "required": ["homeworkId", "studentId", "studentName", "link"]
+    },
+    "kitchen": {
+      "title": "Kitchen",
+      "description": "Pure Jain kitchen profile or restaurant",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "object", "description": "Name in Hindi/English" },
+        "type": { "type": "string", "enum": ["family", "dharamshala", "restaurant"] },
+        "address": { "type": "object" },
+        "city": { "type": "string" },
+        "contact": { "type": "string" },
+        "sunsetCompliant": { "type": "boolean" },
+        "filteredWater": { "type": "boolean" },
+        "noRootsAllowed": { "type": "boolean" },
+        "rating": { "type": "number" },
+        "pureUtensils": { "type": "boolean" },
+        "distanceSimulated": { "type": "number" },
+        "aharTimings": { "type": "object" },
+        "specialty": { "type": "object" },
+        "reviews": { "type": "array", "items": { "type": "object" } },
+        "lat": { "type": "number" },
+        "lng": { "type": "number" },
+        "state": { "type": "string" },
+        "costType": { "type": "string", "enum": ["free", "nominal", "paid"] },
+        "costRupees": { "type": "number" },
+        "costInfo": { "type": "object" },
+        "status": { "type": "string", "enum": ["approved", "pending"] },
+        "chatHistory": { "type": "array", "items": { "type": "object" } }
+      },
+      "required": ["name", "type", "address", "city", "contact", "status"]
+    },
+    "dharamshala": {
+      "title": "Dharamshala",
+      "description": "Verified Jain Dharamshala details and live room state",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "object" },
+        "tirth": { "type": "object" },
+        "sect": { "type": "string", "enum": ["Digambar", "Svetambar", "Unified"] },
+        "distanceToHillWalk": { "type": "string" },
+        "roomsAvailable": { "type": "number" },
+        "totalRooms": { "type": "number" },
+        "pricePerDay": { "type": "number" },
+        "rating": { "type": "number" },
+        "aharshalaStatus": { "type": "object" },
+        "contact": { "type": "string" },
+        "address": { "type": "object" },
+        "facilities": {
+          "type": "array",
+          "items": { "type": "object" }
+        }
+      },
+      "required": ["id", "name", "tirth", "sect", "roomsAvailable", "totalRooms", "pricePerDay", "contact", "address"]
+    },
+    "dharamshala_booking": {
+      "title": "Dharamshala Booking",
+      "description": "Live booking request and approval state",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "dharamshalaId": { "type": "string" },
+        "dharamshalaName": { "type": "object" },
+        "tirth": { "type": "object" },
+        "pilgrimName": { "type": "string" },
+        "checkInDate": { "type": "string" },
+        "roomType": { "type": "string" },
+        "guestsCount": { "type": "number" },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
+        "priceCollected": { "type": "number" },
+        "contact": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "dharamshalaId", "pilgrimName", "checkInDate", "roomType", "status"]
     }
   },
   "firestore": {
@@ -186,6 +261,9 @@
     "/settings/config": { "schema": "settings", "description": "Global app settings" },
     "/user_chats/{id}": { "schema": "user_chats", "description": "Private user chat sessions" },
     "/homeworks/{id}": { "schema": "homeworks", "description": "Pathshala homework records" },
-    "/homework_submissions/{id}": { "schema": "homework_submissions", "description": "Homework student answers" }
+    "/homework_submissions/{id}": { "schema": "homework_submissions", "description": "Homework student answers" },
+    "/kitchens/{id}": { "schema": "kitchen", "description": "Verified Jain kitchens and registrations" },
+    "/dharamshalas/{id}": { "schema": "dharamshala", "description": "Dharamshala properties" },
+    "/dharamshala_bookings/{id}": { "schema": "dharamshala_booking", "description": "Bookings table for notifications and approvals" }
   }
 }

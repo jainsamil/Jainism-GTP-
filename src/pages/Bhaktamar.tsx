@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, BookOpen, Volume2, Sparkles, Heart, HeartOff, HelpCircle, CheckCircle2, ChevronRight, Play, Pause, Bookmark, Loader2 } from 'lucide-react';
+import { ArrowLeft, BookOpen, Volume2, Sparkles, Heart, HeartOff, HelpCircle, CheckCircle2, ChevronRight, Play, Pause, Bookmark, Loader2, Globe } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { motion, AnimatePresence } from 'motion/react';
 import { BHAKTAMAR_DATA, ShlokaData } from '../data/bhaktamarData';
@@ -86,7 +86,7 @@ export default function BhaktamarPage() {
       setAudioLoading(false);
       setAudioError("Primary stotra stream offline. Switching to standby relaxation stream...");
       
-      const standbyUrl = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3";
+      const standbyUrl = "https://archive.org/download/BhaktamarStotra_201306/Bhaktamar%20Stotra.mp3";
       setTimeout(() => {
         if (audioInstanceRef.current) {
           audioInstanceRef.current.src = standbyUrl;
@@ -191,6 +191,18 @@ export default function BhaktamarPage() {
 
   return (
     <div className="min-h-full p-6 pb-26 bg-gradient-to-b from-gray-50 to-gray-100 dark:from-[#050505] dark:to-[#0d0d0d] text-gray-900 dark:text-gray-100 transition-colors duration-300">
+      
+      {/* FIXED TOP RIGHT TRANSLATOR WIDGET */}
+      <button
+        type="button"
+        onClick={toggleLanguage}
+        className="fixed top-4 right-4 z-50 px-4.5 py-2.5 bg-[#FF3D00] text-white hover:bg-[#D50000] active:scale-95 transition-all shadow-lg rounded-full flex items-center justify-center gap-2 font-black text-xs cursor-pointer border border-[#FF9100]/30"
+        title="Translate Language / भाषा बदलें"
+      >
+        <Globe size={15} className="animate-spin-slow" />
+        <span>{lang === 'en' ? 'हिन्दी' : 'English'}</span>
+      </button>
+
       {/* Header */}
       <header className="sticky top-0 z-40 bg-gray-50/95 dark:bg-[#050505]/95 backdrop-blur-md -mx-6 px-6 py-4 mb-6 border-b border-gray-200/50 dark:border-white/5 flex items-center justify-between gap-4">
         <div className="flex items-center gap-4">
@@ -201,14 +213,6 @@ export default function BhaktamarPage() {
             {lang === 'en' ? 'BHAKTAMAR HEALING' : 'भक्तामर हीलिंग एवं पाठ'}
           </h1>
         </div>
-
-        <button
-          onClick={toggleLanguage}
-          className="px-4 py-2 bg-white/80 dark:bg-[#121212]/80 backdrop-blur-md border border-gray-200 dark:border-white/10 rounded-full flex items-center justify-center text-[#FF8A65] hover:bg-gray-100 dark:hover:bg-[#1A1A1A] transition-all shadow-sm font-bold text-xs cursor-pointer"
-          title="Toggle Language"
-        >
-          {lang === 'en' ? 'हिंदी (HI)' : 'English (EN)'}
-        </button>
       </header>
 
       {/* Intro info box */}

@@ -141,7 +141,7 @@ export const fallbackMediaData = {
       id: "fb_bhajan_6",
       type: "bhajans",
       title: "नामुकार मंत्र महा कल्याण मंत्र",
-      artist: "गायत्री मंत्र सुर",
+      artist: "जैन स्वर साधना",
       duration: "08:15",
       thumbnail: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?q=80&w=600&auto=format&fit=crop",
       url: "https://archive.org/download/NavkarMantra_201704/Navkar%20Mantra.mp3"
@@ -150,7 +150,7 @@ export const fallbackMediaData = {
       id: "fb_bhajan_7",
       type: "bhajans",
       title: "मेरी भावना स्वर संगीत",
-      artist: "वैदिक सुर",
+      artist: "परम्परागत जैन संगीत",
       duration: "09:02",
       thumbnail: "https://images.unsplash.com/photo-1465847899084-d164df4dedc6?q=80&w=600&auto=format&fit=crop",
       url: "https://archive.org/download/bhaktamar-stotra-hindi/bhaktamar_hindi.mp3"

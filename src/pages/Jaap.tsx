@@ -1,20 +1,20 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, RotateCcw, Volume2, VolumeX, Sparkles, Award, Play, Pause, Compass, Zap } from 'lucide-react';
+import { ArrowLeft, RotateCcw, Volume2, VolumeX, Sparkles, Award, Play, Pause, Compass, Zap, Globe } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { motion, AnimatePresence } from 'motion/react';
 import SectionAiAgent from '../components/SectionAiAgent';
 
 const MANTRAS = [
-  { id: 'navkar', text: 'नमोकार महामंत्र', enText: 'Navkar Mahamantra', full: 'णमो अरिहंताणं णमो सिद्धाणं णमो आयरियाणं णमो उवज्झायाणं णमो लोए सव्वसाहूणं। ऐसो पंचणमोयारो सव्वपावप्पणासणो मंगलाणं च सव्वेसिं पडमम हवई मंगलम।' },
+  { id: 'navkar', text: 'नमोकार महामंत्र', enText: 'Navkar Mahamantra', full: 'णमो अरिहंताणं णमो सिद्धाणं णमो आयरियाणं णमो उवज्झायाणं णमो लोए सव्वसाहूणं। एसा पंचणमोक्कारो सव्वपावप्पणासणो। मंगलाणं च सव्वेसिं पढमं हवइ मंगलं॥' },
   { id: 'om', text: 'ॐ नमः सिद्धम्', enText: 'Om Namah Siddham', full: 'ॐ नमः सिद्धम्' },
   { id: 'parshva', text: 'ॐ ह्रीं श्रीं पार्श्वनाथाय नमः', enText: 'Om Hreem Shreem Parshvanathaya Namah', full: 'ॐ ह्रीं श्रीं धरणीन्द्र पद्मावती सहित पार्श्वनाथाय नमः' },
-  { id: 'mahavir', text: 'ॐ नमो भगवते महावीराय', enText: 'Om Namo Bhagavate Mahaviraya', full: 'ॐ ह्रीं श्रीं वर्धमान जिनेन्द्राय नमः' },
+  { id: 'mahavir', text: 'ॐ नमो भगवते महावीराय (वर्धमान)', enText: 'Om Namo Bhagavate Mahaviraya', full: 'ॐ ह्रीं श्रीं सन्मति वर्धमान जिनेन्द्राय नमः' },
 ];
 
 export default function JaapPage() {
   const navigate = useNavigate();
-  const { language: lang } = useLanguage();
+  const { language: lang, toggleLanguage } = useLanguage();
   const [selectedMantra, setSelectedMantra] = useState(MANTRAS[0]);
   const [count, setCount] = useState(0);
   const [malas, setMalas] = useState(0);
@@ -24,6 +24,8 @@ export default function JaapPage() {
   const [totalCounts, setTotalCounts] = useState(0);
   const [showCelebration, setShowCelebration] = useState(false);
   const [ripples, setRipples] = useState<{ id: number; x: number; y: number }[]>([]);
+  const [isAutoChanting, setIsAutoChanting] = useState(false);
+  const [autoChantSpeed, setAutoChantSpeed] = useState(4); // seconds per bead interval
 
   useEffect(() => {
     // Load persisted stats
@@ -35,15 +37,16 @@ export default function JaapPage() {
     if (savedCount) setTotalCounts(parseInt(savedCount, 10));
     if (savedMalas) setMalas(parseInt(savedMalas, 10));
     
-    // Calculate streak
+    // Calculate streak precisely by comparing dates
     if (savedStreak) {
       const parsedStreak = parseInt(savedStreak, 10);
       if (lastSession) {
-        const lastDate = new Date(lastSession);
-        const today = new Date();
-        const diffTime = Math.abs(today.getTime() - lastDate.getTime());
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        if (diffDays <= 1) {
+        const todayStr = new Date().toDateString();
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = yesterday.toDateString();
+
+        if (lastSession === todayStr || lastSession === yesterdayStr) {
           setStreak(parsedStreak);
         } else {
           setStreak(0); // Streak broken
@@ -110,13 +113,19 @@ export default function JaapPage() {
     }
   };
 
-  const incrementCount = (e: React.MouseEvent<HTMLDivElement>) => {
+  const incrementCount = (e?: React.MouseEvent<HTMLDivElement>) => {
     // Collect ripple coordinate
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const newRipple = { id: Date.now(), x, y };
-    setRipples(prev => [...prev, newRipple]);
+    if (e && e.currentTarget) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const newRipple = { id: Date.now(), x, y };
+      setRipples(prev => [...prev, newRipple]);
+    } else {
+      // Simulate central pulsing coordinates
+      const newRipple = { id: Date.now(), x: 128, y: 128 };
+      setRipples(prev => [...prev, newRipple]);
+    }
 
     playBeep();
 
@@ -153,6 +162,19 @@ export default function JaapPage() {
     }
   };
 
+  // Auto-Chant meditative companion loop
+  useEffect(() => {
+    let intervalId: any = null;
+    if (isAutoChanting) {
+      intervalId = setInterval(() => {
+        incrementCount();
+      }, autoChantSpeed * 1000);
+    }
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [isAutoChanting, autoChantSpeed, count, totalCounts, malas, streak]);
+
   const handleReset = () => {
     const resetBeads = window.confirm(lang === 'en' ? 'Do you want to reset current Mala beads count?' : 'क्या आप वर्तमान माला जाप संख्या (Beads Count) रीसेट करना चाहते हैं?');
     if (resetBeads) {
@@ -178,6 +200,7 @@ export default function JaapPage() {
       window.speechSynthesis.cancel();
       setIsPlayingChant(false);
     } else {
+      window.speechSynthesis.cancel(); // Safety line to unblock any stuck synthesis
       setIsPlayingChant(true);
       const textToSpeak = selectedMantra.full;
       const utterance = new SpeechSynthesisUtterance(textToSpeak);
@@ -208,29 +231,42 @@ export default function JaapPage() {
 
   return (
     <div className="min-h-full p-6 pb-26 bg-gradient-to-b from-gray-50 to-gray-100 dark:from-[#050505] dark:to-[#0d0d0d] text-gray-900 dark:text-gray-100 transition-colors duration-300">
+      
+      {/* FIXED TOP RIGHT TRANSLATOR WIDGET */}
+      <button
+        type="button"
+        onClick={toggleLanguage}
+        className="fixed top-4 right-4 z-50 px-4.5 py-2.5 bg-[#FF3D00] text-white hover:bg-[#D50000] active:scale-95 transition-all shadow-lg rounded-full flex items-center justify-center gap-2 font-black text-xs cursor-pointer border border-[#FF9100]/30"
+        title="Translate Language / भाषा बदलें"
+      >
+        <Globe size={15} className="animate-spin-slow" />
+        <span>{lang === 'en' ? 'हिन्दी' : 'English'}</span>
+      </button>
+
       {/* Header */}
-      <header className="flex items-center justify-between mb-6 pt-4">
+      <header className="sticky top-0 z-40 bg-gray-50/95 dark:bg-[#050505]/95 backdrop-blur-md -mx-6 px-6 py-4 mb-6 border-b border-gray-200/50 dark:border-white/5 flex items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <button onClick={() => navigate(-1)} className="p-2 rounded-full bg-white dark:bg-white/5 shadow-sm dark:shadow-[0_0_10px_rgba(0,0,0,0.5)] border border-gray-100 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/10 transition-all">
             <ArrowLeft size={22} className="text-gray-700 dark:text-gray-300" />
           </button>
-          <h1 className="text-2xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] tracking-tight drop-shadow-none dark:drop-shadow-[0_0_10px_rgba(255,109,0,0.4)]">
-            JAAP COUNTER (माला)
+          <h1 className="text-xl md:text-2xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] tracking-tight drop-shadow-none dark:drop-shadow-[0_0_10px_rgba(255,109,0,0.4)]">
+            {lang === 'en' ? 'JAAP COUNTER (MALA)' : 'जाप काउंटर (माला)'}
           </h1>
         </div>
         
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2">
           <button 
             onClick={() => setSoundEnabled(!soundEnabled)} 
-            className="p-2.5 rounded-full bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 shadow-sm text-gray-600 dark:text-gray-400 hover:text-orange-500 transition-colors"
+            className="p-2.5 rounded-full bg-white/80 dark:bg-[#121212]/80 border border-gray-200 dark:border-white/10 shadow-sm text-gray-600 dark:text-gray-400 hover:text-orange-500 transition-colors cursor-pointer"
             title={soundEnabled ? "Mute Feedback" : "Enable Feedback"}
             id="btn-sound-toggle"
           >
             {soundEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
           </button>
+          
           <button 
             onClick={handleReset} 
-            className="p-2.5 rounded-full bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 shadow-sm text-gray-600 dark:text-gray-400 hover:text-red-500 transition-colors"
+            className="p-2.5 rounded-full bg-white/80 dark:bg-[#121212]/80 border border-gray-200 dark:border-white/10 shadow-sm text-gray-600 dark:text-gray-400 hover:text-red-500 transition-colors cursor-pointer"
             title="Reset Current Mala"
             id="btn-reset-jaap"
           >
@@ -330,6 +366,57 @@ export default function JaapPage() {
           >
             {isPlayingChant ? <Pause size={18} /> : <Play size={18} className="ml-0.5" />}
           </button>
+        </div>
+      </div>
+
+      {/* Hands-Free Auto-Jaap Companion Control Centre */}
+      <div className="bg-gradient-to-r from-orange-500/10 to-yellow-500/10 backdrop-blur-md rounded-3xl p-5 border border-orange-500/20 shadow-md mb-6">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+          <div>
+            <span className="text-[10px] font-black tracking-widest text-[#FF6D00] block mb-1 uppercase">
+              {lang === 'en' ? 'HANDS-FREE AUTO-JAAP PILOT' : 'ऑटो-जाप सेवा (हैंड्स-फ्री)'}
+            </span>
+            <h3 className="text-base font-black text-gray-800 dark:text-white">
+              {lang === 'en' ? 'Continuous Automatic Meditation' : 'निरंतर स्वचालित जाप सिम्युलेटर'}
+            </h3>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+              {lang === 'en' ? 'Chimes and increments virtual beads automatically at your chosen pace.' : 'आपके चुने अंतराल पर स्वचालित रूप से माला के मनके आगे बढ़ाता चलेगा।'}
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-4">
+            {/* Speed selection */}
+            <div className="flex items-center gap-1.5 bg-gray-100 dark:bg-white/5 p-1 rounded-xl border border-gray-200/50 dark:border-white/5">
+              {[2, 3, 4, 5, 8].map((s) => (
+                <button
+                  key={s}
+                  onClick={() => setAutoChantSpeed(s)}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-black transition-all ${
+                    autoChantSpeed === s
+                      ? 'bg-orange-500 text-white shadow-sm'
+                      : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
+                  }`}
+                  title={`${s} seconds interval`}
+                >
+                  {s}s
+                </button>
+              ))}
+            </div>
+
+            {/* Toggle State */}
+            <button
+              onClick={() => setIsAutoChanting(!isAutoChanting)}
+              className={`px-5 py-2.5 rounded-2xl text-xs font-black tracking-wider uppercase transition-all duration-300 shadow-sm border ${
+                isAutoChanting
+                  ? 'bg-red-500 hover:bg-red-600 text-white border-transparent animate-pulse'
+                  : 'bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] text-black border-transparent hover:scale-105'
+              }`}
+            >
+              {isAutoChanting 
+                ? (lang === 'en' ? 'STOP AUTO' : 'जाप रोकें') 
+                : (lang === 'en' ? 'START AUTO' : 'ऑटो चालू करें')}
+            </button>
+          </div>
         </div>
       </div>
 

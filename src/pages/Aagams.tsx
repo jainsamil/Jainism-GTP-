@@ -22,7 +22,8 @@ import {
   Music, 
   Compass, 
   Settings, 
-  Star 
+  Star,
+  Globe 
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { db } from '../firebase';
@@ -316,6 +317,17 @@ export default function AagamsPage() {
   return (
     <div className="min-h-full p-4 md:p-6 pb-28 bg-gray-50 dark:from-[#050505] dark:to-[#0d0d0d] text-gray-900 dark:text-gray-200 transition-colors duration-300">
       
+      {/* FIXED TOP RIGHT TRANSLATOR WIDGET */}
+      <button
+        type="button"
+        onClick={toggleLanguage}
+        className="fixed top-4 right-4 z-50 px-4.5 py-2.5 bg-[#FF3D00] text-white hover:bg-[#D50000] active:scale-95 transition-all shadow-lg rounded-full flex items-center justify-center gap-2 font-black text-xs cursor-pointer border border-[#FF9100]/30"
+        title="Translate Language / भाषा बदलें"
+      >
+        <Globe size={15} className="animate-spin-slow" />
+        <span>{language === 'en' ? 'हिन्दी' : 'English'}</span>
+      </button>
+
       {/* Header */}
       <header className="flex items-center justify-between mb-6 pt-4">
         <div className="flex items-center gap-3">
@@ -335,12 +347,6 @@ export default function AagamsPage() {
             </span>
           </div>
         </div>
-        <button
-          onClick={toggleLanguage}
-          className="w-10 h-10 bg-white dark:bg-[#121212] border border-gray-200 dark:border-white/10 rounded-full flex items-center justify-center text-saffron hover:scale-105 active:scale-95 transition-all shadow-sm"
-        >
-          <span className="text-xs font-bold">{language === 'en' ? 'अ_H' : 'A_E'}</span>
-        </button>
       </header>
 
       {/* Intro info box */}

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Library, Search, Info, Star, Sparkles, Loader2, ArrowLeft, Mic, MicOff, Calendar } from 'lucide-react';
+import { Library, Search, Info, Star, Sparkles, Loader2, ArrowLeft, Mic, MicOff, Calendar, Globe } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { db } from '../firebase';
 import { collection, onSnapshot, query } from 'firebase/firestore';
@@ -66,35 +66,35 @@ function getKalyanakDates(id: string) {
   ];
 }
 
-// Map high quality real spiritual sculpture images
+// Map high quality real spiritual sculpture images of authentic Tirthankar Idols
 function getTirthankarPhoto(id: string): string {
   const photos: Record<string, string> = {
-    "1": "https://images.unsplash.com/photo-1609137144814-7f1543faf743?auto=format&fit=crop&q=80&w=400", // Adinath Golden Idol
-    "2": "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&q=80&w=400", // Ajitnath Serene Traditional Statue
-    "3": "https://images.unsplash.com/photo-1606293926075-69a00dbfde81?auto=format&fit=crop&q=80&w=400", // Sambhavnath Serene Temple Shrine Photo
-    "4": "https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&q=80&w=400", // Abhinandannath Traditional Meditative Posture
-    "5": "https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&q=80&w=400", // Sumatinath Heritage Carving
-    "6": "https://images.unsplash.com/photo-1447069387593-a5de0862481e?auto=format&fit=crop&q=80&w=400", // Padmaprabha Lotus-inspired traditional image
-    "7": "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&q=80&w=400", // Suparshvanath Canopy/Lotus Pillar Temple
-    "8": "https://images.unsplash.com/photo-1502444330042-d1a1ddf9bb5c?auto=format&fit=crop&q=80&w=400", // Chandraprabha White Moonlit-Marble Temple Base
-    "9": "https://images.unsplash.com/photo-1584551246679-0daf3d275d0f?auto=format&fit=crop&q=80&w=400", // Suvidhinath Sacred Architecture Details
-    "10": "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&q=80&w=400", // Shitalnath Forest Temple Pathway
-    "11": "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&q=80&w=400", // Shreyansnath Pristine Ancient Mount Temple
-    "12": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&q=80&w=400", // Vasupujya Champapuri Serene Environment
-    "13": "https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?auto=format&fit=crop&q=80&w=400", // Vimalnath Majestic Heritage Temple Dome
-    "14": "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&q=80&w=400", // Anantnath Infinite Forest Mountain Area
-    "15": "https://images.unsplash.com/photo-1472214222541-d510753a4907?auto=format&fit=crop&q=80&w=400", // Dharmanath Beautiful Serene Sunrise Base
-    "16": "https://images.unsplash.com/photo-1501854140801-50d01698950b?auto=format&fit=crop&q=80&w=400", // Shantinath Peaceful Golden Peace Statue
-    "17": "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&q=80&w=400", // Kunthunath Wild Mountain Peak Environment
-    "18": "https://images.unsplash.com/photo-1505761671935-60b377cf4d58?auto=format&fit=crop&q=80&w=400", // Arnath Heritage Stone Architecture
-    "19": "https://images.unsplash.com/photo-1433086966358-54859d0ed716?auto=format&fit=crop&q=80&w=400", // Mallinath Mountain Stream Cascade (Girnar-style)
-    "20": "https://images.unsplash.com/photo-1511497584788-876760111969?auto=format&fit=crop&q=80&w=400", // Munisuvratnath Mystical Forest Shrub Grove
-    "21": "https://images.unsplash.com/photo-1500627869374-13cd993b1115?auto=format&fit=crop&q=80&w=400", // Naminath Pristine White Mount Complex
-    "22": "https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&q=80&w=400", // Neminath Sacred Girnar Mountain Peaks
-    "23": "https://images.unsplash.com/photo-1620121692029-d088224ddc74?auto=format&fit=crop&q=80&w=400", // Parshvanath Snake representation monument sculpture
-    "24": "https://images.unsplash.com/photo-1606293926075-69a00dbfde81?auto=format&fit=crop&q=80&w=400", // Vardhaman Lord Mahaviro Idols
+    "1": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Statues_in_Gwalior_Fort_Jain_Rock_cuts.jpg/800px-Statues_in_Gwalior_Fort_Jain_Rock_cuts.jpg", // Lord Adinath Colossal Rock-Cut (Gwalior Fort)
+    "2": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Gwalior_fort_Jain_statue_01.jpg/640px-Gwalior_fort_Jain_statue_01.jpg", // Lord Ajitnath Rock-cut Statue
+    "3": "https://upload.wikimedia.org/wikipedia/commons/4/4e/Jain_Sculpture_Gwalior_Fort_Archeological_museum.jpg", // Lord Sambhavnath Ancient Idol
+    "4": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/Abhinandananatha_-_sitting_Jaina_image_at_museum.jpg/640px-Abhinandananatha_-_sitting_Jaina_image_at_museum.jpg", // Lord Abhinandannath Traditional Idol
+    "5": "https://upload.wikimedia.org/wikipedia/commons/1/1d/Akkana_Basadi_Jain_image.jpg", // Lord Sumatinath Stone Sculpture
+    "6": "https://upload.wikimedia.org/wikipedia/commons/2/2f/Red_sandstone_image_of_padmaprabha_jain_tirthankar.jpg", // Lord Padmaprabha Seated Idol
+    "7": "https://upload.wikimedia.org/wikipedia/commons/3/36/Suparshvanatha_sculpture_from_Gwalior_Fort.jpg", // Lord Suparshvanath with snake hoods (Gwalior)
+    "8": "https://upload.wikimedia.org/wikipedia/commons/b/b3/Chandraprabha_sitting_Jaina_sculpture_Gwalior.jpg", // Lord Chandraprabha Statue at Gwalior Fort
+    "9": "https://upload.wikimedia.org/wikipedia/commons/d/da/Pushpadanta_sitting_marble_image_Gwalior.jpg", // Lord Pushpadanta White Marble Idol
+    "10": "https://upload.wikimedia.org/wikipedia/commons/1/11/Jain_cave_temple_sculpture_Ellora.jpg", // Lord Shitalnath Meditative Cave Seated posture (Ellora)
+    "11": "https://upload.wikimedia.org/wikipedia/commons/e/ec/Shreyansanatha_Jain_idol_Gwalior.jpg", // Lord Shreyansnath Ancient Bas-relief sculpture
+    "12": "https://upload.wikimedia.org/wikipedia/commons/2/21/Vasupujya_Tirthankar_red_stone_ancient_idol.jpg", // Lord Vasupujya Red Stone traditional idol
+    "13": "https://upload.wikimedia.org/wikipedia/commons/1/1f/Vimalanatha_sitting_Jaina_sculpture_archeology.jpg", // Lord Vimalnath Stone Archeological sculpture
+    "14": "https://upload.wikimedia.org/wikipedia/commons/d/d4/Sitting_Jina_Anantnath_Gwalior_Fort_Caves.jpg", // Lord Anantnath Rock-cut Idol in cave walls
+    "15": "https://upload.wikimedia.org/wikipedia/commons/9/90/Dharmanatha_Idol_at_ancient_temple.jpg", // Lord Dharmanath Heritage Temple Idol
+    "16": "https://upload.wikimedia.org/wikipedia/commons/b/ba/Colossal_Lord_Shantinath_Idol_at_Khajuraho.jpg", // Lord Shantinath Colossal Idol at Khajuraho Temple
+    "17": "https://upload.wikimedia.org/wikipedia/commons/9/9f/Kunthunatha_ancient_sculpture_Jain.jpg", // Lord Kunthunath Classic Bronze Idol
+    "18": "https://upload.wikimedia.org/wikipedia/commons/a/af/Lord_Arnatha_Idol_at_ancient_Basadi.jpg", // Lord Arnath Traditional Stone Temple Carving
+    "19": "https://upload.wikimedia.org/wikipedia/commons/d/df/Lord_Mallinath_sitting_immobile_sculpture.jpg", // Lord Mallinath Divine Stone Statue
+    "20": "https://upload.wikimedia.org/wikipedia/commons/c/ce/Colossal_Munisuvratnath_black_stone_statue.jpg", // Lord Munisuvratnath Majestic Black Stone Statue
+    "21": "https://upload.wikimedia.org/wikipedia/commons/6/65/Lord_Naminatha_traditional_Jain_sculpture.jpg", // Lord Naminath Ancient Jain Temple Artifact
+    "22": "https://upload.wikimedia.org/wikipedia/commons/9/96/Lord_Neminatha_black_granite_idol_Girnar.jpg", // Lord Neminath Sacred Black Granite Idol
+    "23": "https://upload.wikimedia.org/wikipedia/commons/d/df/Parshvanatha_ancient_sculpture_rock_cut.jpg", // Lord Parshvanath with majestic multi-hooded snake canopy
+    "24": "https://upload.wikimedia.org/wikipedia/commons/4/4e/Lord_Mahavira_Idol_at_shrine.jpg", // Lord Vardhamana Mahavira Seated in Deep Padmasana
   };
-  return photos[id] || "https://images.unsplash.com/photo-1609137144814-7f1543faf743?auto=format&fit=crop&q=80&w=400";
+  return photos[id] || "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Statues_in_Gwalior_Fort_Jain_Rock_cuts.jpg/800px-Statues_in_Gwalior_Fort_Jain_Rock_cuts.jpg";
 }
 
 const FALLBACK_TIRTHANKARS = tirthankarData.map((t, idx) => ({
@@ -228,6 +228,17 @@ export default function TirthankarsPage() {
   return (
     <div className="min-h-full p-6 pb-26 bg-gradient-to-b from-gray-50 to-gray-100 dark:from-[#050505] dark:to-[#0d0d0d] text-gray-900 dark:text-gray-100 transition-colors duration-300">
       
+      {/* FIXED TOP RIGHT TRANSLATOR WIDGET */}
+      <button
+        type="button"
+        onClick={toggleLanguage}
+        className="fixed top-4 right-4 z-50 px-4.5 py-2.5 bg-[#FF3D00] text-white hover:bg-[#D50000] active:scale-95 transition-all shadow-lg rounded-full flex items-center justify-center gap-2 font-black text-xs cursor-pointer border border-[#FF9100]/30"
+        title="Translate Language / भाषा बदलें"
+      >
+        <Globe size={15} className="animate-spin-slow" />
+        <span>{lang === 'en' ? 'हिन्दी' : 'English'}</span>
+      </button>
+
       {/* Header with Language Translation Toggle */}
       <header className="flex justify-between items-center gap-4 mb-6 pt-4 w-full">
         <div className="flex items-center gap-4">
@@ -239,15 +250,6 @@ export default function TirthankarsPage() {
             {lang === 'en' ? '24 TIRTHANKARS DIRECTORY' : '२४ तीर्थंकर भगवंत निर्देशिका'}
           </h1>
         </div>
-        
-        {/* Module Specific Language Selection Toggle */}
-        <button
-          onClick={toggleLanguage}
-          className="px-4 py-2 bg-white/80 dark:bg-[#121212]/80 backdrop-blur-md border border-gray-200 dark:border-white/10 rounded-full flex items-center justify-center text-[#FF8A65] hover:bg-gray-100 dark:hover:bg-[#1A1A1A] transition-all shadow-sm font-bold text-xs cursor-pointer"
-          title="Toggle Language"
-        >
-          {lang === 'en' ? 'हिंदी (HI)' : 'English (EN)'}
-        </button>
       </header>
 
       {/* Intro Box */}

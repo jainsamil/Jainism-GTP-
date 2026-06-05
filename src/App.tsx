@@ -31,6 +31,11 @@ import SwadhyayPage from './pages/Swadhyay';
 import BhaktamarPage from './pages/Bhaktamar';
 import DietPage from './pages/Diet';
 
+import VerifiedFoodPage from './pages/VerifiedFood';
+import ViharTrackerPage from './pages/ViharTracker';
+import DharamshalaBookingPage from './pages/DharamshalaBooking';
+import ManuscriptLibraryPage from './pages/ManuscriptLibrary';
+
 import PrivacyPolicyPage from './pages/PrivacyPolicy';
 import TermsPage from './pages/Terms';
 import ContactPage from './pages/Contact';
@@ -80,7 +85,12 @@ function Layout({ children }: { children: React.ReactNode }) {
            location.pathname !== '/fasting' && 
            location.pathname !== '/swadhyay' && 
            location.pathname !== '/bhaktamar' && 
-           location.pathname !== '/diet' && (
+           location.pathname !== '/diet' && 
+           location.pathname !== '/saints' && 
+           location.pathname !== '/verified-food' && 
+           location.pathname !== '/vihar-tracker' && 
+           location.pathname !== '/dharamshala-booking' && 
+           location.pathname !== '/manuscript-library' && (
             <button
               onClick={toggleLanguage}
               className="w-10 h-10 bg-white/80 dark:bg-[#121212]/80 backdrop-blur-md border border-gray-200 dark:border-white/10 rounded-full flex items-center justify-center text-[#FF8A65] hover:bg-gray-100 dark:hover:bg-[#1A1A1A] transition-all shadow-sm"
@@ -173,6 +183,10 @@ export default function App() {
                 <Route path="/swadhyay" element={<SwadhyayPage />} />
                 <Route path="/bhaktamar" element={<BhaktamarPage />} />
                 <Route path="/diet" element={<DietPage />} />
+                <Route path="/verified-food" element={<VerifiedFoodPage />} />
+                <Route path="/vihar-tracker" element={<ViharTrackerPage />} />
+                <Route path="/dharamshala-booking" element={<DharamshalaBookingPage />} />
+                <Route path="/manuscript-library" element={<ManuscriptLibraryPage />} />
                 <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
                 <Route path="/terms" element={<TermsPage />} />
                 <Route path="/contact" element={<ContactPage />} />

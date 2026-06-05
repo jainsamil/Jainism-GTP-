@@ -127,33 +127,33 @@ export default function MediaPage() {
       setAudioLoading(false);
       
       const track = currentTrackRef.current;
-      if (track && !audio.src.includes("soundhelix.com")) {
+      if (track && !audio.src.includes("archive.org/")) {
         setAudioError("Primary audio stream unavailable. Retrying with stable standby source...");
         
         // Auto-fallback execution
         const backups: Record<string, string> = {
-          fb_story_1: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-          fb_story_2: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
-          fb_story_3: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
-          fb_story_4: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3",
-          fb_story_5: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3",
-          fb_story_6: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-          fb_story_7: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
-          fb_story_8: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
-          fb_story_9: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3",
-          fb_story_10: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3",
-          fb_bhajan_1: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3",
-          fb_bhajan_2: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3",
-          fb_bhajan_3: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3",
-          fb_bhajan_4: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3",
-          fb_bhajan_5: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3",
-          fb_bhajan_6: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3",
-          fb_bhajan_7: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3",
-          fb_bhajan_8: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3",
-          fb_bhajan_9: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3",
-          fb_bhajan_10: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3",
+          fb_story_1: "https://archive.org/download/bhaktamar-stotra-hindi/bhaktamar_hindi.mp3",
+          fb_story_2: "https://archive.org/download/BhaktamarStotra_201306/Bhaktamar%20Stotra.mp3",
+          fb_story_3: "https://archive.org/download/bhaktamar-stotra-hindi/bhaktamar_hindi.mp3",
+          fb_story_4: "https://archive.org/download/NavkarMantra_201704/Navkar%20Mantra.mp3",
+          fb_story_5: "https://archive.org/download/BhaktamarStotra_201306/Bhaktamar%20Stotra.mp3",
+          fb_story_6: "https://archive.org/download/bhaktamar-stotra-hindi/bhaktamar_hindi.mp3",
+          fb_story_7: "https://archive.org/download/NavkarMantra_201704/Navkar%20Mantra.mp3",
+          fb_story_8: "https://archive.org/download/BhaktamarStotra_201306/Bhaktamar%20Stotra.mp3",
+          fb_story_9: "https://archive.org/download/bhaktamar-stotra-hindi/bhaktamar_hindi.mp3",
+          fb_story_10: "https://archive.org/download/NavkarMantra_201704/Navkar%20Mantra.mp3",
+          fb_bhajan_1: "https://archive.org/download/BhaktamarStotra_201306/Bhaktamar%20Stotra.mp3",
+          fb_bhajan_2: "https://archive.org/download/bhaktamar-stotra-hindi/bhaktamar_hindi.mp3",
+          fb_bhajan_3: "https://archive.org/download/BhaktamarStotra_201306/Bhaktamar%20Stotra.mp3",
+          fb_bhajan_4: "https://archive.org/download/bhaktamar-stotra-hindi/bhaktamar_hindi.mp3",
+          fb_bhajan_5: "https://archive.org/download/BhaktamarStotra_201306/Bhaktamar%20Stotra.mp3",
+          fb_bhajan_6: "https://archive.org/download/NavkarMantra_201704/Navkar%20Mantra.mp3",
+          fb_bhajan_7: "https://archive.org/download/bhaktamar-stotra-hindi/bhaktamar_hindi.mp3",
+          fb_bhajan_8: "https://archive.org/download/bhaktamar-stotra-hindi/bhaktamar_hindi.mp3",
+          fb_bhajan_9: "https://archive.org/download/BhaktamarStotra_201306/Bhaktamar%20Stotra.mp3",
+          fb_bhajan_10: "https://archive.org/download/NavkarMantra_201704/Navkar%20Mantra.mp3",
         };
-        const fallbackUrl = backups[track.id] || "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3";
+        const fallbackUrl = backups[track.id] || "https://archive.org/download/NavkarMantra_201704/Navkar%20Mantra.mp3";
         
         setTimeout(() => {
           // Verify user is still listening to the same track that failed

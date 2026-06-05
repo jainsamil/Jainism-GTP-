@@ -65,7 +65,11 @@ export default function SectionAiAgent({ section }: SectionAiAgentProps) {
       diet: 'knowledge',
       profile: 'knowledge',
       tirthankars: 'tirthankars',
-      panchang: 'festivals'
+      panchang: 'festivals',
+      'verified-food': 'knowledge',
+      'vihar-tracker': 'saints',
+      'dharamshala-booking': 'tirth',
+      'manuscript-library': 'aagams'
     };
 
     const defaultCol = sectionToCollectionMap[section.toLowerCase()] || 'knowledge';

@@ -5,7 +5,7 @@ import {
   Library, ScrollText, Calendar, Quote,
   PlaySquare, Landmark, HelpCircle, PartyPopper,
   Disc, Navigation, Flame, FileText, Heart, Utensils,
-  Sparkles, Sun, Moon
+  Sparkles, Sun, Moon, MapPin, Shield, Hotel, Languages
 } from 'lucide-react';
 import { db } from '../firebase';
 import { collection, query, limit, doc, onSnapshot } from 'firebase/firestore';
@@ -84,6 +84,10 @@ export default function HomePage() {
     { title: 'Swadhyay Book', icon: FileText, path: '/swadhyay', color: 'from-[#AA00FF] to-[#E040FB]', shadow: 'shadow-[0_0_15px_rgba(170,0,255,0.3)]', enabled: true },
     { title: 'Bhaktamar', icon: Heart, path: '/bhaktamar', color: 'from-[#F50057] to-[#FF80AB]', shadow: 'shadow-[0_0_15px_rgba(245,0,87,0.3)]', enabled: true },
     { title: 'Jain Diet Guide', icon: Utensils, path: '/diet', color: 'from-[#00BFA5] to-[#64FFDA]', shadow: 'shadow-[0_0_15px_rgba(0,191,165,0.3)]', enabled: true },
+    { title: 'Jain Food Locator', icon: MapPin, path: '/verified-food', color: 'from-[#FF3D00] to-[#FF9100]', shadow: 'shadow-[0_0_15px_rgba(255,61,0,0.3)]', enabled: true },
+    { title: 'Monk Vihar Tracker', icon: Shield, path: '/vihar-tracker', color: 'from-[#2979FF] to-[#29B6F6]', shadow: 'shadow-[0_0_15px_rgba(41,121,255,0.3)]', enabled: true },
+    { title: 'Dharamshala Booking', icon: Hotel, path: '/dharamshala-booking', color: 'from-[#00E676] to-[#69F0AE]', shadow: 'shadow-[0_0_15px_rgba(0,230,118,0.3)]', enabled: true },
+    { title: 'Manuscript Library', icon: Languages, path: '/manuscript-library', color: 'from-[#AA00FF] to-[#EA80FC]', shadow: 'shadow-[0_0_15px_rgba(170,0,255,0.3)]', enabled: true },
   ];
 
   return (

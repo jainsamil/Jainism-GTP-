@@ -167,5 +167,17 @@ service cloud.firestore {
     match /homework_submissions/{id} {
       allow read, write: if true;
     }
+
+    match /kitchens/{id} {
+      allow read, write: if true;
+    }
+
+    match /dharamshalas/{id} {
+      allow read, write: if true;
+    }
+
+    match /dharamshala_bookings/{id} {
+      allow read, write: if true;
+    }
   }
 }
