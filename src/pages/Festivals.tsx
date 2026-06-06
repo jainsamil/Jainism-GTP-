@@ -133,6 +133,7 @@ export default function FestivalsPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'upcoming' | 'this_month'>('all');
+  const [showHelpModal, setShowHelpModal] = useState(false);
 
   useEffect(() => {
     const q = query(collection(db, 'festivals'));
@@ -207,11 +208,7 @@ export default function FestivalsPage() {
       const matchesSearch = name.includes(searchLower) || desc.includes(searchLower) || tithi.includes(searchLower) || date.includes(searchLower);
       
       if (!matchesSearch) return false;
-      
-      if (filterType === 'upcoming') {
-        return fest.daysLeft !== undefined && fest.daysLeft <= 90;
-      }
-      if (filterType === 'this_month') {
+       if (filterType === 'this_month') {
         return fest.targetMonth === currentMonth && fest.targetYear === currentYear;
       }
       return true;
@@ -219,33 +216,46 @@ export default function FestivalsPage() {
   }, [festivals, searchQuery, filterType, language]);
 
   return (
-    <div className="min-h-full p-6 pb-24 bg-[#050505] text-gray-200">
+    <div className="min-h-full p-6 pb-24 bg-[#050505] text-gray-200 relative">
       
-      {/* FIXED TOP RIGHT TRANSLATOR WIDGET */}
-      <button
-        type="button"
-        onClick={toggleLanguage}
-        className="fixed top-4 right-4 z-50 px-4.5 py-2.5 bg-[#FF3D00] text-white hover:bg-[#D50000] active:scale-95 transition-all shadow-lg rounded-full flex items-center justify-center gap-2 font-black text-xs cursor-pointer border border-[#FF9100]/30"
-        title="Translate Language / भाषा बदलें"
-      >
-        <Globe size={15} className="animate-spin-slow" />
-        <span>{language === 'en' ? 'हिन्दी' : 'English'}</span>
-      </button>
-
-      <header className="sticky top-0 z-40 bg-[#050505]/95 backdrop-blur-md -mx-6 px-6 py-4 mb-8 border-b border-white/5 flex items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <button onClick={() => navigate(-1)} className="p-2 rounded-full bg-white/5 hover:bg-white/10 transition-colors cursor-pointer">
-            <ArrowLeft size={24} className="text-gray-300" />
+      {/* Unified Single Row Header */}
+      <header className="sticky top-0 z-40 bg-[#050505]/95 backdrop-blur-md -mx-6 px-6 py-4 mb-8 border-b border-white/5 flex items-center justify-between gap-2 md:gap-4">
+        <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+          <button onClick={() => navigate(-1)} className="p-1.5 sm:p-2 rounded-full bg-white/5 hover:bg-white/10 transition-colors cursor-pointer shrink-0">
+            <ArrowLeft size={18} className="text-gray-300 sm:w-6 sm:h-6" />
           </button>
-          <div>
-            <h1 className="text-2xl md:text-3xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] flex items-center gap-3 drop-shadow-[0_0_10px_rgba(255,109,0,0.5)]">
-              <PartyPopper className="text-[#FF6D00]" size={32} />
-              {language === 'hi' ? 'जैन पर्व व तिथि पत्रक' : 'FESTIVALS'}
+          <div className="min-w-0">
+            <h1 className="text-sm sm:text-base md:text-lg lg:text-xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] flex items-center gap-1.5 sm:gap-2 truncate drop-shadow-[0_0_10px_rgba(255,109,0,0.5)]">
+               <PartyPopper className="text-[#FF6D00] w-4 h-4 sm:w-6 sm:h-6 md:w-8 md:h-8 shrink-0" />
+              <span className="truncate">{language === 'hi' ? 'जैन पर्व तिथि' : 'FESTIVALS & VRAT'}</span>
             </h1>
-            <p className="text-[9px] text-gray-500 font-mono tracking-wider mt-0.5 uppercase">
+            <p className="text-[9px] text-gray-550 font-mono tracking-wider mt-0.5 uppercase truncate hidden xs:block">
               {language === 'hi' ? '५०+ वार्षिक पर्व तथा व्रत विवरण' : '50+ sacred kalyanaks & vrat details'}
             </p>
           </div>
+        </div>
+
+        {/* Right Aligned Controls - Help and Translate in One line */}
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          {/* Section User Guide Trigger */}
+          <button
+            onClick={() => setShowHelpModal(true)}
+            className="p-1.5 sm:p-2 bg-white/5 hover:bg-white/10 text-gray-400 rounded-xl text-xs font-bold transition-all cursor-pointer border border-white/10 h-8 w-8 sm:h-9 sm:w-9 flex items-center justify-center shrink-0 shadow-sm"
+            title={language === 'en' ? 'Festivals Section Guide' : 'पर्व अनुभाग निर्देशपुस्तिका'}
+          >
+            ❓
+          </button>
+
+          {/* Symmetrical Translate Button */}
+          <button
+            type="button"
+            onClick={toggleLanguage}
+            className="px-2.5 py-1.5 sm:px-3.5 sm:py-2 bg-[#FF3D00] text-white hover:bg-[#D50000] active:scale-95 transition-all shadow-sm rounded-xl flex items-center justify-center gap-1.5 font-black text-[9px] sm:text-[10px] cursor-pointer border border-[#FF9100]/30 shrink-0 h-8 sm:h-9"
+            title={language === 'en' ? 'Translate / भाषा बदलें' : 'अंग्रेज़ी में बदलें'}
+          >
+            <Globe size={11} className="animate-spin-slow shrink-0" />
+            <span>{language === 'en' ? 'हिन्दी' : 'English'}</span>
+          </button>
         </div>
       </header>
 
@@ -407,6 +417,87 @@ export default function FestivalsPage() {
           </div>
         )}
       </div>
+      {/* Dynamic JBT Premium Help Modal */}
+      {showHelpModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-300 pointer-events-auto">
+          <div className="bg-[#121212] border border-white/10 rounded-[2rem] w-full max-w-lg p-6 md:p-8 shadow-2xl relative overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-[#FF6D00]/10 rounded-full blur-3xl pointer-events-none" />
+            
+            <div className="flex justify-between items-start mb-5 relative z-10">
+              <div className="text-left">
+                <span className="text-[9px] font-black text-[#FF6D00] uppercase tracking-widest bg-[#FF6D00]/10 px-3 py-1 rounded-full border border-[#FF6D00]/10 inline-block mb-1.5">
+                  📁 {language === 'en' ? 'SECTION USER GUIDE' : 'अनुभाग निर्देश पुस्तिका'}
+                </span>
+                <h2 className="text-2xl font-display font-black text-white tracking-tight">
+                  ℹ️ {language === 'en' ? 'Help & Features' : 'सहायता एवं सुविधाएँ'}
+                </h2>
+              </div>
+              <button 
+                onClick={() => setShowHelpModal(false)}
+                className="w-10 h-10 shrink-0 flex items-center justify-center rounded-full bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer border border-white/5 active:scale-95"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Modal Translator switch requested in help modal */}
+            <div className="bg-white/5 p-3 rounded-2xl border border-white/5 flex items-center justify-between gap-3 mb-5 relative z-10">
+              <span className="text-[10px] font-black uppercase text-gray-400">
+                {language === 'en' ? 'Translate guide language' : 'निर्देश निर्देश भाषा बदलें'}
+              </span>
+              <button
+                onClick={toggleLanguage}
+                className="px-3.5 py-1.5 bg-[#FF3D00] text-white hover:bg-[#D50000] rounded-xl text-[10px] font-black uppercase transition-all ring-1 ring-orange-500/20 flex items-center gap-1 cursor-pointer"
+              >
+                <Globe size={11} className="animate-spin-slow" />
+                {language === 'en' ? 'HINDI / हिन्दी' : 'ENGLISH / A'}
+              </button>
+            </div>
+
+            {/* Help Scrollable Content */}
+            <div className="overflow-y-auto pr-1 space-y-4.5 text-left text-zinc-355 dark:text-zinc-300 text-xs text-medium leading-relaxed relative z-10 max-h-[55vh]">
+              <p className="font-bold text-white text-sm">
+                {language === 'en' ? 'Welcome to Jain Festivals & Kalyanak Portal!' : 'जैन पर्व, त्योहार व व्रत पटल में आपका स्वागत है!'}
+              </p>
+              <p className="font-semibold text-gray-400">
+                {language === 'en' 
+                  ? 'Stay aligned with major Tirthankar Kalyanaks, Dashlakshan Parv, Ashtanhika, and monthly fasts with live real-time countdown trackers:' 
+                  : 'प्रमुख चौबीस तीर्थंकरों के पंचकल्याणक, दशलक्षण पर्व, अष्टान्हिका तथा महत्वपूर्ण मासिक व्रतों की तिथियों और सांस्कृतिक महत्व को जानें:'}
+              </p>
+              <ul className="list-disc pl-5 space-y-2 text-gray-400 font-semibold font-sans">
+                <li>
+                  <strong className="text-[#FFD54F]">{language === 'en' ? 'Dynamic Countdown Trackers:' : 'कल्याणक लाइव काउंटडाउन ट्रैकर:'}</strong>{' '}
+                  {language === 'en' 
+                    ? 'View precise remaining days left for upcoming fasts or festivals, calculated dynamically corresponding to Lunar calendars.' 
+                    : 'आगामी पर्वों और कल्याणकों के लिए शेष बचे दिनों की स्वचालित सटीक गणना तुरंत देखें।'}
+                </li>
+                <li>
+                  <strong className="text-[#FFD54F]">{language === 'en' ? 'Search and Date Filtering:' : 'पर्व खोज एवं मासिक छँटनी:'}</strong>{' '}
+                  {language === 'en'
+                    ? 'Search through 50+ sacred parameters, or instantly narrow down to vrat occurring during "this month" or within 90 days.'
+                    : '५० से अधिक पवित्र पर्वों की सूची में खोजें अथवा "इस महीने" आने वाले व्रत तथा "आगामी पर्व" का त्वरित फिल्टर लगाएँ।'}
+                </li>
+                <li>
+                  <strong className="text-[#FFD54F]">{language === 'en' ? 'Spiritual AI Guidance:' : 'पर्वों के धार्मिक व पौराणिक अर्थ की AI व्याख्या:'}</strong>{' '}
+                  {language === 'en'
+                    ? 'Click on the "Ask AI about Festival" shortcut to launch a guided chat about the historical, botantical, and ascetical code of conduct of the festival.'
+                    : 'किसी भी पर्व अथवा तीर्थंकर कल्याणक के नीचे "AI से पूछें" पर क्लिक कर कथा, पूजन विधि और धार्मिक रहस्य जानें।'}
+                </li>
+              </ul>
+            </div>
+
+            <div className="mt-6 pt-4 border-t border-white/5 text-center relative z-10">
+              <button
+                onClick={() => setShowHelpModal(false)}
+                className="w-full bg-[#FF6D00] hover:bg-orange-600 text-black py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest cursor-pointer hover:scale-[1.02] active:scale-95 transition-all text-center"
+              >
+                {language === 'en' ? 'UNDERSTOOD & CONTINUE' : 'पूर्ण समझ आया, आगे बढ़ें'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <SectionAiAgent section="festivals" />
     </div>
   );

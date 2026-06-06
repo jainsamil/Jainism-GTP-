@@ -119,6 +119,7 @@ export default function ViharTrackerPage() {
   // PILOT SYNC SOS FLASHER SYSTEM
   const [showFlasher, setShowFlasher] = useState(false);
   const [flashOn, setFlashOn] = useState(false);
+  const [showHelpModal, setShowHelpModal] = useState(false);
 
   // Form State for new route
   const [saintHi, setSaintHi] = useState('');
@@ -236,31 +237,44 @@ export default function ViharTrackerPage() {
   return (
     <div className="min-h-full p-6 pb-26 bg-gradient-to-b from-gray-50 to-gray-100 dark:from-[#050505] dark:to-[#0d0d0d] text-gray-900 dark:text-gray-100 transition-colors duration-300 relative">
       
-      {/* FIXED TOP RIGHT TRANSLATOR WIDGET */}
-      <button
-        onClick={toggleLanguage}
-        className="fixed top-4 right-4 z-50 px-4.5 py-2.5 bg-[#2962FF] text-white hover:bg-blue-700 active:scale-95 transition-all shadow-lg rounded-full flex items-center justify-center gap-2 font-black text-xs cursor-pointer border border-[#29B6F6]/30"
-        title="Translate Language / भाषा बदलें"
-      >
-        <Globe size={15} className="animate-spin-slow" />
-        <span>{language === 'en' ? 'हिन्दी' : 'English'}</span>
-      </button>
-
-      {/* Header */}
-      <header className="sticky top-0 z-40 bg-gray-50/95 dark:bg-[#050505]/95 backdrop-blur-md -mx-6 -mt-6 px-6 pt-6 pb-4 mb-6 border-b border-gray-200/50 dark:border-white/5 flex items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <button onClick={() => navigate(-1)} className="p-2 rounded-full bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 shadow-sm hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">
-            <ArrowLeft size={22} className="text-gray-700 dark:text-gray-300" />
+      {/* Aligned Single Row Header with Translate, Help in One Line */}
+      <header className="sticky top-0 z-40 bg-gray-50/95 dark:bg-[#050505]/95 backdrop-blur-md -mx-6 -mt-6 px-6 pt-4 pb-4 mb-6 border-b border-gray-200/50 dark:border-white/5 flex items-center justify-between gap-2 md:gap-4">
+        <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+          <button onClick={() => navigate(-1)} className="p-1.5 sm:p-2 rounded-full bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 shadow-sm hover:bg-gray-100 dark:hover:bg-white/10 transition-colors shrink-0">
+            <ArrowLeft size={18} className="text-gray-700 dark:text-gray-300 sm:w-6 sm:h-6" />
           </button>
-          <div>
-            <h1 className="text-xl md:text-2xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#2962FF] to-[#00E5FF] flex items-center gap-2">
-              <Compass className="text-[#2962FF] shrink-0 animate-spin-slow" size={26} />
-              {language === 'en' ? 'MONK VIHAR SAFETY' : 'मुनि विहार सेवा व सुरक्षा ट्रैकर'}
+          <div className="min-w-0">
+            <h1 className="text-sm sm:text-base md:text-lg lg:text-xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#2962FF] to-[#00E5FF] flex items-center gap-1.5 sm:gap-2 truncate">
+              <Compass className="text-[#2962FF] w-4 h-4 sm:w-6 sm:h-6 md:w-8 md:h-8 shrink-0" />
+              <span className="truncate">{language === 'en' ? 'SAGE VIHAR SAFETY' : 'मुनि विहार सेवा'}</span>
             </h1>
-            <p className="text-[10px] text-gray-550 font-black dark:text-gray-400">
-              {language === 'en' ? 'Live Highway Route Coordinator & Volunteer Pilot Network' : 'पैदल विहार कर रहे हमारे संतों की सुरक्षा और धर्मशाला समन्वय लाइव'}
+            <p className="text-[9px] sm:text-[10px] text-gray-550 font-black dark:text-gray-400 truncate hidden xs:block">
+              {language === 'en' ? 'Live Route Coordinator' : 'पैदल विहार संतों की सुरक्षा लाइव'}
             </p>
           </div>
+        </div>
+
+        {/* Dynamic Controls Aligned in One Line on the Right */}
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          {/* Section User Guide Trigger */}
+          <button
+            onClick={() => setShowHelpModal(true)}
+            className="p-1.5 sm:p-2 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/11 text-gray-550 dark:text-gray-350 rounded-xl text-xs font-bold transition-all cursor-pointer border border-gray-200 dark:border-white/10 h-8 w-8 sm:h-9 sm:w-9 flex items-center justify-center shrink-0 shadow-sm"
+            title={language === 'en' ? 'Vihar Section Guide' : 'विहार ट्रैकर निर्देशपुस्तिका'}
+          >
+            ❓
+          </button>
+
+          {/* Symmetrical Inline Translate Button */}
+          <button
+            type="button"
+            onClick={toggleLanguage}
+            className="px-2.5 py-1.5 sm:px-3.5 sm:py-2 bg-[#2962FF] text-white hover:bg-blue-750 active:scale-95 transition-all shadow-sm rounded-xl flex items-center justify-center gap-1.5 font-black text-[9px] sm:text-[10px] cursor-pointer border border-[#29B6F6]/30 shrink-0 h-8 sm:h-9"
+            title={language === 'en' ? 'Translate / भाषा बदलें' : 'अंग्रेज़ी में बदलें'}
+          >
+            <Globe size={11} className="animate-spin-slow shrink-0" />
+            <span>{language === 'en' ? 'हिन्दी' : 'English'}</span>
+          </button>
         </div>
       </header>
 
@@ -644,6 +658,93 @@ export default function ViharTrackerPage() {
           </div>
         ))}
       </div>
+
+      {/* Dynamic JBT Premium Help Modal */}
+      {showHelpModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-300 pointer-events-auto">
+          <div className="bg-[#121212] border border-white/10 rounded-[2rem] w-full max-w-lg p-6 md:p-8 shadow-2xl relative overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
+            
+            <div className="flex justify-between items-start mb-5 relative z-10">
+              <div className="text-left">
+                <span className="text-[9px] font-black text-blue-500 uppercase tracking-widest bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/10 inline-block mb-1.5">
+                  📁 {language === 'en' ? 'SECTION USER GUIDE' : 'अनुभाग निर्देश पुस्तिका'}
+                </span>
+                <h2 className="text-2xl font-display font-black text-white tracking-tight">
+                  ℹ️ {language === 'en' ? 'Help & Features' : 'सहायता एवं सुविधाएँ'}
+                </h2>
+              </div>
+              <button 
+                onClick={() => setShowHelpModal(false)}
+                className="w-10 h-10 shrink-0 flex items-center justify-center rounded-full bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer border border-white/5 active:scale-95"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Modal Translator switch requested in help modal */}
+            <div className="bg-white/5 p-3 rounded-2xl border border-white/5 flex items-center justify-between gap-3 mb-5 relative z-10">
+              <span className="text-[10px] font-black uppercase text-gray-400">
+                {language === 'en' ? 'Translate guide language' : 'निर्देश निर्देश भाषा बदलें'}
+              </span>
+              <button
+                onClick={toggleLanguage}
+                className="px-3.5 py-1.5 bg-[#2962FF] text-white hover:bg-[#1565C0] rounded-xl text-[10px] font-black uppercase transition-all ring-1 ring-blue-500/20 flex items-center gap-1 cursor-pointer"
+              >
+                <Globe size={11} className="animate-spin-slow" />
+                {language === 'en' ? 'HINDI / हिन्दी' : 'ENGLISH / A'}
+              </button>
+            </div>
+
+            {/* Help Scrollable Content */}
+            <div className="overflow-y-auto pr-1 space-y-4.5 text-left text-zinc-355 dark:text-zinc-300 text-xs text-medium leading-relaxed relative z-10 max-h-[55vh]">
+              <p className="font-bold text-white text-sm">
+                {language === 'en' ? 'Welcome to Monk Vihar Safety & Escort Tracker!' : 'मुनि विहार सेवा व राजमार्ग रक्षक पटल में आपका स्वागत है!'}
+              </p>
+              <p className="font-semibold text-gray-400">
+                {language === 'en' 
+                  ? 'Coordinate and secure pedestrian Jain saints (Munshree/Aryikaji) traveling bare-feet on high-speed national highways:' 
+                  : 'हमारे पूज्य दिगंबर/श्वेतांबर पैदल विहार कर रहे संतों की राष्ट्रीय राजमार्गों पर सुरक्षा, सेवा मंडल, एवं धर्मशाला विश्राम के लिए समन्वय करें:'}
+              </p>
+              <ul className="list-disc pl-5 space-y-2 text-gray-400 font-semibold font-sans">
+                <li>
+                  <strong className="text-[#FFD54F]">{language === 'en' ? 'Report Live Route Details:' : 'विहार मार्ग सुरक्षा बुलेटिन जारी करें:'}</strong>{' '}
+                  {language === 'en' 
+                    ? 'Submit new walking route schedules specifying Saint Name, Sangh Size, current location, and scheduled next stop (Halt).' 
+                    : 'संत संघ का नाम, मार्ग का नक्शा, तथा आगामी अल्प-विश्राम का नाम भरें। तत्काल आसपास के जैन सुरक्षा वाहिनी को अलर्ट भेज दिया जाता है।'}
+                </li>
+                <li>
+                  <strong className="text-[#FFD54F]">{language === 'en' ? 'Highway Hazard Flagging:' : 'मार्ग के खतरों (कुत्ता, अंधेरा, डंपर) का अंकन:'}</strong>{' '}
+                  {language === 'en'
+                    ? 'Report live hazards (fog, high-speed container traffic, dark spots, absolute stray animal zones) to caution surrounding pilgrims.'
+                    : 'मार्ग में कोहरा, स्ट्रीट लाइट का अभाव अथवा आवारा पशु बाहुल्यता का अंकन करें। समीपवर्ती सुरक्षाकर्मियों के फोन पर साइरन चला दिया जाएगा।'}
+                </li>
+                <li>
+                  <strong className="text-[#FFD54F]">{language === 'en' ? 'Register As Escort Pilot:' : 'विहार रक्षक सहयात्री बनें:'}</strong>{' '}
+                  {language === 'en'
+                    ? 'Tap "Join Escort Crew" to register your local vehicle or body to safeguard and navigate pedestrian saints safely.'
+                    : 'साधार्मिक "रक्षक दल जुड़ें" पर क्लिक कर विहार संघ के आगे-पीछे लाल झंडी/रिफ्लेक्टर लेकर मार्ग सुरक्षा पायलट सुरक्षा चक्र में सहयोग कर सकते हैं।'}
+                </li>
+                <li>
+                  <strong className="text-[#FFD54F]">{language === 'en' ? 'Live Flashing Alarm Sync:' : 'लाइट फ़्लैशर आपातकालीन सिंक्रोनाइजेशन:'}</strong>{' '}
+                  {language === 'en'
+                    ? 'Use the screen red-beacon flashing system at early mornings (3 AM - 6 AM Vihar hours) using phone screens as high-visibility alerts to warning high-speed trucks.'
+                    : 'भोर काल (३ से ६ बजे) में विहार पथ पर सुरक्षा बीकन चालू कर फ़ोन की चमकीली तीव्र लाल बत्ती का उपयोग कर राजमार्ग पर आ रहे ट्रकों को सचेत करें।'}
+                </li>
+              </ul>
+            </div>
+
+            <div className="mt-6 pt-4 border-t border-white/5 text-center relative z-10">
+              <button
+                onClick={() => setShowHelpModal(false)}
+                className="w-full bg-[#2962FF] hover:bg-[#1565C0] text-black py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest cursor-pointer hover:scale-[1.02] active:scale-95 transition-all text-center"
+              >
+                {language === 'en' ? 'UNDERSTOOD & CONTINUE' : 'पूर्ण समझ आया, आगे बढ़ें'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="mt-8">
         <SectionAiAgent section="vihar-tracker" />

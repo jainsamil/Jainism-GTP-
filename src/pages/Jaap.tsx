@@ -26,6 +26,7 @@ export default function JaapPage() {
   const [ripples, setRipples] = useState<{ id: number; x: number; y: number }[]>([]);
   const [isAutoChanting, setIsAutoChanting] = useState(false);
   const [autoChantSpeed, setAutoChantSpeed] = useState(4); // seconds per bead interval
+  const [showHelpModal, setShowHelpModal] = useState(false);
 
   useEffect(() => {
     // Load persisted stats
@@ -232,45 +233,56 @@ export default function JaapPage() {
   return (
     <div className="min-h-full p-6 pb-26 bg-gradient-to-b from-gray-50 to-gray-100 dark:from-[#050505] dark:to-[#0d0d0d] text-gray-900 dark:text-gray-100 transition-colors duration-300">
       
-      {/* FIXED TOP RIGHT TRANSLATOR WIDGET */}
-      <button
-        type="button"
-        onClick={toggleLanguage}
-        className="fixed top-4 right-4 z-50 px-4.5 py-2.5 bg-[#FF3D00] text-white hover:bg-[#D50000] active:scale-95 transition-all shadow-lg rounded-full flex items-center justify-center gap-2 font-black text-xs cursor-pointer border border-[#FF9100]/30"
-        title="Translate Language / भाषा बदलें"
-      >
-        <Globe size={15} className="animate-spin-slow" />
-        <span>{lang === 'en' ? 'हिन्दी' : 'English'}</span>
-      </button>
-
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-gray-50/95 dark:bg-[#050505]/95 backdrop-blur-md -mx-6 px-6 py-4 mb-6 border-b border-gray-200/50 dark:border-white/5 flex items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <button onClick={() => navigate(-1)} className="p-2 rounded-full bg-white dark:bg-white/5 shadow-sm dark:shadow-[0_0_10px_rgba(0,0,0,0.5)] border border-gray-100 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/10 transition-all">
-            <ArrowLeft size={22} className="text-gray-700 dark:text-gray-300" />
+      <header className="sticky top-0 z-40 bg-gray-50/95 dark:bg-[#050505]/95 backdrop-blur-md -mx-6 px-6 py-4 mb-6 border-b border-gray-200/50 dark:border-white/5 flex items-center justify-between gap-2 md:gap-4">
+        <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+          <button onClick={() => navigate(-1)} className="p-1.5 sm:p-2 rounded-full bg-white dark:bg-white/5 shadow-sm dark:shadow-[0_0_10px_rgba(0,0,0,0.5)] border border-gray-100 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/10 transition-all shrink-0">
+            <ArrowLeft size={18} className="text-gray-700 dark:text-gray-300 sm:w-[22px] sm:h-[22px]" />
           </button>
-          <h1 className="text-xl md:text-2xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] tracking-tight drop-shadow-none dark:drop-shadow-[0_0_10px_rgba(255,109,0,0.4)]">
+          <h1 className="text-sm sm:text-base md:text-lg lg:text-xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] tracking-tight drop-shadow-none dark:drop-shadow-[0_0_10px_rgba(255,109,0,0.4)] truncate">
             {lang === 'en' ? 'JAAP COUNTER (MALA)' : 'जाप काउंटर (माला)'}
           </h1>
         </div>
         
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 self-end sm:self-auto">
+          {/* Inline Translate / Language Switch button next to text as requested */}
+          <button
+            type="button"
+            onClick={toggleLanguage}
+            className="px-3.5 py-1.5 bg-[#FF3D00] text-white hover:bg-[#D50000] active:scale-95 transition-all shadow-sm rounded-xl flex items-center justify-center gap-1.5 font-black text-[10px] cursor-pointer border border-[#FF9100]/30 shrink-0 h-9"
+            title="Translate Language / भाषा बदलें"
+          >
+            <Globe size={11} className="animate-spin-slow shrink-0" />
+            <span>{lang === 'en' ? 'हिन्दी' : 'English'}</span>
+          </button>
+
+          {/* Symmetrical User Guide trigger */}
+          <button
+            onClick={() => setShowHelpModal(true)}
+            className="p-2 bg-white dark:bg-[#121212] hover:bg-gray-100 dark:hover:bg-white/10 text-gray-500 dark:text-gray-350 rounded-xl text-xs font-bold leading-normal transition-all cursor-pointer shadow-sm border border-gray-200 dark:border-white/10 h-9 w-9 flex items-center justify-center shrink-0"
+            title={lang === 'en' ? 'Jaap Section Guide' : 'जाप मार्गदर्शन पुस्तिका'}
+          >
+            ❓
+          </button>
+
+          {/* Sound enable button next to translator */}
           <button 
             onClick={() => setSoundEnabled(!soundEnabled)} 
-            className="p-2.5 rounded-full bg-white/80 dark:bg-[#121212]/80 border border-gray-200 dark:border-white/10 shadow-sm text-gray-600 dark:text-gray-400 hover:text-orange-500 transition-colors cursor-pointer"
+            className="p-2 rounded-xl bg-white dark:bg-[#121212] border border-gray-200 dark:border-white/10 shadow-sm text-gray-600 dark:text-gray-400 hover:text-orange-500 transition-colors cursor-pointer h-9 w-9 flex items-center justify-center shrink-0"
             title={soundEnabled ? "Mute Feedback" : "Enable Feedback"}
             id="btn-sound-toggle"
           >
-            {soundEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
+            {soundEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
           </button>
           
+          {/* Reset/Retry button right after sound feedback */}
           <button 
             onClick={handleReset} 
-            className="p-2.5 rounded-full bg-white/80 dark:bg-[#121212]/80 border border-gray-200 dark:border-white/10 shadow-sm text-gray-600 dark:text-gray-400 hover:text-red-500 transition-colors cursor-pointer"
+            className="p-2 rounded-xl bg-white dark:bg-[#121212] border border-gray-200 dark:border-white/10 shadow-sm text-gray-600 dark:text-gray-400 hover:text-red-500 transition-colors cursor-pointer h-9 w-9 flex items-center justify-center shrink-0"
             title="Reset Current Mala"
             id="btn-reset-jaap"
           >
-            <RotateCcw size={18} />
+            <RotateCcw size={16} />
           </button>
         </div>
       </header>
@@ -508,6 +520,93 @@ export default function JaapPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Dynamic JBT Premium Help Modal */}
+      {showHelpModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-300 pointer-events-auto">
+          <div className="bg-[#121212] border border-white/10 rounded-[2rem] w-full max-w-lg p-6 md:p-8 shadow-2xl relative overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-[#FF6D00]/10 rounded-full blur-3xl pointer-events-none" />
+            
+            <div className="flex justify-between items-start mb-5 relative z-10">
+              <div className="text-left">
+                <span className="text-[9px] font-black text-[#FF6D00] uppercase tracking-widest bg-[#FF6D00]/10 px-3 py-1 rounded-full border border-[#FF6D00]/10 inline-block mb-1.5">
+                  📁 {lang === 'en' ? 'SECTION USER GUIDE' : 'अनुभाग निर्देश पुस्तिका'}
+                </span>
+                <h2 className="text-2xl font-display font-black text-white tracking-tight">
+                  ℹ️ {lang === 'en' ? 'Help & Features' : 'सहायता एवं सुविधाएँ'}
+                </h2>
+              </div>
+              <button 
+                onClick={() => setShowHelpModal(false)}
+                className="w-10 h-10 shrink-0 flex items-center justify-center rounded-full bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer border border-white/5 active:scale-95"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Modal Translator switch requested in help modal */}
+            <div className="bg-white/5 p-3 rounded-2xl border border-white/5 flex items-center justify-between gap-3 mb-5 relative z-10">
+              <span className="text-[10px] font-black uppercase text-gray-400">
+                {lang === 'en' ? 'Translate guide language' : 'निर्देश निर्देश भाषा बदलें'}
+              </span>
+              <button
+                onClick={toggleLanguage}
+                className="px-3.5 py-1.5 bg-[#FF3D00] text-white hover:bg-[#D50000] rounded-xl text-[10px] font-black uppercase transition-all ring-1 ring-orange-500/20 flex items-center gap-1 cursor-pointer"
+              >
+                <Globe size={11} className="animate-spin-slow" />
+                {lang === 'en' ? 'HINDI / हिन्दी' : 'ENGLISH / A'}
+              </button>
+            </div>
+
+            {/* Help Scrollable Content */}
+            <div className="overflow-y-auto pr-1 space-y-4.5 text-left text-zinc-355 dark:text-zinc-300 text-xs text-medium leading-relaxed relative z-10 max-h-[55vh]">
+              <p className="font-bold text-white text-sm">
+                {lang === 'en' ? 'Welcome to Sacred Jaap & Mala Room!' : 'पवित्र जाप कक्ष में आपका स्वागत है!'}
+              </p>
+              <p className="font-semibold text-gray-400">
+                {lang === 'en' 
+                  ? 'A fully-featured self-meditation chamber with local persistence to track your spiritual commitments:' 
+                  : 'यह आधुनिक जाप काउंटर आपको शुद्ध अंतःकरण से घर बैठे स्वाध्याय और जाप करने की सुविधा देता है:'}
+              </p>
+              <ul className="list-disc pl-5 space-y-2 text-gray-400 font-semibold">
+                <li>
+                  <strong className="text-[#FFD54F]">{lang === 'en' ? 'Tap To Count:' : 'जाप क्रिया:'}</strong>{' '}
+                  {lang === 'en' 
+                    ? 'Simply click or touch inside the large concentric central circle to advance the bead counter. Mechanical sound effects provide feedback.' 
+                    : 'केंद्र में दिए गए आकर्षक "जाप करें" चक्र पर कहीं भी क्लिक या स्पर्श करें। मणिका अपने आप आगे बढ़ेगी।'}
+                </li>
+                <li>
+                  <strong className="text-[#FFD54F]">{lang === 'en' ? 'Mala Completes:' : 'माला पूर्णता प्रणाली:'}</strong>{' '}
+                  {lang === 'en'
+                    ? 'Reaching 108 beads will automatically reset your current bead and compile 1 complete Mala with a sweet chiming sound celebration.'
+                    : 'प्रत्येक १०८ जाप पूर्ण होने पर एक माला (माला संख्या +१) दर्ज होगी और मधुर घंटा ध्वनि से पूर्णता घोषित होगी।'}
+                </li>
+                <li>
+                  <strong className="text-[#FFD54F]">{lang === 'en' ? 'Text to Speech Chant:' : 'स्व-जाप स्वर सहायक (TTS):'}</strong>{' '}
+                  {lang === 'en'
+                    ? 'Click on the text speaker icon to hear high quality native Hindi vocalizations of the Navkar mantra and stay in sync.'
+                    : 'ऊपर दिए स्पीकर आइकॉन का उपयोग कर मंत्र का शुद्ध आध्यात्मिक उच्चारण सुनें, तथा साथ-साथ जाप का अभ्यास बनाए रखें।'}
+                </li>
+                <li>
+                  <strong className="text-[#FFD54F]">{lang === 'en' ? 'Auto-Chant Timer:' : 'ऑटो-जाप गति विन्यास:'}</strong>{' '}
+                  {lang === 'en'
+                    ? 'Enable Auto Chant block to simulate natural bead advancements automatically every few seconds.'
+                    : 'जाप चक्र के नीचे "ऑटो-जाप प्रारंभ" का विकल्प खोलकर गति तय कर सकते हैं जिससे जाप चक्र स्वतः अंतराल पर आगे बढ़ेगा।'}
+                </li>
+              </ul>
+            </div>
+
+            <div className="mt-6 pt-4 border-t border-white/5 text-center relative z-10">
+              <button
+                onClick={() => setShowHelpModal(false)}
+                className="w-full bg-[#FF6D00] hover:bg-orange-600 text-black py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest cursor-pointer hover:scale-[1.02] active:scale-95 transition-all text-center"
+              >
+                {lang === 'en' ? 'UNDERSTOOD & CONTINUE' : 'पूर्ण समझ आया, आगे बढ़ें'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <SectionAiAgent section="jaap" />
     </div>

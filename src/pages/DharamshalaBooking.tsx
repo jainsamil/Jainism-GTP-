@@ -205,6 +205,7 @@ export default function DharamshalaBookingPage() {
   const [developerCode, setDeveloperCode] = useState('');
   const [isDeveloper, setIsDeveloper] = useState(false);
   const [showPasscodeForm, setShowPasscodeForm] = useState(false);
+  const [showHelpModal, setShowHelpModal] = useState(false);
 
   // Booking Overlay states
   const [selectedDharamshala, setSelectedDharamshala] = useState<Dharamshala | null>(null);
@@ -392,50 +393,60 @@ export default function DharamshalaBookingPage() {
   return (
     <div className="min-h-full p-6 pb-26 bg-gradient-to-b from-gray-50 to-gray-100 dark:from-[#050505] dark:to-[#0d0d0d] text-gray-900 dark:text-gray-100 transition-colors duration-300 relative">
       
-      {/* FIXED TOP RIGHT TRANSLATOR WIDGET */}
-      <button
-        onClick={toggleLanguage}
-        className="fixed top-4 right-4 z-50 px-4.5 py-2.5 bg-[#00C853] text-white hover:bg-emerald-600 active:scale-95 transition-all shadow-lg rounded-full flex items-center justify-center gap-2 font-black text-xs cursor-pointer border border-emerald-400/30"
-        title="Translate Language / भाषा बदलें"
-      >
-        <Globe size={15} className="animate-spin-slow" />
-        <span>{language === 'en' ? 'हिन्दी' : 'English'}</span>
-      </button>
-
-      {/* Header */}
-      <header className="sticky top-0 z-40 bg-gray-50/95 dark:bg-[#050505]/95 backdrop-blur-md -mx-6 -mt-6 px-6 pt-6 pb-4 mb-6 border-b border-gray-200/50 dark:border-white/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <button onClick={() => navigate(-1)} className="p-2 rounded-full bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 shadow-sm hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">
-            <ArrowLeft size={22} className="text-gray-700 dark:text-gray-300" />
+      {/* Header and Controls aligned in a single line */}
+      <header className="sticky top-0 z-40 bg-gray-50/95 dark:bg-[#050505]/95 backdrop-blur-md -mx-6 -mt-6 px-6 pt-4 pb-4 mb-6 border-b border-gray-200/50 dark:border-white/5 flex items-center justify-between gap-2 md:gap-4">
+        <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+          <button onClick={() => navigate(-1)} className="p-1.5 sm:p-2 rounded-full bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 shadow-sm hover:bg-gray-100 dark:hover:bg-white/10 transition-colors shrink-0">
+            <ArrowLeft size={18} className="text-gray-700 dark:text-gray-300 sm:w-[22px] sm:h-[22px]" />
           </button>
-          <div>
-            <h1 className="text-xl md:text-2xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#00C853] to-[#00E676] flex items-center gap-2">
-              <Landmark className="text-[#00C853] shrink-0 fill-current animate-bounce" size={26} />
-              {language === 'en' ? 'JAIN DHARAMSHALA BOOKING' : 'एकीकृत जैन धर्मशाला बुकिंग'}
+          <div className="min-w-0">
+            <h1 className="text-sm sm:text-base md:text-lg lg:text-xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#00C853] to-[#00E676] flex items-center gap-1.5 sm:gap-2 truncate">
+              <Landmark className="text-[#00C853] shrink-0 fill-current w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
+              <span className="truncate">{language === 'en' ? 'JAIN DHARAMSHALA' : 'धर्मशाला बुकिंग'}</span>
             </h1>
-            <p className="text-[10px] text-gray-550 font-black dark:text-gray-400">
-              {language === 'en' ? 'Unified Dharamshala Reservation & Food Timings Portal' : 'तीर्थक्षेत्रों पर कमरों की उपलब्धता एवं अग्रिम ऑनलाइन बुकिंग खिड़की'}
+            <p className="text-[9px] sm:text-[10px] text-gray-555 font-black dark:text-gray-400 truncate hidden xs:block">
+              {language === 'en' ? 'Unified Dharamshala Reservation & Food Timings' : 'तीर्थक्षेत्रों पर कमरों की बुकिंग खिड़की'}
             </p>
           </div>
         </div>
 
-        {/* Manager/Trustee Portal Controls */}
-        <div className="flex items-center gap-2 self-end sm:self-auto">
+        {/* Dynamic Controls Aligned in One Line on the Right */}
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           {isDeveloper ? (
             <button
               onClick={() => setIsDeveloper(false)}
-              className="px-3.5 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-[#00C853] rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1 border border-emerald-500/30 cursor-pointer shadow-sm animate-pulse"
+              className="px-2 py-1.5 sm:px-3 sm:py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-[#00C853] rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-wider border border-emerald-500/30 cursor-pointer shadow-sm shrink-0"
             >
-              🛠️ TRUSTEE PORTAL: ON
+              🛠️ <span className="hidden xs:inline">TRUST ACTIVE</span>
             </button>
           ) : (
             <button
               onClick={() => setShowPasscodeForm(true)}
-              className="px-3.5 py-2 bg-gray-100 dark:bg-white/5 dark:hover:bg-white/10 text-gray-650 dark:text-gray-350 hover:text-[#00C853] dark:hover:text-[#00C853] rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1 border border-dashed border-gray-200/50 dark:border-white/5 cursor-pointer shadow-sm"
+              className="px-2 py-1.5 sm:px-3 sm:py-2 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-650 dark:text-gray-350 hover:text-[#00C853] dark:hover:text-[#00C853] rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-wide border border-dashed border-gray-200/50 dark:border-white/5 cursor-pointer shadow-sm shrink-0 h-8 sm:h-9"
             >
-              🛠️ TRUSTEE LOGIN
+              🛠️ <span className="hidden xs:inline">{language === 'en' ? 'LOGIN' : 'लॉगिन'}</span>
             </button>
           )}
+
+          {/* Help Action Button */}
+          <button
+            onClick={() => setShowHelpModal(true)}
+            className="p-1.5 sm:p-2 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/11 text-gray-550 dark:text-gray-350 rounded-xl text-xs font-bold leading-normal transition-all cursor-pointer border border-gray-200 dark:border-white/10 h-8 w-8 sm:h-9 sm:w-9 flex items-center justify-center shrink-0 shadow-sm"
+            title={language === 'en' ? 'Dharamshala Section Guide' : 'धर्मशाला निर्देशपुस्तिका'}
+          >
+            ❓
+          </button>
+
+          {/* Symmetrical Inline Translate Button */}
+          <button
+            type="button"
+            onClick={toggleLanguage}
+            className="px-3 py-1.5 sm:px-3.5 sm:py-2 bg-[#00C853] text-white hover:bg-emerald-600 active:scale-95 transition-all shadow-sm rounded-xl flex items-center justify-center gap-1.5 font-black text-[9px] sm:text-[10px] cursor-pointer border border-emerald-400/30 shrink-0 h-8 sm:h-9"
+            title={language === 'en' ? 'Translate / भाषा बदलें' : 'अंग्रेज़ी में बदलें'}
+          >
+            <Globe size={11} className="animate-spin-slow shrink-0" />
+            <span>{language === 'en' ? 'हिन्दी' : 'English'}</span>
+          </button>
         </div>
       </header>
 
@@ -950,6 +961,93 @@ export default function DharamshalaBookingPage() {
           );
         })}
       </div>
+
+      {/* Dynamic JBT Premium Help Modal */}
+      {showHelpModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-300 pointer-events-auto">
+          <div className="bg-[#121212] border border-white/10 rounded-[2rem] w-full max-w-lg p-6 md:p-8 shadow-2xl relative overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+            
+            <div className="flex justify-between items-start mb-5 relative z-10">
+              <div className="text-left">
+                <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/10 inline-block mb-1.5">
+                  📁 {language === 'en' ? 'SECTION USER GUIDE' : 'अनुभाग निर्देश पुस्तिका'}
+                </span>
+                <h2 className="text-2xl font-display font-black text-white tracking-tight">
+                  ℹ️ {language === 'en' ? 'Help & Features' : 'सहायता एवं सुविधाएँ'}
+                </h2>
+              </div>
+              <button 
+                onClick={() => setShowHelpModal(false)}
+                className="w-10 h-10 shrink-0 flex items-center justify-center rounded-full bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer border border-white/5 active:scale-95"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Modal Translator switch requested in help modal */}
+            <div className="bg-white/5 p-3 rounded-2xl border border-white/5 flex items-center justify-between gap-3 mb-5 relative z-10">
+              <span className="text-[10px] font-black uppercase text-gray-400">
+                {language === 'en' ? 'Translate guide language' : 'निर्देश निर्देश भाषा बदलें'}
+              </span>
+              <button
+                onClick={toggleLanguage}
+                className="px-3.5 py-1.5 bg-[#00C853] text-white hover:bg-emerald-650 rounded-xl text-[10px] font-black uppercase transition-all ring-1 ring-emerald-500/20 flex items-center gap-1 cursor-pointer"
+              >
+                <Globe size={11} className="animate-spin-slow" />
+                {language === 'en' ? 'HINDI / हिन्दी' : 'ENGLISH / A'}
+              </button>
+            </div>
+
+            {/* Help Scrollable Content */}
+            <div className="overflow-y-auto pr-1 space-y-4.5 text-left text-zinc-355 dark:text-zinc-300 text-xs text-medium leading-relaxed relative z-10 max-h-[55vh]">
+              <p className="font-bold text-white text-sm">
+                {language === 'en' ? 'Welcome to Dharamshala Reservation Portal!' : 'धर्मशाला कमरा बुकिंग पोर्टल में आपका स्वागत है!'}
+              </p>
+              <p className="font-semibold text-gray-400">
+                {language === 'en' 
+                  ? 'Reserve pure, clean, non-violent accommodations and order pious restricted meals (Ahar) at major pilgrimage centers easily:' 
+                  : 'तीर्थ क्षेत्रों पर शुद्ध, मर्यादित और छने जल की व्यवस्था वाले विश्राम कक्ष तथा सात्विक साधार्मिक वात्सल्य भोजन की अग्रिम बुकिंग करें:'}
+              </p>
+              <ul className="list-disc pl-5 space-y-2 text-gray-400 font-semibold font-sans">
+                <li>
+                  <strong className="text-[#FFD54F]">{language === 'en' ? 'Book AC/Non-AC Rooms Online:' : 'कमरे का ऑनलाइन चयन एवं बुकिंग:'}</strong>{' '}
+                  {language === 'en' 
+                    ? 'Explore and search room inventory, including AC Twin Luxury or Family Suites, complete with pricing and instant booking slip output.' 
+                    : 'अपनी पसंद के कुण्डलपुर, सोनागिरि अथवा शिखरजी में कमरों की उपलब्धता सूची देखें, आवश्यक विवरण भरकर अग्रिम पर्ची जनरेट करें।'}
+                </li>
+                <li>
+                  <strong className="text-[#FFD54F]">{language === 'en' ? 'Verify Holy Amenities:' : 'धर्मशाला की सात्विक सुविधाएँ:'}</strong>{' '}
+                  {language === 'en'
+                    ? 'Every Dharamshala verifies filters for Double Filtered Water Tanks, Sunrise Food limitations (Chauvihar Rules), and nearby Temple proximity.'
+                    : 'सुरक्षित निवास हेतु प्रत्येक स्थान पर छने जल का पृथक प्रबंध, मंदिर की समीपता तथा शुद्ध अहिंसक मर्यादा सुनिश्चित की जाती है।'}
+                </li>
+                <li>
+                  <strong className="text-[#FFD54F]">{language === 'en' ? 'Track Reservations Locally:' : 'बुकिंग हिस्ट्री की जाँच करें:'}</strong>{' '}
+                  {language === 'en'
+                    ? 'Access your generated receipt PDF-slips locally or print them out right from your screen to show on check-in counters.'
+                    : 'आपके द्वारा आरक्षित पर्ची हमेशा लोकल डिवाइस पर सहेज ली जाती है, जिसे चेक-इन काउंटर पर दिखाकर कमरा प्राप्त कर सकते हैं।'}
+                </li>
+                <li>
+                  <strong className="text-[#FFD54F]">{language === 'en' ? 'Trustee / Manager Portal:' : 'धर्मशाला प्रबंधक (Trustee Login) पटल:'}</strong>{' '}
+                  {language === 'en'
+                    ? 'Authorized trustees can login using holy code to edit total room limits, declare status (House Full), and oversee guest registrations.'
+                    : 'क्षेत्रीय प्रबंधकों अथवा कमेटी सदस्यों के लिए ट्रस्टी कोड द्वारा लॉगिन कर कमरों की अधिकतम मर्यादा बदलने की प्रशासनिक सुविधा उपलब्ध है।'}
+                </li>
+              </ul>
+            </div>
+
+            <div className="mt-6 pt-4 border-t border-white/5 text-center relative z-10">
+              <button
+                onClick={() => setShowHelpModal(false)}
+                className="w-full bg-[#00C853] hover:bg-emerald-600 text-black py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest cursor-pointer hover:scale-[1.02] active:scale-95 transition-all text-center"
+              >
+                {language === 'en' ? 'UNDERSTOOD & CONTINUE' : 'पूर्ण समझ आया, आगे बढ़ें'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="mt-8">
         <SectionAiAgent section="dharamshala-booking" />

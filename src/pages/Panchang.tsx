@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Sparkles, X, Sunrise, Sunset, Clock, Star, BookOpen, Users, ArrowLeft, Loader2, Info, Moon, Sun } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Sparkles, X, Sunrise, Sunset, Clock, Star, BookOpen, Users, ArrowLeft, Loader2, Info, Moon, Sun, Globe } from 'lucide-react';
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, getDay, startOfWeek, endOfWeek } from 'date-fns';
 import { hi } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
@@ -438,7 +438,7 @@ const getGenericTithi = (date: Date) => {
 
 export default function PanchangPage() {
   const navigate = useNavigate();
-  const { language } = useLanguage();
+  const { language, toggleLanguage } = useLanguage();
   const [currentDate, setCurrentDate] = useState(new Date()); 
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
   const [loading, setLoading] = useState(true);
@@ -588,15 +588,33 @@ export default function PanchangPage() {
 
   return (
     <div className="min-h-screen bg-[#080808] text-white p-4 pb-24 overflow-x-hidden">
-      <header className="flex items-center gap-4 mb-6 pt-2">
-        <button onClick={() => navigate(-1)} className="p-2 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
-          <ArrowLeft size={24} />
-        </button>
-        <div>
-          <h1 className="text-2xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FF6D00] to-[#FFD54F]">
-            {t.title}
-          </h1>
-          <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{t.subtitle}</p>
+      
+      {/* Sticky Header with inline controls */}
+      <header className="sticky top-0 z-40 bg-black/95 backdrop-blur-md -mx-4 -mt-4 px-4 pt-4 pb-4 mb-6 border-b border-white/5 flex items-center justify-between gap-2 md:gap-4">
+        <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+          <button onClick={() => navigate(-1)} className="p-1.5 sm:p-2 rounded-full bg-white/5 border border-white/10 shadow-sm hover:bg-white/10 transition-colors shrink-0">
+            <ArrowLeft size={18} className="text-gray-300 sm:w-[22px] sm:h-[22px]" />
+          </button>
+          <div className="min-w-0">
+            <h1 className="text-sm sm:text-base md:text-lg lg:text-xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] tracking-tight truncate">
+              {t.title}
+            </h1>
+            <p className="text-[9px] sm:text-[10px] text-[#FF806A] font-black uppercase tracking-widest truncate hidden xs:block">{t.subtitle}</p>
+          </div>
+        </div>
+
+        {/* Dynamic Controls Aligned in One Line on the Right */}
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          {/* Inline Header Translator Button */}
+          <button
+            type="button"
+            onClick={toggleLanguage}
+            className="px-2.5 py-1.5 sm:px-3 sm:py-2 bg-[#FF3D00] text-white hover:bg-[#D50000] active:scale-95 transition-all shadow-sm rounded-xl flex items-center justify-center gap-1.5 font-bold text-[9px] sm:text-[10px] cursor-pointer border border-[#FF9100]/20 shrink-0 h-8 sm:h-9"
+            title="Translate Language / भाषा बदलें"
+          >
+            <Globe size={11} className="shrink-0 animate-spin-slow" />
+            <span>{language === 'en' ? 'हिन्दी' : 'English'}</span>
+          </button>
         </div>
       </header>
 

@@ -29,6 +29,8 @@ interface TirthItem {
   lat: number;
   lng: number;
   nearby: NearbyTemple[];
+  whatToVisit: { en: string; hi: string };
+  howToReach: { en: string; hi: string };
 }
 
 const TIRTHS_DATA: TirthItem[] = [
@@ -65,7 +67,15 @@ const TIRTHS_DATA: TirthItem[] = [
       { name: { en: "Gautam Swamy Tonk", hi: "गौतम स्वामी कूट" }, distance: "On Route" },
       { name: { en: "Kunthunath Tonk", hi: "कुन्थुनाथ कूट" }, distance: "On Route" },
       { name: { en: "Madhuban Dharamshala complex", hi: "मधुबन धर्मशाला संकुल" }, distance: "Base Camp" }
-    ]
+    ],
+    whatToVisit: {
+      en: "Visit the 24 sacred Tonks on the mountain trail, Jal Mandir in the middle, Gautam Swamy Koot, Gunayatji (at the bottom), and magnificent Jain Museums containing ancient relic idols in Madhuban base.",
+      hi: "२४ कूट (तीर्थंकर चरण पादुका), पहाड़ी पर स्थित जल मंदिर, गौतम स्वामी कूट, तलहटी में गुणायातजी मंदिर और मधुबन स्थित भव्य प्राचीन हस्तलिखित जैन संग्रहालय और दिगम्बर/श्वेताम्बर धर्मशाला जिनालय।"
+    },
+    howToReach: {
+      en: "By Air: Ranchi Airport (140 km). By Train: Parasnath Railway Station (PNM) is just 22 km from Madhuban base. Road: regular taxis operate from Parasnath station and Giridih daily.",
+      hi: "हवाई मार्ग: रांची हवाई अड्डा (१४० किमी)। रेल मार्ग: पारसनाथ रेलवे स्टेशन (PNM) जो मधुबन बेस कैंप से मात्र २२ किमी दूर है। सड़क मार्ग: पारसनाथ स्टेशन या गिरिडीह से सीधे बस, ऑटो व टैक्सियां हर समय उपलब्ध हैं।"
+    }
   },
   {
     id: "palitana",
@@ -100,7 +110,15 @@ const TIRTHS_DATA: TirthItem[] = [
       { name: { en: "Kumarpal Temple", hi: "कुमारपाल मंदिर" }, distance: "Top" },
       { name: { en: "Chaumukha Mandir", hi: "चौमुख मंदिर" }, distance: "Top" },
       { name: { en: "Jindas Atishay Kshetra", hi: "जिनदास अतिशय क्षेत्र" }, distance: "2 km" }
-    ]
+    ],
+    whatToVisit: {
+      en: "The majestic main Adishwar Temple, Chaumukha Temple (four-faced Adinath), Kumarpal Temple, the ancient Rayan Tree, and the famous Taleti Temple complex at the bottom.",
+      hi: "शिखर पर स्थित मुख्य आदिनाथ स्वामी जिनालय, चौमुख मंदिर, कुमारपाल मंदिर, अति प्राचीन रायन वृक्ष (जहाँ प्रभु ने ध्यान किया था) और तलहटी में स्थित भव्य समवशरण मंदिर समूह।"
+    },
+    howToReach: {
+      en: "By Air: Bhavnagar Airport (55 km) or Ahmedabad (215 km). By Train: Palitana local station or Sihor Jn. Road: regular State Transport buses run from Ahmedabad and Bhavnagar directly.",
+      hi: "हवाई मार्ग: भावनगर हवाई अड्डा (५५ किमी) या अहमदाबाद (२१५ किमी)। रेल मार्ग: पालीताना रेलवे स्टेशन या सिहोर जंक्शन। सड़क मार्ग: अहमदाबाद और भावनगर से पालीताना के लिए प्रतिदिन सीधी बसें और कारें उपलब्ध हैं।"
+    }
   },
   {
     id: "dilwara",
@@ -134,7 +152,15 @@ const TIRTHS_DATA: TirthItem[] = [
     nearby: [
       { name: { en: "Achalgarh Digambar Jain Temple", hi: "अचलगढ़ दिगंबर जैन मंदिर" }, distance: "8 km" },
       { name: { en: "Nakoda Parshvanath Tirth", hi: "नाकोडा पार्श्वनाथ तीर्थ" }, distance: "120 km" }
-    ]
+    ],
+    whatToVisit: {
+      en: "Vimal Vasahi Temple (dedicated to Lord Adinath), Luna Vasahi Temple (Lord Neminath), Pittalhar Temple (huge five-metal statue), Khartar Vasahi (three storeyed), and nearby Achalgarh Fort temples.",
+      hi: "विमल वसाही मंदिर (भगवान आदिनाथ), लूण वसाही मंदिर (भगवान नेमिनाथ), पीत्तलहर मंदिर (पीतल मिश्रित धातु की विशाल प्रतिमा), खरतर वसाही और ८ किमी दूर स्थित भव्य अचलगढ़ दिगंबर किला जिनमंदिर।"
+    },
+    howToReach: {
+      en: "By Air: Udaipur Airport (180 km). By Train: Abu Road Railway Station (ABR) is 28 km away with frequent taxis. Road: regular buses scale the Mount Abu ghat from Abu Road every 15 minutes.",
+      hi: "हवाई मार्ग: उदयपुर हवाई अड्डा (१८० किमी)। रेल मार्ग: आबू रोड रेलवे स्टेशन (ABR) जो केवल २८ किमी दूर है। सड़क मार्ग: आबू रोड रेलवे स्टेशन से माउंट आबू पहाड़ी के लिए प्रत्येक १५ मिनट में बसें और टैक्सियां चलती हैं।"
+    }
   },
   {
     id: "girnar",
@@ -168,7 +194,15 @@ const TIRTHS_DATA: TirthItem[] = [
     nearby: [
       { name: { en: "Rajul Caves", hi: "राजीमती गुफा" }, distance: "On Route" },
       { name: { en: "Sahasavan", hi: "सहसावन केवलज्ञान भूमि" }, distance: "Girnar Base" }
-    ]
+    ],
+    whatToVisit: {
+      en: "The 1st peak temples featuring historic carving galleries, Rajul Caves, Sahasavan Koot, and the supreme 5th Peak (Neminath Moksha Tonk) with panoramic mountain views.",
+      hi: "प्रथम कूट पर स्थित प्राचीन भव्य दिगंबर-श्वेताम्बर मंदिर, माता राजीमती (राजील) की गुफाएं, सहसावन केवलज्ञान तपोभूमि, और सर्वोच्च ५वीं कूट (भगवान नेमिनाथ मोक्ष चरण पादुका)।"
+    },
+    howToReach: {
+      en: "By Air: Rajkot Airport (100 km). By Train: Junagadh Railway Station (JND) is 5 km from Girnar base. Ropeway: India's longest temple ropeway runs from base up to Ambaji peak, saving 5,000 steps.",
+      hi: "हवाई मार्ग: राजकोट हवाई अड्डा (१०० किमी)। रेल मार्ग: जूनागढ़ जंक्शन (JND) जो तलहटी से सिर्फ ५ किमी दूर है। उड़नखटोला (Ropeway): गिरनार बेस से अंबा कूट तक चलने वाली एशिया की सबसे लंबी रोपवे सेवा उपलब्ध है।"
+    }
   },
   {
     id: "ranakpur",
@@ -201,7 +235,15 @@ const TIRTHS_DATA: TirthItem[] = [
     nearby: [
       { name: { en: "Parshvanath Devayatan", hi: "श्री पार्श्वनाथ देवायतन" }, distance: "Within Complex" },
       { name: { en: "Sun Temple", hi: "सूर्य मंदिर रणकपुर" }, distance: "1 km" }
-    ]
+    ],
+    whatToVisit: {
+      en: "The marvelous Chaumukha Temple with 29 halls and 1444 pillar vault, Parshvanath Temple featuring erotic style window frames, and the beautiful Sun Temple nearby.",
+      hi: "२२ विशाल मंडपों वाला अद्भुत १४४४ स्तंभों का चौमुख मंदिर, सुंदर पार्श्वनाथ मंदिर (जिसमें आकर्षक जालीदार पत्थर की खिड़कियां हैं) और परिसर से १ किमी दूर स्थित प्राचीन सूर्य मंदिर।"
+    },
+    howToReach: {
+      en: "By Air: Udaipur Airport (95 km). By Train: Falna Railway Station (FA) is 35 km away. Road: easily accessible via well-maintained national highways from Jodhpur or Udaipur.",
+      hi: "हवाई मार्ग: उदयपुर हवाई अड्डा (९५ किमी)। रेल मार्ग: फालना रेलवे स्टेशन (FA) जो यहाँ से ३५ किमी दूर है। सड़क मार्ग: उदयपुर, जोधपुर तथा माउंट आबू से रणकपुर के लिए सीधी बसें तथा निजी टैक्सियां आसानी से मिल जाती हैं।"
+    }
   },
   {
     id: "shravanabelagola",
@@ -234,7 +276,15 @@ const TIRTHS_DATA: TirthItem[] = [
     nearby: [
       { name: { en: "Chandragiri Hill Basadi", hi: "चंद्रगिरि पहाड़ी जैन बस्तियाँ" }, distance: "0.5 km" },
       { name: { en: "Bhandari Basti", hi: "भंडारी बस्ती" }, distance: "Village Base" }
-    ]
+    ],
+    whatToVisit: {
+      en: "The massive Gomateshwara Bahubali Statue on Vindhyagiri hill, Bhattaraka Matha historic murals, Tyagada Kamba pillar, and 14 Basadis (temples) atop Chandragiri hill opposite.",
+      hi: "विंध्यगिरि पहाड़ी पर स्थित भगवान गोमटेश्वर बाहुबली की विशालकाय प्रतिमा, भट्टारक स्वामी मठ के भित्तिचित्र, ऐतिहासिक त्यागद स्तंभ और सामने स्थित चंद्रगिरि पहाड़ी पर चंद्रगुप्त मौर्य की गुफा एवं १४ प्राचीन बस्तियां (जिनालय)।"
+    },
+    howToReach: {
+      en: "By Air: Bengaluru Airport (165 km). By Train: Shravanabelagola Railway Station (SBGA) connects to Hassan and Bengaluru. Road: major buses operate on national highways directly from Mysore and Bengaluru.",
+      hi: "हवाई मार्ग: केम्पेगौड़ा हवाई अड्डा बेंगलुरु (१६५ किमी)। रेल मार्ग: श्रवणबेलगोला रेलवे स्टेशन (SBGA) जो बेंगलुरु और हासन से सीधे जुड़ा है। सड़क मार्ग: हासन, मैसूर और बेंगलुरु से सीधी लग्जरी बसें और कार मार्ग उपलब्ध हैं।"
+    }
   }
 ];
 
@@ -264,6 +314,7 @@ export default function TirthPage() {
   const { language: lang, toggleLanguage } = useLanguage();
   const [search, setSearch] = useState('');
   const [selectedTirth, setSelectedTirth] = useState<TirthItem | null>(null);
+  const [showHelpModal, setShowHelpModal] = useState(false);
 
   // New interactive states
   const [selectedCityIdx, setSelectedCityIdx] = useState<number>(0);
@@ -391,26 +442,38 @@ export default function TirthPage() {
   return (
     <div className="min-h-full p-6 pb-26 bg-gradient-to-b from-gray-50 to-gray-100 dark:from-[#050505] dark:to-[#0d0d0d] text-gray-900 dark:text-gray-100 transition-colors duration-300">
       
-      {/* FIXED TOP RIGHT TRANSLATOR WIDGET */}
-      <button
-        type="button"
-        onClick={toggleLanguage}
-        className="fixed top-4 right-4 z-50 px-4.5 py-2.5 bg-[#FF3D00] text-white hover:bg-[#D50000] active:scale-95 transition-all shadow-lg rounded-full flex items-center justify-center gap-2 font-black text-xs cursor-pointer border border-[#FF9100]/30"
-        title="Translate Language / भाषा बदलें"
-      >
-        <Globe size={15} className="animate-spin-slow" />
-        <span>{lang === 'en' ? 'हिन्दी' : 'English'}</span>
-      </button>
-
-      {/* Header */}
-      <header className="sticky top-0 z-40 bg-gray-50/95 dark:bg-[#050505]/95 backdrop-blur-md -mx-6 px-6 py-4 mb-6 border-b border-gray-200/50 dark:border-white/5 flex items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <button onClick={() => navigate(-1)} className="p-2 rounded-full bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 shadow-sm hover:bg-gray-100 dark:hover:bg-[#1A1A1A] transition-colors">
-            <ArrowLeft size={22} className="text-gray-700 dark:text-gray-300" />
+      {/* Header with Help and Translate in One line */}
+      <header className="sticky top-0 z-40 bg-gray-50/95 dark:bg-[#050505]/95 backdrop-blur-md -mx-6 px-6 py-4 mb-6 border-b border-gray-200/50 dark:border-white/5 flex items-center justify-between gap-2 md:gap-4">
+        <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+          <button onClick={() => navigate(-1)} className="p-2 rounded-full bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 shadow-sm hover:bg-gray-100 dark:hover:bg-[#1A1A1A] transition-colors shrink-0">
+            <ArrowLeft size={18} className="text-gray-700 dark:text-gray-300 sm:w-[22px] sm:h-[22px]" />
           </button>
-          <h1 className="text-xl md:text-2xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] tracking-tight drop-shadow-none dark:drop-shadow-[0_0_10px_rgba(255,109,0,0.4)]">
-            {lang === 'en' ? 'JAIN TIRTH DIRECTORY' : 'जैन तीर्थ एवं दर्शन गाइड'}
+          <h1 className="text-sm sm:text-base md:text-lg lg:text-xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] tracking-tight drop-shadow-none dark:drop-shadow-[0_0_10px_rgba(255,109,0,0.4)] truncate">
+            {lang === 'en' ? 'JAIN TIRTH DIRECTORY' : 'जैन तीर्थ गाइड'}
           </h1>
+        </div>
+
+        {/* Dynamic Controls Aligned in One Line on the Right */}
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          {/* Section User Guide Trigger */}
+          <button
+            onClick={() => setShowHelpModal(true)}
+            className="p-1.5 sm:p-2 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/11 text-gray-550 dark:text-gray-350 rounded-xl text-xs font-bold transition-all cursor-pointer border border-gray-200 dark:border-white/10 h-8 w-8 sm:h-9 sm:w-9 flex items-center justify-center shrink-0 shadow-sm"
+            title={lang === 'en' ? 'Tirth Section Guide' : 'तीर्थ मार्गदर्शिका निर्देशपुस्तिका'}
+          >
+            ❓
+          </button>
+
+          {/* Inline Header Translator Button */}
+          <button
+            type="button"
+            onClick={toggleLanguage}
+            className="px-2.5 py-1.5 sm:px-3 sm:py-2 bg-[#FF3D00] text-white hover:bg-[#D50000] active:scale-95 transition-all shadow-sm rounded-xl flex items-center justify-center gap-1.5 font-bold text-[9px] sm:text-[10px] cursor-pointer border border-[#FF9100]/20 shrink-0 h-8 sm:h-9"
+            title="Translate Language / भाषा बदलें"
+          >
+            <Globe size={11} className="animate-spin-slow shrink-0" />
+            <span>{lang === 'en' ? 'हिन्दी' : 'English'}</span>
+          </button>
         </div>
       </header>
 
@@ -695,13 +758,39 @@ export default function TirthPage() {
                 </div>
 
                 {/* Legend History */}
-                <div className="space-y-2">
+                <div className="space-y-2 text-left">
                   <div className="flex items-center gap-2 text-[#2962FF]">
                     <BookOpen size={16} />
                     <span className="text-[10px] font-black uppercase tracking-widest">{lang === 'en' ? 'Divine History & Legend' : 'पावन इतिहास एवं कथा वर्णन'}</span>
                   </div>
-                  <p className="text-xs text-gray-600 dark:text-gray-300 font-medium leading-relaxed">
+                  <p className="text-xs text-gray-650 dark:text-gray-300 font-semibold leading-relaxed">
                     {lang === 'en' ? selectedTirth.history.en : selectedTirth.history.hi}
+                  </p>
+                </div>
+
+                {/* What to Visit Guide */}
+                <div className="p-4 rounded-2xl bg-orange-550/5 dark:bg-emerald-500/5 border border-emerald-500/10 space-y-2 text-left">
+                  <div className="flex items-center gap-2 text-emerald-500">
+                    <Landmark size={16} />
+                    <span className="text-[10px] font-black uppercase tracking-widest">
+                      {lang === 'en' ? 'Major attractions / what to visit' : 'प्रमुख दर्शनीय स्थल / क्या-क्या देखें'}
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-700 dark:text-gray-250 font-bold leading-relaxed">
+                    {lang === 'en' ? selectedTirth.whatToVisit.en : selectedTirth.whatToVisit.hi}
+                  </p>
+                </div>
+
+                {/* How to Reach Guide */}
+                <div className="p-4 rounded-2xl bg-amber-550/5 dark:bg-amber-500/5 border border-amber-500/10 space-y-2 text-left">
+                  <div className="flex items-center gap-2 text-amber-500">
+                    <Navigation size={16} />
+                    <span className="text-[10px] font-black uppercase tracking-widest">
+                      {lang === 'en' ? 'How to Reach / Travel Guide' : 'पहुंचने का मार्ग / यात्रा निर्देश'}
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-700 dark:text-gray-250 font-bold leading-relaxed flex flex-col gap-1">
+                    {lang === 'en' ? selectedTirth.howToReach.en : selectedTirth.howToReach.hi}
                   </p>
                 </div>
 
@@ -956,6 +1045,93 @@ export default function TirthPage() {
           </motion.div>
         )}
       </AnimatePresence>
+      {/* Dynamic JBT Premium Help Modal */}
+      {showHelpModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-300 pointer-events-auto">
+          <div className="bg-[#121212] border border-white/10 rounded-[2rem] w-full max-w-lg p-6 md:p-8 shadow-2xl relative overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-[#FF6D00]/10 rounded-full blur-3xl pointer-events-none" />
+            
+            <div className="flex justify-between items-start mb-5 relative z-10">
+              <div className="text-left">
+                <span className="text-[9px] font-black text-[#FF6D00] uppercase tracking-widest bg-[#FF6D00]/10 px-3 py-1 rounded-full border border-[#FF6D00]/10 inline-block mb-1.5">
+                  📁 {lang === 'en' ? 'SECTION USER GUIDE' : 'अनुभाग निर्देश पुस्तिका'}
+                </span>
+                <h2 className="text-2xl font-display font-black text-white tracking-tight">
+                  ℹ️ {lang === 'en' ? 'Help & Features' : 'सहायता एवं सुविधाएँ'}
+                </h2>
+              </div>
+              <button 
+                onClick={() => setShowHelpModal(false)}
+                className="w-10 h-10 shrink-0 flex items-center justify-center rounded-full bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer border border-white/5 active:scale-95"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Modal Translator switch requested in help modal */}
+            <div className="bg-white/5 p-3 rounded-2xl border border-white/5 flex items-center justify-between gap-3 mb-5 relative z-10">
+              <span className="text-[10px] font-black uppercase text-gray-400">
+                {lang === 'en' ? 'Translate guide language' : 'निर्देश निर्देश भाषा बदलें'}
+              </span>
+              <button
+                onClick={toggleLanguage}
+                className="px-3.5 py-1.5 bg-[#FF3D00] text-white hover:bg-[#D50000] rounded-xl text-[10px] font-black uppercase transition-all ring-1 ring-orange-500/20 flex items-center gap-1 cursor-pointer"
+              >
+                <Globe size={11} className="animate-spin-slow" />
+                {lang === 'en' ? 'HINDI / हिन्दी' : 'ENGLISH / A'}
+              </button>
+            </div>
+
+            {/* Help Scrollable Content */}
+            <div className="overflow-y-auto pr-1 space-y-4.5 text-left text-zinc-355 dark:text-zinc-300 text-xs text-medium leading-relaxed relative z-10 max-h-[55vh]">
+              <p className="font-bold text-white text-sm">
+                {lang === 'en' ? 'Welcome to Jain Tirth Directory!' : 'जैन तीर्थ निर्देशिका एवं मार्गदर्शक पटल में आपका स्वागत है!'}
+              </p>
+              <p className="font-semibold text-gray-400">
+                {lang === 'en' 
+                  ? 'Explore, calculate real physical distance, and plan stays at sacred Atishya or Siddha Jain holy land coordinates seamlessly:' 
+                  : 'प्राचीन चमत्कारी अतिशय क्षेत्रों तथा सिद्ध क्षेत्रों का इतिहास, दूरी मानचित्र एवं उपलब्ध धर्मशालाओं की संपूर्ण जानकारी प्राप्त करें:'}
+              </p>
+              <ul className="list-disc pl-5 space-y-2 text-gray-400 font-semibold font-sans">
+                <li>
+                  <strong className="text-[#FFD54F]">{lang === 'en' ? 'Explore Siddha & Atishya Kshetras:' : 'सिद्ध एवं अतिशय क्षेत्रों का संपूर्ण परिचय:'}</strong>{' '}
+                  {lang === 'en' 
+                    ? 'Learn deep history, historical importance, and holy legends behind kshetras like Shikharji, Kundalpur, Girnar, and Palitana.' 
+                    : 'शिखरजी, कुण्डलपुर, गिरनार जी व सोनागिरि की निर्माण गाथा और वैज्ञानिक रहस्यों को जानें।'}
+                </li>
+                <li>
+                  <strong className="text-[#FFD54F]">{lang === 'en' ? 'Inter-City Distance Grid:' : 'दूरी मापन एवं जीपीएस नेविगेशन:'}</strong>{' '}
+                  {lang === 'en'
+                    ? 'Select your base city (simulated or via browser GPS location) to instantly estimate direct distances to all listed holy lands.'
+                    : 'अपने वर्तमान क्षेत्र या जीपीएस पोजीशन से प्रत्येक तीर्थ की वास्तविक दूरी तुरंत पता करें और सीधे गूगल मैप मार्ग खोलें।'}
+                </li>
+                <li>
+                  <strong className="text-[#FFD54F]">{lang === 'en' ? 'Local Room Reservation Simulator:' : 'स्थानीय कमरा आरक्षण पर्ची सिमुलेटर:'}</strong>{' '}
+                  {lang === 'en'
+                    ? 'Simulate dynamic guestroom options, selecting rooms, and outputting local vouchers for immediate pilgrimage planning.'
+                    : 'तीर्थों पर कमरों की बुकिंग संबंधी योजना तैयार करने हेतु सिमुलेटर पर्ची जनरेट करें।'}
+                </li>
+                <li>
+                  <strong className="text-[#FFD54F]">{lang === 'en' ? 'Vandana Target Counter:' : 'पावन वंदना संकल्प काउंटर:'}</strong>{' '}
+                  {lang === 'en'
+                    ? 'Track your pilgrimage counters (how many times you climbed or visited the holy hills) stored persistently in your local browser storage.'
+                    : 'आपने प्रत्येक पावन पर्वत की यात्रा कितनी बार संपन्न की है, उसका संकल्प काउंटर चालू कर अपनी रिकॉर्ड सूची सहेजें।'}
+                </li>
+              </ul>
+            </div>
+
+            <div className="mt-6 pt-4 border-t border-white/5 text-center relative z-10">
+              <button
+                onClick={() => setShowHelpModal(false)}
+                className="w-full bg-[#FF6D00] hover:bg-orange-600 text-black py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest cursor-pointer hover:scale-[1.02] active:scale-95 transition-all text-center"
+              >
+                {lang === 'en' ? 'UNDERSTOOD & CONTINUE' : 'पूर्ण समझ आया, आगे बढ़ें'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <SectionAiAgent section="tirth" />
     </div>
   );

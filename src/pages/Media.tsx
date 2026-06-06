@@ -1,11 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
-import { PlaySquare, Headphones, BookOpen, Play, Heart, Pause, SkipForward, SkipBack, Search, Mic, ArrowLeft, Loader2 } from 'lucide-react';
+import { PlaySquare, Headphones, BookOpen, Play, Heart, Pause, SkipForward, SkipBack, Search, Mic, ArrowLeft, Loader2, Globe } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useNavigate } from 'react-router-dom';
 import { db } from '../firebase';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { fallbackMediaData } from '../data/mediaData';
 import SectionAiAgent from '../components/SectionAiAgent';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const tabs: { id: 'stories' | 'bhajans' | 'audiobooks', label: string, icon: any }[] = [
   { id: 'stories', label: 'Stories', icon: PlaySquare },
@@ -15,6 +16,8 @@ const tabs: { id: 'stories' | 'bhajans' | 'audiobooks', label: string, icon: any
 
 export default function MediaPage() {
   const navigate = useNavigate();
+  const { language, toggleLanguage } = useLanguage();
+  const [showHelpModal, setShowHelpModal] = useState(false);
   const [activeTab, setActiveTab] = useState<'stories' | 'bhajans' | 'audiobooks'>('stories');
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTrack, setCurrentTrack] = useState<any>(null);
@@ -318,14 +321,41 @@ export default function MediaPage() {
 
   return (
     <div className="min-h-full p-6 pb-24 bg-[#050505] text-gray-200">
-      <header className="flex items-center gap-4 mb-8 pt-4">
-        <button onClick={() => navigate(-1)} className="p-2 rounded-full bg-white/5 hover:bg-white/10 transition-colors">
-          <ArrowLeft size={24} className="text-gray-300" />
-        </button>
-        <h1 className="text-3xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] flex items-center gap-3 drop-shadow-[0_0_10px_rgba(255,109,0,0.5)]">
-          <PlaySquare className="text-[#FF6D00] drop-shadow-[0_0_8px_rgba(255,109,0,0.8)]" size={32} />
-          MULTIMEDIA
-        </h1>
+      
+      {/* Sticky Header with inline controls */}
+      <header className="sticky top-0 z-40 bg-[#050505]/95 backdrop-blur-md -mx-6 px-6 pt-4 pb-4 mb-6 border-b border-white/5 flex items-center justify-between gap-2 md:gap-4">
+        <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+          <button onClick={() => navigate(-1)} className="p-1.5 sm:p-2 rounded-full bg-white/5 border border-white/10 shadow-sm hover:bg-white/10 transition-colors shrink-0">
+            <ArrowLeft size={18} className="text-gray-300 sm:w-[22px] sm:h-[22px]" />
+          </button>
+          <h1 className="text-sm sm:text-base md:text-lg lg:text-xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] tracking-tight drop-shadow-none dark:drop-shadow-[0_0_10px_rgba(255,109,0,0.4)] truncate flex items-center gap-2">
+            <PlaySquare className="text-[#FF6D00] shrink-0" size={18} />
+            <span className="truncate">{language === 'en' ? 'JAIN MULTIMEDIA' : 'जैन मल्टीमीडिया'}</span>
+          </h1>
+        </div>
+
+        {/* Dynamic Controls Aligned in One Line on the Right */}
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          {/* Section User Guide Trigger */}
+          <button
+            onClick={() => setShowHelpModal(true)}
+            className="p-1.5 sm:p-2 bg-white/5 hover:bg-white/10 text-gray-300 rounded-xl text-xs font-bold transition-all cursor-pointer border border-white/10 h-8 w-8 sm:h-9 sm:w-9 flex items-center justify-center shrink-0 shadow-sm animate-none"
+            title={language === 'en' ? 'Multimedia Section Guide' : 'मल्टीमीडिया विभाग निर्देशपुस्तिका'}
+          >
+            ❓
+          </button>
+
+          {/* Inline Header Translator Button */}
+          <button
+            type="button"
+            onClick={toggleLanguage}
+            className="px-2.5 py-1.5 sm:px-3 sm:py-2 bg-[#FF3D00] text-white hover:bg-[#D50000] active:scale-95 transition-all shadow-sm rounded-xl flex items-center justify-center gap-1.5 font-bold text-[9px] sm:text-[10px] cursor-pointer border border-[#FF9100]/20 shrink-0 h-8 sm:h-9"
+            title="Translate Language / भाषा बदलें"
+          >
+            <Globe size={11} className="animate-spin-slow shrink-0" />
+            <span>{language === 'en' ? 'हिन्दी' : 'English'}</span>
+          </button>
+        </div>
       </header>
 
       {/* Now Playing Banner */}
@@ -496,6 +526,78 @@ export default function MediaPage() {
         )}
       </div>
       <SectionAiAgent section="media" />
+
+      {/* JBT Premium Help Modal for Multimedia */}
+      {showHelpModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-300 pointer-events-auto">
+          <div className="bg-[#121212] border border-white/10 rounded-[2rem] w-full max-w-lg p-6 md:p-8 shadow-2xl relative overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-[#FF6D00]/10 rounded-full blur-3xl pointer-events-none" />
+            
+            <div className="flex justify-between items-start mb-5 relative z-10">
+              <div className="text-left">
+                <span className="text-[9px] font-black text-[#FF6D00] uppercase tracking-widest bg-[#FF6D00]/10 px-3 py-1 rounded-full border border-[#FF6D00]/10 inline-block mb-1.5">
+                  📁 {language === 'en' ? 'MULTIMEDIA USER GUIDE' : 'मल्टीमीडिया निर्देश पुस्तिका'}
+                </span>
+                <h2 className="text-2xl font-display font-black text-white tracking-tight">
+                  ℹ️ {language === 'en' ? 'Help & Features' : 'सहायता एवं सुविधाएँ'}
+                </h2>
+              </div>
+              <button 
+                onClick={() => setShowHelpModal(false)}
+                className="w-10 h-10 shrink-0 flex items-center justify-center rounded-full bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer border border-white/5 active:scale-95"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Modal Translator switch requested in help modal */}
+            <div className="bg-white/5 p-3 rounded-2xl border border-white/5 flex items-center justify-between gap-3 mb-5 relative z-10">
+              <span className="text-[10px] font-black uppercase text-gray-400">
+                {language === 'en' ? 'Translate guide language' : 'निर्देश निर्देश भाषा बदलें'}
+              </span>
+              <button
+                onClick={toggleLanguage}
+                className="px-3.5 py-1.5 bg-[#FF3D00] text-white hover:bg-[#D50000] rounded-xl text-[10px] font-black uppercase transition-all ring-1 ring-orange-500/20 flex items-center gap-1 cursor-pointer"
+              >
+                <Globe size={11} className="animate-spin-slow" />
+                {language === 'en' ? 'HINDI / हिन्दी' : 'ENGLISH / A'}
+              </button>
+            </div>
+
+            {/* Help Scrollable Content */}
+            <div className="overflow-y-auto pr-1 space-y-4 text-left text-zinc-300 text-xs text-medium leading-relaxed relative z-10 max-h-[55vh]">
+              <p className="font-bold text-white text-sm">
+                {language === 'en' ? 'Welcome to Jain Multimedia Library!' : 'जैन मल्टीमीडिया ऑडियो लाइब्रेरी में आपका स्वागत है!'}
+              </p>
+              <p className="font-semibold text-gray-400">
+                {language === 'en' 
+                  ? 'Listen to beautiful spiritual stories, divine musical Bhajans, and deep audiobooks easily on-the-go with stable backup media source streams:' 
+                  : 'महान नैतिक कहानियों, संगीतबद्ध भजनों एवं ज्ञानवर्धक ऑडियो पुस्तकों का अमृतपान सुगमता से करें:'}
+              </p>
+              <ul className="list-disc pl-5 space-y-2 text-gray-400 font-semibold font-sans">
+                <li>
+                  <strong className="text-[#FFD54F]">{language === 'en' ? 'Three Dedicated Formats:' : 'तीन विशेष विभाग:'}</strong>{' '}
+                  {language === 'en' 
+                    ? 'Includes Shravak Katha stories, continuous rhythmic devotional Bhajans, and classic Swadhyay audiobooks.' 
+                    : 'नैतिक बोध कराने वाली कहानियां, मंत्रमुग्ध करने वाले भजन आडियो व तत्वज्ञान की पुस्तकें उपलब्ध हैं।'}
+                </li>
+                <li>
+                  <strong className="text-[#FFD54F]">{language === 'en' ? 'Integrated Player Bar:' : 'सक्रिय प्लेयर बार:'}</strong>{' '}
+                  {language === 'en' 
+                    ? 'Easily play, pause, or switch tracks with our floating persistent audio controller bar.' 
+                    : 'नीचे स्थित ऑडियो कंट्रोलर से सीधे गीत को रोकना, आगे बढ़ाना या पीछे करना आसान है।'}
+                </li>
+                <li>
+                  <strong className="text-[#FFD54F]">{language === 'en' ? 'Responsive Voice Search:' : 'आवाज आधारित खोज:'}</strong>{' '}
+                  {language === 'en' 
+                    ? 'Click the Microphone button and state any keyword to filter your active media collection instantly.' 
+                    : 'माइक्रोफोन बटन पर क्लिक करके किसी भी विषय को बोलकर तुरंत खोज सकते हैं।'}
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

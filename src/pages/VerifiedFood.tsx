@@ -985,6 +985,7 @@ export default function VerifiedFoodPage() {
   const [developerCode, setDeveloperCode] = useState('');
   const [isDeveloper, setIsDeveloper] = useState(false);
   const [showPasscodeForm, setShowPasscodeForm] = useState(false);
+  const [showHelpModal, setShowHelpModal] = useState(false);
   const [activeChatKitchenId, setActiveChatKitchenId] = useState<string | null>(null);
   const [userChatText, setUserChatText] = useState('');
   const [mySubmittedIds, setMySubmittedIds] = useState<string[]>(() => {
@@ -1398,65 +1399,46 @@ export default function VerifiedFoodPage() {
   return (
     <div className="min-h-full p-6 pb-26 bg-gradient-to-b from-gray-50 to-gray-100 dark:from-[#050505] dark:to-[#0d0d0d] text-gray-900 dark:text-gray-100 transition-colors duration-300 relative">
       
-      {/* FIXED TOP RIGHT TRANSLATOR WIDGET */}
-      <button
-        type="button"
-        onClick={toggleLanguage}
-        className="fixed top-4 right-4 z-50 px-4.5 py-2.5 bg-[#FF3D00] text-white hover:bg-[#D50000] active:scale-95 transition-all shadow-lg rounded-full flex items-center justify-center gap-2 font-black text-xs cursor-pointer border border-[#FF9100]/30"
-        title="Translate Language / भाषा बदलें"
-      >
-        <Globe size={15} className="animate-spin-slow" />
-        <span>{language === 'en' ? 'हिन्दी' : 'English'}</span>
-      </button>
-
-      {/* Header */}
-      <header className="sticky top-0 z-40 bg-gray-50/95 dark:bg-[#050505]/95 backdrop-blur-md -mx-6 -mt-6 px-6 pt-6 pb-4 mb-6 border-b border-gray-200/50 dark:border-white/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <button onClick={() => navigate(-1)} className="p-2 rounded-full bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 shadow-sm hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">
-            <ArrowLeft size={22} className="text-gray-700 dark:text-gray-300" />
+      {/* Header with Title and Unified Right Controls */}
+      <header className="sticky top-0 z-40 bg-gray-50/95 dark:bg-[#050505]/95 backdrop-blur-md -mx-6 -mt-6 px-6 pt-4 pb-4 mb-6 border-b border-gray-200/50 dark:border-white/5 flex items-center justify-between gap-2 md:gap-4">
+        <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+          <button onClick={() => navigate(-1)} className="p-1.5 sm:p-2 rounded-full bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 shadow-sm hover:bg-gray-100 dark:hover:bg-white/10 transition-colors shrink-0">
+            <ArrowLeft size={18} className="text-gray-700 dark:text-gray-300 sm:w-[22px] sm:h-[22px]" />
           </button>
-          <div>
-            <h1 className="text-xl md:text-2xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FF3D00] to-[#FF9100] flex items-center gap-2">
-              <Utensils className="text-[#FF3D00] shrink-0 animate-bounce" size={26} />
-              {language === 'en' ? 'JAIN FOOD LOCATOR' : 'जैन फूड लोकेटर'}
+          <div className="min-w-0">
+            <h1 className="text-sm sm:text-base md:text-lg lg:text-xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FF3D00] to-[#FF9100] flex items-center gap-1.5 sm:gap-2 truncate">
+              <Utensils className="text-[#FF3D00] shrink-0 w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
+              <span className="truncate">{language === 'en' ? 'JAIN FOOD LOCATOR' : 'जैन फूड लोकेटर'}</span>
             </h1>
-            <p className="text-[10px] text-gray-500 font-bold dark:text-gray-400">
+            <p className="text-[9px] sm:text-[10px] text-gray-550 font-bold dark:text-gray-400 truncate hidden xs:block">
               {language === 'en' ? 'Verified Pure Jain Food on Your Journeys' : 'यात्रा के दौरान शुद्ध और सात्विक भोजन की प्रामाणिक व्यवस्था'}
             </p>
           </div>
         </div>
 
-        {/* Elegant Header Control with Translate (Language toggle) & Developer Portal */}
-        <div className="flex flex-wrap items-center gap-2 self-end sm:self-auto">
-          <button
-            onClick={toggleLanguage}
-            className="px-3.5 py-2 bg-gray-100 dark:bg-white/5 dark:hover:bg-white/10 text-gray-650 dark:text-gray-350 hover:text-[#FF3D00] dark:hover:text-[#FF3D00] rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 border border-dashed border-gray-200/50 dark:border-white/5 cursor-pointer shadow-sm"
-            title={language === 'en' ? 'Switch to Hindi / हिन्दी में बदलें' : 'Switch to English / अंग्रेज़ी में बदलें'}
-          >
-            🌐 {language === 'en' ? 'HINDI / हिन्दी' : 'ENGLISH / A'}
-          </button>
-
+        {/* Right Controls Container - Symmetrical Layout with Dev Portal, Help, and Orange Translate */}
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           {isDeveloper ? (
-            <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-2xl">
-              <span className="text-[10px] font-black tracking-wider text-emerald-600 dark:text-emerald-400">
-                👑 {language === 'en' ? 'SAMIL JAIN - DEV ACTIVE' : 'समिल जैन - डेवलपर सक्रिय'}
+            <div className="flex items-center gap-1 sm:gap-1.5 bg-emerald-500/10 border border-emerald-500/20 px-2 py-1.5 rounded-xl shrink-0">
+              <span className="text-[9px] sm:text-[10px] font-black text-emerald-600 dark:text-emerald-400 hidden sm:inline">
+                👑 {language === 'en' ? 'DEV ACTIVE' : 'देव सक्रिय'}
               </span>
               <button 
                 onClick={() => {
                   setIsDeveloper(false);
                   alert(language === 'en' ? 'Dev Portal locked.' : 'डेवलपर पोर्टल लॉक किया गया।');
                 }}
-                className="p-1 text-red-500 hover:text-red-700 hover:bg-red-500/10 rounded-lg transition-colors"
+                className="text-[10px] text-red-500 hover:text-red-700 cursor-pointer font-bold leading-none p-0.5"
                 title={language === 'en' ? 'Lock controls' : 'नियंत्रण लॉक करें'}
               >
                 🔒
               </button>
             </div>
           ) : showPasscodeForm ? (
-            <div className="flex items-center gap-1.5 bg-white dark:bg-[#111] border border-orange-500/20 p-1 rounded-2xl shadow-sm">
+            <div className="flex items-center gap-1 bg-white dark:bg-[#111] border border-orange-500/25 p-1 rounded-xl shadow-sm shrink-0">
               <input 
                 type="password" 
-                placeholder="Passcode [1008]..."
+                placeholder="1008"
                 value={developerCode}
                 onChange={(e) => setDeveloperCode(e.target.value)}
                 onKeyDown={(e) => {
@@ -1465,32 +1447,52 @@ export default function VerifiedFoodPage() {
                     setShowPasscodeForm(false);
                   }
                 }}
-                className="bg-gray-50 dark:bg-[#181818] border border-gray-200 dark:border-white/10 rounded-xl px-2.5 py-1.5 text-[10px] font-bold text-center w-28 focus:outline-none focus:ring-1 focus:ring-[#FF3D00]"
+                className="bg-gray-50 dark:bg-[#181818] border border-gray-200 dark:border-white/10 rounded-lg px-1.5 py-1 text-[9px] font-bold text-center w-12 sm:w-16 focus:outline-none focus:ring-1 focus:ring-orange-500"
               />
               <button
                 onClick={() => {
                   verifyPasscode();
                   setShowPasscodeForm(false);
                 }}
-                className="px-3 py-1.5 bg-[#FF3D00] text-white rounded-xl text-[10px] font-black uppercase tracking-wider hover:bg-red-650 transition-colors"
+                className="px-2 py-1 bg-[#FF3D00] text-white rounded-lg text-[9px] font-black uppercase hover:bg-orange-600 active:scale-95 transition-all text-center"
               >
-                {language === 'en' ? 'Verify' : 'पुष्टि'}
+                ✓
               </button>
               <button
                 onClick={() => setShowPasscodeForm(false)}
-                className="text-[10px] text-gray-400 hover:text-gray-600 px-1 font-bold"
+                className="text-[9px] text-gray-400 hover:text-gray-650 px-1 font-bold"
               >
-                {language === 'en' ? 'Cancel' : 'रद्द'}
+                ✕
               </button>
             </div>
           ) : (
             <button
               onClick={() => setShowPasscodeForm(true)}
-              className="px-3.5 py-2 bg-gray-100 dark:bg-white/5 dark:hover:bg-white/10 text-gray-650 dark:text-gray-350 hover:text-[#FF3D00] dark:hover:text-[#FF3D00] rounded-2xl text-[10px] font-black uppercase tracking-widest transition-colors flex items-center gap-1.5 border border-dashed border-gray-200/50 dark:border-white/5 cursor-pointer"
+              className="px-2.5 py-1.5 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/15 text-gray-650 dark:text-gray-350 hover:text-[#FF3D00] dark:hover:text-[#FF3D00] rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-colors flex items-center gap-1 border border-dashed border-gray-200/50 dark:border-white/5 cursor-pointer h-8 sm:h-9"
             >
-              🔐 {language === 'en' ? 'DEV PORTAL' : 'डेवलपर पटल'}
+              🔐 <span className="hidden xs:inline">{language === 'en' ? 'DEV PORTAL' : 'डेवलपर पटल'}</span>
             </button>
           )}
+
+          {/* Help Button */}
+          <button
+            onClick={() => setShowHelpModal(true)}
+            className="p-1.5 sm:p-2 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/15 text-gray-550 dark:text-gray-350 rounded-xl text-xs font-bold leading-normal transition-all cursor-pointer border border-gray-200 dark:border-white/10 h-8 w-8 sm:h-9 sm:w-9 flex items-center justify-center shrink-0 shadow-sm"
+            title={language === 'en' ? 'Food Section Guide' : 'आहार खोजक निर्देशपुस्तिका'}
+          >
+            ❓
+          </button>
+
+          {/* Symmetrical Translate Button (The orange one) */}
+          <button
+            type="button"
+            onClick={toggleLanguage}
+            className="px-3 py-1.5 sm:px-3.5 sm:py-2 bg-[#FF3D00] text-white hover:bg-[#D50000] active:scale-95 transition-all shadow-sm rounded-xl flex items-center justify-center gap-1.5 font-black text-[9px] sm:text-[10px] cursor-pointer border border-[#FF9100]/30 shrink-0 h-8 sm:h-9"
+            title={language === 'en' ? 'Translate / भाषा बदलें' : 'अंग्रेज़ी में बदलें'}
+          >
+            <Globe size={11} className="animate-spin-slow shrink-0" />
+            <span>{language === 'en' ? 'हिन्दी' : 'English'}</span>
+          </button>
         </div>
       </header>
 
@@ -2362,6 +2364,93 @@ export default function VerifiedFoodPage() {
           </div>
         )}
       </div>
+
+      {/* Dynamic JBT Premium Help Modal */}
+      {showHelpModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-300 pointer-events-auto">
+          <div className="bg-[#121212] border border-white/10 rounded-[2rem] w-full max-w-lg p-6 md:p-8 shadow-2xl relative overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-[#FF6D00]/10 rounded-full blur-3xl pointer-events-none" />
+            
+            <div className="flex justify-between items-start mb-5 relative z-10">
+              <div className="text-left">
+                <span className="text-[9px] font-black text-[#FF6D00] uppercase tracking-widest bg-[#FF6D00]/10 px-3 py-1 rounded-full border border-[#FF6D00]/10 inline-block mb-1.5">
+                  📁 {language === 'en' ? 'SECTION USER GUIDE' : 'अनुभाग निर्देश पुस्तिका'}
+                </span>
+                <h2 className="text-2xl font-display font-black text-white tracking-tight">
+                  ℹ️ {language === 'en' ? 'Help & Features' : 'सहायता एवं सुविधाएँ'}
+                </h2>
+              </div>
+              <button 
+                onClick={() => setShowHelpModal(false)}
+                className="w-10 h-10 shrink-0 flex items-center justify-center rounded-full bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer border border-white/5 active:scale-95"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Modal Translator switch requested in help modal */}
+            <div className="bg-white/5 p-3 rounded-2xl border border-white/5 flex items-center justify-between gap-3 mb-5 relative z-10">
+              <span className="text-[10px] font-black uppercase text-gray-400">
+                {language === 'en' ? 'Translate guide language' : 'निर्देश निर्देश भाषा बदलें'}
+              </span>
+              <button
+                onClick={toggleLanguage}
+                className="px-3.5 py-1.5 bg-[#FF3D00] text-white hover:bg-[#D50000] rounded-xl text-[10px] font-black uppercase transition-all ring-1 ring-orange-500/20 flex items-center gap-1 cursor-pointer"
+              >
+                <Globe size={11} className="animate-spin-slow" />
+                {language === 'en' ? 'HINDI / हिन्दी' : 'ENGLISH / A'}
+              </button>
+            </div>
+
+            {/* Help Scrollable Content */}
+            <div className="overflow-y-auto pr-1 space-y-4.5 text-left text-zinc-355 dark:text-zinc-300 text-xs text-medium leading-relaxed relative z-10 max-h-[55vh]">
+              <p className="font-bold text-white text-sm">
+                {language === 'en' ? 'Welcome to Jain Food Locator!' : 'जैन फूड लोकेटर (विशुद्ध भोजनशाला खोजक) में आपका स्वागत है!'}
+              </p>
+              <p className="font-semibold text-gray-400">
+                {language === 'en' 
+                  ? 'This directory helps Sadharmik Yatris (travelers) locate pure, non-violent Jain kitchens, Dharamshala dining halls, and pure Satvik dining facilities during journeys.' 
+                  : 'यह अनुभाग जैन साधर्मियों को यात्रा के दौरान शुद्ध, मर्यादित और कंदमूल-रहित भोजन की व्यवस्था प्रदान करने वाली रसोईयों, धर्मशाला अहारशालाओं की जानकारी देता है:'}
+              </p>
+              <ul className="list-disc pl-5 space-y-2 text-gray-400 font-semibold font-sans">
+                <li>
+                  <strong className="text-[#FFD54F]">{language === 'en' ? 'Strict Purity Parameters:' : 'शुचिता के त्रि-आयामी नियम:'}</strong>{' '}
+                  {language === 'en' 
+                    ? 'All kitchens list metrics for Sunset Compliance (serving strictly before sunset), Jal Galan (using traditional water filters), and Zero Root-Vegetables.' 
+                    : 'सभी भोजनशालाओं में सूर्यास्त पूर्व भोजन (चौविहार), मर्यादा पूर्वक छना जल (जल गालन), तथा कंदमूल (आलू, प्याज, लहसुन) का शत-प्रतिशत निषेध अनिवार्य है।'}
+                </li>
+                <li>
+                  <strong className="text-[#FFD54F]">{language === 'en' ? 'Interactive Distance Calculation:' : 'दूरी एवं लोकेशन गणना प्रणाली:'}</strong>{' '}
+                  {language === 'en'
+                    ? 'Calculate exact proximity by selecting your current city coordinates, or query via state (MP, UP, Karnataka) to optimize travel routes.'
+                    : 'अपने वर्तमान शहर (इन्दौर, कुण्डलपुर, सोनागिर आदि) का चयन कर प्रत्येक अहारशाला की वास्तविक हवाई दूरी एवं ड्राइविंग सुगमता मापें।'}
+                </li>
+                <li>
+                  <strong className="text-[#FFD54F]">{language === 'en' ? 'Direct Sadharmik Chat & Contact:' : 'इन-ऐप सीधा चेट संवाद एवं संपर्क:'}</strong>{' '}
+                  {language === 'en'
+                    ? 'Launch live private chat channels directly with the kitchen operators to request food timings, pre-book seats, and query specialized diet requirements.'
+                    : 'अतिथियों हेतु रसोई संचालक के पास उपलब्ध "चर्चा करें" बटन पर क्लिक कर सीधे संवाद करें तथा भोजन मर्यादा व बुकिंग समय सुनिश्चित करें।'}
+                </li>
+                <li>
+                  <strong className="text-[#FFD54F]">{language === 'en' ? 'Register New Holy Chowka:' : 'नवीन शुद्ध चौका/अहारशाला जोड़ें:'}</strong>{' '}
+                  {language === 'en'
+                    ? 'Sadharmik families or community heads can tap "Register New Kitchen" to add locations with photos, cost info (free/nominal/paid), and coordinate details.'
+                    : 'साधार्मिक गृहस्थ अथवा प्रबंधक "रजिस्टर चौका" विकल्प से निःशुल्क, नाममात्र अथवा मर्यादित भोजनालयों का संपर्क एवं पता दर्ज कर साझा कर सकते हैं।'}
+                </li>
+              </ul>
+            </div>
+
+            <div className="mt-6 pt-4 border-t border-white/5 text-center relative z-10">
+              <button
+                onClick={() => setShowHelpModal(false)}
+                className="w-full bg-[#FF6D00] hover:bg-orange-600 text-black py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest cursor-pointer hover:scale-[1.02] active:scale-95 transition-all text-center"
+              >
+                {language === 'en' ? 'UNDERSTOOD & CONTINUE' : 'पूर्ण समझ आया, आगे बढ़ें'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="mt-8">
         <SectionAiAgent section="verified-food" />

@@ -1,14 +1,17 @@
 import { useState, useEffect } from 'react';
-import { Quote, Share2, Heart, ChevronLeft, ChevronRight, Copy, Check, Loader2, ArrowLeft } from 'lucide-react';
+import { Quote, Share2, Heart, ChevronLeft, ChevronRight, Copy, Check, Loader2, ArrowLeft, Globe } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { db } from '../firebase';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { FALLBACK_VICHAARS, getDeterministicVichaar } from '../data/vichaarData';
 import SectionAiAgent from '../components/SectionAiAgent';
+import { useLanguage } from '../contexts/LanguageContext';
 
 export default function VichaarPage() {
   const navigate = useNavigate();
+  const { language, toggleLanguage } = useLanguage();
+  const [showHelpModal, setShowHelpModal] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [liked, setLiked] = useState<Record<number, boolean>>({});
   const [copied, setCopied] = useState(false);
@@ -96,19 +99,41 @@ export default function VichaarPage() {
 
   return (
     <div className="min-h-full p-6 pb-24 bg-[#050505] flex flex-col text-gray-200">
-      <header className="flex items-center gap-4 mb-8 pt-4 shrink-0">
-        <button 
-          onClick={() => navigate('/')} 
-          className="p-2.5 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition-all cursor-pointer shadow-md"
-          title="Back to Home"
-          id="btn-back-to-home"
-        >
-          <ArrowLeft size={22} className="text-gray-300" />
-        </button>
-        <h1 className="text-3xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] flex items-center gap-3 drop-shadow-[0_0_10px_rgba(255,109,0,0.5)]">
-          <Quote className="text-[#FF6D00] drop-shadow-[0_0_8px_rgba(255,109,0,0.8)]" size={28} />
-          DAILY VICHAAR
-        </h1>
+      
+      {/* Sticky Header with inline controls */}
+      <header className="sticky top-0 z-40 bg-[#050505]/95 backdrop-blur-md -mx-6 px-6 pt-4 pb-4 mb-6 border-b border-white/5 flex items-center justify-between gap-2 md:gap-4">
+        <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+          <button onClick={() => navigate(-1)} className="p-1.5 sm:p-2 rounded-full bg-white/5 border border-white/10 shadow-sm hover:bg-white/10 transition-colors shrink-0">
+            <ArrowLeft size={18} className="text-gray-300 sm:w-[22px] sm:h-[22px]" />
+          </button>
+          <h1 className="text-sm sm:text-base md:text-lg lg:text-xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] tracking-tight drop-shadow-none dark:drop-shadow-[0_0_10px_rgba(255,109,0,0.4)] truncate flex items-center gap-2">
+            <Quote className="text-[#FF6D00] shrink-0" size={18} />
+            <span className="truncate">{language === 'en' ? 'DAILY JAIN VICHAAR' : 'दैनिक जैन विचार'}</span>
+          </h1>
+        </div>
+
+        {/* Dynamic Controls Aligned in One Line on the Right */}
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          {/* Section User Guide Trigger */}
+          <button
+            onClick={() => setShowHelpModal(true)}
+            className="p-1.5 sm:p-2 bg-white/5 hover:bg-white/10 text-gray-300 rounded-xl text-xs font-bold transition-all cursor-pointer border border-white/10 h-8 w-8 sm:h-9 sm:w-9 flex items-center justify-center shrink-0 shadow-sm animate-none"
+            title={language === 'en' ? 'Vichaar Section Guide' : 'विचार विभाग निर्देशपुस्तिका'}
+          >
+            ❓
+          </button>
+
+          {/* Inline Header Translator Button */}
+          <button
+            type="button"
+            onClick={toggleLanguage}
+            className="px-2.5 py-1.5 sm:px-3 sm:py-2 bg-[#FF3D00] text-white hover:bg-[#D50000] active:scale-95 transition-all shadow-sm rounded-xl flex items-center justify-center gap-1.5 font-bold text-[9px] sm:text-[10px] cursor-pointer border border-[#FF9100]/20 shrink-0 h-8 sm:h-9"
+            title="Translate Language / भाषा बदलें"
+          >
+            <Globe size={11} className="animate-spin-slow shrink-0" />
+            <span>{language === 'en' ? 'हिन्दी' : 'English'}</span>
+          </button>
+        </div>
       </header>
 
       <div className="flex-1 flex items-center justify-center relative w-full">
@@ -188,6 +213,78 @@ export default function VichaarPage() {
         </button>
       </div>
       <SectionAiAgent section="vichaar" />
+
+      {/* JBT Premium Help Modal for Vichaar */}
+      {showHelpModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-300 pointer-events-auto">
+          <div className="bg-[#121212] border border-white/10 rounded-[2rem] w-full max-w-lg p-6 md:p-8 shadow-2xl relative overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-[#FF6D00]/10 rounded-full blur-3xl pointer-events-none" />
+            
+            <div className="flex justify-between items-start mb-5 relative z-10">
+              <div className="text-left">
+                <span className="text-[9px] font-black text-[#FF6D00] uppercase tracking-widest bg-[#FF6D00]/10 px-3 py-1 rounded-full border border-[#FF6D00]/10 inline-block mb-1.5">
+                  📁 {language === 'en' ? 'VICHAAR USER GUIDE' : 'विचार निर्देश पुस्तिका'}
+                </span>
+                <h2 className="text-2xl font-display font-black text-white tracking-tight">
+                  ℹ️ {language === 'en' ? 'Help & Features' : 'सहायता एवं सुविधाएँ'}
+                </h2>
+              </div>
+              <button 
+                onClick={() => setShowHelpModal(false)}
+                className="w-10 h-10 shrink-0 flex items-center justify-center rounded-full bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer border border-white/5 active:scale-95"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Modal Translator switch requested in help modal */}
+            <div className="bg-white/5 p-3 rounded-2xl border border-white/5 flex items-center justify-between gap-3 mb-5 relative z-10">
+              <span className="text-[10px] font-black uppercase text-gray-400">
+                {language === 'en' ? 'Translate guide language' : 'निर्देश निर्देश भाषा बदलें'}
+              </span>
+              <button
+                onClick={toggleLanguage}
+                className="px-3.5 py-1.5 bg-[#FF3D00] text-white hover:bg-[#D50000] rounded-xl text-[10px] font-black uppercase transition-all ring-1 ring-orange-500/20 flex items-center gap-1 cursor-pointer"
+              >
+                <Globe size={11} className="animate-spin-slow" />
+                {language === 'en' ? 'HINDI / हिन्दी' : 'ENGLISH / A'}
+              </button>
+            </div>
+
+            {/* Help Scrollable Content */}
+            <div className="overflow-y-auto pr-1 space-y-4 text-left text-zinc-300 text-xs text-medium leading-relaxed relative z-10 max-h-[55vh]">
+              <p className="font-bold text-white text-sm">
+                {language === 'en' ? 'Welcome to Daily Jain Vichaar!' : 'दैनिक जैन विचार पटल में आपका स्वागत है!'}
+              </p>
+              <p className="font-semibold text-gray-400">
+                {language === 'en' 
+                  ? 'Reflect deeply on teachings from great spiritual leaders and sacred scriptures, and share divine insights daily.' 
+                  : 'महान आचार्यों, संतों और प्राचीन जैन दर्शन के दिव्य चिंतनशील विचारों का नित्य मनन करें और शेयर करें:'}
+              </p>
+              <ul className="list-disc pl-5 space-y-2 text-gray-400 font-semibold font-sans">
+                <li>
+                  <strong className="text-[#FFD54F]">{language === 'en' ? 'Daily Up-to-date Quotes:' : 'नित्य नए चिंतनशील विचार:'}</strong>{' '}
+                  {language === 'en' 
+                    ? 'Get access to unique pure Jain thoughts synced beautifully across different spiritual lineages.' 
+                    : 'नित्य प्रति अलग-अलग आगमों व संतों के दिव्य विचारों का मनन प्राप्त करें।'}
+                </li>
+                <li>
+                  <strong className="text-[#FFD54F]">{language === 'en' ? 'Copy & Share Instantly:' : 'कॉपी और सीधा साझा करें:'}</strong>{' '}
+                  {language === 'en' 
+                    ? 'Simply click Copy to save standard quote text, or tap Share to distribute directly via WhatsApp, Instagram or social channels.' 
+                    : 'कॉपी बटन द्वारा सीधा किसी को भी भेजें, या शेयर बटन से सीधे सोशल मीडिया पर फैलाएं।'}
+                </li>
+                <li>
+                  <strong className="text-[#FFD54F]">{language === 'en' ? 'Lineages Respect:' : 'सभी संप्रदायों का आदर:'}</strong>{' '}
+                  {language === 'en' 
+                    ? 'Contains insights from across Digambara and Shvetambara canonical texts, promoting global peace.' 
+                    : 'दिगंबर व श्वेतांबर दोनों परंपराओं के सुंदर आगम वचनों का अनूठा संग्रह।'}
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

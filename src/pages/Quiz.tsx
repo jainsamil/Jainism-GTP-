@@ -86,6 +86,7 @@ export default function QuizPage() {
   const [showResult, setShowResult] = useState(false);
   const [hasAnswered, setHasAnswered] = useState(false);
   const [isGeneratingAiQ, setIsGeneratingAiQ] = useState(false);
+  const [showHelpModal, setShowHelpModal] = useState(false);
 
   const generateAiPracticeQuestion = async () => {
     setIsGeneratingAiQ(true);
@@ -253,31 +254,42 @@ export default function QuizPage() {
   return (
     <div className="min-h-full p-6 pb-24 bg-[#050505] text-gray-200">
       
-      {/* FIXED TOP RIGHT TRANSLATOR WIDGET */}
-      <button
-        type="button"
-        onClick={toggleLanguage}
-        className="fixed top-4 right-4 z-50 px-4.5 py-2.5 bg-[#FF3D00] text-white hover:bg-[#D50000] active:scale-95 transition-all shadow-lg rounded-full flex items-center justify-center gap-2 font-black text-xs cursor-pointer border border-[#FF9100]/30"
-        title="Translate Language / भाषा बदलें"
-      >
-        <Globe size={15} className="animate-spin-slow" />
-        <span>{language === 'en' ? 'हिन्दी' : 'English'}</span>
-      </button>
-
-      <header className="sticky top-0 z-40 bg-[#050505]/95 backdrop-blur-md -mx-6 px-6 py-4 mb-8 border-b border-white/5 flex items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <button onClick={() => navigate(-1)} className="p-2 rounded-full bg-white/5 hover:bg-white/10 transition-colors">
-            <ArrowLeft size={24} className="text-gray-300" />
+      <header className="sticky top-0 z-40 bg-[#050505]/95 backdrop-blur-md -mx-6 px-6 py-4 mb-8 border-b border-white/5 flex items-center justify-between gap-2 md:gap-4">
+        <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+          <button onClick={() => navigate(-1)} className="p-1.5 sm:p-2 rounded-full bg-white/5 hover:bg-white/10 transition-colors shrink-0">
+            <ArrowLeft size={18} className="text-gray-300 sm:w-6 sm:h-6" />
           </button>
-          <h1 className="text-2xl md:text-3xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] flex items-center gap-3 drop-shadow-[0_0_10px_rgba(255,109,0,0.5)]">
-            <HelpCircle className="text-[#FF6D00] drop-shadow-[0_0_8px_rgba(255,109,0,0.8)]" size={32} />
-            {language === 'hi' ? 'दैनिक क्विज़' : 'DAILY QUIZ'}
+          <h1 className="text-sm sm:text-base md:text-lg lg:text-xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] flex items-center gap-1.5 sm:gap-2 drop-shadow-[0_0_10px_rgba(255,109,0,0.5)] truncate">
+            <HelpCircle className="text-[#FF6D00] shrink-0 w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
+            <span className="truncate">{language === 'hi' ? 'दैनिक क्विज़' : 'DAILY QUIZ'}</span>
           </h1>
         </div>
-        <div className="flex items-center gap-3 font-semibold">
-          <span className="bg-[#121212]/80 px-4 py-1.5 rounded-full text-sm font-black text-[#FFD54F] shadow-[0_0_10px_rgba(255,213,79,0.1)] border border-[#FFD54F]/20 tracking-widest">
+
+        <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap self-end sm:self-auto">
+          {/* Question counter badge */}
+          <span className="bg-[#121212]/80 px-4 py-2.5 rounded-2xl text-xs font-black text-[#FFD54F] shadow-[0_0_10px_rgba(255,213,79,0.1)] border border-[#FFD54F]/20 tracking-widest shrink-0 h-10 flex items-center justify-center">
             {currentQ + 1} / {questions.length}
           </span>
+
+          {/* Section User Guide Trigger */}
+          <button
+            onClick={() => setShowHelpModal(true)}
+            className="p-2 bg-white/5 hover:bg-white/10 text-gray-300 rounded-2xl text-xs font-bold leading-normal transition-all cursor-pointer shadow-sm border border-white/5 h-10 w-10 flex items-center justify-center shrink-0"
+            title={language === 'en' ? 'Daily Quiz Section Guide' : 'दैनिक क्विज़ अनुभाग निर्देशपुस्तिका'}
+          >
+            ❓
+          </button>
+
+          {/* Symmetrical Inline Translate Button */}
+          <button
+            type="button"
+            onClick={toggleLanguage}
+            className="px-4 py-2.5 bg-[#FF3D00] text-white hover:bg-[#D50000] active:scale-95 transition-all shadow-sm rounded-2xl flex items-center justify-center gap-2 font-black text-xs cursor-pointer border border-[#FF9100]/30 shrink-0 h-10"
+            title={language === 'en' ? 'Translate / भाषा बदलें' : 'अंग्रेज़ी में बदलें'}
+          >
+            <Globe size={14} className="animate-spin-slow shrink-0" />
+            <span>{language === 'en' ? 'हिन्दी' : 'English'}</span>
+          </button>
         </div>
       </header>
 
@@ -355,6 +367,87 @@ export default function QuizPage() {
             ? (language === 'hi' ? 'अगला प्रश्न' : 'NEXT QUESTION') 
             : (language === 'hi' ? 'परिणाम देखें' : 'VIEW RESULTS')}
         </button>
+      )}
+
+      {/* Dynamic JBT Premium Help Modal */}
+      {showHelpModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-300 pointer-events-auto">
+          <div className="bg-[#121212] border border-white/10 rounded-[2rem] w-full max-w-lg p-6 md:p-8 shadow-2xl relative overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-[#FF6D00]/10 rounded-full blur-3xl pointer-events-none" />
+            
+            <div className="flex justify-between items-start mb-5 relative z-10">
+              <div className="text-left">
+                <span className="text-[9px] font-black text-[#FF6D00] uppercase tracking-widest bg-[#FF6D00]/10 px-3 py-1 rounded-full border border-[#FF6D00]/10 inline-block mb-1.5">
+                  📁 {language === 'en' ? 'SECTION USER GUIDE' : 'अनुभाग निर्देश पुस्तिका'}
+                </span>
+                <h2 className="text-2xl font-display font-black text-white tracking-tight">
+                  ℹ️ {language === 'en' ? 'Help & Features' : 'सहायता एवं सुविधाएँ'}
+                </h2>
+              </div>
+              <button 
+                onClick={() => setShowHelpModal(false)}
+                className="w-10 h-10 shrink-0 flex items-center justify-center rounded-full bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer border border-white/5 active:scale-95"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Modal Translator switch requested in help modal */}
+            <div className="bg-white/5 p-3 rounded-2xl border border-white/5 flex items-center justify-between gap-3 mb-5 relative z-10">
+              <span className="text-[10px] font-black uppercase text-gray-400">
+                {language === 'en' ? 'Translate guide language' : 'निर्देश निर्देश भाषा बदलें'}
+              </span>
+              <button
+                onClick={toggleLanguage}
+                className="px-3.5 py-1.5 bg-[#FF3D00] text-white hover:bg-[#D50000] rounded-xl text-[10px] font-black uppercase transition-all ring-1 ring-orange-500/20 flex items-center gap-1 cursor-pointer"
+              >
+                <Globe size={11} className="animate-spin-slow" />
+                {language === 'en' ? 'HINDI / हिन्दी' : 'ENGLISH / A'}
+              </button>
+            </div>
+
+            {/* Help Scrollable Content */}
+            <div className="overflow-y-auto pr-1 space-y-4.5 text-left text-zinc-355 dark:text-zinc-300 text-xs text-medium leading-relaxed relative z-10 max-h-[55vh]">
+              <p className="font-bold text-white text-sm">
+                {language === 'en' ? 'Welcome to Jain Daily Quiz Challenge!' : 'जैन दैनिक क्विज़ प्रतियोगिता में आपका स्वागत है!'}
+              </p>
+              <p className="font-semibold text-gray-400">
+                {language === 'en' 
+                  ? 'Test your core understanding of spiritual karma, ethics, history, and conduct with zero distraction:' 
+                  : 'यह पावन अनुभाग आपके द्वारा अर्जित जैन दर्शन और २४ तीर्थंकरों के ज्ञान की परीक्षा करने का सर्वोत्तम माध्यम है:'}
+              </p>
+              <ul className="list-disc pl-5 space-y-2 text-gray-400 font-semibold">
+                <li>
+                  <strong className="text-[#FFD54F]">{language === 'en' ? 'Offline-first Practice:' : 'ऑफ़लाइन-प्रथम अभ्यास प्रक्रिया:'}</strong>{' '}
+                  {language === 'en' 
+                    ? 'Attempt carefully-curated questions with interactive card selections and beautiful validation colors.' 
+                    : 'बिना इंटरनेट रुकावट के व्यवस्थित तरीके से २५ महत्वपूर्ण प्रश्नपत्र सेटों का स्वाध्याय रूप में अभ्यास करें।'}
+                </li>
+                <li>
+                  <strong className="text-[#FFD54F]">{language === 'en' ? 'In-depth Explanations:' : 'तथ्यात्मक स्पष्टीकरण:'}</strong>{' '}
+                  {language === 'en'
+                    ? 'Every question provides detailed spiritual explanations citing scripture roots once an answer is chosen.'
+                    : 'अपना उत्तर चुनने के बाद प्रश्न के नीचे उसका वैज्ञानिक या शास्त्रसम्मत दार्शनिक प्रामाणिक कारण अवश्य स्वाध्याय करें।'}
+                </li>
+                <li>
+                  <strong className="text-[#FFD54F]">{language === 'en' ? 'AI Generated Challenges:' : 'नवीन AI-प्रश्न प्रणाली (प्रायोगिक):'}</strong>{' '}
+                  {language === 'en'
+                    ? 'Feeling confident? Dynamically generate authentic Jain philosophy questions to expand your path.'
+                    : 'नये-नये प्रश्नों के अभ्यास हेतु नीचे दिए "AI अभ्यास प्रश्न बनाएं" बटन का प्रयोग कर नये प्रामाणिक प्रश्न शामिल करें।'}
+                </li>
+              </ul>
+            </div>
+
+            <div className="mt-6 pt-4 border-t border-white/5 text-center relative z-10">
+              <button
+                onClick={() => setShowHelpModal(false)}
+                className="w-full bg-[#FF6D00] hover:bg-orange-600 text-black py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest cursor-pointer hover:scale-[1.02] active:scale-95 transition-all text-center"
+              >
+                {language === 'en' ? 'UNDERSTOOD & CONTINUE' : 'पूर्ण समझ आया, आगे बढ़ें'}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       <SectionAiAgent section="quiz" />

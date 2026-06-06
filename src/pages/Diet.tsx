@@ -335,6 +335,7 @@ export default function DietPage() {
   const { language: lang, toggleLanguage } = useLanguage();
   const [activeTab, setActiveTab] = useState<'rules' | 'recipes' | 'audit' | 'chouka'>('rules');
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
+  const [showHelpModal, setShowHelpModal] = useState(false);
 
   // Satvik Audit State
   const [auditScores, setAuditScores] = useState({
@@ -463,26 +464,37 @@ export default function DietPage() {
   return (
     <div className="min-h-full p-6 pb-26 bg-gradient-to-b from-gray-50 to-gray-100 dark:from-[#050505] dark:to-[#0d0d0d] text-gray-900 dark:text-gray-100 transition-colors duration-300">
       
-      {/* FIXED TOP RIGHT TRANSLATOR WIDGET */}
-      <button
-        type="button"
-        onClick={toggleLanguage}
-        className="fixed top-4 right-4 z-50 px-4.5 py-2.5 bg-[#FF3D00] text-white hover:bg-[#D50000] active:scale-95 transition-all shadow-lg rounded-full flex items-center justify-center gap-2 font-black text-xs cursor-pointer border border-[#FF9100]/30"
-        title="Translate Language / भाषा बदलें"
-      >
-        <Globe size={15} className="animate-spin-slow" />
-        <span>{lang === 'en' ? 'हिन्दी' : 'English'}</span>
-      </button>
-
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-gray-50/95 dark:bg-[#050505]/95 backdrop-blur-md -mx-6 px-6 py-4 mb-6 border-b border-gray-200/50 dark:border-white/5 flex items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <button onClick={() => navigate(-1)} className="p-2 rounded-full bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 shadow-sm hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">
-            <ArrowLeft size={22} className="text-gray-700 dark:text-gray-300" />
+      <header className="sticky top-0 z-40 bg-gray-50/95 dark:bg-[#050505]/95 backdrop-blur-md -mx-6 px-6 py-4 mb-6 border-b border-gray-200/50 dark:border-white/5 flex items-center justify-between gap-2 md:gap-4">
+        <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+          <button onClick={() => navigate(-1)} className="p-1.5 sm:p-2 rounded-full bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 shadow-sm hover:bg-gray-100 dark:hover:bg-white/10 transition-colors shrink-0">
+            <ArrowLeft size={18} className="text-gray-700 dark:text-gray-300 sm:w-[22px] sm:h-[22px]" />
           </button>
-          <h1 className="text-xl md:text-2xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] tracking-tight drop-shadow-none dark:drop-shadow-[0_0_10px_rgba(255,109,0,0.4)]">
+          <h1 className="text-sm sm:text-base md:text-lg lg:text-xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] tracking-tight drop-shadow-none dark:drop-shadow-[0_0_10px_rgba(255,109,0,0.4)] truncate">
             {lang === 'en' ? 'AHAR VIDHI (JAIN DIET)' : 'आहार विधि (जैन भोजन नियम)'}
           </h1>
+        </div>
+
+        <div className="flex items-center gap-2 self-end sm:self-auto">
+          {/* Section User Guide Trigger */}
+          <button
+            onClick={() => setShowHelpModal(true)}
+            className="p-2 bg-white dark:bg-[#121212] hover:bg-gray-100 dark:hover:bg-white/10 text-gray-500 dark:text-gray-350 rounded-xl text-xs font-bold leading-normal transition-all cursor-pointer shadow-sm border border-gray-200 dark:border-white/10 h-9 w-9 flex items-center justify-center shrink-0"
+            title={lang === 'en' ? 'Diet Section Guide' : 'आहार अनुभाग निर्देशपुस्तिका'}
+          >
+            ❓
+          </button>
+
+          {/* Symmetrical Inline Translate Button */}
+          <button
+            type="button"
+            onClick={toggleLanguage}
+            className="px-3.5 py-1.5 bg-[#FF3D00] text-white hover:bg-[#D50000] active:scale-95 transition-all shadow-sm rounded-xl flex items-center justify-center gap-1.5 font-black text-[10px] cursor-pointer border border-[#FF9100]/30 shrink-0 h-9"
+            title={lang === 'en' ? 'Translate / भाषा बदलें' : 'अंग्रेज़ी में बदलें'}
+          >
+            <Globe size={11} className="animate-spin-slow shrink-0" />
+            <span>{lang === 'en' ? 'हिन्दी' : 'English'}</span>
+          </button>
         </div>
       </header>
 
@@ -973,6 +985,93 @@ export default function DietPage() {
                 </div>
               ))
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Dynamic JBT Premium Help Modal */}
+      {showHelpModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-300 pointer-events-auto">
+          <div className="bg-[#121212] border border-white/10 rounded-[2rem] w-full max-w-lg p-6 md:p-8 shadow-2xl relative overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-[#FF6D00]/10 rounded-full blur-3xl pointer-events-none" />
+            
+            <div className="flex justify-between items-start mb-5 relative z-10">
+              <div className="text-left">
+                <span className="text-[9px] font-black text-[#FF6D00] uppercase tracking-widest bg-[#FF6D00]/10 px-3 py-1 rounded-full border border-[#FF6D00]/10 inline-block mb-1.5">
+                  📁 {lang === 'en' ? 'SECTION USER GUIDE' : 'अनुभाग निर्देश पुस्तिका'}
+                </span>
+                <h2 className="text-2xl font-display font-black text-white tracking-tight">
+                  ℹ️ {lang === 'en' ? 'Help & Features' : 'सहायता एवं सुविधाएँ'}
+                </h2>
+              </div>
+              <button 
+                onClick={() => setShowHelpModal(false)}
+                className="w-10 h-10 shrink-0 flex items-center justify-center rounded-full bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer border border-white/5 active:scale-95"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Modal Translator switch requested in help modal */}
+            <div className="bg-white/5 p-3 rounded-2xl border border-white/5 flex items-center justify-between gap-3 mb-5 relative z-10">
+              <span className="text-[10px] font-black uppercase text-gray-400">
+                {lang === 'en' ? 'Translate guide language' : 'निर्देश निर्देश भाषा बदलें'}
+              </span>
+              <button
+                onClick={toggleLanguage}
+                className="px-3.5 py-1.5 bg-[#FF3D00] text-white hover:bg-[#D50000] rounded-xl text-[10px] font-black uppercase transition-all ring-1 ring-orange-500/20 flex items-center gap-1 cursor-pointer"
+              >
+                <Globe size={11} className="animate-spin-slow" />
+                {lang === 'en' ? 'HINDI / हिन्दी' : 'ENGLISH / A'}
+              </button>
+            </div>
+
+            {/* Help Scrollable Content */}
+            <div className="overflow-y-auto pr-1 space-y-4.5 text-left text-zinc-355 dark:text-zinc-300 text-xs text-medium leading-relaxed relative z-10 max-h-[55vh]">
+              <p className="font-bold text-white text-sm">
+                {lang === 'en' ? 'Welcome to Ahar Vidhi (Jain Diet) Guide!' : 'जैन आहार विधि मार्गदर्शिका में आपका स्वागत है!'}
+              </p>
+              <p className="font-semibold text-gray-400">
+                {lang === 'en' 
+                  ? 'Align your cooking with traditional non-violent dietary principles using these custom modules:' 
+                  : 'अहिंसक आहार प्रणाली के माध्यम से शारीरिक व मानसिक स्वास्थ्य संवर्धन हेतु निम्न प्रणालियों का लाभ लें:'}
+              </p>
+              <ul className="list-disc pl-5 space-y-2 text-gray-400 font-semibold font-sans">
+                <li>
+                  <strong className="text-[#FFD54F]">{lang === 'en' ? 'Dietary Rules & Prohibition:' : 'सात्विक भक्ष्य-अभक्ष्य विवेक नियम:'}</strong>{' '}
+                  {lang === 'en' 
+                    ? 'Explore complete guidelines detailing why root vegetables (potatoes, onions, garlic) and fermentation are prohibited, emphasizing botanical life science.' 
+                    : 'सात्विक जैन गृहस्थ मर्यादा के प्रमुख नियम (सूर्यास्त पूर्व भोजन, छना पानी, कंदमूल त्याग) का तर्कसंगत वैज्ञानिक परिचय पढ़ें।'}
+                </li>
+                <li>
+                  <strong className="text-[#FFD54F]">{lang === 'en' ? 'Satvik Culinary Recipes:' : 'अहिंसक स्वादिष्ट व्यंजन विधियाँ:'}</strong>{' '}
+                  {lang === 'en'
+                    ? 'Access wholesome step-by-step cooking recipes developed entirely with pure ingredients, featuring unique dairy-free seed-paste thickness alternatives.'
+                    : 'बिना आलू, प्याज, लहसुन व यीस्ट के बनने वाले लजीज पारंपरिक व्यंजनों (जैसे अमरुद चटनी, सात्विक पनीर टिक्का) की सुंदर पाक विधि सीखें।'}
+                </li>
+                <li>
+                  <strong className="text-[#FFD54F]">{lang === 'en' ? 'Personal Satvik Food Auditor:' : 'सात्विक भोजन परीक्षक (Audit):'}</strong>{' '}
+                  {lang === 'en'
+                    ? 'Use the interactive food auditor questionnaire to gauge if your current meal is non-satvik, moderately clean, or fully pure.'
+                    : 'अपने वर्तमान भोजन की शुद्धता जाँचने के लिए ६ आसान प्रश्न संवाद का उत्तर दें तथा सात्विक वर्गीकरण एवं सुझाव जानें।'}
+                </li>
+                <li>
+                  <strong className="text-[#FFD54F]">{lang === 'en' ? 'Verified Jain Chouka Navigator:' : 'सत्यापित जैन चौका खोजक:'}</strong>{' '}
+                  {lang === 'en'
+                    ? 'Locate nearby community kitchens, dharamshala dining halls, or volunteer home catering networks implementing sunset limits and water filtration.'
+                    : 'अपने नजदीक में संचालित शुद्ध साधार्मिक चौका, दशलक्षण पर्व आहार प्रदाता व स्थानीय शुद्ध जैन भोजनालयों का संपर्क एवं पता खोजें।'}
+                </li>
+              </ul>
+            </div>
+
+            <div className="mt-6 pt-4 border-t border-white/5 text-center relative z-10">
+              <button
+                onClick={() => setShowHelpModal(false)}
+                className="w-full bg-[#FF6D00] hover:bg-orange-600 text-black py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest cursor-pointer hover:scale-[1.02] active:scale-95 transition-all text-center"
+              >
+                {lang === 'en' ? 'UNDERSTOOD & CONTINUE' : 'पूर्ण समझ आया, आगे बढ़ें'}
+              </button>
+            </div>
           </div>
         </div>
       )}

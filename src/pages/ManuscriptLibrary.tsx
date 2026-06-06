@@ -100,6 +100,7 @@ export default function ManuscriptLibraryPage() {
   const [isTranslating, setIsTranslating] = useState(false);
   const [aiResult, setAiResult] = useState<any | null>(null);
   const [showScanner, setShowScanner] = useState(false);
+  const [showHelpModal, setShowHelpModal] = useState(false);
 
   // Pre-load a few Prakrit/Sanskrit Verses for easy translation click
   const PRELOADED_VERSES = [
@@ -178,31 +179,44 @@ export default function ManuscriptLibraryPage() {
   return (
     <div className="min-h-full p-6 pb-26 bg-gradient-to-b from-gray-50 to-gray-100 dark:from-[#050505] dark:to-[#0d0d0d] text-gray-900 dark:text-gray-100 transition-colors duration-300 relative">
       
-      {/* FIXED TOP RIGHT TRANSLATOR WIDGET */}
-      <button
-        onClick={toggleLanguage}
-        className="fixed top-4 right-4 z-50 px-4.5 py-2.5 bg-[#7B1FA2] text-white hover:bg-purple-800 active:scale-95 transition-all shadow-lg rounded-full flex items-center justify-center gap-2 font-black text-xs cursor-pointer border border-[#E1BEE7]/30"
-        title="Translate Language / भाषा बदलें"
-      >
-        <Globe size={15} className="animate-spin-slow" />
-        <span>{language === 'en' ? 'हिन्दी' : 'English'}</span>
-      </button>
-
-      {/* Header */}
-      <header className="sticky top-0 z-40 bg-gray-50/95 dark:bg-[#050505]/95 backdrop-blur-md -mx-6 -mt-6 px-6 pt-6 pb-4 mb-6 border-b border-gray-200/50 dark:border-white/5 flex items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <button onClick={() => navigate(-1)} className="p-2 rounded-full bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 shadow-sm hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">
-            <ArrowLeft size={22} className="text-gray-700 dark:text-gray-300" />
+      {/* Aligned Single Row Header with Translate, Help in One Line */}
+      <header className="sticky top-0 z-40 bg-gray-50/95 dark:bg-[#050505]/95 backdrop-blur-md -mx-6 -mt-6 px-6 pt-4 pb-4 mb-6 border-b border-gray-200/50 dark:border-white/5 flex items-center justify-between gap-2 md:gap-4">
+        <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+          <button onClick={() => navigate(-1)} className="p-1.5 sm:p-2 rounded-full bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 shadow-sm hover:bg-gray-100 dark:hover:bg-white/10 transition-colors shrink-0">
+            <ArrowLeft size={18} className="text-gray-700 dark:text-gray-300 sm:w-6 sm:h-6" />
           </button>
-          <div>
-            <h1 className="text-xl md:text-2xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#AA00FF] to-[#EA80FC] flex items-center gap-2">
-              <ScrollText className="text-[#AA00FF] shrink-0" size={26} />
-              {language === 'en' ? 'JAIN HANDSCRIPT AI' : 'प्राचीन पांडुलिपि डिजिटल आर्काइव एवं AI'}
+          <div className="min-w-0">
+            <h1 className="text-sm sm:text-base md:text-lg lg:text-xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#AA00FF] to-[#EA80FC] flex items-center gap-1.5 sm:gap-2 truncate">
+              <ScrollText className="text-[#AA00FF] w-4 h-4 sm:w-6 sm:h-6 md:w-8 md:h-8 shrink-0" />
+              <span className="truncate">{language === 'en' ? 'MANUSCRIPT AI' : 'पांडुलिपि डिजिटल AI'}</span>
             </h1>
-            <p className="text-[10px] text-gray-550 font-bold dark:text-gray-400">
-              {language === 'en' ? 'Decipher Ancient Manuscripts using AI (Sanskrit & Prakrit Translator)' : 'प्राकृत, अपभ्रंश एवं संस्कृत वैज्ञानिक ग्रंथों का आधुनिक अनुवाद पटल'}
+            <p className="text-[9px] sm:text-[10px] text-gray-550 font-bold dark:text-gray-400 truncate hidden xs:block">
+              {language === 'en' ? 'Decipher Ancient Sanskrit & Prakrit' : 'प्राकृत एवं संस्कृत ग्रंथों का आधुनिक अनुवाद'}
             </p>
           </div>
+        </div>
+
+        {/* Dynamic Controls Aligned in One Line on the Right */}
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          {/* Section User Guide Trigger */}
+          <button
+            onClick={() => setShowHelpModal(true)}
+            className="p-1.5 sm:p-2 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/11 text-gray-550 dark:text-gray-350 rounded-xl text-xs font-bold transition-all cursor-pointer border border-gray-200 dark:border-white/10 h-8 w-8 sm:h-9 sm:w-9 flex items-center justify-center shrink-0 shadow-sm"
+            title={language === 'en' ? 'Manuscript Section Guide' : 'पांडुलिपि निर्देशपुस्तिका'}
+          >
+            ❓
+          </button>
+
+          {/* Symmetrical Inline Translate Button */}
+          <button
+            type="button"
+            onClick={toggleLanguage}
+            className="px-2.5 py-1.5 sm:px-3.5 sm:py-2 bg-[#7B1FA2] text-white hover:bg-purple-800 active:scale-95 transition-all shadow-sm rounded-xl flex items-center justify-center gap-1.5 font-black text-[9px] sm:text-[10px] cursor-pointer border border-[#E1BEE7]/30 shrink-0 h-8 sm:h-9"
+            title={language === 'en' ? 'Translate / भाषा बदलें' : 'अंग्रेज़ी में बदलें'}
+          >
+            <Globe size={11} className="animate-spin-slow shrink-0" />
+            <span>{language === 'en' ? 'हिन्दी' : 'English'}</span>
+          </button>
         </div>
       </header>
 
@@ -455,6 +469,87 @@ export default function ManuscriptLibraryPage() {
           ))}
         </div>
       </div>
+
+      {/* Dynamic JBT Premium Help Modal */}
+      {showHelpModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-300 pointer-events-auto">
+          <div className="bg-[#121212] border border-white/10 rounded-[2rem] w-full max-w-lg p-6 md:p-8 shadow-2xl relative overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
+            
+            <div className="flex justify-between items-start mb-5 relative z-10">
+              <div className="text-left">
+                <span className="text-[9px] font-black text-[#EA80FC] uppercase tracking-widest bg-[#EA80FC]/10 px-3 py-1 rounded-full border border-purple-500/10 inline-block mb-1.5">
+                  📁 {language === 'en' ? 'SECTION USER GUIDE' : 'अनुभाग निर्देश पुस्तिका'}
+                </span>
+                <h2 className="text-2xl font-display font-black text-white tracking-tight">
+                  ℹ️ {language === 'en' ? 'Help & Features' : 'सहायता एवं सुविधाएँ'}
+                </h2>
+              </div>
+              <button 
+                onClick={() => setShowHelpModal(false)}
+                className="w-10 h-10 shrink-0 flex items-center justify-center rounded-full bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer border border-white/5 active:scale-95"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Modal Translator switch requested in help modal */}
+            <div className="bg-white/5 p-3 rounded-2xl border border-white/5 flex items-center justify-between gap-3 mb-5 relative z-10">
+              <span className="text-[10px] font-black uppercase text-gray-400">
+                {language === 'en' ? 'Translate guide language' : 'निर्देश निर्देश भाषा बदलें'}
+              </span>
+              <button
+                onClick={toggleLanguage}
+                className="px-3.5 py-1.5 bg-[#7B1FA2] text-white hover:bg-[#6A1B9A] rounded-xl text-[10px] font-black uppercase transition-all ring-1 ring-purple-500/20 flex items-center gap-1 cursor-pointer"
+              >
+                <Globe size={11} className="animate-spin-slow" />
+                {language === 'en' ? 'HINDI / हिन्दी' : 'ENGLISH / A'}
+              </button>
+            </div>
+
+            {/* Help Scrollable Content */}
+            <div className="overflow-y-auto pr-1 space-y-4.5 text-left text-zinc-355 dark:text-zinc-300 text-xs text-medium leading-relaxed relative z-10 max-h-[55vh]">
+              <p className="font-bold text-white text-sm">
+                {language === 'en' ? 'Welcome to Manuscript AI Decipherer!' : 'पांडुलिपि डिजिटल अनुवाद AI में आपका स्वागत है!'}
+              </p>
+              <p className="font-semibold text-gray-400">
+                {language === 'en' 
+                  ? 'Decipher and translate hand-painted historical Jaina manuscripts (from classical Ardhahmagadhi Prakrit & Sanskrit) with verified scientific logic:' 
+                  : 'प्राचीन मंदिरों के ज्ञान भंडारों में सुरक्षित दुर्लभ ताड़पत्र एवं हस्तलिखित ग्रंथों का प्राकृत एवं संस्कृत से सीधा आधुनिक वैज्ञानिक अनुवाद करें:'}
+              </p>
+              <ul className="list-disc pl-5 space-y-2 text-gray-400 font-semibold font-sans">
+                <li>
+                  <strong className="text-[#FFD54F]">{language === 'en' ? 'Interactive AI Slate Decipherer:' : 'गाथा प्रविष्ट करें एवं अनुवाद पायें:'}</strong>{' '}
+                  {language === 'en' 
+                    ? 'Type original script or copy-paste verses in the input canvas, then click translate to extract literal meanings in Hindi and English!' 
+                    : 'गाथा या सूत्र को कीबोर्ड से लिखें अथवा नीचे उद्धृत "क्लिक एंड टेस्ट" उदाहरणों पर टैप करके वास्तविक हिन्दी-अंग्रेज़ी अर्थ निकालें।'}
+                </li>
+                <li>
+                  <strong className="text-[#FFD54F]">{language === 'en' ? 'Ancient & Modern Science Synthesis:' : 'विज्ञान और आधुनिक भौतिकी संबंध:'}</strong>{' '}
+                  {language === 'en'
+                    ? 'Every decoded result establishes connections with Astrophysics, Thermodynamics, and Cellular Biology written centuries ago.'
+                    : 'प्रत्येक सूत्र का आधुनिक विज्ञान जैसे क्वांटम सुचालकता, वनस्पति विज्ञान, तथा एस्ट्रोफिजिक्स के रहस्यों से सीधा मिलान प्रदर्शित किया जाता है।'}
+                </li>
+                <li>
+                  <strong className="text-[#FFD54F]">{language === 'en' ? 'Virtual Camera OCR Scanner:' : 'डिजिटल लाइव कैमरा स्कैनर:'}</strong>{' '}
+                  {language === 'en'
+                    ? 'Use your smartphone camera to upload or take mock pictures of scripts to execute real-time Optical Character Recognition (OCR).'
+                    : 'अपने कैमरे का उपयोग कर प्राचीन हस्तलिपियों के चित्र खींचकर स्कैन करें तथा कम्प्यूटेशनल ट्रांसलिट्रेशन द्वारा डिजिटल टेक्स्ट पायें।'}
+                </li>
+              </ul>
+            </div>
+
+            <div className="mt-6 pt-4 border-t border-white/5 text-center relative z-10">
+              <button
+                onClick={() => setShowHelpModal(false)}
+                className="w-full bg-[#AA00FF] hover:bg-purple-800 text-black py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest cursor-pointer hover:scale-[1.02] active:scale-95 transition-all text-center"
+              >
+                {language === 'en' ? 'UNDERSTOOD & CONTINUE' : 'पूर्ण समझ आया, आगे बढ़ें'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="mt-8">
         <SectionAiAgent section="manuscript-library" />

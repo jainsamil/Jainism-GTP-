@@ -179,7 +179,7 @@ export default function HomePage() {
         </p>
 
         <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed font-semibold mb-4">
-          Conceived and developed for the global community by <strong className="text-[#FF6D00] dark:text-[#FFD54F] font-black">Samil Jain</strong>, this platform is specifically optimized to provide accurate <strong className="text-gray-900 dark:text-white font-bold">Jainism Questions and Answers</strong>. Inside, you will discover curated spiritual resources covering:
+          Conceived and developed for the global community by <strong className="text-[#FF6D00] dark:text-[#FFD54F] font-black">Samil Jain</strong>, this platform has now expanded with new features specifically optimized to provide accurate <strong className="text-gray-900 dark:text-white font-bold">Jainism Questions and Answers</strong>. Inside, you will discover curated spiritual resources and interactive tools covering:
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-semibold text-gray-600 dark:text-gray-400 mb-6 pl-2">
@@ -194,27 +194,43 @@ export default function HomePage() {
             </div>
             <div className="flex items-center gap-2.5">
               <span className="w-1.5 h-1.5 rounded-full bg-[#FF6D00] shrink-0" />
-              <span>The timeless teachings of Lord Mahavira (<strong className="text-gray-800 dark:text-gray-300 font-bold">Mahavira Teachings</strong>) and the 24 <strong className="text-gray-800 dark:text-gray-300 font-bold">Jain Tirthankaras</strong></span>
+              <span>The teachings of Lord Mahavira (<strong className="text-gray-800 dark:text-gray-300 font-bold">Mahavira Teachings</strong>) and 24 <strong className="text-gray-800 dark:text-gray-300 font-bold">Jain Tirthankaras</strong></span>
+            </div>
+            <div className="flex items-center gap-2.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#FFD54F] shrink-0" />
+              <span>Divine healing and chants via <strong className="text-gray-800 dark:text-gray-300 font-bold">Bhaktamar Healing</strong> with audio triggers</span>
+            </div>
+            <div className="flex items-center gap-2.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#FF6D00] shrink-0" />
+              <span>Secure <strong className="text-gray-800 dark:text-gray-300 font-bold">Jain Dharamshala Bookings</strong> at major pilgrimage sites (Tirths)</span>
             </div>
           </div>
           <div className="space-y-2.5">
             <div className="flex items-center gap-2.5">
               <span className="w-1.5 h-1.5 rounded-full bg-[#FFD54F] shrink-0" />
-              <span>Sacred chanting guidelines for the divine <strong className="text-gray-800 dark:text-gray-300 font-bold">Navkar Mantra</strong></span>
+              <span>Sacred chanting guidelines for the divine <strong className="text-gray-800 dark:text-gray-300 font-bold">Navkar Mantra</strong> inside our Tapas & Swadhyay notebooks</span>
             </div>
             <div className="flex items-center gap-2.5">
               <span className="w-1.5 h-1.5 rounded-full bg-[#FF6D00] shrink-0" />
-              <span>Sectarian lineages and mutual respect across <strong className="text-gray-800 dark:text-gray-300 font-bold">Digambar and Shvetambar</strong> traditions</span>
+              <span>Sectarian lineages across <strong className="text-gray-800 dark:text-gray-300 font-bold">Digambar and Shvetambar</strong> traditions</span>
             </div>
             <div className="flex items-center gap-2.5">
               <span className="w-1.5 h-1.5 rounded-full bg-[#FFD54F] shrink-0" />
               <span>Preserved <strong className="text-gray-800 dark:text-gray-300 font-bold">Jainism Scriptures</strong> and verified canonical Agamas</span>
             </div>
+            <div className="flex items-center gap-2.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#FF6D00] shrink-0" />
+              <span>Finding verified <strong className="text-gray-800 dark:text-gray-300 font-bold">Pure Jain Food</strong> via the interactive Food Locator</span>
+            </div>
+            <div className="flex items-center gap-2.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#FFD54F] shrink-0" />
+              <span>Fostering devotee support with the active <strong className="text-gray-800 dark:text-gray-300 font-bold">Sage Vihar Tracker</strong></span>
+            </div>
           </div>
         </div>
 
         <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed font-semibold">
-          Additionally, this smart spiritual portal details major events in <strong className="text-gray-900 dark:text-white font-bold">Jain History</strong>, reminds you of sacred <strong className="text-gray-900 dark:text-white font-bold">Jain Festivals</strong> and holy Vrats (fasts), and lists an accurate, live <strong className="text-gray-900 dark:text-white font-bold">Jain Panchang</strong>. Every page is tailored with meticulous care to maximize visibility on search results, serving as a unified spiritual companion as you walk your divine path.
+          Additionally, this smart spiritual portal details major events in <strong className="text-gray-900 dark:text-white font-bold">Jain History</strong>, reminds you of sacred <strong className="text-gray-900 dark:text-white font-bold">Jain Festivals</strong> and holy Vrats (fasts), and lists an accurate, live <strong className="text-gray-900 dark:text-white font-bold">Jain Panchang</strong> alongside our newly added interactive <strong className="text-gray-900 dark:text-white font-bold">Daily Jain Quiz</strong> platform. Every page is tailored with meticulous care to maximize visibility on search results, serving as a unified virtual community companion as you walk your divine path.
         </p>
 
         <div className="mt-8 pt-4 border-t border-gray-200 dark:border-white/5 flex items-center justify-between">

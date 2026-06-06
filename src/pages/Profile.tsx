@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { User, Camera, Instagram, Award, Settings, LogOut, BookOpen, ShieldAlert, Info, Edit2, Check, X, Download, Compass, Code, Milestone, Sparkles, Database } from 'lucide-react';
+import { User, Camera, Instagram, Award, Settings, LogOut, BookOpen, ShieldAlert, Info, Edit2, Check, X, Download, Compass, Code, Milestone, Sparkles, Database, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { useAuth } from '../contexts/AuthContext';
@@ -91,16 +91,24 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-full p-6 pb-24 bg-gray-50 dark:bg-[#050505] text-gray-900 dark:text-gray-200 transition-colors duration-300">
-      <header className="flex items-center justify-between mb-8 pt-4">
-        <h1 className="text-3xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] flex items-center gap-3 drop-shadow-[0_0_10px_rgba(255,109,0,0.5)]">
-          <User className="text-[#FF6D00] drop-shadow-[0_0_8px_rgba(255,109,0,0.8)]" size={32} />
-          PROFILE
-        </h1>
+      
+      {/* Sticky Header with inline controls */}
+      <header className="sticky top-0 z-40 bg-gray-50/95 dark:bg-[#050505]/95 backdrop-blur-md -mx-6 -mt-6 px-6 pt-4 pb-4 mb-8 border-b border-gray-200/50 dark:border-white/5 flex items-center justify-between gap-2 md:gap-4">
+        <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+          <button onClick={() => navigate(-1)} className="p-1.5 sm:p-2 rounded-full bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 shadow-sm hover:bg-gray-100 dark:hover:bg-white/10 transition-colors shrink-0">
+            <ArrowLeft size={18} className="text-gray-700 dark:text-gray-300 sm:w-[22px] sm:h-[22px]" />
+          </button>
+          <h1 className="text-sm sm:text-base md:text-lg lg:text-xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] flex items-center gap-1.5 sm:gap-2 drop-shadow-none dark:drop-shadow-[0_0_10px_rgba(255,109,0,0.4)] truncate">
+            <User className="text-[#FF6D00] shrink-0 w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
+            <span className="truncate">PROFILE</span>
+          </h1>
+        </div>
+
         <button 
           onClick={() => setShowSettings(true)}
-          className="p-2.5 bg-white/80 dark:bg-[#121212]/80 backdrop-blur-xl rounded-full border border-gray-200 dark:border-white/10 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:border-[#FF6D00]/50 hover:shadow-[0_0_15px_rgba(255,109,0,0.3)] transition-all"
+          className="p-1.5 sm:p-2 bg-white/80 dark:bg-[#121212]/80 backdrop-blur-xl rounded-full border border-gray-200 dark:border-white/10 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:border-[#FF6D00]/50 hover:shadow-[0_0_15px_rgba(255,109,0,0.3)] transition-all h-8 w-8 sm:h-9 sm:w-9 flex items-center justify-center shrink-0"
         >
-          <Settings size={20} />
+          <Settings size={18} />
         </button>
       </header>
 
@@ -351,6 +359,51 @@ export default function ProfilePage() {
                           <strong className="text-gray-800 dark:text-gray-300">काम (Function):</strong> Penance logging & wellness diary.
                           <br />
                           <strong className="text-gray-800 dark:text-gray-300">विवरण (Description):</strong> Allows devotees to keep record books of standard fast days like Upvas, Ekasana, Biyasana, or Ayambil with customized feedback notes on inner peace and mindfulness.
+                        </p>
+                      </div>
+
+                      <div className="p-3 bg-gray-100/50 dark:bg-white/5 rounded-xl border border-gray-200/50 dark:border-white/5">
+                        <div className="font-extrabold text-[#FF6D00] text-[13px] mb-1">7. Tirth Dharamshala Bookings</div>
+                        <p className="text-gray-500 dark:text-gray-400 font-medium leading-relaxed">
+                          <strong className="text-gray-800 dark:text-gray-300">काम (Function):</strong> Holy pilgrimage room registrations.
+                          <br />
+                          <strong className="text-gray-800 dark:text-gray-300">विवरण (Description):</strong> Allows users to explore canonical Jain dharamshalas near holy shrines, book rooms, and state arrival plans while ensuring full compliance with dietary rules.
+                        </p>
+                      </div>
+
+                      <div className="p-3 bg-gray-100/50 dark:bg-white/5 rounded-xl border border-gray-200/50 dark:border-white/5">
+                        <div className="font-extrabold text-[#FF6D00] text-[13px] mb-1">8. Pure Jain Food Locator</div>
+                        <p className="text-gray-500 dark:text-gray-400 font-medium leading-relaxed">
+                          <strong className="text-gray-800 dark:text-gray-300">काम (Function):</strong> Finding pure vegetarian food on-the-go.
+                          <br />
+                          <strong className="text-gray-800 dark:text-gray-300">विवरण (Description):</strong> Helps travelers discover verified pure Jain sweet shops, restaurants, and sadharmik kitchens with customizable filter controls.
+                        </p>
+                      </div>
+
+                      <div className="p-3 bg-gray-100/50 dark:bg-white/5 rounded-xl border border-gray-200/50 dark:border-white/5">
+                        <div className="font-extrabold text-[#FF6D00] text-[13px] mb-1">9. Bhaktamar Stotra Healing</div>
+                        <p className="text-gray-500 dark:text-gray-400 font-medium leading-relaxed">
+                          <strong className="text-gray-800 dark:text-gray-300">काम (Function):</strong> Playback and translation of chanting verses.
+                          <br />
+                          <strong className="text-gray-800 dark:text-gray-300">विवरण (Description):</strong> Details each Shloka's specific benefits, supporting loop playbacks, rhythmic tuning, and authentic Sanskrit/Hindi translation views.
+                        </p>
+                      </div>
+
+                      <div className="p-3 bg-gray-100/50 dark:bg-white/5 rounded-xl border border-gray-200/50 dark:border-white/5">
+                        <div className="font-extrabold text-[#FF6D00] text-[13px] mb-1">10. Sage Vihar Safety Support</div>
+                        <p className="text-gray-500 dark:text-gray-400 font-medium leading-relaxed">
+                          <strong className="text-gray-800 dark:text-gray-300">काम (Function):</strong> Tracking safety paths of Jain ascetics (Munishris).
+                          <br />
+                          <strong className="text-gray-800 dark:text-gray-300">विवरण (Description):</strong> Features emergency help alert relays, direct path mapping, and group notifications for food/water tasks while saints are walking.
+                        </p>
+                      </div>
+
+                      <div className="p-3 bg-gray-100/50 dark:bg-white/5 rounded-xl border border-gray-200/50 dark:border-white/5">
+                        <div className="font-extrabold text-[#FF6D00] text-[13px] mb-1">11. Manuscript AI Digital Library</div>
+                        <p className="text-gray-500 dark:text-gray-400 font-medium leading-relaxed">
+                          <strong className="text-gray-800 dark:text-gray-300">काम (Function):</strong> Scanning and translating holy scripts.
+                          <br />
+                          <strong className="text-gray-800 dark:text-gray-300">विवरण (Description):</strong> Provides scanning capabilities to convert handwritten manuscripts into translated digital copy, preserving the sacred canonical context.
                         </p>
                       </div>
                     </div>
