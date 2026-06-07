@@ -320,13 +320,13 @@ export default function MediaPage() {
   }, [currentTrack, isPlaying, activeTab, filteredContent]);
 
   return (
-    <div className="min-h-full p-6 pb-24 bg-[#050505] text-gray-200">
+    <div className="min-h-full p-6 pb-24 bg-gradient-to-b from-gray-50 to-gray-100 dark:from-[#050505] dark:to-[#0d0d0d] text-gray-900 dark:text-gray-200 transition-colors duration-300">
       
       {/* Sticky Header with inline controls */}
-      <header className="sticky top-0 z-40 bg-[#050505]/95 backdrop-blur-md -mx-6 px-6 pt-4 pb-4 mb-6 border-b border-white/5 flex items-center justify-between gap-2 md:gap-4">
+      <header className="sticky top-0 z-40 bg-white/95 dark:bg-[#050505]/95 backdrop-blur-md -mx-6 px-6 pt-4 pb-4 mb-6 border-b border-gray-200/50 dark:border-white/5 flex items-center justify-between gap-2 md:gap-4 transition-colors duration-300">
         <div className="flex items-center gap-2 sm:gap-4 min-w-0">
-          <button onClick={() => navigate(-1)} className="p-1.5 sm:p-2 rounded-full bg-white/5 border border-white/10 shadow-sm hover:bg-white/10 transition-colors shrink-0">
-            <ArrowLeft size={18} className="text-gray-300 sm:w-[22px] sm:h-[22px]" />
+          <button onClick={() => navigate(-1)} className="p-1.5 sm:p-2 rounded-full bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 shadow-sm hover:bg-gray-100 dark:hover:bg-white/10 transition-colors shrink-0">
+            <ArrowLeft size={18} className="text-gray-700 dark:text-gray-300 sm:w-[22px] sm:h-[22px]" />
           </button>
           <h1 className="text-sm sm:text-base md:text-lg lg:text-xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] tracking-tight drop-shadow-none dark:drop-shadow-[0_0_10px_rgba(255,109,0,0.4)] truncate flex items-center gap-2">
             <PlaySquare className="text-[#FF6D00] shrink-0" size={18} />
@@ -339,7 +339,7 @@ export default function MediaPage() {
           {/* Section User Guide Trigger */}
           <button
             onClick={() => setShowHelpModal(true)}
-            className="p-1.5 sm:p-2 bg-white/5 hover:bg-white/10 text-gray-300 rounded-xl text-xs font-bold transition-all cursor-pointer border border-white/10 h-8 w-8 sm:h-9 sm:w-9 flex items-center justify-center shrink-0 shadow-sm animate-none"
+            className="p-1.5 sm:p-2 bg-white dark:bg-white/5 hover:bg-gray-100 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300 rounded-xl text-xs font-bold transition-all cursor-pointer border border-gray-200 dark:border-white/10 h-8 w-8 sm:h-9 sm:w-9 flex items-center justify-center shrink-0 shadow-sm animate-none"
             title={language === 'en' ? 'Multimedia Section Guide' : 'मल्टीमीडिया विभाग निर्देशपुस्तिका'}
           >
             ❓
@@ -360,13 +360,13 @@ export default function MediaPage() {
 
       {/* Now Playing Banner */}
       {currentTrack && (
-        <div className="mb-8 bg-[#121212]/90 backdrop-blur-xl rounded-[2.5rem] p-5 shadow-[0_0_30px_rgba(255,109,0,0.15)] border border-[#FF6D00]/30 relative overflow-hidden group flex items-center gap-4">
+        <div className="mb-8 bg-white/95 dark:bg-[#121212]/90 backdrop-blur-xl rounded-[2.5rem] p-5 shadow-lg dark:shadow-[0_0_30px_rgba(255,109,0,0.15)] border border-gray-200 dark:border-[#FF6D00]/30 relative overflow-hidden group flex items-center gap-4 transition-colors duration-300">
           <div className="absolute top-0 right-0 w-32 h-32 bg-[#FF6D00]/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 group-hover:bg-[#FF6D00]/20 transition-all duration-700" />
           
-          <div className="w-16 h-16 rounded-2xl overflow-hidden relative shrink-0 shadow-[0_0_15px_rgba(255,109,0,0.3)] border border-white/10 group-hover:scale-105 transition-transform">
+          <div className="w-16 h-16 rounded-2xl overflow-hidden relative shrink-0 shadow-[0_0_15px_rgba(255,109,0,0.3)] border border-gray-200 dark:border-white/10 group-hover:scale-105 transition-transform">
             <img src={currentTrack.thumbnail || "https://picsum.photos/seed/mahavir/100/100"} alt="Now Playing" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
             {isPlaying && (
-              <div className="absolute inset-0 bg-black/40 flex items-center justify-center gap-0.5">
+              <div className="absolute inset-0 bg-black/45 flex items-center justify-center gap-0.5">
                 <div className="w-1 h-3 bg-[#FFD54F] animate-[bounce_1s_infinite_0ms] rounded-full shadow-[0_0_5px_rgba(255,213,79,0.8)]" />
                 <div className="w-1 h-4 bg-[#FFD54F] animate-[bounce_1s_infinite_200ms] rounded-full shadow-[0_0_5px_rgba(255,213,79,0.8)]" />
                 <div className="w-1 h-2 bg-[#FFD54F] animate-[bounce_1s_infinite_400ms] rounded-full shadow-[0_0_5px_rgba(255,213,79,0.8)]" />
@@ -374,8 +374,8 @@ export default function MediaPage() {
             )}
           </div>
           
-          <div className="flex-1 min-w-0 relative z-10">
-            <div className="flex items-center gap-2 text-[#FF8A65] mb-1">
+          <div className="flex-1 min-w-0 relative z-10 text-left">
+            <div className="flex items-center gap-2 text-[#E65100] dark:text-[#FF8A65] mb-1">
               <span className="text-[9px] font-bold tracking-widest uppercase drop-shadow-[0_0_5px_rgba(255,138,101,0.5)]">Now Playing</span>
               {audioLoading && (
                 <span className="text-[9px] font-bold bg-[#FF6D00]/20 text-[#FFD54F] px-2 py-0.5 rounded-full flex items-center gap-1 animate-pulse">
@@ -383,16 +383,16 @@ export default function MediaPage() {
                 </span>
               )}
             </div>
-            <h3 className="text-base font-black text-white truncate drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{currentTrack.title}</h3>
+            <h3 className="text-base font-black text-gray-950 dark:text-white truncate drop-shadow-none dark:drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{currentTrack.title}</h3>
             {audioError ? (
-              <p className="text-xs text-amber-400 font-bold animate-pulse truncate">{audioError}</p>
+              <p className="text-xs text-amber-500 font-bold animate-pulse truncate">{audioError}</p>
             ) : (
-              <p className="text-xs text-gray-400 font-medium truncate">{currentTrack.artist || currentTrack.author || 'Story'} • {currentTrack.duration || `${currentTrack.chapters} chapters`}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 font-medium truncate">{currentTrack.artist || currentTrack.author || 'Story'} • {currentTrack.duration || `${currentTrack.chapters} chapters`}</p>
             )}
           </div>
           
           <div className="flex items-center gap-3 relative z-10 shrink-0">
-            <button onClick={playPrevTrack} className="text-gray-400 hover:text-white transition-colors cursor-pointer" title="Previous Track">
+            <button onClick={playPrevTrack} className="text-gray-400 hover:text-gray-800 dark:hover:text-white transition-colors cursor-pointer" title="Previous Track">
               <SkipBack size={20} />
             </button>
             <button 
@@ -401,7 +401,7 @@ export default function MediaPage() {
             >
               {isPlaying ? <Pause size={20} className="fill-black" /> : <Play size={20} className="fill-black ml-1" />}
             </button>
-            <button onClick={playNextTrack} className="text-gray-400 hover:text-white transition-colors cursor-pointer" title="Next Track">
+            <button onClick={playNextTrack} className="text-gray-400 hover:text-gray-800 dark:hover:text-white transition-colors cursor-pointer" title="Next Track">
               <SkipForward size={20} />
             </button>
           </div>
@@ -411,20 +411,20 @@ export default function MediaPage() {
       {/* Search Box */}
       <div className="mb-8 relative">
         <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-          <Search className="text-gray-400" size={20} />
+          <Search className="text-gray-400 dark:text-gray-500" size={20} />
         </div>
         <input
           type="text"
           placeholder="Search media..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full bg-[#121212] border border-white/10 rounded-2xl py-4 pl-12 pr-12 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#FF6D00] transition-all"
+          className="w-full bg-white dark:bg-[#121212] border border-gray-200 dark:border-white/10 rounded-2xl py-4 pl-12 pr-12 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#FF6D00] transition-all shadow-sm"
         />
         <button
           onClick={startListening}
           className={cn(
             "absolute inset-y-0 right-4 flex items-center transition-colors",
-            isListening ? "text-[#FF6D00] animate-pulse" : "text-gray-400 hover:text-white"
+            isListening ? "text-[#FF6D00] animate-pulse" : "text-gray-400 hover:text-gray-700 dark:hover:text-white"
           )}
         >
           <Mic size={20} />
@@ -443,8 +443,8 @@ export default function MediaPage() {
               className={cn(
                 "flex items-center gap-2.5 px-6 py-3 rounded-full text-sm font-bold whitespace-nowrap transition-all duration-300",
                 isActive 
-                  ? "bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] text-black shadow-[0_0_15px_rgba(255,109,0,0.6)] scale-105" 
-                  : "bg-[#121212]/80 text-gray-400 hover:text-white hover:bg-white/10 border border-white/10 hover:border-[#FF6D00]/30"
+                  ? "bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] text-black shadow-md dark:shadow-[0_0_15px_rgba(255,109,0,0.6)] scale-105" 
+                  : "bg-white dark:bg-[#121212]/80 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 border border-gray-200 dark:border-white/10 hover:border-[#FF6D00]/30"
               )}
             >
               <Icon size={18} className={cn(isActive && "drop-shadow-[0_0_5px_rgba(0,0,0,0.5)]")} />
@@ -459,22 +459,22 @@ export default function MediaPage() {
         {activeTab === 'stories' && (
           <div className="grid gap-6">
             {filteredContent.map((story, idx) => (
-              <div key={idx} onClick={() => playTrack(story)} className="bg-[#121212]/80 backdrop-blur-xl rounded-[2rem] overflow-hidden shadow-[0_0_15px_rgba(0,0,0,0.5)] border border-white/5 group cursor-pointer hover:shadow-[0_0_25px_rgba(255,109,0,0.2)] hover:border-[#FF6D00]/30 transition-all duration-500 hover:-translate-y-1">
+              <div key={idx} onClick={() => playTrack(story)} className="bg-white dark:bg-[#121212]/80 backdrop-blur-xl rounded-[2rem] overflow-hidden shadow-sm dark:shadow-[0_0_15px_rgba(0,0,0,0.5)] border border-gray-200 dark:border-white/5 group cursor-pointer hover:shadow-lg dark:hover:shadow-[0_0_25px_rgba(255,109,0,0.2)] hover:border-[#FF6D00]/30 transition-all duration-500 hover:-translate-y-1">
                 <div className="relative h-48 overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-transparent z-10" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-gray-100/95 via-transparent to-transparent dark:from-[#050505] z-10" />
                   <img src={story.thumbnail} alt={story.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" referrerPolicy="no-referrer" />
-                  <div className="absolute inset-0 bg-[#FF6D00]/10 group-hover:bg-[#FF6D00]/20 transition-colors z-10 flex items-center justify-center">
-                    <div className="w-16 h-16 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center text-white pl-1.5 shadow-[0_0_20px_rgba(255,109,0,0.5)] border border-white/20 transform group-hover:scale-110 group-hover:bg-[#FF6D00] group-hover:text-black transition-all duration-300">
-                      {currentTrack?.id === story.id && isPlaying ? <Pause size={28} className="drop-shadow-[0_0_5px_rgba(0,0,0,0.5)] -ml-1.5" /> : <Play size={28} className="drop-shadow-[0_0_5px_rgba(0,0,0,0.5)]" />}
+                  <div className="absolute inset-0 bg-transparent dark:bg-[#FF6D00]/10 group-hover:bg-black/10 dark:group-hover:bg-[#FF6D00]/20 transition-colors z-10 flex items-center justify-center">
+                    <div className="w-16 h-16 bg-white/20 dark:bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center text-white pl-1.5 shadow-md dark:shadow-[0_0_20px_rgba(255,109,0,0.5)] border border-white/20 transform group-hover:scale-110 group-hover:bg-[#FF6D00] group-hover:text-black transition-all duration-300">
+                      {currentTrack?.id === story.id && isPlaying ? <Pause size={28} className="drop-shadow-none dark:drop-shadow-[0_0_5px_rgba(0,0,0,0.5)] -ml-1.5" /> : <Play size={28} className="drop-shadow-none dark:drop-shadow-[0_0_5px_rgba(0,0,0,0.5)] text-gray-800 dark:text-white" />}
                     </div>
                   </div>
-                  <div className="absolute bottom-4 right-4 bg-black/80 backdrop-blur-md text-[#FFD54F] text-xs px-3 py-1.5 rounded-lg font-bold tracking-wider z-20 border border-white/10 shadow-[0_0_10px_rgba(0,0,0,0.5)]">
+                  <div className="absolute bottom-4 right-4 bg-white/80 dark:bg-black/80 backdrop-blur-md text-gray-900 dark:text-[#FFD54F] text-xs px-3 py-1.5 rounded-lg font-bold tracking-wider z-20 border border-gray-200 dark:border-white/10 shadow-sm">
                     {story.duration}
                   </div>
                 </div>
-                <div className="p-6 flex justify-between items-center relative z-20 bg-[#121212]">
-                  <h3 className="font-bold text-white text-lg tracking-wide group-hover:text-[#FFD54F] transition-colors">{story.title}</h3>
-                  <button onClick={(e) => e.stopPropagation()} className="text-gray-500 hover:text-[#F50057] transition-colors hover:scale-110 hover:drop-shadow-[0_0_8px_rgba(245,0,87,0.8)]">
+                <div className="p-6 flex justify-between items-center relative z-20 bg-white dark:bg-[#121212] text-left">
+                  <h3 className="font-bold text-gray-900 dark:text-white text-lg tracking-wide group-hover:text-[#E65100] dark:group-hover:text-[#FFD54F] transition-colors">{story.title}</h3>
+                  <button onClick={(e) => e.stopPropagation()} className="text-gray-400 hover:text-[#F50057] transition-colors hover:scale-110 hover:drop-shadow-[0_0_8px_rgba(245,0,87,0.8)]">
                     <Heart size={24} />
                   </button>
                 </div>
@@ -486,15 +486,15 @@ export default function MediaPage() {
         {activeTab === 'bhajans' && (
           <div className="space-y-4">
             {filteredContent.map((bhajan, idx) => (
-              <div key={idx} onClick={() => playTrack(bhajan)} className="bg-[#121212]/80 backdrop-blur-xl p-5 rounded-[1.5rem] shadow-[0_0_15px_rgba(0,0,0,0.5)] border border-white/5 flex items-center gap-5 cursor-pointer hover:shadow-[0_0_20px_rgba(255,109,0,0.15)] hover:border-[#FF6D00]/30 transition-all duration-300 hover:-translate-y-1 group">
-                <div className="w-14 h-14 bg-[#FF6D00]/10 text-[#FF8A65] rounded-2xl flex items-center justify-center shrink-0 border border-[#FF6D00]/20 group-hover:scale-110 group-hover:bg-[#FF6D00] group-hover:text-black transition-all duration-300">
-                  {currentTrack?.id === bhajan.id && isPlaying ? <Pause size={24} className="group-hover:drop-shadow-[0_0_5px_rgba(0,0,0,0.5)]" /> : <Play size={24} className="group-hover:drop-shadow-[0_0_5px_rgba(0,0,0,0.5)] ml-1" />}
+              <div key={idx} onClick={() => playTrack(bhajan)} className="bg-white dark:bg-[#121212]/80 backdrop-blur-xl p-5 rounded-[1.5rem] shadow-sm dark:shadow-[0_0_15px_rgba(0,0,0,0.5)] border border-gray-200 dark:border-white/5 flex items-center gap-5 cursor-pointer hover:shadow-md dark:hover:shadow-[0_0_20px_rgba(255,109,0,0.15)] hover:border-[#FF6D00]/30 transition-all duration-300 hover:-translate-y-1 group">
+                <div className="w-14 h-14 bg-orange-50 dark:bg-[#FF6D00]/10 text-[#FF8A65] rounded-2xl flex items-center justify-center shrink-0 border border-orange-100 dark:border-[#FF6D00]/20 group-hover:scale-110 group-hover:bg-[#FF6D00] group-hover:text-black transition-all duration-300">
+                  {currentTrack?.id === bhajan.id && isPlaying ? <Pause size={24} className="group-hover:drop-shadow-none dark:group-hover:drop-shadow-[0_0_5px_rgba(0,0,0,0.5)]" /> : <Play size={24} className="group-hover:drop-shadow-none dark:group-hover:drop-shadow-[0_0_5px_rgba(0,0,0,0.5)] ml-1" />}
                 </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-bold text-gray-100 text-lg truncate group-hover:text-white transition-colors">{bhajan.title}</h3>
-                  <p className="text-sm text-gray-400 font-medium truncate">{bhajan.artist}</p>
+                <div className="flex-1 min-w-0 text-left">
+                  <h3 className="font-bold text-gray-800 dark:text-gray-100 text-lg truncate group-hover:text-[#E65100] dark:group-hover:text-white transition-colors">{bhajan.title}</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 font-medium truncate">{bhajan.artist}</p>
                 </div>
-                <div className="text-sm font-bold tracking-widest text-[#FFD54F] shrink-0 bg-[#FFD54F]/10 px-3 py-1.5 rounded-lg border border-[#FFD54F]/20">
+                <div className="text-sm font-bold tracking-widest text-[#E65100] dark:text-[#FFD54F] shrink-0 bg-orange-50 dark:bg-[#FFD54F]/10 px-3 py-1.5 rounded-lg border border-orange-100 dark:border-[#FFD54F]/20">
                   {bhajan.duration}
                 </div>
               </div>
@@ -505,17 +505,17 @@ export default function MediaPage() {
         {activeTab === 'audiobooks' && (
           <div className="grid gap-5">
             {filteredContent.map((book, idx) => (
-              <div key={idx} onClick={() => playTrack(book)} className="bg-[#121212]/80 backdrop-blur-xl p-6 rounded-[2rem] shadow-[0_0_15px_rgba(0,0,0,0.5)] border border-white/5 flex gap-6 cursor-pointer hover:shadow-[0_0_25px_rgba(255,109,0,0.15)] hover:border-[#FF6D00]/30 transition-all duration-300 hover:-translate-y-1 group">
-                <div className="w-20 h-28 bg-gradient-to-br from-[#FF6D00] to-[#FFD54F] rounded-xl shadow-[0_0_20px_rgba(255,109,0,0.4)] flex items-center justify-center text-black shrink-0 group-hover:scale-105 transition-transform duration-300 relative overflow-hidden">
+              <div key={idx} onClick={() => playTrack(book)} className="bg-white dark:bg-[#121212]/80 backdrop-blur-xl p-6 rounded-[2rem] shadow-sm dark:shadow-[0_0_15px_rgba(0,0,0,0.5)] border border-gray-200 dark:border-white/5 flex gap-6 cursor-pointer hover:shadow-md dark:hover:shadow-[0_0_25px_rgba(255,109,0,0.15)] hover:border-[#FF6D00]/30 transition-all duration-300 hover:-translate-y-1 group">
+                <div className="w-20 h-28 bg-gradient-to-br from-[#FF6D00] to-[#FFD54F] rounded-xl shadow-md dark:shadow-[0_0_20px_rgba(255,109,0,0.4)] flex items-center justify-center text-black shrink-0 group-hover:scale-105 transition-transform duration-300 relative overflow-hidden">
                   <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors" />
                   <BookOpen size={32} className="drop-shadow-[0_0_8px_rgba(0,0,0,0.3)] relative z-10" />
                 </div>
-                <div className="flex-1 flex flex-col justify-center">
-                  <h3 className="font-bold text-white text-xl mb-1.5 group-hover:text-[#FFD54F] transition-colors">{book.title}</h3>
-                  <p className="text-sm text-gray-400 font-medium mb-4">{book.author}</p>
-                  <div className="flex items-center gap-3 text-xs font-bold tracking-widest text-[#FF8A65] uppercase">
-                    <span className="bg-[#FF6D00]/10 border border-[#FF6D00]/20 px-3 py-1.5 rounded-lg shadow-[0_0_10px_rgba(255,109,0,0.1)]">{book.chapters} Chapters</span>
-                    <span className="bg-[#FF6D00]/10 border border-[#FF6D00]/20 px-3 py-1.5 rounded-lg flex items-center gap-1.5 hover:bg-[#FF6D00] hover:text-black transition-colors shadow-[0_0_10px_rgba(255,109,0,0.1)]">
+                <div className="flex-1 flex flex-col justify-center text-left">
+                  <h3 className="font-bold text-gray-900 dark:text-white text-xl mb-1.5 group-hover:text-[#E65100] dark:group-hover:text-[#FFD54F] transition-colors">{book.title}</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-4">{book.author}</p>
+                  <div className="flex items-center gap-3 text-xs font-bold tracking-widest text-[#E65100] dark:text-[#FF8A65] uppercase flex-wrap">
+                    <span className="bg-orange-50 dark:bg-[#FF6D00]/10 border border-orange-100 dark:border-[#FF6D00]/20 px-3 py-1.5 rounded-lg shadow-sm">{book.chapters} Chapters</span>
+                    <span className="bg-orange-100 dark:bg-[#FF6D00]/10 border border-orange-100 dark:border-[#FF6D00]/20 px-3 py-1.5 rounded-lg flex items-center gap-1.5 hover:bg-[#FF6D00] hover:text-black dark:hover:bg-[#FF6D00] dark:hover:text-black transition-colors shadow-sm">
                       {currentTrack?.id === book.id && isPlaying ? <Pause size={12} /> : <Play size={12} />} Listen
                     </span>
                   </div>
@@ -528,34 +528,35 @@ export default function MediaPage() {
       <SectionAiAgent section="media" />
 
       {/* JBT Premium Help Modal for Multimedia */}
-      {showHelpModal && (
+       {showHelpModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-300 pointer-events-auto">
-          <div className="bg-[#121212] border border-white/10 rounded-[2rem] w-full max-w-lg p-6 md:p-8 shadow-2xl relative overflow-hidden flex flex-col max-h-[90vh]">
+          <div className="bg-white dark:bg-[#121212] border border-gray-200 dark:border-white/10 rounded-[2rem] w-full max-w-lg p-6 md:p-8 shadow-2xl relative overflow-hidden flex flex-col max-h-[90vh] text-gray-900 dark:text-gray-100 transition-colors duration-300">
             <div className="absolute top-0 right-0 w-32 h-32 bg-[#FF6D00]/10 rounded-full blur-3xl pointer-events-none" />
             
             <div className="flex justify-between items-start mb-5 relative z-10">
               <div className="text-left">
-                <span className="text-[9px] font-black text-[#FF6D00] uppercase tracking-widest bg-[#FF6D00]/10 px-3 py-1 rounded-full border border-[#FF6D00]/10 inline-block mb-1.5">
+                <span className="text-[9px] font-black text-[#FF6D00] uppercase tracking-widest bg-[#FF6D00]/10 px-3 py-1 rounded-full border border-[#FF6D00]/25 inline-block mb-1.5 font-mono">
                   📁 {language === 'en' ? 'MULTIMEDIA USER GUIDE' : 'मल्टीमीडिया निर्देश पुस्तिका'}
                 </span>
-                <h2 className="text-2xl font-display font-black text-white tracking-tight">
+                <h2 className="text-2xl font-display font-black text-gray-900 dark:text-white tracking-tight">
                   ℹ️ {language === 'en' ? 'Help & Features' : 'सहायता एवं सुविधाएँ'}
                 </h2>
               </div>
               <button 
                 onClick={() => setShowHelpModal(false)}
-                className="w-10 h-10 shrink-0 flex items-center justify-center rounded-full bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer border border-white/5 active:scale-95"
+                className="w-10 h-10 shrink-0 flex items-center justify-center rounded-full bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white hover:bg-gray-200 dark:hover:bg-white/10 transition-colors cursor-pointer border border-gray-200 dark:border-white/5 active:scale-95"
               >
                 ✕
               </button>
             </div>
 
             {/* Modal Translator switch requested in help modal */}
-            <div className="bg-white/5 p-3 rounded-2xl border border-white/5 flex items-center justify-between gap-3 mb-5 relative z-10">
-              <span className="text-[10px] font-black uppercase text-gray-400">
+            <div className="bg-gray-50 dark:bg-white/5 p-3 rounded-2xl border border-gray-200 dark:border-white/5 flex items-center justify-between gap-3 mb-5 relative z-10">
+              <span className="text-[10px] font-black uppercase text-gray-500 dark:text-gray-400">
                 {language === 'en' ? 'Translate guide language' : 'निर्देश निर्देश भाषा बदलें'}
               </span>
               <button
+                type="button"
                 onClick={toggleLanguage}
                 className="px-3.5 py-1.5 bg-[#FF3D00] text-white hover:bg-[#D50000] rounded-xl text-[10px] font-black uppercase transition-all ring-1 ring-orange-500/20 flex items-center gap-1 cursor-pointer"
               >
@@ -565,35 +566,44 @@ export default function MediaPage() {
             </div>
 
             {/* Help Scrollable Content */}
-            <div className="overflow-y-auto pr-1 space-y-4 text-left text-zinc-300 text-xs text-medium leading-relaxed relative z-10 max-h-[55vh]">
-              <p className="font-bold text-white text-sm">
+            <div className="overflow-y-auto pr-1 space-y-4 text-left text-gray-650 dark:text-gray-300 text-xs leading-relaxed relative z-10 max-h-[55vh]">
+              <p className="font-bold text-gray-900 dark:text-white text-sm">
                 {language === 'en' ? 'Welcome to Jain Multimedia Library!' : 'जैन मल्टीमीडिया ऑडियो लाइब्रेरी में आपका स्वागत है!'}
               </p>
-              <p className="font-semibold text-gray-400">
+              <p className="font-semibold text-gray-500 dark:text-gray-400">
                 {language === 'en' 
                   ? 'Listen to beautiful spiritual stories, divine musical Bhajans, and deep audiobooks easily on-the-go with stable backup media source streams:' 
                   : 'महान नैतिक कहानियों, संगीतबद्ध भजनों एवं ज्ञानवर्धक ऑडियो पुस्तकों का अमृतपान सुगमता से करें:'}
               </p>
-              <ul className="list-disc pl-5 space-y-2 text-gray-400 font-semibold font-sans">
+              <ul className="list-disc pl-5 space-y-2 text-gray-500 dark:text-gray-400 font-semibold font-sans font-sans">
                 <li>
-                  <strong className="text-[#FFD54F]">{language === 'en' ? 'Three Dedicated Formats:' : 'तीन विशेष विभाग:'}</strong>{' '}
+                  <strong className="text-gray-900 dark:text-[#FFD54F]">{language === 'en' ? 'Three Dedicated Formats:' : 'तीन विशेष विभाग:'}</strong>{' '}
                   {language === 'en' 
                     ? 'Includes Shravak Katha stories, continuous rhythmic devotional Bhajans, and classic Swadhyay audiobooks.' 
                     : 'नैतिक बोध कराने वाली कहानियां, मंत्रमुग्ध करने वाले भजन आडियो व तत्वज्ञान की पुस्तकें उपलब्ध हैं।'}
                 </li>
                 <li>
-                  <strong className="text-[#FFD54F]">{language === 'en' ? 'Integrated Player Bar:' : 'सक्रिय प्लेयर बार:'}</strong>{' '}
+                  <strong className="text-gray-900 dark:text-[#FFD54F]">{language === 'en' ? 'Integrated Player Bar:' : 'सक्रिय प्लेयर बार:'}</strong>{' '}
                   {language === 'en' 
                     ? 'Easily play, pause, or switch tracks with our floating persistent audio controller bar.' 
                     : 'नीचे स्थित ऑडियो कंट्रोलर से सीधे गीत को रोकना, आगे बढ़ाना या पीछे करना आसान है।'}
                 </li>
                 <li>
-                  <strong className="text-[#FFD54F]">{language === 'en' ? 'Responsive Voice Search:' : 'आवाज आधारित खोज:'}</strong>{' '}
+                  <strong className="text-gray-900 dark:text-[#FFD54F]">{language === 'en' ? 'Responsive Voice Search:' : 'आवाज आधारित खोज:'}</strong>{' '}
                   {language === 'en' 
                     ? 'Click the Microphone button and state any keyword to filter your active media collection instantly.' 
                     : 'माइक्रोफोन बटन पर क्लिक करके किसी भी विषय को बोलकर तुरंत खोज सकते हैं।'}
                 </li>
               </ul>
+            </div>
+
+            <div className="mt-6 pt-4 border-t border-gray-150 dark:border-white/10 text-center relative z-10">
+              <button
+                onClick={() => setShowHelpModal(false)}
+                className="w-full bg-[#FF6D00] hover:bg-orange-600 text-black py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest cursor-pointer hover:scale-[1.02] active:scale-95 transition-all text-center"
+              >
+                {language === 'en' ? 'UNDERSTOOD & CONTINUE' : 'पूर्ण समझ आया, आगे बढ़ें'}
+              </button>
             </div>
           </div>
         </div>

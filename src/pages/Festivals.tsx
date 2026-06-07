@@ -216,20 +216,20 @@ export default function FestivalsPage() {
   }, [festivals, searchQuery, filterType, language]);
 
   return (
-    <div className="min-h-full p-6 pb-24 bg-[#050505] text-gray-200 relative">
+    <div className="min-h-full p-6 pb-24 bg-gradient-to-b from-gray-50 to-gray-100 dark:from-[#050505] dark:to-[#0d0d0d] text-gray-905 dark:text-gray-200 relative transition-colors duration-300">
       
       {/* Unified Single Row Header */}
-      <header className="sticky top-0 z-40 bg-[#050505]/95 backdrop-blur-md -mx-6 px-6 py-4 mb-8 border-b border-white/5 flex items-center justify-between gap-2 md:gap-4">
+      <header className="sticky top-0 z-40 bg-white/95 dark:bg-[#050505]/95 backdrop-blur-md -mx-6 px-6 py-4 mb-8 border-b border-gray-200 dark:border-white/5 flex items-center justify-between gap-2 md:gap-4 transition-colors duration-300">
         <div className="flex items-center gap-2 sm:gap-4 min-w-0">
-          <button onClick={() => navigate(-1)} className="p-1.5 sm:p-2 rounded-full bg-white/5 hover:bg-white/10 transition-colors cursor-pointer shrink-0">
-            <ArrowLeft size={18} className="text-gray-300 sm:w-6 sm:h-6" />
+          <button onClick={() => navigate(-1)} className="p-1.5 sm:p-2 rounded-full bg-white dark:bg-white/5 border border-gray-150 dark:border-white/10 shadow-sm hover:bg-gray-100 dark:hover:bg-white/10 transition-colors cursor-pointer shrink-0 text-gray-700 dark:text-gray-300">
+            <ArrowLeft size={18} className="sm:w-6 sm:h-6" />
           </button>
-          <div className="min-w-0">
-            <h1 className="text-sm sm:text-base md:text-lg lg:text-xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] flex items-center gap-1.5 sm:gap-2 truncate drop-shadow-[0_0_10px_rgba(255,109,0,0.5)]">
+          <div className="min-w-0 text-left">
+            <h1 className="text-sm sm:text-base md:text-lg lg:text-xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] flex items-center gap-1.5 sm:gap-2 truncate drop-shadow-none dark:drop-shadow-[0_0_10px_rgba(255,109,0,0.5)]">
                <PartyPopper className="text-[#FF6D00] w-4 h-4 sm:w-6 sm:h-6 md:w-8 md:h-8 shrink-0" />
               <span className="truncate">{language === 'hi' ? 'जैन पर्व तिथि' : 'FESTIVALS & VRAT'}</span>
             </h1>
-            <p className="text-[9px] text-gray-550 font-mono tracking-wider mt-0.5 uppercase truncate hidden xs:block">
+            <p className="text-[9px] text-gray-500 dark:text-gray-400 font-mono tracking-wider mt-0.5 uppercase truncate hidden xs:block">
               {language === 'hi' ? '५०+ वार्षिक पर्व तथा व्रत विवरण' : '50+ sacred kalyanaks & vrat details'}
             </p>
           </div>
@@ -240,7 +240,7 @@ export default function FestivalsPage() {
           {/* Section User Guide Trigger */}
           <button
             onClick={() => setShowHelpModal(true)}
-            className="p-1.5 sm:p-2 bg-white/5 hover:bg-white/10 text-gray-400 rounded-xl text-xs font-bold transition-all cursor-pointer border border-white/10 h-8 w-8 sm:h-9 sm:w-9 flex items-center justify-center shrink-0 shadow-sm"
+            className="p-1.5 sm:p-2 bg-white dark:bg-white/5 hover:bg-gray-100 dark:hover:bg-white/10 text-gray-600 dark:text-gray-400 rounded-xl text-xs font-bold transition-all cursor-pointer border border-gray-200 dark:border-white/10 h-8 w-8 sm:h-9 sm:w-9 flex items-center justify-center shrink-0 shadow-sm"
             title={language === 'en' ? 'Festivals Section Guide' : 'पर्व अनुभाग निर्देशपुस्तिका'}
           >
             ❓
@@ -261,12 +261,12 @@ export default function FestivalsPage() {
 
       {/* Upcoming Banner */}
       {loading ? (
-        <div className="mb-8 bg-[#121212]/80 backdrop-blur-xl rounded-[2.5rem] p-10 flex flex-col items-center justify-center border border-white/5">
+        <div className="mb-8 bg-white dark:bg-[#121212]/80 backdrop-blur-xl rounded-[2.5rem] p-10 flex flex-col items-center justify-center border border-gray-200 dark:border-white/5 shadow-sm">
           <Loader2 className="animate-spin mb-4 text-[#FF6D00]" size={40} />
           <p className="font-bold uppercase tracking-widest text-xs text-gray-500">{language === 'hi' ? 'लोड हो रहा है...' : 'Loading Festivals...'}</p>
         </div>
       ) : upcoming ? (
-        <div className="mb-8 bg-gradient-to-br from-[#FF6D00]/20 to-[#FFD54F]/10 backdrop-blur-xl rounded-[2.5rem] p-6 shadow-[0_0_30px_rgba(255,109,0,0.2)] border border-[#FF6D00]/30 relative overflow-hidden group">
+        <div className="mb-8 bg-gradient-to-br from-[#FF6D00]/10 to-[#FFD54F]/5 dark:from-[#FF6D00]/20 dark:to-[#FFD54F]/10 backdrop-blur-xl rounded-[2.5rem] p-6 shadow-sm dark:shadow-[0_0_30px_rgba(255,109,0,0.2)] border border-[#FF6D00]/20 dark:border-[#FF6D00]/30 relative overflow-hidden group text-left">
           <div className="absolute top-0 right-0 w-40 h-40 bg-[#FF6D00]/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-[#FF6D00]/30 transition-all duration-700" />
           
           <div className="flex items-center gap-2 text-[#FFD54F] mb-3 relative z-10">
@@ -274,7 +274,7 @@ export default function FestivalsPage() {
             <span className="text-[10px] font-bold tracking-widest uppercase">{language === 'hi' ? 'निकटतम पावन पर्व' : 'Nearest Holy Festival'}</span>
           </div>
           
-          <h2 className="text-2xl font-black text-white mb-2 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] relative z-10">{upcoming.name?.[language] || upcoming.name}</h2>
+          <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-2 drop-shadow-none dark:drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] relative z-10">{upcoming.name?.[language] || upcoming.name}</h2>
           
           <div className="flex items-end justify-between relative z-10 mt-4">
             <div className="flex flex-col">
@@ -287,17 +287,17 @@ export default function FestivalsPage() {
                   {language === 'hi' ? 'कल है!' : 'Tomorrow'}
                 </span>
               ) : (
-                <span className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FF6D00] to-[#FFD54F]">
+                <span className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] font-mono">
                   {upcoming.daysLeft} {language === 'hi' ? 'दिन शेष' : 'Days Left'}
                 </span>
               )}
-              <span className="text-[10px] font-bold text-gray-450 uppercase tracking-widest mt-1">
+              <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1 font-mono">
                 {language === 'hi' ? `दिनांक: ${upcoming.calculatedDateStr?.hi}` : `Date: ${upcoming.calculatedDateStr?.en}`}
               </span>
             </div>
             <button 
               onClick={() => handleAskAI(upcoming.name?.[language] || upcoming.name)}
-              className="px-5 py-2.5 bg-[#FF6D00] hover:bg-orange-600 text-black rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-[0_0_15px_rgba(255,109,0,0.4)] cursor-pointer"
+              className="px-5 py-2.5 bg-[#FF6D00] hover:bg-orange-600 text-black rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-sm hover:shadow-lg cursor-pointer"
             >
               {language === 'hi' ? 'तैयारी एवं पूजन विधान' : 'Prepare details'}
             </button>
@@ -306,45 +306,45 @@ export default function FestivalsPage() {
       ) : null}
 
       {/* Advanced Filter Toolbar */}
-      <div className="bg-[#121212]/80 border border-white/5 p-4 rounded-3xl mb-8 flex flex-col md:flex-row gap-4 justify-between items-center">
+      <div className="bg-white dark:bg-[#121212]/80 border border-gray-200 dark:border-white/5 p-4 rounded-3xl mb-8 flex flex-col md:flex-row gap-4 justify-between items-center shadow-sm">
         <div className="relative w-full md:max-w-md">
-          <Search className="absolute left-4 top-3 text-gray-500" size={16} />
+          <Search className="absolute left-4 top-3 text-gray-450 dark:text-gray-500" size={16} />
           <input 
             type="text"
             placeholder={language === 'hi' ? "पर्व का नाम, तिथि या विवरण खोजें..." : "Search festival, tithi, or month..."}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl py-2 pl-11 pr-4 text-xs font-bold text-white focus:outline-none focus:border-[#FF6D00]"
+            className="w-full bg-gray-100 dark:bg-[#0a0a0a] border border-gray-200 dark:border-white/10 rounded-xl py-2 pl-11 pr-4 text-xs font-bold text-gray-900 dark:text-white focus:outline-none focus:border-[#FF6D00] transition-colors"
           />
         </div>
 
         <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
           <button
             onClick={() => setFilterType('all')}
-            className={`flex-1 md:flex-none px-4 py-2 rounded-xl text-xs font-bold tracking-wider uppercase transition-colors cursor-pointer ${
+            className={`flex-1 md:flex-none px-4 py-2 rounded-xl text-xs font-bold tracking-wider uppercase transition-all duration-350 cursor-pointer ${
               filterType === 'all' 
                 ? 'bg-[#FF6D00] text-black shadow-md' 
-                : 'bg-[#181818] text-gray-400 hover:text-white border border-white/5'
+                : 'bg-gray-100 dark:bg-[#181818] text-gray-650 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white border border-gray-200 dark:border-white/5'
             }`}
           >
             {language === 'hi' ? 'सभी त्योहार' : 'All'} ({(festivals || []).length})
           </button>
           <button
             onClick={() => setFilterType('this_month')}
-            className={`flex-1 md:flex-none px-4 py-2 rounded-xl text-xs font-bold tracking-wider uppercase transition-colors cursor-pointer ${
+            className={`flex-1 md:flex-none px-4 py-2 rounded-xl text-xs font-bold tracking-wider uppercase transition-all duration-350 cursor-pointer ${
               filterType === 'this_month' 
                 ? 'bg-[#FF6D00] text-black shadow-md' 
-                : 'bg-[#181818] text-gray-400 hover:text-white border border-white/5'
+                : 'bg-gray-100 dark:bg-[#181818] text-gray-650 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white border border-gray-200 dark:border-white/5'
             }`}
           >
             {language === 'hi' ? 'इसी माह के पर्व' : 'This Month'}
           </button>
           <button
             onClick={() => setFilterType('upcoming')}
-            className={`flex-1 md:flex-none px-4 py-2 rounded-xl text-xs font-bold tracking-wider uppercase transition-colors cursor-pointer ${
+            className={`flex-1 md:flex-none px-4 py-2 rounded-xl text-xs font-bold tracking-wider uppercase transition-all duration-350 cursor-pointer ${
               filterType === 'upcoming' 
                 ? 'bg-[#FF6D00] text-black shadow-md' 
-                : 'bg-[#181818] text-gray-400 hover:text-white border border-white/5'
+                : 'bg-gray-100 dark:bg-[#181818] text-gray-650 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white border border-gray-200 dark:border-white/5'
             }`}
           >
             {language === 'hi' ? '९० दिनों के अंदर' : 'Within 90 Days'}
@@ -356,20 +356,20 @@ export default function FestivalsPage() {
       <div className="space-y-8">
         {!loading && filteredFestivals.length > 0 ? (
           filteredFestivals.map((fest, idx) => (
-            <div key={idx} className="bg-[#121212]/80 backdrop-blur-xl rounded-[2rem] overflow-hidden shadow-[0_0_20px_rgba(0,0,0,0.5)] border border-white/5 group hover:border-[#FF6D00]/50 hover:shadow-[0_0_30px_rgba(255,109,0,0.15)] transition-all duration-500">
+            <div key={idx} className="bg-white dark:bg-[#121212]/80 backdrop-blur-xl rounded-[2.5rem] overflow-hidden shadow-sm dark:shadow-[0_0_20px_rgba(0,0,0,0.5)] border border-gray-200 dark:border-white/5 group hover:border-[#FF6D00]/50 hover:shadow-md dark:hover:shadow-[0_0_30px_rgba(255,109,0,0.15)] transition-all duration-500 text-left">
               <div className="h-48 relative overflow-hidden">
                 <img src={fest.image} alt={fest.name?.[language] || fest.name} className="w-full h-full object-cover group-hover:scale-110 group-hover:rotate-1 transition-transform duration-700 opacity-80" referrerPolicy="no-referrer" />
                 <div className={`absolute inset-0 bg-gradient-to-t ${fest.color || 'from-orange-400 to-amber-500'} mix-blend-multiply opacity-80`} />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#121212] via-transparent to-transparent opacity-90" />
+                <div className="absolute inset-0 bg-gradient-to-t from-white dark:from-[#121212] via-transparent to-transparent opacity-95" />
                 <div className="absolute bottom-4 left-5 right-5 flex justify-between items-end">
                   <div>
-                    <span className="text-[9px] font-mono font-black tracking-wide text-[#FFD54F] uppercase bg-black/45 px-2.5 py-1 rounded-md mb-1.5 inline-block">
+                    <span className="text-[9px] font-mono font-black tracking-wide text-[#FFD54F] uppercase bg-black/60 px-2.5 py-1 rounded-md mb-1.5 inline-block">
                       TITHI: {fest.tithi || 'N/A'}
                     </span>
-                    <h2 className="text-2xl font-display font-black text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)] tracking-wide">{fest.name?.[language] || fest.name}</h2>
+                    <h2 className="text-2xl font-display font-black text-gray-900 dark:text-white drop-shadow-none dark:drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)] tracking-wide">{fest.name?.[language] || fest.name}</h2>
                   </div>
                   {fest.daysLeft !== undefined && (
-                    <div className="bg-black/50 px-3 py-1.5 rounded-xl border border-white/10 font-mono text-center min-w-[75px]">
+                    <div className="bg-black/50 px-3 py-1.5 rounded-xl border border-white/10 font-mono text-center min-w-[75px] cursor-default">
                       {fest.daysLeft === 0 ? (
                         <span className="text-xs font-black text-rose-500 block animate-pulse">
                           {language === 'hi' ? 'आज है!' : 'TODAY!'}
@@ -390,19 +390,18 @@ export default function FestivalsPage() {
               </div>
               
               <div className="p-6 relative">
-                <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-white/5 to-transparent pointer-events-none" />
                 <div className="relative z-10">
-                  <div className="flex items-center gap-2 text-[#FFD54F] font-bold text-xs mb-4 bg-[#FFD54F]/10 border border-[#FFD54F]/20 w-fit px-3.5 py-1.5 rounded-full shadow-[0_0_10px_rgba(255,213,79,0.1)] uppercase tracking-widest">
-                    <Calendar size={14} className="drop-shadow-[0_0_5px_rgba(255,213,79,0.8)]" />
+                  <div className="flex items-center gap-2 text-[#FFD54F] font-bold text-xs mb-4 bg-amber-500/10 border border-amber-500/20 w-fit px-3.5 py-1.5 rounded-full shadow-sm uppercase tracking-widest">
+                    <Calendar size={14} className="drop-shadow-none" />
                     {fest.calculatedDateStr?.[language] || fest.date}
                   </div>
-                  <p className="text-gray-400 text-sm leading-relaxed mb-6 font-medium">
+                  <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed mb-6 font-medium font-sans">
                     {fest.desc?.[language] || fest.desc}
                   </p>
                   
                   <button 
                     onClick={() => handleAskAI(fest.name?.[language] || fest.name)}
-                    className="w-full py-3.5 bg-gradient-to-r from-[#FF6D00]/10 to-[#FFD54F]/10 hover:from-[#FF6D00] hover:to-[#FFD54F] text-[#FF8A65] hover:text-black rounded-2xl font-bold transition-all duration-300 flex items-center justify-center gap-2 border border-[#FF6D00]/25 hover:border-transparent cursor-pointer shadow-[0_0_15px_rgba(255,109,0,0.1)] hover:shadow-[0_0_20px_rgba(255,109,0,0.4)] group/btn"
+                    className="w-full py-3.5 bg-gradient-to-r from-[#FF6D00]/10 to-[#FFD54F]/10 hover:from-[#FF6D00] hover:to-[#FFD54F] text-[#FF8A65] hover:text-black rounded-2xl font-bold transition-all duration-300 flex items-center justify-center gap-2 border border-[#FF6D00]/25 hover:border-transparent cursor-pointer shadow-sm hover:shadow-[0_0_20px_rgba(255,109,0,0.4)] group/btn"
                   >
                     <Sparkles size={18} className="group-hover/btn:animate-pulse" />
                     {language === 'hi' ? `${fest.name?.[language] || fest.name} के बारे में AI से पूछें` : `Ask AI about ${fest.name?.[language] || fest.name}`}
@@ -412,40 +411,42 @@ export default function FestivalsPage() {
             </div>
           ))
         ) : !loading && (
-          <div className="text-center py-16 bg-[#121212]/50 border border-white/5 rounded-3xl text-gray-500 font-bold tracking-wide">
+          <div className="text-center py-16 bg-white dark:bg-[#121212]/50 border border-gray-200 dark:border-white/5 rounded-3xl text-gray-500 font-bold tracking-wide shadow-inner">
             {language === 'hi' ? 'कोई मेल खाता हुआ कल्याणक/त्योहार नहीं मिला।' : 'No matching festival found in the calendar.'}
           </div>
         )}
       </div>
+
       {/* Dynamic JBT Premium Help Modal */}
       {showHelpModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-300 pointer-events-auto">
-          <div className="bg-[#121212] border border-white/10 rounded-[2rem] w-full max-w-lg p-6 md:p-8 shadow-2xl relative overflow-hidden flex flex-col max-h-[90vh]">
+          <div className="bg-white dark:bg-[#121212] border border-gray-200 dark:border-white/10 rounded-[2rem] w-full max-w-lg p-6 md:p-8 shadow-2xl relative overflow-hidden flex flex-col max-h-[90vh] text-gray-900 dark:text-gray-100 transition-colors duration-300">
             <div className="absolute top-0 right-0 w-32 h-32 bg-[#FF6D00]/10 rounded-full blur-3xl pointer-events-none" />
             
             <div className="flex justify-between items-start mb-5 relative z-10">
               <div className="text-left">
-                <span className="text-[9px] font-black text-[#FF6D00] uppercase tracking-widest bg-[#FF6D00]/10 px-3 py-1 rounded-full border border-[#FF6D00]/10 inline-block mb-1.5">
+                <span className="text-[9px] font-black text-[#FF6D00] uppercase tracking-widest bg-[#FF6D00]/10 px-3 py-1 rounded-full border border-[#FF6D00]/10 inline-block mb-1.5 font-mono">
                   📁 {language === 'en' ? 'SECTION USER GUIDE' : 'अनुभाग निर्देश पुस्तिका'}
                 </span>
-                <h2 className="text-2xl font-display font-black text-white tracking-tight">
+                <h2 className="text-2xl font-display font-black text-gray-900 dark:text-white tracking-tight">
                   ℹ️ {language === 'en' ? 'Help & Features' : 'सहायता एवं सुविधाएँ'}
                 </h2>
               </div>
               <button 
                 onClick={() => setShowHelpModal(false)}
-                className="w-10 h-10 shrink-0 flex items-center justify-center rounded-full bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer border border-white/5 active:scale-95"
+                className="w-10 h-10 shrink-0 flex items-center justify-center rounded-full bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white hover:bg-gray-200 dark:hover:bg-white/10 transition-colors cursor-pointer border border-gray-200 dark:border-white/5 active:scale-95"
               >
                 ✕
               </button>
             </div>
 
             {/* Modal Translator switch requested in help modal */}
-            <div className="bg-white/5 p-3 rounded-2xl border border-white/5 flex items-center justify-between gap-3 mb-5 relative z-10">
-              <span className="text-[10px] font-black uppercase text-gray-400">
+            <div className="bg-gray-50 dark:bg-white/5 p-3 rounded-2xl border border-gray-200 dark:border-white/5 flex items-center justify-between gap-3 mb-5 relative z-10">
+              <span className="text-[10px] font-black uppercase text-gray-500 dark:text-gray-400">
                 {language === 'en' ? 'Translate guide language' : 'निर्देश निर्देश भाषा बदलें'}
               </span>
               <button
+                type="button"
                 onClick={toggleLanguage}
                 className="px-3.5 py-1.5 bg-[#FF3D00] text-white hover:bg-[#D50000] rounded-xl text-[10px] font-black uppercase transition-all ring-1 ring-orange-500/20 flex items-center gap-1 cursor-pointer"
               >
@@ -455,38 +456,38 @@ export default function FestivalsPage() {
             </div>
 
             {/* Help Scrollable Content */}
-            <div className="overflow-y-auto pr-1 space-y-4.5 text-left text-zinc-355 dark:text-zinc-300 text-xs text-medium leading-relaxed relative z-10 max-h-[55vh]">
-              <p className="font-bold text-white text-sm">
-                {language === 'en' ? 'Welcome to Jain Festivals & Kalyanak Portal!' : 'जैन पर्व, त्योहार व व्रत पटल में आपका स्वागत है!'}
+            <div className="overflow-y-auto pr-1 space-y-4.5 text-left text-gray-600 dark:text-gray-300 text-xs leading-relaxed relative z-10 max-h-[55vh]">
+              <p className="font-bold text-gray-900 dark:text-white text-sm">
+                {language === 'en' ? 'Welcome to Jain Festivals & Kalyanakat Portal!' : 'जैन पर्व, त्योहार व व्रत पटल में स्वागत है!'}
               </p>
-              <p className="font-semibold text-gray-400">
+              <p className="font-semibold text-gray-500 dark:text-gray-450">
                 {language === 'en' 
-                  ? 'Stay aligned with major Tirthankar Kalyanaks, Dashlakshan Parv, Ashtanhika, and monthly fasts with live real-time countdown trackers:' 
+                  ? 'Stay aligned with major Tirthankar Kalyanaks, Dashlakshan Parv, Astahnika, and monthly fasts with live real-time countdown trackers:' 
                   : 'प्रमुख चौबीस तीर्थंकरों के पंचकल्याणक, दशलक्षण पर्व, अष्टान्हिका तथा महत्वपूर्ण मासिक व्रतों की तिथियों और सांस्कृतिक महत्व को जानें:'}
               </p>
-              <ul className="list-disc pl-5 space-y-2 text-gray-400 font-semibold font-sans">
+              <ul className="list-disc pl-5 space-y-2 text-gray-650 dark:text-gray-400 font-semibold font-sans">
                 <li>
-                  <strong className="text-[#FFD54F]">{language === 'en' ? 'Dynamic Countdown Trackers:' : 'कल्याणक लाइव काउंटडाउन ट्रैकर:'}</strong>{' '}
+                  <strong className="text-gray-800 dark:text-[#FFD54F]">{language === 'en' ? 'Dynamic Countdown Trackers:' : 'कल्याणक लाइव काउंटडाउन ट्रैकर:'}</strong>{' '}
                   {language === 'en' 
                     ? 'View precise remaining days left for upcoming fasts or festivals, calculated dynamically corresponding to Lunar calendars.' 
                     : 'आगामी पर्वों और कल्याणकों के लिए शेष बचे दिनों की स्वचालित सटीक गणना तुरंत देखें।'}
                 </li>
                 <li>
-                  <strong className="text-[#FFD54F]">{language === 'en' ? 'Search and Date Filtering:' : 'पर्व खोज एवं मासिक छँटनी:'}</strong>{' '}
+                  <strong className="text-gray-800 dark:text-[#FFD54F]">{language === 'en' ? 'Search and Date Filtering:' : 'पर्व खोज एवं मासिक छँटनी:'}</strong>{' '}
                   {language === 'en'
                     ? 'Search through 50+ sacred parameters, or instantly narrow down to vrat occurring during "this month" or within 90 days.'
                     : '५० से अधिक पवित्र पर्वों की सूची में खोजें अथवा "इस महीने" आने वाले व्रत तथा "आगामी पर्व" का त्वरित फिल्टर लगाएँ।'}
                 </li>
                 <li>
-                  <strong className="text-[#FFD54F]">{language === 'en' ? 'Spiritual AI Guidance:' : 'पर्वों के धार्मिक व पौराणिक अर्थ की AI व्याख्या:'}</strong>{' '}
+                  <strong className="text-gray-800 dark:text-[#FFD54F]">{language === 'en' ? 'Spiritual AI Guidance:' : 'पर्वों के धार्मिक व पौराणिक अर्थ की AI व्याख्या:'}</strong>{' '}
                   {language === 'en'
-                    ? 'Click on the "Ask AI about Festival" shortcut to launch a guided chat about the historical, botantical, and ascetical code of conduct of the festival.'
+                    ? 'Click on the "Ask AI about Festival" shortcut to launch a guided chat about the historical, botanical, and ascetical code of conduct of the festival.'
                     : 'किसी भी पर्व अथवा तीर्थंकर कल्याणक के नीचे "AI से पूछें" पर क्लिक कर कथा, पूजन विधि और धार्मिक रहस्य जानें।'}
                 </li>
               </ul>
             </div>
 
-            <div className="mt-6 pt-4 border-t border-white/5 text-center relative z-10">
+            <div className="mt-6 pt-4 border-t border-gray-150 dark:border-white/10 text-center relative z-10">
               <button
                 onClick={() => setShowHelpModal(false)}
                 className="w-full bg-[#FF6D00] hover:bg-orange-600 text-black py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest cursor-pointer hover:scale-[1.02] active:scale-95 transition-all text-center"

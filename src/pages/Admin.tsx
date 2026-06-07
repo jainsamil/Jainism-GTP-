@@ -381,7 +381,7 @@ export default function AdminPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#050505] flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-[#050505] flex items-center justify-center transition-colors duration-300">
         <div className="w-12 h-12 border-4 border-[#FF6D00] border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -389,26 +389,26 @@ export default function AdminPage() {
 
   if (!hasAdminAccess && role !== 'admin') {
     return (
-      <div className="min-h-screen bg-[#050505] flex items-center justify-center p-6 relative">
+      <div className="min-h-screen bg-gray-50 dark:bg-[#050505] flex items-center justify-center p-6 relative transition-colors duration-300">
         <button 
           onClick={() => navigate('/')}
-          className="absolute top-6 left-6 p-3 bg-white/5 hover:bg-white/10 rounded-full text-white transition-colors"
+          className="absolute top-6 left-6 p-3 bg-gray-200 dark:bg-white/5 hover:bg-gray-300 dark:hover:bg-white/10 rounded-full text-gray-800 dark:text-white transition-colors"
         >
           <ArrowLeft size={24} />
         </button>
-        <div className="bg-[#121212] p-10 rounded-[2.5rem] border border-white/10 w-full max-w-md text-center">
+        <div className="bg-white dark:bg-[#121212] p-10 rounded-[2.5rem] border border-gray-200 dark:border-white/10 w-full max-w-md text-center shadow-xl">
           <div className="w-20 h-20 bg-gradient-to-br from-[#FF6D00] to-[#FFD54F] rounded-full flex items-center justify-center text-black mx-auto mb-8 shadow-lg">
             <Lock size={40} />
           </div>
-          <h1 className="text-3xl font-display font-black text-white mb-4">ADMIN ACCESS</h1>
-          <p className="text-gray-400 mb-8">Enter admin password or sign-in to continue.</p>
+          <h1 className="text-3xl font-display font-black text-gray-900 dark:text-white mb-4">ADMIN ACCESS</h1>
+          <p className="text-gray-500 dark:text-gray-400 mb-8 font-semibold">Enter admin password or sign-in to continue.</p>
           <form onSubmit={handleAdminLogin} className="space-y-4">
             <input
               type="password"
               placeholder="Admin Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-4 text-white focus:border-[#FF6D00]/50 outline-none text-center tracking-widest"
+              className="w-full bg-gray-100 dark:bg-white/5 border border-gray-300 dark:border-white/10 rounded-xl px-4 py-4 text-gray-900 dark:text-white focus:border-[#FF6D00]/50 outline-none text-center tracking-widest font-bold"
               required
             />
             {loginError && <p className="text-red-500 text-sm font-semibold">{loginError}</p>}
@@ -445,7 +445,7 @@ export default function AdminPage() {
   ] as { id: CollectionType; label: string; icon: any }[];
 
   return (
-    <div className="min-h-screen bg-[#050505] p-4 md:p-6 pb-24 text-gray-200">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#050505] p-4 md:p-6 pb-24 text-gray-800 dark:text-gray-205 transition-colors duration-300">
       <header className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 md:mb-10 pt-4 gap-4">
         <h1 className="text-2xl md:text-3xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] flex items-center gap-3">
           <LayoutDashboard className="text-[#FF6D00]" size={28} />
@@ -455,15 +455,23 @@ export default function AdminPage() {
           <button 
             onClick={seedData}
             disabled={seeding}
-            className="flex items-center gap-2 px-3 py-2 md:px-4 md:py-2 bg-white/5 border border-white/10 rounded-xl text-[#FFD54F] text-xs font-bold hover:bg-white/10 transition-all disabled:opacity-50"
+            className="flex items-center gap-2 px-3 py-2 md:px-4 md:py-2 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-[#FF6D00] dark:text-[#FFD54F] text-xs font-bold hover:bg-gray-100 dark:hover:bg-white/10 transition-all disabled:opacity-50 shadow-sm"
           >
             {seeding ? <RefreshCw size={14} className="animate-spin" /> : <Database size={14} />}
             <span className="hidden sm:inline">{seedStatus || 'Seed Sample Data'}</span>
             <span className="sm:hidden">{seedStatus || 'Seed Data'}</span>
           </button>
           <div className="flex items-center gap-3">
+            <button 
+              onClick={() => navigate('/')}
+              className="flex items-center gap-1.5 p-2 px-3 bg-[#FF6D00]/10 dark:bg-white/5 text-[#FF6D00] dark:text-[#FFD54F] border border-[#FF6D00]/20 dark:border-white/10 rounded-xl hover:bg-[#FF6D00]/20 dark:hover:bg-white/10 transition-colors text-xs font-semibold"
+              title="Back to App"
+            >
+              <ArrowLeft size={14} />
+              <span>Back</span>
+            </button>
             <div className="text-right hidden sm:block">
-              <p className="text-sm font-bold text-white">{user?.displayName}</p>
+              <p className="text-sm font-bold text-gray-900 dark:text-white">{user?.displayName}</p>
               <p className="text-[10px] text-[#FFD54F] font-black uppercase tracking-widest">Administrator</p>
             </div>
             <img src={user?.photoURL || "https://i.ibb.co/Myg19RW6/1000539584.jpg"} className="w-8 h-8 md:w-10 md:h-10 rounded-full border-2 border-[#FF6D00] object-cover" alt="Admin" />
@@ -499,7 +507,7 @@ export default function AdminPage() {
                 "shrink-0 lg:w-full flex items-center gap-2 lg:gap-3 px-4 lg:px-6 py-3 lg:py-4 rounded-xl lg:rounded-2xl font-bold transition-all duration-300 group snap-start",
                 activeCollection === col.id 
                   ? "bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] text-black shadow-lg scale-[1.02]" 
-                  : "bg-[#121212] text-gray-400 hover:bg-white/5 hover:text-white border border-white/5"
+                  : "bg-white dark:bg-[#121212] text-gray-700 dark:text-gray-400 hover:bg-gray-200/60 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-white border border-gray-200 dark:border-white/5"
               )}
             >
               <col.icon size={18} className={cn(activeCollection === col.id ? "text-black" : "text-[#FF6D00]")} />

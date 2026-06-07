@@ -520,33 +520,11 @@ export default function AagamsPage() {
             </p>
             <p className="text-xs text-gray-400">
               {language === 'en' 
-                ? "Try searching for others or use Jainism GPT to generate below" 
-                : "आप नीचे दिए गए दिव्य AI जनरेटर के माध्यम से नया पाठ जोड़ सकते हैं!"}
+                ? "Try searching for different keywords or categories." 
+                : "कृपया अन्य कीवर्ड या श्रेणियों के माध्यम से खोजें।"}
             </p>
           </div>
         )}
-      </div>
-
-      {/* Divine AI Expansion Module */}
-      <div className="mt-8 bg-gradient-to-br from-[#121212] to-[#201812] backdrop-blur-xl border border-saffron/20 rounded-[2rem] p-6 lg:p-8 text-center shadow-lg relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-28 h-28 bg-saffron/5 rounded-full blur-2xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-28 h-28 bg-coral/5 rounded-full blur-2xl pointer-events-none" />
-        
-        <h3 className="font-display font-black text-white text-base tracking-wider mb-2.5 uppercase flex items-center justify-center gap-2">
-          <Sparkles size={18} className="text-saffron animate-pulse" />
-          {language === 'en' ? `Missing a ${activeCat}?` : `नया ${activeCat} पाठ जोड़ें?`}
-        </h3>
-        <p className="text-xs text-gray-400 max-w-sm mx-auto mb-4.5 leading-relaxed">
-          {language === 'en'
-            ? 'Need another traditional chant, vidhi or stotra? Ask Jainism GPT to research academic archives and sync it directly to your device.'
-            : 'क्या आप कोई विशिष्ट प्राचीन आरती, चालीसा या पूजन चाहते हैं? हमारे स्वायत्त जैन धर्म AI गुरु से इतिहास सम्मत शुद्ध पाठ निर्मित करवाएं।'}
-        </p>
-        <button
-          onClick={() => setShowAiModal(true)}
-          className="px-6 py-3 bg-gradient-to-r from-saffron to-coral hover:scale-105 active:scale-95 text-white font-black uppercase text-xs tracking-widest rounded-xl transition-all shadow-md shadow-saffron/10 cursor-pointer"
-        >
-          ✨ AI Generate {activeCat}
-        </button>
       </div>
 
       {/* Full-Screen Reading Modal View */}

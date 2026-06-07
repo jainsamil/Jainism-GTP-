@@ -179,24 +179,24 @@ export default function QuizPage() {
 
   if (showResult) {
     return (
-      <div className="min-h-full p-6 pb-24 bg-[#050505] flex flex-col items-center justify-center text-center text-gray-200">
+      <div className="min-h-full p-6 pb-24 bg-gradient-to-b from-gray-50 to-gray-100 dark:from-[#050505] dark:to-[#0d0d0d] flex flex-col items-center justify-center text-center text-gray-910 transition-colors duration-300">
         <div className="relative mb-8 group">
           <div className="absolute -inset-2 bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] rounded-full blur-xl opacity-50 group-hover:opacity-75 transition duration-500 animate-pulse"></div>
-          <div className="w-32 h-32 bg-gradient-to-br from-[#FF6D00] to-[#FFD54F] rounded-full flex items-center justify-center text-black shadow-[0_0_30px_rgba(255,109,0,0.8)] relative z-10 border-4 border-[#121212]">
+          <div className="w-32 h-32 bg-gradient-to-br from-[#FF6D00] to-[#FFD54F] rounded-full flex items-center justify-center text-black shadow-[0_0_30px_rgba(255,109,0,0.8)] relative z-10 border-4 border-white dark:border-[#121212]">
             <Award size={64} className="drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" />
           </div>
         </div>
         
-        <h1 className="text-5xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400 mb-4 drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]">
+        <h1 className="text-5xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400 mb-4 drop-shadow-none dark:drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]">
           {language === 'hi' ? 'क्विज़ पूर्ण!' : 'Quiz Complete!'}
         </h1>
-        <p className="text-2xl text-gray-400 mb-10 font-medium">
-          {language === 'hi' ? 'आपका स्कोर' : 'You scored'} <span className="font-black text-[#FFD54F] drop-shadow-[0_0_8px_rgba(255,213,79,0.8)] text-4xl mx-2">{score}</span> {language === 'hi' ? 'में से' : 'out of'} {questions.length}
+        <p className="text-2xl text-gray-600 dark:text-gray-400 mb-10 font-medium">
+          {language === 'hi' ? 'आपका स्कोर' : 'You scored'} <span className="font-black text-[#FFD54F] dark:text-[#FFD54F] drop-shadow-sm dark:drop-shadow-[0_0_8px_rgba(255,213,79,0.8)] text-4xl mx-2 font-mono">{score}</span> {language === 'hi' ? 'में से' : 'out of'} {questions.length}
         </p>
         
-        <div className="bg-[#121212]/80 backdrop-blur-xl p-8 rounded-[2rem] shadow-[0_0_20px_rgba(0,0,0,0.5)] border border-white/10 w-full max-w-md mb-10 relative overflow-hidden">
+        <div className="bg-white dark:bg-[#121212]/80 backdrop-blur-xl p-8 rounded-[2rem] shadow-sm dark:shadow-[0_0_20px_rgba(0,0,0,0.5)] border border-[#FF6D00]/10 dark:border-white/10 w-full max-w-md mb-10 relative overflow-hidden text-left">
           <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
-          <p className="text-gray-300 font-bold text-lg relative z-10 leading-relaxed">
+          <p className="text-gray-700 dark:text-gray-300 font-bold text-lg relative z-10 leading-relaxed text-center">
             {score === questions.length 
               ? (language === 'hi' ? "उत्कृष्ट! आपको जैन धर्म का गहरा ज्ञान है।" : "Excellent! You have profound knowledge of Jainism.") 
               : score >= questions.length / 2 
@@ -209,7 +209,7 @@ export default function QuizPage() {
         <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
           <button 
             onClick={restart}
-            className="w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-4 bg-white/5 border border-white/10 hover:bg-white/10 text-white rounded-full font-bold shadow-lg transition-all active:scale-95 hover:scale-105"
+            className="w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-4 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/10 text-gray-800 dark:text-white rounded-full font-bold shadow-sm dark:shadow-lg transition-all active:scale-95 hover:scale-105 cursor-pointer"
           >
             <RefreshCcw size={20} />
             {language === 'hi' ? 'पुनः प्रयास करें' : 'TRY AGAIN'}
@@ -234,17 +234,17 @@ export default function QuizPage() {
 
   if (loading) {
     return (
-      <div className="min-h-full p-6 pb-24 bg-[#050505] text-gray-200 flex flex-col items-center justify-center">
+      <div className="min-h-full p-6 pb-24 bg-gray-50 dark:bg-[#050505] text-gray-800 dark:text-gray-200 flex flex-col items-center justify-center transition-colors">
         <Loader2 className="animate-spin mb-4 text-[#FF6D00]" size={40} />
-        <p className="font-bold uppercase tracking-widest text-xs text-gray-500">Loading Quiz...</p>
+        <p className="font-bold uppercase tracking-widest text-xs text-gray-400 dark:text-gray-500">Loading Quiz...</p>
       </div>
     );
   }
 
   if (questions.length === 0) {
     return (
-      <div className="min-h-full p-6 pb-24 bg-[#050505] text-gray-200 flex flex-col items-center justify-center">
-        <p className="font-bold uppercase tracking-widest text-xs text-gray-500">No questions found.</p>
+      <div className="min-h-full p-6 pb-24 bg-gray-50 dark:bg-[#050505] text-gray-800 dark:text-gray-255 flex flex-col items-center justify-center transition-colors">
+        <p className="font-bold uppercase tracking-widest text-xs text-gray-400 dark:text-gray-500">No questions found.</p>
       </div>
     );
   }
@@ -252,14 +252,14 @@ export default function QuizPage() {
   const q = questions[currentQ];
 
   return (
-    <div className="min-h-full p-6 pb-24 bg-[#050505] text-gray-200">
+    <div className="min-h-full p-6 pb-24 bg-gradient-to-b from-gray-50 to-gray-100 dark:from-[#050505] dark:to-[#0d0d0d] text-gray-900 dark:text-gray-200 transition-colors duration-300">
       
-      <header className="sticky top-0 z-40 bg-[#050505]/95 backdrop-blur-md -mx-6 px-6 py-4 mb-8 border-b border-white/5 flex items-center justify-between gap-2 md:gap-4">
+      <header className="sticky top-0 z-40 bg-white/95 dark:bg-[#050505]/95 backdrop-blur-md -mx-6 px-6 py-4 mb-8 border-b border-gray-200/50 dark:border-white/5 flex items-center justify-between gap-2 md:gap-4 transition-colors duration-300">
         <div className="flex items-center gap-2 sm:gap-4 min-w-0">
-          <button onClick={() => navigate(-1)} className="p-1.5 sm:p-2 rounded-full bg-white/5 hover:bg-white/10 transition-colors shrink-0">
-            <ArrowLeft size={18} className="text-gray-300 sm:w-6 sm:h-6" />
+          <button onClick={() => navigate(-1)} className="p-1.5 sm:p-2 rounded-full bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 shadow-sm hover:bg-gray-100 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300 sm:w-10 sm:h-10 flex items-center justify-center transition-colors shrink-0">
+            <ArrowLeft size={18} className="text-gray-750 dark:text-gray-300" />
           </button>
-          <h1 className="text-sm sm:text-base md:text-lg lg:text-xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] flex items-center gap-1.5 sm:gap-2 drop-shadow-[0_0_10px_rgba(255,109,0,0.5)] truncate">
+          <h1 className="text-sm sm:text-base md:text-lg lg:text-xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] flex items-center gap-1.5 sm:gap-2 drop-shadow-none dark:drop-shadow-[0_0_10px_rgba(255,109,0,0.5)] truncate">
             <HelpCircle className="text-[#FF6D00] shrink-0 w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
             <span className="truncate">{language === 'hi' ? 'दैनिक क्विज़' : 'DAILY QUIZ'}</span>
           </h1>
@@ -267,14 +267,14 @@ export default function QuizPage() {
 
         <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap self-end sm:self-auto">
           {/* Question counter badge */}
-          <span className="bg-[#121212]/80 px-4 py-2.5 rounded-2xl text-xs font-black text-[#FFD54F] shadow-[0_0_10px_rgba(255,213,79,0.1)] border border-[#FFD54F]/20 tracking-widest shrink-0 h-10 flex items-center justify-center">
+          <span className="bg-white dark:bg-[#121212]/80 px-4 py-2.5 rounded-2xl text-xs font-black text-[#FFD54F] dark:text-[#FFD54F] shadow-sm dark:shadow-[0_0_10px_rgba(255,213,79,0.1)] border border-[#FF6D00]/20 dark:border-[#FFD54F]/20 tracking-widest shrink-0 h-10 flex items-center justify-center transition-colors">
             {currentQ + 1} / {questions.length}
           </span>
 
           {/* Section User Guide Trigger */}
           <button
             onClick={() => setShowHelpModal(true)}
-            className="p-2 bg-white/5 hover:bg-white/10 text-gray-300 rounded-2xl text-xs font-bold leading-normal transition-all cursor-pointer shadow-sm border border-white/5 h-10 w-10 flex items-center justify-center shrink-0"
+            className="p-1.5 sm:p-2 bg-white dark:bg-white/5 hover:bg-gray-100 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300 rounded-xl text-xs font-bold transition-all cursor-pointer border border-gray-200 dark:border-white/10 h-10 w-10 flex items-center justify-center shrink-0 shadow-sm animate-none"
             title={language === 'en' ? 'Daily Quiz Section Guide' : 'दैनिक क्विज़ अनुभाग निर्देशपुस्तिका'}
           >
             ❓
@@ -284,10 +284,10 @@ export default function QuizPage() {
           <button
             type="button"
             onClick={toggleLanguage}
-            className="px-4 py-2.5 bg-[#FF3D00] text-white hover:bg-[#D50000] active:scale-95 transition-all shadow-sm rounded-2xl flex items-center justify-center gap-2 font-black text-xs cursor-pointer border border-[#FF9100]/30 shrink-0 h-10"
+            className="px-2.5 py-1.5 sm:px-3 sm:py-2 bg-[#FF3D00] text-white hover:bg-[#D50000] active:scale-95 transition-all shadow-sm rounded-xl flex items-center justify-center gap-1.5 font-bold text-[9px] sm:text-[10px] cursor-pointer border border-[#FF9100]/20 shrink-0 h-10"
             title={language === 'en' ? 'Translate / भाषा बदलें' : 'अंग्रेज़ी में बदलें'}
           >
-            <Globe size={14} className="animate-spin-slow shrink-0" />
+            <Globe size={11} className="animate-spin-slow shrink-0" />
             <span>{language === 'en' ? 'हिन्दी' : 'English'}</span>
           </button>
         </div>
@@ -295,26 +295,26 @@ export default function QuizPage() {
 
       {/* Daily Challenge Banner */}
       {currentQ === 0 && !hasAnswered && (
-        <div className="mb-8 bg-gradient-to-br from-[#2962FF]/20 to-[#82B1FF]/10 backdrop-blur-xl rounded-[2rem] p-5 shadow-[0_0_20px_rgba(41,98,255,0.15)] border border-[#2962FF]/30 relative overflow-hidden flex items-center justify-between">
+        <div className="mb-8 bg-gradient-to-br from-[#2962FF]/20 to-[#82B1FF]/10 backdrop-blur-xl rounded-[2rem] p-5 shadow-sm dark:shadow-[0_0_20px_rgba(41,98,255,0.15)] border border-[#2962FF]/20 dark:border-[#2962FF]/30 relative overflow-hidden flex items-center justify-between">
           <div className="absolute top-0 right-0 w-32 h-32 bg-[#2962FF]/20 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
-          <div className="relative z-10">
-            <h3 className="text-lg font-black text-white mb-1 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+          <div className="relative z-10 text-left">
+            <h3 className="text-lg font-black text-gray-900 dark:text-white mb-1 drop-shadow-none dark:drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
               {language === 'hi' ? 'दैनिक चुनौती' : 'Daily Challenge'}
             </h3>
-            <p className="text-xs text-[#82B1FF] font-bold tracking-widest uppercase">
+            <p className="text-xs text-[#2962FF] dark:text-[#82B1FF] font-black tracking-widest uppercase font-mono">
               {language === 'hi' ? '50 बोनस अंक अर्जित करें' : 'Earn 50 Bonus Points'}
             </p>
           </div>
-          <div className="w-12 h-12 bg-[#2962FF]/20 rounded-full flex items-center justify-center border border-[#2962FF]/40 shadow-[0_0_15px_rgba(41,98,255,0.3)] relative z-10">
-            <Award size={24} className="text-[#82B1FF] drop-shadow-[0_0_8px_rgba(130,177,255,0.8)]" />
+          <div className="w-12 h-12 bg-white dark:bg-[#2962FF]/20 rounded-full flex items-center justify-center border border-gray-200 dark:border-[#2962FF]/40 shadow-sm dark:shadow-[0_0_15px_rgba(41,98,255,0.3)] relative z-10">
+            <Award size={24} className="text-[#2962FF] dark:text-[#82B1FF]" />
           </div>
         </div>
       )}
 
-      <div className="bg-[#121212]/80 backdrop-blur-xl rounded-[2rem] shadow-[0_0_20px_rgba(0,0,0,0.5)] border border-white/10 p-8 mb-8 animate-in slide-in-from-right-8 duration-500 relative overflow-hidden">
+      <div className="bg-white dark:bg-[#121212]/80 backdrop-blur-xl rounded-[2rem] shadow-sm dark:shadow-[0_0_20px_rgba(0,0,0,0.5)] border border-gray-200 dark:border-white/10 p-8 mb-8 animate-in slide-in-from-right-8 duration-500 relative overflow-hidden transition-colors duration-300 text-left">
         <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
         
-        <h2 className="text-2xl font-black text-white mb-8 leading-relaxed relative z-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">
+        <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-8 leading-relaxed relative z-10 drop-shadow-none dark:drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">
           {q.q[language as 'en' | 'hi']}
         </h2>
 
@@ -331,11 +331,11 @@ export default function QuizPage() {
                 onClick={() => handleSelect(idx)}
                 disabled={hasAnswered}
                 className={cn(
-                  "w-full text-left p-5 rounded-2xl border-2 transition-all duration-300 flex items-center justify-between font-bold text-lg",
-                  !hasAnswered && "border-white/10 text-gray-300 hover:border-[#FF6D00]/50 hover:bg-[#FF6D00]/10 hover:text-white hover:shadow-[0_0_15px_rgba(255,109,0,0.2)]",
+                  "w-full text-left p-5 rounded-2xl border-2 transition-all duration-300 flex items-center justify-between font-bold text-lg cursor-pointer",
+                  !hasAnswered && "border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-300 hover:border-[#FF6D00]/50 hover:bg-[#FF6D00]/10 hover:text-[#FF6D00] dark:hover:text-white hover:shadow-md dark:hover:shadow-[0_0_15px_rgba(255,109,0,0.2)]",
                   showCorrect && "border-[#00E676] bg-[#00E676]/10 text-[#00E676] shadow-[0_0_20px_rgba(0,230,118,0.2)]",
                   showWrong && "border-[#FF1744] bg-[#FF1744]/10 text-[#FF1744] shadow-[0_0_20px_rgba(255,23,68,0.2)]",
-                  hasAnswered && !isSelected && !isCorrect && "border-white/5 text-gray-600 opacity-50"
+                  hasAnswered && !isSelected && !isCorrect && "border-gray-100 dark:border-white/5 text-gray-400 dark:text-gray-600 opacity-50"
                 )}
               >
                 <span>{opt}</span>
@@ -372,29 +372,29 @@ export default function QuizPage() {
       {/* Dynamic JBT Premium Help Modal */}
       {showHelpModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-300 pointer-events-auto">
-          <div className="bg-[#121212] border border-white/10 rounded-[2rem] w-full max-w-lg p-6 md:p-8 shadow-2xl relative overflow-hidden flex flex-col max-h-[90vh]">
+          <div className="bg-white dark:bg-[#121212] border border-gray-200 dark:border-white/10 rounded-[2rem] w-full max-w-lg p-6 md:p-8 shadow-2xl relative overflow-hidden flex flex-col max-h-[90vh] text-gray-900 dark:text-gray-100 transition-colors duration-300">
             <div className="absolute top-0 right-0 w-32 h-32 bg-[#FF6D00]/10 rounded-full blur-3xl pointer-events-none" />
             
-            <div className="flex justify-between items-start mb-5 relative z-10">
-              <div className="text-left">
-                <span className="text-[9px] font-black text-[#FF6D00] uppercase tracking-widest bg-[#FF6D00]/10 px-3 py-1 rounded-full border border-[#FF6D00]/10 inline-block mb-1.5">
+            <div className="flex justify-between items-start mb-5 relative z-10 text-left">
+              <div>
+                <span className="text-[9px] font-black text-[#FF6D00] uppercase tracking-widest bg-[#FF6D00]/10 px-3 py-1 rounded-full border border-[#FF6D00]/10 inline-block mb-1.5 font-mono">
                   📁 {language === 'en' ? 'SECTION USER GUIDE' : 'अनुभाग निर्देश पुस्तिका'}
                 </span>
-                <h2 className="text-2xl font-display font-black text-white tracking-tight">
+                <h2 className="text-2xl font-display font-black text-gray-900 dark:text-white tracking-tight">
                   ℹ️ {language === 'en' ? 'Help & Features' : 'सहायता एवं सुविधाएँ'}
                 </h2>
               </div>
               <button 
                 onClick={() => setShowHelpModal(false)}
-                className="w-10 h-10 shrink-0 flex items-center justify-center rounded-full bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer border border-white/5 active:scale-95"
+                className="w-10 h-10 shrink-0 flex items-center justify-center rounded-full bg-gray-100 dark:bg-white/5 text-gray-400 hover:text-[#050505] dark:hover:text-white hover:bg-gray-200 dark:hover:bg-white/10 transition-colors cursor-pointer border border-[#FF6D00]/10 active:scale-95"
               >
                 ✕
               </button>
             </div>
 
             {/* Modal Translator switch requested in help modal */}
-            <div className="bg-white/5 p-3 rounded-2xl border border-white/5 flex items-center justify-between gap-3 mb-5 relative z-10">
-              <span className="text-[10px] font-black uppercase text-gray-400">
+            <div className="bg-gray-50 dark:bg-white/5 p-3 rounded-2xl border border-gray-200 dark:border-white/5 flex items-center justify-between gap-3 mb-5 relative z-10">
+              <span className="text-[10px] font-black uppercase text-gray-500 dark:text-gray-400">
                 {language === 'en' ? 'Translate guide language' : 'निर्देश निर्देश भाषा बदलें'}
               </span>
               <button
@@ -407,30 +407,30 @@ export default function QuizPage() {
             </div>
 
             {/* Help Scrollable Content */}
-            <div className="overflow-y-auto pr-1 space-y-4.5 text-left text-zinc-355 dark:text-zinc-300 text-xs text-medium leading-relaxed relative z-10 max-h-[55vh]">
-              <p className="font-bold text-white text-sm">
+            <div className="overflow-y-auto pr-1 space-y-4.5 text-left text-gray-700 dark:text-zinc-355 dark:text-zinc-300 text-xs text-medium leading-relaxed relative z-10 max-h-[55vh]">
+              <p className="font-bold text-gray-900 dark:text-white text-sm">
                 {language === 'en' ? 'Welcome to Jain Daily Quiz Challenge!' : 'जैन दैनिक क्विज़ प्रतियोगिता में आपका स्वागत है!'}
               </p>
-              <p className="font-semibold text-gray-400">
+              <p className="font-semibold text-gray-500 dark:text-gray-400">
                 {language === 'en' 
                   ? 'Test your core understanding of spiritual karma, ethics, history, and conduct with zero distraction:' 
                   : 'यह पावन अनुभाग आपके द्वारा अर्जित जैन दर्शन और २४ तीर्थंकरों के ज्ञान की परीक्षा करने का सर्वोत्तम माध्यम है:'}
               </p>
-              <ul className="list-disc pl-5 space-y-2 text-gray-400 font-semibold">
+              <ul className="list-disc pl-5 space-y-2 text-gray-500 dark:text-gray-400 font-semibold">
                 <li>
-                  <strong className="text-[#FFD54F]">{language === 'en' ? 'Offline-first Practice:' : 'ऑफ़लाइन-प्रथम अभ्यास प्रक्रिया:'}</strong>{' '}
+                  <strong className="text-gray-900 dark:text-[#FFD54F]">{language === 'en' ? 'Offline-first Practice:' : 'ऑफ़लाइन-प्रथम अभ्यास प्रक्रिया:'}</strong>{' '}
                   {language === 'en' 
                     ? 'Attempt carefully-curated questions with interactive card selections and beautiful validation colors.' 
                     : 'बिना इंटरनेट रुकावट के व्यवस्थित तरीके से २५ महत्वपूर्ण प्रश्नपत्र सेटों का स्वाध्याय रूप में अभ्यास करें।'}
                 </li>
                 <li>
-                  <strong className="text-[#FFD54F]">{language === 'en' ? 'In-depth Explanations:' : 'तथ्यात्मक स्पष्टीकरण:'}</strong>{' '}
+                  <strong className="text-gray-900 dark:text-[#FFD54F]">{language === 'en' ? 'In-depth Explanations:' : 'तथ्यात्मक स्पष्टीकरण:'}</strong>{' '}
                   {language === 'en'
                     ? 'Every question provides detailed spiritual explanations citing scripture roots once an answer is chosen.'
                     : 'अपना उत्तर चुनने के बाद प्रश्न के नीचे उसका वैज्ञानिक या शास्त्रसम्मत दार्शनिक प्रामाणिक कारण अवश्य स्वाध्याय करें।'}
                 </li>
                 <li>
-                  <strong className="text-[#FFD54F]">{language === 'en' ? 'AI Generated Challenges:' : 'नवीन AI-प्रश्न प्रणाली (प्रायोगिक):'}</strong>{' '}
+                  <strong className="text-gray-900 dark:text-[#FFD54F]">{language === 'en' ? 'AI Generated Challenges:' : 'नवीन AI-प्रश्न प्रणाली (प्रायोगिक):'}</strong>{' '}
                   {language === 'en'
                     ? 'Feeling confident? Dynamically generate authentic Jain philosophy questions to expand your path.'
                     : 'नये-नये प्रश्नों के अभ्यास हेतु नीचे दिए "AI अभ्यास प्रश्न बनाएं" बटन का प्रयोग कर नये प्रामाणिक प्रश्न शामिल करें।'}
@@ -438,7 +438,7 @@ export default function QuizPage() {
               </ul>
             </div>
 
-            <div className="mt-6 pt-4 border-t border-white/5 text-center relative z-10">
+            <div className="mt-6 pt-4 border-t border-gray-200 dark:border-white/5 text-center relative z-10">
               <button
                 onClick={() => setShowHelpModal(false)}
                 className="w-full bg-[#FF6D00] hover:bg-orange-600 text-black py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest cursor-pointer hover:scale-[1.02] active:scale-95 transition-all text-center"

@@ -329,7 +329,7 @@ export default function ProfilePage() {
                       <div className="p-3 bg-gray-100/50 dark:bg-white/5 rounded-xl border border-gray-200/50 dark:border-white/5">
                         <div className="font-extrabold text-[#FF6D00] text-[13px] mb-1">3. Jain Scriptures & Agamas Library</div>
                         <p className="text-gray-500 dark:text-gray-400 font-medium leading-relaxed">
-                          <strong className="text-gray-800 dark:text-gray-200">काम (Function):</strong> Interactive digitised scripture browser.
+                          <strong className="text-gray-800 dark:text-gray-200">काम (Function):</strong> Interactive digitized scripture browser.
                           <br />
                           <strong className="text-gray-800 dark:text-gray-300">विवरण (Description):</strong> Implements a responsive read-only search and look-up index of traditional compilations like the Tattvartha Sutra, Bhaktamar Stotra, and Namokar Mantra, providing standard daily chanting verses.
                         </p>
@@ -404,6 +404,33 @@ export default function ProfilePage() {
                           <strong className="text-gray-800 dark:text-gray-300">काम (Function):</strong> Scanning and translating holy scripts.
                           <br />
                           <strong className="text-gray-800 dark:text-gray-300">विवरण (Description):</strong> Provides scanning capabilities to convert handwritten manuscripts into translated digital copy, preserving the sacred canonical context.
+                        </p>
+                      </div>
+
+                      <div className="p-3 bg-gray-100/50 dark:bg-white/5 rounded-xl border border-gray-200/50 dark:border-white/5">
+                        <div className="font-extrabold text-[#FF6D00] text-[13px] mb-1">12. Interactive Daily Jain Quiz</div>
+                        <p className="text-gray-500 dark:text-gray-400 font-medium leading-relaxed">
+                          <strong className="text-gray-800 dark:text-gray-300">काम (Function):</strong> Spiritual trivia assessments & self-assessment loops.
+                          <br />
+                          <strong className="text-gray-800 dark:text-gray-300">विवरण (Description):</strong> Provides a clean, fun, and high-contrast Multiple-Choice Question (MCQ) quiz interface covering historical occurrences, Jain tenets, and general spiritual vocabulary to elevate youth literacy.
+                        </p>
+                      </div>
+
+                      <div className="p-3 bg-gray-100/50 dark:bg-white/5 rounded-xl border border-gray-200/50 dark:border-white/5">
+                        <div className="font-extrabold text-[#FF6D00] text-[13px] mb-1">13. Section-Wise Live AI Specialists (AI Agents)</div>
+                        <p className="text-gray-500 dark:text-gray-400 font-medium leading-relaxed">
+                          <strong className="text-gray-800 dark:text-gray-300">काम (Function):</strong> Section-level interactive guides & smart helpers.
+                          <br />
+                          <strong className="text-gray-800 dark:text-gray-300">विवरण (Description):</strong> Integrates highly specialized local AI guides under each critical module (such as Panchang, Vichaar, Scriptures, and Media) to help users discover content, ask contextual questions, and perform direct digital search query actions effortlessly.
+                        </p>
+                      </div>
+
+                      <div className="p-3 bg-gray-100/50 dark:bg-white/5 rounded-xl border border-gray-200/50 dark:border-white/5">
+                        <div className="font-extrabold text-[#FF6D00] text-[13px] mb-1">14. Chronological Jain History Overview</div>
+                        <p className="text-gray-500 dark:text-gray-400 font-medium leading-relaxed">
+                          <strong className="text-gray-800 dark:text-gray-300">काम (Function):</strong> Historical milestones explorer & timeline index.
+                          <br />
+                          <strong className="text-gray-800 dark:text-gray-300">विवरण (Description):</strong> Details landmark events in Jainism history from deep antiquity through recent historical excavations and modern standardizations, plotted on a responsive historical timeline.
                         </p>
                       </div>
                     </div>

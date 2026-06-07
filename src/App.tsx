@@ -66,7 +66,7 @@ function Layout({ children }: { children: React.ReactNode }) {
       {/* Global Toggles */}
       {!isAdmin && (
         <div className="fixed top-4 right-4 pt-safe flex items-center gap-2 z-50">
-          {/* Language Toggle - Everywhere EXCEPT Home Screen, Admin, Media, Profile, Tirthankars, Panchang, Chat, Pathshala, Daily Vichaar, Aagams, Knowledge, History, Quiz, Festivals, Tirth, Fasting, Swadhyay, Bhaktamar, Diet */}
+          {/* Language Toggle - Everywhere EXCEPT Home Screen, Admin, Media, Profile, Tirthankars, Panchang, Chat, Pathshala, Daily Vichaar, Aagams, Knowledge, History, Quiz, Festivals, Tirth, Fasting, Swadhyay, Bhaktamar, Diet, Privacy, Terms */}
           {location.pathname !== '/' && 
            location.pathname !== '/chat' && 
            location.pathname !== '/media' && 
@@ -90,7 +90,10 @@ function Layout({ children }: { children: React.ReactNode }) {
            location.pathname !== '/verified-food' && 
            location.pathname !== '/vihar-tracker' && 
            location.pathname !== '/dharamshala-booking' && 
-           location.pathname !== '/manuscript-library' && (
+           location.pathname !== '/manuscript-library' && 
+           location.pathname !== '/privacy-policy' && 
+           location.pathname !== '/terms' && 
+           location.pathname !== '/contact' && (
             <button
               onClick={toggleLanguage}
               className="w-10 h-10 bg-white/80 dark:bg-[#121212]/80 backdrop-blur-md border border-gray-200 dark:border-white/10 rounded-full flex items-center justify-center text-[#FF8A65] hover:bg-gray-100 dark:hover:bg-[#1A1A1A] transition-all shadow-sm"

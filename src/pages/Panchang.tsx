@@ -577,7 +577,7 @@ export default function PanchangPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-[#050505] text-gray-800 dark:text-gray-200 flex flex-col items-center justify-center">
         <Loader2 className="animate-spin text-[#FF6D00] mb-4" size={48} />
         <p className="text-gray-500 font-bold tracking-[0.2em] animate-pulse uppercase text-xs">Awaiting Cosmic Alignment...</p>
       </div>
@@ -587,13 +587,13 @@ export default function PanchangPage() {
   const selectedDetails = selectedDate ? getPanchangDetails(selectedDate) : null;
 
   return (
-    <div className="min-h-screen bg-[#080808] text-white p-4 pb-24 overflow-x-hidden">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#080808] text-gray-955 dark:text-white p-4 pb-24 overflow-x-hidden transition-colors duration-300">
       
       {/* Sticky Header with inline controls */}
-      <header className="sticky top-0 z-40 bg-black/95 backdrop-blur-md -mx-4 -mt-4 px-4 pt-4 pb-4 mb-6 border-b border-white/5 flex items-center justify-between gap-2 md:gap-4">
+      <header className="sticky top-0 z-40 bg-white/95 dark:bg-black/95 backdrop-blur-md -mx-4 -mt-4 px-4 pt-4 pb-4 mb-6 border-b border-gray-200 dark:border-white/5 flex items-center justify-between gap-2 md:gap-4">
         <div className="flex items-center gap-2 sm:gap-4 min-w-0">
-          <button onClick={() => navigate(-1)} className="p-1.5 sm:p-2 rounded-full bg-white/5 border border-white/10 shadow-sm hover:bg-white/10 transition-colors shrink-0">
-            <ArrowLeft size={18} className="text-gray-300 sm:w-[22px] sm:h-[22px]" />
+          <button onClick={() => navigate(-1)} className="p-1.5 sm:p-2 rounded-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 shadow-sm hover:bg-gray-200 dark:hover:bg-white/10 transition-colors shrink-0">
+            <ArrowLeft size={18} className="text-gray-700 dark:text-gray-300 sm:w-[22px] sm:h-[22px]" />
           </button>
           <div className="min-w-0">
             <h1 className="text-sm sm:text-base md:text-lg lg:text-xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] tracking-tight truncate">
@@ -621,9 +621,9 @@ export default function PanchangPage() {
       <div className="relative mb-8">
         <div className="absolute inset-0 bg-[#FF6D00] rounded-[3rem] blur-[60px] opacity-10 pointer-events-none" />
         
-        <div className="bg-[#121111] rounded-[3rem] border-2 border-[#FF6D00]/20 p-8 shadow-2xl relative overflow-hidden backdrop-blur-xl">
+        <div className="bg-white dark:bg-[#121111] rounded-[3rem] border-2 border-orange-500/20 dark:border-[#FF6D00]/20 p-8 shadow-2xl relative overflow-hidden backdrop-blur-xl">
           <div className="flex justify-between items-center mb-10 relative z-10">
-            <button onClick={() => setCurrentDate(subMonths(currentDate, 1))} className="p-3 text-gray-400 hover:text-white transition-colors">
+            <button onClick={() => setCurrentDate(subMonths(currentDate, 1))} className="p-3 text-gray-400 dark:text-gray-500 hover:text-gray-800 dark:hover:text-white transition-colors">
               <ChevronLeft size={28} />
             </button>
             <div className="text-center">
@@ -631,23 +631,23 @@ export default function PanchangPage() {
                 {format(currentDate, 'MMMM yyyy', { locale: language === 'hi' ? hi : undefined })}
               </h2>
               <div className="flex gap-4 justify-center mt-2">
-                <span className="text-[10px] font-bold text-gray-500 tracking-widest uppercase">
+                <span className="text-[10px] font-bold text-gray-450 dark:text-gray-500 tracking-widest uppercase">
                   {language === 'hi' ? `वि.सं. ${currentDate.getFullYear() + 57}` : `V.S. ${currentDate.getFullYear() + 57}`}
                 </span>
-                <span className="text-[10px] text-gray-700">|</span>
-                <span className="text-[10px] font-bold text-gray-500 tracking-widest uppercase">
+                <span className="text-[10px] text-gray-300 dark:text-gray-700">|</span>
+                <span className="text-[10px] font-bold text-gray-450 dark:text-gray-500 tracking-widest uppercase">
                   {language === 'hi' ? `वी.नि.सं. ${currentDate.getFullYear() + 527}` : `V.N.S. ${currentDate.getFullYear() + 527}`}
                 </span>
               </div>
             </div>
-            <button onClick={() => setCurrentDate(addMonths(currentDate, 1))} className="p-3 text-gray-400 hover:text-white transition-colors">
+            <button onClick={() => setCurrentDate(addMonths(currentDate, 1))} className="p-3 text-gray-400 dark:text-gray-500 hover:text-gray-800 dark:hover:text-white transition-colors">
               <ChevronRight size={28} />
             </button>
           </div>
 
           <div className="grid grid-cols-7 gap-1 mb-8 relative z-10">
             {[t.sun, t.mon, t.tue, t.wed, t.thu, t.fri, t.sat].map((day) => (
-              <div key={day} className="text-center text-[10px] font-black text-gray-600 uppercase tracking-widest">
+              <div key={day} className="text-center text-[10px] font-black text-gray-500 dark:text-gray-600 uppercase tracking-widest">
                 {day}
               </div>
             ))}
@@ -672,18 +672,18 @@ export default function PanchangPage() {
                   <div className={cn(
                     "w-12 h-12 rounded-full flex items-center justify-center mb-1 transition-all duration-500",
                     isSelected 
-                      ? "bg-gradient-to-br from-[#FFD54F] to-[#FFB300] shadow-[0_0_20px_rgba(255,213,79,0.4)] scale-110 border-2 border-white/20" 
+                      ? "bg-gradient-to-br from-[#FFD54F] to-[#FFB300] text-black shadow-[0_0_20px_rgba(255,213,79,0.4)] scale-110 border-2 border-orange-300 dark:border-white/20" 
                       : isToday 
-                        ? "bg-[#FFD54F]/20 border-2 border-[#FFD54F] animate-pulse" 
-                        : "group-hover:bg-white/10"
+                        ? "bg-amber-100 dark:bg-[#FFD54F]/20 border-2 border-amber-500 dark:border-[#FFD54F] animate-pulse text-gray-900 dark:text-white" 
+                        : "text-gray-800 dark:text-white group-hover:bg-gray-100 dark:group-hover:bg-white/10"
                   )}>
                     <span className="text-xl font-bold">
                       {format(day, 'd')}
                     </span>
                   </div>
                   <span className={cn(
-                    "text-[8px] font-bold uppercase tracking-tighter opacity-60",
-                    isSelected ? "text-[#FFD54F] opacity-100" : "text-gray-400"
+                    "text-[8px] font-bold uppercase tracking-tighter opacity-70",
+                    isSelected ? "text-[#FF6D00] dark:text-[#FFD54F] opacity-100 font-extrabold" : "text-gray-500 dark:text-gray-450"
                   )}>
                     {details.tithi}
                   </span>
@@ -708,22 +708,22 @@ export default function PanchangPage() {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div className="col-span-2 bg-[#121212] rounded-[2rem] p-6 border border-white/5 flex items-center justify-between shadow-xl">
+            <div className="col-span-2 bg-white dark:bg-[#121212] rounded-[2rem] p-6 border border-gray-200 dark:border-white/5 flex items-center justify-between shadow-sm dark:shadow-xl transition-all duration-300">
               <div>
-                <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">{t.tithi}</p>
+                <p className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest mb-1">{t.tithi}</p>
                 <div className="flex items-baseline gap-2">
-                  <h4 className="text-3xl font-black text-white">{selectedDetails.tithi}</h4>
+                  <h4 className="text-3xl font-black text-gray-900 dark:text-white">{selectedDetails.tithi}</h4>
                   <span className="text-xs text-[#FF6D00] font-bold">{selectedDetails.paksha}</span>
                 </div>
               </div>
               <div className="flex flex-col items-end">
-                <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">{language === 'hi' ? 'समय' : 'Time'}</p>
+                <p className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest mb-1">{language === 'hi' ? 'समय' : 'Time'}</p>
                 <div className="flex gap-4">
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-1.5 text-gray-700 dark:text-gray-300">
                     <Sunrise size={16} className="text-[#FFD54F]" />
                     <span className="text-xs font-bold">{selectedDetails.sunrise}</span>
                   </div>
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-1.5 text-gray-700 dark:text-gray-300">
                     <Sunset size={16} className="text-[#FF8A65]" />
                     <span className="text-xs font-bold">{selectedDetails.sunset}</span>
                   </div>
@@ -731,82 +731,82 @@ export default function PanchangPage() {
               </div>
             </div>
 
-            <div className="col-span-2 bg-[#121212] rounded-[2rem] p-6 border border-white/5 shadow-xl relative overflow-hidden">
+            <div className="col-span-2 bg-white dark:bg-[#121212] rounded-[2rem] p-6 border border-gray-200 dark:border-white/5 shadow-sm dark:shadow-xl relative overflow-hidden transition-all duration-300">
                <div className="absolute top-0 right-0 w-32 h-32 bg-[#FF6D00]/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
               <div className="flex items-center gap-3 mb-4 relative z-10">
                 <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#FF6D00] to-[#FFD54F] flex items-center justify-center border border-white/20">
                   <Clock className="text-black" size={20} />
                 </div>
                 <div>
-                  <h4 className="font-black text-lg tracking-wide uppercase">{t.muhurat}</h4>
+                  <h4 className="font-black text-lg tracking-wide uppercase text-gray-900 dark:text-white">{t.muhurat}</h4>
                 </div>
               </div>
               <div className="grid grid-cols-1 gap-2 relative z-10">
                 {selectedDetails.shubhMuhurat.map((m, i) => (
-                  <div key={i} className="bg-white/5 rounded-xl p-3 flex justify-between items-center border border-white/5 group hover:bg-white/10 transition-all">
+                  <div key={i} className="bg-gray-50 dark:bg-white/5 rounded-xl p-3 flex justify-between items-center border border-gray-150 dark:border-white/5 group hover:bg-gray-100 dark:hover:bg-white/10 transition-all">
                     <div className="flex items-center gap-2">
                       <div className={cn("w-1.5 h-1.5 rounded-full", i === 0 ? "bg-[#00E676]" : "bg-[#FFD54F]")} />
-                      <span className="text-sm font-bold text-gray-300">{m}</span>
+                      <span className="text-sm font-bold text-gray-700 dark:text-gray-300">{m}</span>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="bg-[#121212] rounded-[2rem] p-6 border border-white/5 shadow-xl">
+            <div className="bg-white dark:bg-[#121212] rounded-[2rem] p-6 border border-gray-200 dark:border-white/5 shadow-sm dark:shadow-xl transition-all duration-300">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 rounded-2xl bg-[#448AFF]/10 flex items-center justify-center border border-[#448AFF]/20">
                   <Star className="text-[#448AFF]" size={20} />
                 </div>
-                <h4 className="font-black text-sm tracking-wide uppercase leading-tight">{t.tirthankar}</h4>
+                <h4 className="font-black text-sm tracking-wide uppercase leading-tight text-gray-900 dark:text-white">{t.tirthankar}</h4>
               </div>
               {selectedDetails.kalyanak.length > 0 ? (
                 <ul className="space-y-3">
                   {selectedDetails.kalyanak.map((k, i) => (
-                    <li key={i} className="text-xs font-bold text-gray-200 leading-relaxed flex items-start gap-2">
+                    <li key={i} className="text-xs font-bold text-gray-700 dark:text-gray-200 leading-relaxed flex items-start gap-2">
                       <span className="w-1.5 h-1.5 rounded-full bg-[#448AFF] mt-1 shrink-0" />
                       {k}
                     </li>
                   ))}
                 </ul>
               ) : (
-                <p className="text-[10px] text-gray-600 italic">{language === 'hi' ? 'आज कोई मुख्य कल्याणक नहीं है।' : 'No major kalyanaks today.'}</p>
+                <p className="text-[10px] text-gray-400 dark:text-gray-500 italic">{language === 'hi' ? 'आज कोई मुख्य कल्याणक नहीं है।' : 'No major kalyanaks today.'}</p>
               )}
             </div>
 
-            <div className="bg-[#121212] rounded-[2rem] p-6 border border-white/5 shadow-xl">
+            <div className="bg-white dark:bg-[#121212] rounded-[2rem] p-6 border border-gray-200 dark:border-white/5 shadow-sm dark:shadow-xl transition-all duration-300">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 rounded-2xl bg-[#00E676]/10 flex items-center justify-center border border-[#00E676]/20">
                   <Users className="text-[#00E676]" size={20} />
                 </div>
-                <h4 className="font-black text-sm tracking-wide uppercase leading-tight">{t.acharya}</h4>
+                <h4 className="font-black text-sm tracking-wide uppercase leading-tight text-gray-900 dark:text-white">{t.acharya}</h4>
               </div>
               {selectedDetails.acharyaDarpan.length > 0 ? (
                 <ul className="space-y-3">
                   {selectedDetails.acharyaDarpan.map((a, i) => (
-                    <li key={i} className="text-xs font-bold text-gray-200 leading-relaxed flex items-start gap-2">
+                    <li key={i} className="text-xs font-bold text-gray-700 dark:text-gray-200 leading-relaxed flex items-start gap-2">
                       <span className="w-1.5 h-1.5 rounded-full bg-[#00E676] mt-1 shrink-0" />
                       {a}
                     </li>
                   ))}
                 </ul>
               ) : (
-                <p className="text-[10px] text-gray-600 italic">{language === 'hi' ? 'आज कोई विशेष स्मृति नहीं है।' : 'No special memories today.'}</p>
+                <p className="text-[10px] text-gray-400 dark:text-gray-500 italic">{language === 'hi' ? 'आज कोई विशेष स्मृति नहीं है।' : 'No special memories today.'}</p>
               )}
             </div>
 
             {selectedDetails.festivals && selectedDetails.festivals.length > 0 && (
-              <div className="col-span-2 bg-[#121212] rounded-[2rem] p-6 border border-[#FFD54F]/20 shadow-xl relative overflow-hidden">
+              <div className="col-span-2 bg-white dark:bg-[#121212] rounded-[2rem] p-6 border border-orange-200 dark:border-[#FFD54F]/20 shadow-sm dark:shadow-xl relative overflow-hidden transition-all duration-300">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-[#FFD54F]/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
                 <div className="flex items-center gap-3 mb-4 relative z-10">
                   <div className="w-10 h-10 rounded-2xl bg-amber-500/10 flex items-center justify-center border border-amber-500/20">
-                    <Sparkles className="text-amber-400" size={20} />
+                    <Sparkles className="text-amber-500 dark:text-amber-400" size={20} />
                   </div>
-                  <h4 className="font-black text-lg tracking-wide uppercase">{language === 'hi' ? 'महत्वपूर्ण त्योहार और दिवस' : 'Important Festivals & Days'}</h4>
+                  <h4 className="font-black text-lg tracking-wide uppercase text-gray-900 dark:text-white">{language === 'hi' ? 'महत्वपूर्ण त्योहार और दिवस' : 'Important Festivals & Days'}</h4>
                 </div>
                 <div className="flex flex-wrap gap-2 relative z-10">
                   {selectedDetails.festivals.map((f, i) => (
-                    <span key={i} className="bg-amber-500/10 text-amber-300 px-4 py-2 rounded-xl text-xs font-black border border-amber-500/20 shadow-sm">
+                    <span key={i} className="bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-300 px-4 py-2 rounded-xl text-xs font-black border border-amber-300 dark:border-amber-500/20 shadow-sm">
                       {f}
                     </span>
                   ))}
@@ -814,12 +814,12 @@ export default function PanchangPage() {
               </div>
             )}
 
-            <div className="col-span-2 bg-[#121212] rounded-[2rem] p-6 border border-white/5 shadow-xl">
+            <div className="col-span-2 bg-white dark:bg-[#121212] rounded-[2rem] p-6 border border-gray-200 dark:border-white/5 shadow-sm dark:shadow-xl transition-all duration-300">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 rounded-2xl bg-[#F50057]/10 flex items-center justify-center border border-[#F50057]/20">
                   <BookOpen className="text-[#F50057]" size={20} />
                 </div>
-                <h4 className="font-black text-lg tracking-wide uppercase">{t.vrat}</h4>
+                <h4 className="font-black text-lg tracking-wide uppercase text-gray-900 dark:text-white">{t.vrat}</h4>
               </div>
               <div className="flex flex-wrap gap-2">
                 {selectedDetails.vrat.length > 0 ? (
@@ -829,7 +829,7 @@ export default function PanchangPage() {
                     </span>
                   ))
                 ) : (
-                  <p className="text-xs text-gray-600 italic">{language === 'hi' ? 'आज कोई विशेष व्रत नहीं है।' : 'No specific vrats listed for this day.'}</p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500 italic">{language === 'hi' ? 'आज कोई विशेष व्रत नहीं है।' : 'No specific vrats listed for this day.'}</p>
                 )}
               </div>
             </div>

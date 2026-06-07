@@ -53,14 +53,14 @@ export default function HistoryPage() {
   };
 
   return (
-    <div className="min-h-full p-6 pb-24 bg-[#050505] text-gray-200">
+    <div className="min-h-full p-6 pb-24 bg-gradient-to-b from-gray-50 to-gray-100 dark:from-[#050505] dark:to-[#0d0d0d] text-gray-900 dark:text-gray-200 transition-colors duration-300">
       
-      <header className="sticky top-0 z-40 bg-[#050505]/95 backdrop-blur-md -mx-6 px-6 py-4 mb-8 border-b border-white/5 flex items-center justify-between gap-2 md:gap-4">
+      <header className="sticky top-0 z-40 bg-white/95 dark:bg-[#050505]/95 backdrop-blur-md -mx-6 px-6 py-4 mb-8 border-b border-gray-200/50 dark:border-white/5 flex items-center justify-between gap-2 md:gap-4 transition-colors duration-300">
         <div className="flex items-center gap-2 sm:gap-4 min-w-0">
-          <button onClick={() => navigate(-1)} className="p-1.5 sm:p-2 rounded-full bg-white/5 hover:bg-white/10 transition-colors shrink-0">
-            <ArrowLeft size={18} className="text-gray-300 sm:w-6 sm:h-6" />
+          <button onClick={() => navigate(-1)} className="p-1.5 sm:p-2 rounded-full bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 shadow-sm hover:bg-gray-100 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300 sm:w-10 sm:h-10 flex items-center justify-center transition-colors shrink-0">
+            <ArrowLeft size={18} className="text-gray-750 dark:text-gray-300" />
           </button>
-          <h1 className="text-sm sm:text-base md:text-lg lg:text-xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] flex items-center gap-1.5 sm:gap-2 drop-shadow-[0_0_10px_rgba(255,109,0,0.5)] truncate">
+          <h1 className="text-sm sm:text-base md:text-lg lg:text-xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] flex items-center gap-1.5 sm:gap-2 drop-shadow-none dark:drop-shadow-[0_0_10px_rgba(255,109,0,0.5)] truncate">
             <Landmark className="text-[#FF6D00] shrink-0 w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
             <span className="truncate">{language === 'hi' ? 'जैन इतिहास व धरोहर' : 'HERITAGE & HISTORY'}</span>
           </h1>
@@ -70,7 +70,7 @@ export default function HistoryPage() {
           {/* Section User Guide Trigger */}
           <button
             onClick={() => setShowHelpModal(true)}
-            className="p-2 bg-white/5 hover:bg-white/10 text-gray-300 rounded-2xl text-xs font-bold leading-normal transition-all cursor-pointer shadow-sm border border-white/5 h-10 w-10 flex items-center justify-center shrink-0"
+            className="p-1.5 sm:p-2 bg-white dark:bg-white/5 hover:bg-gray-100 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300 rounded-xl text-xs font-bold transition-all cursor-pointer border border-gray-200 dark:border-white/10 h-8 w-8 sm:h-9 sm:w-9 flex items-center justify-center shrink-0 shadow-sm animate-none"
             title={language === 'en' ? 'History Section Guide' : 'इतिहास भाग निर्देशपुस्तिका'}
           >
             ❓
@@ -80,43 +80,43 @@ export default function HistoryPage() {
           <button
             type="button"
             onClick={toggleLanguage}
-            className="px-4 py-2.5 bg-[#FF3D00] text-white hover:bg-[#D50000] active:scale-95 transition-all shadow-sm rounded-2xl flex items-center justify-center gap-2 font-black text-xs cursor-pointer border border-[#FF9100]/30 shrink-0"
+            className="px-2.5 py-1.5 sm:px-3 sm:py-2 bg-[#FF3D00] text-white hover:bg-[#D50000] active:scale-95 transition-all shadow-sm rounded-xl flex items-center justify-center gap-1.5 font-bold text-[9px] sm:text-[10px] cursor-pointer border border-[#FF9100]/20 shrink-0 h-8 sm:h-9"
             title={language === 'en' ? 'Translate / भाषा बदलें' : 'अंग्रेज़ी में बदलें'}
           >
-            <Globe size={14} className="animate-spin-slow shrink-0" />
+            <Globe size={11} className="animate-spin-slow shrink-0" />
             <span>{language === 'en' ? 'हिन्दी' : 'English'}</span>
           </button>
         </div>
       </header>
 
-      <p className="text-gray-400 mb-10 leading-relaxed font-medium bg-[#121212]/80 p-5 rounded-2xl border border-white/5 shadow-[0_0_15px_rgba(0,0,0,0.5)] text-sm">
+      <p className="text-gray-700 dark:text-gray-400 mb-10 leading-relaxed font-semibold bg-white dark:bg-[#121212]/85 p-5 rounded-3xl border border-gray-200 dark:border-white/5 shadow-sm dark:shadow-[0_0_15px_rgba(0,0,0,0.5)] text-sm transition-colors duration-300 text-left">
         {language === 'hi' ? introText.hi : introText.en}
       </p>
 
       {/* SECTION 1: Major Epochs Timeline */}
       <div className="mb-12">
-        <h2 className="text-xl font-bold mb-6 text-white border-l-4 border-[#FF6D00] pl-3 tracking-wide">
+        <h2 className="text-xl font-bold mb-6 text-gray-900 dark:text-white border-l-4 border-[#FF6D00] pl-3 tracking-wide text-left">
           {language === 'hi' ? 'ऐतिहासिक समय-सारिणी (मुख्य कालगणना)' : 'MAJOR HISTORICAL EPOCHS TIMELINE'}
         </h2>
         
         <div className="relative border-l-2 border-[#FF6D00]/30 ml-4 space-y-8 pb-4">
           {mainEpochs.map((item, idx) => (
             <div key={idx} className="relative pl-8 group">
-              <div className={`absolute -left-[11px] top-1 w-5 h-5 rounded-full border-4 border-[#050505] ${item.color || 'bg-orange-500'} shadow-[0_0_10px_rgba(255,109,0,0.8)] group-hover:scale-125 transition-transform duration-300`} />
+              <div className={`absolute -left-[11px] top-1 w-5 h-5 rounded-full border-4 border-gray-100 dark:border-[#050505] ${item.color || 'bg-orange-500'} shadow-[0_0_10px_rgba(255,109,0,0.8)] group-hover:scale-125 transition-transform duration-300`} />
               
               <div 
                 onClick={() => setSelectedItem(item)}
-                className="bg-[#121212]/80 backdrop-blur-xl rounded-[1.5rem] p-6 shadow-[0_0_20px_rgba(0,0,0,0.5)] border border-white/5 hover:border-[#FF6D00]/30 hover:shadow-[0_0_30px_rgba(255,109,0,0.15)] cursor-pointer transition-all duration-500 relative overflow-hidden"
+                className="bg-white dark:bg-[#121212]/80 backdrop-blur-xl rounded-[2rem] p-6 shadow-sm dark:shadow-[0_0_20px_rgba(0,0,0,0.5)] border border-gray-200 dark:border-white/5 hover:border-[#FF6D00]/30 hover:shadow-lg dark:hover:shadow-[0_0_30px_rgba(255,109,0,0.15)] cursor-pointer transition-all duration-500 relative overflow-hidden"
               >
                 <div className="relative z-10">
                   <div className="flex items-center gap-2 text-[#FFD54F] font-bold text-[10px] uppercase tracking-widest mb-3 bg-[#FFD54F]/10 border border-[#FFD54F]/20 w-fit px-3 py-1.5 rounded-full shadow-[0_0_10px_rgba(255,213,79,0.1)]">
                     <Clock size={14} />
                     {item.period}
                   </div>
-                  <h3 className="text-lg font-black text-white mb-2 group-hover:text-[#FFD54F] transition-colors">
+                  <h3 className="text-lg font-black text-gray-900 dark:text-white mb-2 group-hover:text-[#FF6D00] dark:group-hover:text-[#FFD54F] transition-colors">
                     {item.title?.[language] || item.title?.en}
                   </h3>
-                  <p className="text-xs text-gray-400 line-clamp-2 leading-relaxed">
+                  <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 leading-relaxed">
                     {item.desc?.[language] || item.desc?.en}
                   </p>
                 </div>
@@ -127,28 +127,28 @@ export default function HistoryPage() {
       </div>
 
       {/* SECTION 2: Search & Filter 350+ Jain Monuments */}
-      <div className="mt-12 pt-8 border-t border-white/5">
+      <div className="mt-12 pt-8 border-t border-gray-200 dark:border-white/5">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-          <div>
-            <h2 className="text-xl font-bold text-white tracking-wide">
+          <div className="text-left">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white tracking-wide">
               {language === 'hi' ? '३५०+ जैन धरोहर एवं तीर्थ दीर्घा' : '350+ HERITAGE SITES & MONUMENTS'}
             </h2>
-            <p className="text-xs text-gray-400 mt-1">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
               {language === 'hi' ? 'श्रेणी, स्थान और राज्यों के अनुसार प्राचीन मंदिरों, प्रतिमाओं व अभिलेखों को खोजें' : 'Search & locate historical temples, grotto caves, inscriptions & relics'}
             </p>
           </div>
         </div>
 
         {/* Filters and Search Bar Container */}
-        <div className="bg-[#121212] p-5 rounded-3xl border border-white/5 shadow-inner mb-6 space-y-4">
+        <div className="bg-white dark:bg-[#121212] p-5 rounded-3xl border border-gray-200 dark:border-white/5 shadow-inner mb-6 space-y-4 text-left">
           <div className="relative">
-            <Search className="absolute left-4 top-3.5 text-gray-500" size={18} />
+            <Search className="absolute left-4 top-3.5 text-gray-400 dark:text-gray-500" size={18} />
             <input 
               type="text" 
               placeholder={language === 'hi' ? "इतिहास, मंदिर, स्थान, काल या शब्द खोजें..." : "Search temples, relics, structures, or centuries..."}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 bg-[#0a0a0a] text-white rounded-2xl border border-white/15 focus:border-[#FF6D00] focus:ring-1 focus:ring-[#FF6D00] transition-all text-xs font-bold font-mono outline-none"
+              className="w-full pl-12 pr-4 py-3 bg-gray-100 dark:bg-[#0a0a0a] text-gray-900 dark:text-white rounded-2xl border border-gray-200 dark:border-white/15 focus:border-[#FF6D00] focus:ring-1 focus:ring-[#FF6D00] transition-all text-xs font-bold font-mono outline-none"
             />
           </div>
 
@@ -161,10 +161,10 @@ export default function HistoryPage() {
                   <button
                     key={cat}
                     onClick={() => setSelectedCategory(cat)}
-                    className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase transition-colors ${
+                    className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase transition-all ${
                       selectedCategory === cat 
                         ? 'bg-[#FF6D00] text-black shadow-md' 
-                        : 'bg-[#181818] text-gray-400 border border-white/5 hover:text-white'
+                        : 'bg-gray-100 dark:bg-[#181818] text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-white/5 hover:text-gray-900 dark:hover:text-white'
                     }`}
                   >
                     {language === 'hi' 
@@ -181,7 +181,7 @@ export default function HistoryPage() {
               <select
                 value={selectedState}
                 onChange={(e) => setSelectedState(e.target.value)}
-                className="w-full p-2.5 bg-[#181818] text-gray-300 text-xs rounded-xl border border-white/5 outline-none font-bold focus:border-[#FF6D00]"
+                className="w-full p-2.5 bg-gray-100 dark:bg-[#181818] text-gray-700 dark:text-gray-300 text-xs rounded-xl border border-gray-200 dark:border-white/5 outline-none font-bold focus:border-[#FF6D00] transition-colors"
               >
                 <option value="All">{language === 'hi' ? 'सभी राज्य (All States)' : 'All States'}</option>
                 {statesList.filter(s => s !== 'All').map(st => (
@@ -194,19 +194,19 @@ export default function HistoryPage() {
 
         {/* Dynamic statistics ribbon */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
-          <div className="bg-[#121212]/80 border border-white/5 p-4 rounded-2xl text-center shadow-[0_5px_15px_rgba(0,0,0,0.3)]">
+          <div className="bg-white dark:bg-[#121212]/80 border border-gray-200 dark:border-white/5 p-4 rounded-2xl text-center shadow-sm dark:shadow-[0_5px_15px_rgba(0,0,0,0.3)] transition-colors duration-300">
             <span className="text-[9px] font-mono font-bold text-gray-500 uppercase tracking-widest block mb-1">{language === 'hi' ? 'कुल संकलित कड़ियां' : 'TOTAL REGISTRY'}</span>
             <span className="text-lg font-black text-[#FFD54F]">355+ {language === 'hi' ? 'धरोहर' : 'Relics'}</span>
           </div>
-          <div className="bg-[#121212]/80 border border-white/5 p-4 rounded-2xl text-center shadow-[0_5px_15px_rgba(0,0,0,0.3)]">
+          <div className="bg-white dark:bg-[#121212]/80 border border-gray-200 dark:border-white/5 p-4 rounded-2xl text-center shadow-sm dark:shadow-[0_5px_15px_rgba(0,0,0,0.3)] transition-colors duration-300">
             <span className="text-[9px] font-mono font-bold text-gray-500 uppercase tracking-widest block mb-1">{language === 'hi' ? 'भारतीय राज्य' : 'COVERED STATES'}</span>
             <span className="text-lg font-black text-[#FF6D00]">10 {language === 'hi' ? 'मुख्य राज्य' : 'Regions'}</span>
           </div>
-          <div className="bg-[#121212]/80 border border-white/5 p-4 rounded-2xl text-center shadow-[0_5px_15px_rgba(0,0,0,0.3)]">
+          <div className="bg-white dark:bg-[#121212]/80 border border-gray-200 dark:border-white/5 p-4 rounded-2xl text-center shadow-sm dark:shadow-[0_5px_15px_rgba(0,0,0,0.3)] transition-colors duration-300">
             <span className="text-[9px] font-mono font-bold text-gray-500 uppercase tracking-widest block mb-1">{language === 'hi' ? 'काल निर्धारण' : 'CHRONOLOGY ERA'}</span>
             <span className="text-lg font-black text-amber-500">2500+ {language === 'hi' ? 'वर्ष का इतिहास' : 'Yrs History'}</span>
           </div>
-          <div className="bg-[#121212]/80 border border-white/5 p-4 rounded-2xl text-center shadow-[0_5px_15px_rgba(0,0,0,0.3)]">
+          <div className="bg-white dark:bg-[#121212]/80 border border-gray-200 dark:border-white/5 p-4 rounded-2xl text-center shadow-sm dark:shadow-[0_5px_15px_rgba(0,0,0,0.3)] transition-colors duration-300">
             <span className="text-[9px] font-mono font-bold text-gray-500 uppercase tracking-widest block mb-1">{language === 'hi' ? 'शाश्वत स्वरूप' : 'ICONOGRAPHY'}</span>
             <span className="text-lg font-black text-yellow-500">Pure Digambar</span>
           </div>
@@ -218,26 +218,26 @@ export default function HistoryPage() {
             <div 
               key={index}
               onClick={() => setSelectedItem(item)}
-              className="bg-[#121212]/50 hover:bg-[#121212] border border-white/5 hover:border-orange-500/30 rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 shadow-lg flex flex-col justify-between"
+              className="bg-white dark:bg-[#121212]/55 hover:bg-gray-50 dark:hover:bg-[#121212] border border-gray-200 dark:border-white/5 hover:border-[#FF6D00]/30 rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 shadow-sm dark:shadow-lg flex flex-col justify-between"
             >
-              <div className="p-4">
+              <div className="p-4 text-left">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-[8px] font-mono font-black text-orange-500 uppercase bg-orange-500/10 px-2.5 py-1 rounded-full border border-orange-500/20">
                     {item.category}
                   </span>
-                  <span className="text-[8px] font-mono font-bold text-gray-400 flex items-center gap-1">
+                  <span className="text-[8px] font-mono font-bold text-gray-500 dark:text-gray-400 flex items-center gap-1">
                     <MapPin size={10} className="text-[#FFD54F]" />
                     {item.state}
                   </span>
                 </div>
-                <h3 className="font-extrabold text-sm text-white line-clamp-1 mb-1.5">
+                <h3 className="font-extrabold text-sm text-gray-900 dark:text-white line-clamp-1 mb-1.5">
                   {item.title?.[language] || item.title?.en}
                 </h3>
-                <p className="text-[11px] text-gray-400 line-clamp-2 leading-relaxed">
+                <p className="text-[11px] text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed">
                   {item.desc?.[language] || item.desc?.en}
                 </p>
               </div>
-              <div className="bg-white/5 px-4 py-2 border-t border-white/5 flex justify-between items-center text-[9px] font-mono font-bold text-gray-500">
+              <div className="bg-gray-50 dark:bg-[#181818]/65 px-4 py-2 border-t border-gray-200 dark:border-white/5 flex justify-between items-center text-[9px] font-mono font-bold text-gray-500">
                 <span>{language === 'hi' ? 'काल:' : 'Era:'} {item.period}</span>
                 <span className="text-orange-500 uppercase font-black">{language === 'hi' ? 'विवरण' : 'Details'} ›</span>
               </div>
@@ -265,31 +265,31 @@ export default function HistoryPage() {
 
       {/* High Quality Detailed Overlay Modal */}
       {selectedItem && (
-        <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
-          <div className="bg-[#121212] border border-white/10 rounded-[2rem] w-full max-w-lg p-6 shadow-2xl relative overflow-hidden flex flex-col max-h-[90vh]">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
+          <div className="bg-white dark:bg-[#121212] border border-gray-200 dark:border-white/10 rounded-[2rem] w-full max-w-lg p-6 shadow-2xl relative overflow-hidden flex flex-col max-h-[90vh] transition-colors duration-300">
             <div className="absolute top-0 right-0 w-32 h-32 bg-[#FF6D00]/10 rounded-full blur-3xl" />
             
-            <div className="flex justify-between items-start mb-4 relative z-10">
+            <div className="flex justify-between items-start mb-4 relative z-10 text-left">
               <div>
                 <span className="text-[8px] font-mono font-black text-[#FF6D00] uppercase bg-[#FF6D00]/10 px-2.5 py-1 rounded-full border border-[#FF6D00]/20 inline-block mb-1">
                   {selectedItem.category}
                 </span>
-                <h2 className="text-xl font-display font-black text-white leading-tight">
+                <h2 className="text-xl font-display font-black text-gray-950 dark:text-white leading-tight">
                   {selectedItem.title?.[language] || selectedItem.title?.en}
                 </h2>
               </div>
               <button 
                 onClick={() => setSelectedItem(null)}
-                className="w-10 h-10 shrink-0 flex items-center justify-center rounded-full bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
+                className="w-10 h-10 shrink-0 flex items-center justify-center rounded-full bg-gray-100 dark:bg-white/5 text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-white/10 border border-gray-200 dark:border-white/5 transition-colors cursor-pointer"
               >
                 ✕
               </button>
             </div>
 
             {/* Content Scroller */}
-            <div className="overflow-y-auto pr-1 space-y-4 text-gray-300 text-xs">
+            <div className="overflow-y-auto pr-1 space-y-4 text-xs">
               {selectedItem.image && (
-                <div className="rounded-xl overflow-hidden border border-white/10 shadow-lg relative aspect-video bg-gray-900">
+                <div className="rounded-xl overflow-hidden border border-gray-250 dark:border-white/10 shadow-lg relative aspect-video bg-gray-900">
                   <img 
                     src={selectedItem.image} 
                     alt={selectedItem.title?.[language] || selectedItem.title?.en} 
@@ -304,15 +304,15 @@ export default function HistoryPage() {
                 </div>
               )}
 
-              <div className="p-4 bg-[#181818] border border-white/5 rounded-2xl space-y-3 font-semibold">
-                <div className="flex items-center gap-2 text-gray-400">
+              <div className="p-4 bg-gray-50 dark:bg-[#181818] border border-gray-200 dark:border-white/5 rounded-2xl space-y-3 font-semibold text-left">
+                <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
                   <MapPin size={14} className="text-[#FFD54F]" />
                   <span>
                     <strong>{language === 'hi' ? 'स्थान व राज्य:' : 'State & Region:'}</strong> {selectedItem.state || "India (भारत)"}
                   </span>
                 </div>
                 {selectedItem.era && (
-                  <div className="flex items-center gap-2 text-gray-400">
+                  <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
                     <Globe size={14} className="text-[#FFD54F]" />
                     <span>
                       <strong>{language === 'hi' ? 'ऐतिहासिक युग:' : 'Historical Dynasty/Era:'}</strong> {selectedItem.era}
@@ -321,9 +321,9 @@ export default function HistoryPage() {
                 )}
               </div>
 
-              <div className="p-4 bg-[#181818]/50 border border-white/5 rounded-2xl">
+              <div className="p-4 bg-gray-100/50 dark:bg-[#181818]/50 border border-gray-20s0 dark:border-white/5 rounded-2xl text-left">
                 <span className="text-[9px] font-black text-orange-500 uppercase block mb-1.5 tracking-wider">{language === 'hi' ? 'ऐतिहासिक और आध्यात्मिक पुरालेख' : 'HISTORICAL & SPIRITUAL ANALYSIS'}</span>
-                <p className="leading-relaxed text-gray-400 font-medium">
+                <p className="leading-relaxed text-gray-600 dark:text-gray-400 font-medium font-sans">
                   {selectedItem.desc?.[language] || selectedItem.desc?.en}
                 </p>
               </div>
@@ -331,7 +331,7 @@ export default function HistoryPage() {
 
             <button 
               onClick={() => setSelectedItem(null)}
-              className="w-full mt-6 py-3.5 bg-orange-500 hover:bg-orange-600 text-black font-extrabold text-xs rounded-2xl tracking-wider uppercase transition-colors shrink-s0"
+              className="w-full mt-6 py-3.5 bg-orange-500 hover:bg-orange-600 text-black font-extrabold text-xs rounded-2xl tracking-wider uppercase transition-all duration-300 cursor-pointer shadow-md"
             >
               {language === 'hi' ? 'गैलरी अवलोकन समाप्त करें' : 'Back to Archive'}
             </button>
@@ -341,29 +341,29 @@ export default function HistoryPage() {
       {/* Dynamic JBT Premium Help Modal */}
       {showHelpModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-300 pointer-events-auto">
-          <div className="bg-[#121212] border border-white/10 rounded-[2rem] w-full max-w-lg p-6 md:p-8 shadow-2xl relative overflow-hidden flex flex-col max-h-[90vh]">
+          <div className="bg-white dark:bg-[#121212] border border-gray-200 dark:border-white/10 rounded-[2rem] w-full max-w-lg p-6 md:p-8 shadow-2xl relative overflow-hidden flex flex-col max-h-[90vh] text-gray-900 dark:text-gray-100 transition-colors duration-300">
             <div className="absolute top-0 right-0 w-32 h-32 bg-[#FF6D00]/10 rounded-full blur-3xl pointer-events-none" />
             
-            <div className="flex justify-between items-start mb-5 relative z-10">
-              <div className="text-left">
-                <span className="text-[9px] font-black text-[#FF6D00] uppercase tracking-widest bg-[#FF6D00]/10 px-3 py-1 rounded-full border border-[#FF6D00]/10 inline-block mb-1.5">
+            <div className="flex justify-between items-start mb-5 relative z-10 text-left">
+              <div>
+                <span className="text-[9px] font-black text-[#FF6D00] uppercase tracking-widest bg-[#FF6D00]/10 px-3 py-1 rounded-full border border-[#FF6D00]/10 inline-block mb-1.5 font-mono">
                   📁 {language === 'en' ? 'SECTION USER GUIDE' : 'अनुभाग निर्देश पुस्तिका'}
                 </span>
-                <h2 className="text-2xl font-display font-black text-white tracking-tight">
+                <h2 className="text-2xl font-display font-black text-gray-900 dark:text-white tracking-tight">
                   ℹ️ {language === 'en' ? 'Help & Features' : 'सहायता एवं सुविधाएँ'}
                 </h2>
               </div>
               <button 
                 onClick={() => setShowHelpModal(false)}
-                className="w-10 h-10 shrink-0 flex items-center justify-center rounded-full bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer border border-white/5 active:scale-95"
+                className="w-10 h-10 shrink-0 flex items-center justify-center rounded-full bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-250 dark:hover:bg-white/10 border border-gray-200 dark:border-white/5 transition-colors cursor-pointer active:scale-95"
               >
                 ✕
               </button>
             </div>
 
             {/* Modal Translator switch requested in help modal */}
-            <div className="bg-white/5 p-3 rounded-2xl border border-white/5 flex items-center justify-between gap-3 mb-5 relative z-10">
-              <span className="text-[10px] font-black uppercase text-gray-400">
+            <div className="bg-gray-50 dark:bg-white/5 p-3 rounded-2xl border border-gray-200 dark:border-white/5 flex items-center justify-between gap-3 mb-5 relative z-10">
+              <span className="text-[10px] font-black uppercase text-gray-500 dark:text-gray-400">
                 {language === 'en' ? 'Translate guide language' : 'निर्देश निर्देश भाषा बदलें'}
               </span>
               <button
@@ -376,30 +376,30 @@ export default function HistoryPage() {
             </div>
 
             {/* Help Scrollable Content */}
-            <div className="overflow-y-auto pr-1 space-y-4.5 text-left text-zinc-355 dark:text-zinc-300 text-xs text-medium leading-relaxed relative z-10 max-h-[55vh]">
-              <p className="font-bold text-white text-sm">
-                {language === 'en' ? 'Welcome to Jain History & Heritage Gallery!' : 'जैन इतिहास एवं प्राचीन धरोहर दीर्घा में आपका स्वागत है!'}
+            <div className="overflow-y-auto pr-1 space-y-4.5 text-left text-gray-700 dark:text-zinc-300 text-xs text-medium leading-relaxed relative z-10 max-h-[55vh]">
+              <p className="font-bold text-gray-900 dark:text-white text-sm">
+                {language === 'en' ? 'Welcome to Jain History & Heritage Gallery!' : 'जैन इतिहास एवं प्राचीन धरोहर दीर्घा में स्वागत है!'}
               </p>
-              <p className="font-semibold text-gray-400">
+              <p className="font-semibold text-gray-500 dark:text-gray-400">
                 {language === 'en' 
                   ? 'This curated research module lets you explore thousands of years of non-violent history:' 
                   : 'यह अनुभाग भारत की श्रमण संस्कृति के गौरवमयी इतिहास व कला-कृतियों को खोजने में आपकी मदद करता है:'}
               </p>
-              <ul className="list-disc pl-5 space-y-2 text-gray-400 font-semibold">
+              <ul className="list-disc pl-5 space-y-2 text-gray-500 dark:text-gray-400 font-semibold">
                 <li>
-                  <strong className="text-[#FFD54F]">{language === 'en' ? 'Major Epochs Timeline:' : 'मुख्य ऐतिहासिक कालगणना:'}</strong>{' '}
+                  <strong className="text-gray-900 dark:text-[#FFD54F]">{language === 'en' ? 'Major Epochs Timeline:' : 'मुख्य ऐतिहासिक कालगणना:'}</strong>{' '}
                   {language === 'en' 
                     ? 'Explore the eight monumental epochs ranging from Lord Rishabhanatha’s pre-historic era to modern revivalism.' 
                     : 'भगवान आदिनाथ के कल्पवृक्ष काल से लेकर सम्राट चन्द्रगुप्त मौर्य एवं आधुनिक काल के स्वर्णिम इतिहास के आठ युगों को जानें।'}
                 </li>
                 <li>
-                  <strong className="text-[#FFD54F]">{language === 'en' ? '350+ Monuments Library:' : '३५०+ कला व प्राचीन जैन मंदिरों की खोज:'}</strong>{' '}
+                  <strong className="text-gray-900 dark:text-[#FFD54F]">{language === 'en' ? '350+ Monuments Library:' : '३५०+ कला व प्राचीन जैन मंदिरों की खोज:'}</strong>{' '}
                   {language === 'en'
                     ? 'Use the smart filter options to categorize monuments by state and type (e.g. Temples, Cave Grottos, Inscriptions).'
                     : 'भारत के विभिन्न राज्यों के प्राचीन जैन मंदिरों, एलीफेंटा/एलोरा गुफाओं तथा खंडगिरि-उदयगिरि के शिलालेखों को वर्गीकृत कर फ़िल्टर करें।'}
                 </li>
                 <li>
-                  <strong className="text-[#FFD54F]">{language === 'en' ? 'Interactive Heritage Sheet:' : 'विस्तृत धरोहर विवरण पत्र:'}</strong>{' '}
+                  <strong className="text-gray-900 dark:text-[#FFD54F]">{language === 'en' ? 'Interactive Heritage Sheet:' : 'विस्तृत धरोहर विवरण पत्र:'}</strong>{' '}
                   {language === 'en'
                     ? 'Click on any heritage card to reveal detailed archaeological periods, coordinates, state, and historical analysis.'
                     : 'किसी भी धरोहर कार्ड पर क्लिक कर उस स्थान का कालखंड, निर्माता राजवंश, मुख्य विदेह मूर्ति एवं इतिहास स्वाध्याय करें।'}
@@ -407,7 +407,7 @@ export default function HistoryPage() {
               </ul>
             </div>
 
-            <div className="mt-6 pt-4 border-t border-white/5 text-center relative z-10">
+            <div className="mt-6 pt-4 border-t border-gray-200 dark:border-white/5 text-center relative z-10">
               <button
                 onClick={() => setShowHelpModal(false)}
                 className="w-full bg-[#FF6D00] hover:bg-orange-600 text-black py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest cursor-pointer hover:scale-[1.02] active:scale-95 transition-all text-center"
