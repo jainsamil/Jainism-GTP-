@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, Search, MapPin, Compass, ShieldAlert, 
@@ -10,283 +10,9 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { motion, AnimatePresence } from 'motion/react';
 import SectionAiAgent from '../components/SectionAiAgent';
 
-interface NearbyTemple {
-  name: { en: string; hi: string };
-  distance: string;
-}
-
-interface TirthItem {
-  id: string;
-  name: { en: string; hi: string };
-  region: { en: string; hi: string };
-  significance: { en: string; hi: string };
-  history: { en: string; hi: string };
-  bestVisible: { en: string; hi: string };
-  rules: string[];
-  rulesHi: string[];
-  coordinates: string;
-  image: string;
-  lat: number;
-  lng: number;
-  nearby: NearbyTemple[];
-  whatToVisit: { en: string; hi: string };
-  howToReach: { en: string; hi: string };
-}
-
-const TIRTHS_DATA: TirthItem[] = [
-  {
-    id: "shikharji",
-    name: { en: "Sammed Shikharji (समेद शिखरजी)", hi: "श्री सम्मेद शिखरजी" },
-    region: { en: "Giridih, Jharkhand", hi: "गिरिडीह, झारखंड" },
-    significance: {
-      en: "The most sacred salvation hill where 20 of the 24 Tirthankars attained final liberation (Moksha).",
-      hi: "परम पावन निर्वाण भूमि जहां २४ में से २० जैन तीर्थंकरों ने मोक्ष प्राप्त किया।"
-    },
-    history: {
-      en: "Known as Parasnath hill, climbing the 27km mountain track on foot is traditionally believed to wash away negative karmas. Every peak is dedicated to a specific liberated Tirthankar.",
-      hi: "पारसनाथ पहाड़ी के रूप में प्रसिद्ध, २७ किमी की इस वंदना को पैदल करने से सात जन्मों का पाप धुल जाता है। प्रत्येक कूट (शिखर) एक-एक तीर्थंकर को समर्पित है।"
-    },
-    bestVisible: { en: "October to March (Pleasant cold weather)", hi: "अक्टूबर से मार्च (सुखद शीत ऋतु और कोहरा)" },
-    rules: [
-      "No leather items whatsoever (wallets, belts) on the mountain track.",
-      "Vandana track starts early morning at 3:00 AM.",
-      "Strict silence and cleanliness should be maintained near the Tonks (shrines).",
-      "Avoid plastics or throwing litter on the sacred hill trail."
-    ],
-    rulesHi: [
-      "पहाड़ ट्रैक पर चमड़े की वस्तुएं (बटुआ, बेल्ट) ले जाना पूरी तरह वर्जित है।",
-      "वंदना तड़के सुबह ३:०० बजे प्रारंभ हो जाती है।",
-      "टोंकों (चरण चरण पादुकाओं) के समीप पूर्ण मौन एवं पवित्रता बनाए रखें।",
-      "पवित्र पहाड़ी पर प्लास्टिक या कचरा फैलाना निषेध है।"
-    ],
-    coordinates: "https://maps.google.com/?q=Sammed+Shikharji+Jharkhand",
-    image: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Shikharji_Jain_Temple_Jharkhand.jpg/800px-Shikharji_Jain_Temple_Jharkhand.jpg",
-    lat: 24.0125,
-    lng: 86.2086,
-    nearby: [
-      { name: { en: "Gautam Swamy Tonk", hi: "गौतम स्वामी कूट" }, distance: "On Route" },
-      { name: { en: "Kunthunath Tonk", hi: "कुन्थुनाथ कूट" }, distance: "On Route" },
-      { name: { en: "Madhuban Dharamshala complex", hi: "मधुबन धर्मशाला संकुल" }, distance: "Base Camp" }
-    ],
-    whatToVisit: {
-      en: "Visit the 24 sacred Tonks on the mountain trail, Jal Mandir in the middle, Gautam Swamy Koot, Gunayatji (at the bottom), and magnificent Jain Museums containing ancient relic idols in Madhuban base.",
-      hi: "२४ कूट (तीर्थंकर चरण पादुका), पहाड़ी पर स्थित जल मंदिर, गौतम स्वामी कूट, तलहटी में गुणायातजी मंदिर और मधुबन स्थित भव्य प्राचीन हस्तलिखित जैन संग्रहालय और दिगम्बर/श्वेताम्बर धर्मशाला जिनालय।"
-    },
-    howToReach: {
-      en: "By Air: Ranchi Airport (140 km). By Train: Parasnath Railway Station (PNM) is just 22 km from Madhuban base. Road: regular taxis operate from Parasnath station and Giridih daily.",
-      hi: "हवाई मार्ग: रांची हवाई अड्डा (१४० किमी)। रेल मार्ग: पारसनाथ रेलवे स्टेशन (PNM) जो मधुबन बेस कैंप से मात्र २२ किमी दूर है। सड़क मार्ग: पारसनाथ स्टेशन या गिरिडीह से सीधे बस, ऑटो व टैक्सियां हर समय उपलब्ध हैं।"
-    }
-  },
-  {
-    id: "palitana",
-    name: { en: "Palitana Shatrunjaya (पालीताना)", hi: "शत्रुंजय महातीर्थ पालीताना" },
-    region: { en: "Bhavnagar, Gujarat", hi: "भावनगर, गुजरात" },
-    significance: {
-      en: "The divine mountain containing over 863 stunning marble-carved Jain temples on a single hill range.",
-      hi: "विश्व का एकमात्र अद्भुत पर्वत जहाँ एक ही पहाड़ी श्रृंखला पर ८६३ से अधिक भव्य संगमरमर मंदिर हैं।"
-    },
-    history: {
-      en: "Shatrunjaya mountain was visited by Lord Adinath, the first Tirthankar. Climbing 3,500 stone steps takes you to the apex. It is believed that millions of saints achieved Moksha on this hill.",
-      hi: "शत्रुंजय पर्वत प्रथम तीर्थंकर भगवान आदिनाथ की पावन ध्यान स्थली रहा है। करीब ३५०० सीढ़ियां चढ़कर आदिनाथ मंदिर पहुंचा जाता है। अनंत मुनिराज यहां से मोक्ष गए हैं।"
-    },
-    bestVisible: { en: "November to March (Mountain remains closed in Monsoon)", hi: "नवंबर से मार्च (चौमासे में पहाड़ वंदना पूर्णतः बंद रहती है)" },
-    rules: [
-      "Nobody can stay on the mountain top after sunset. Downward journey is mandatory.",
-      "Do not eat, drink, or spit while climbing the sacred steps of Shatrunjaya.",
-      "Strict white dress protocol is highly appreciated for entering the main shrine.",
-      "Leather products and electronic cameras are completely barred."
-    ],
-    rulesHi: [
-      "सूर्यास्त के बाद कोई भी पहाड़ी के ऊपर नहीं ठहर सकता। नीचे आना अनिवार्य है।",
-      "पवित्र सीढ़ियों पर चढ़ते समय खाना, पीना या थूकना पूरी तरह वर्जित है।",
-      "मुख्य जिनालय में प्रवेश हेतु पारंपरिक सफेद कुर्ता-पायजामा श्रेष्ठ माना जाता है।",
-      "चमड़े के सामान तथा इलेक्ट्रॉनिक कैमरों का उपयोग प्रतिबंधित है।"
-    ],
-    coordinates: "https://maps.google.com/?q=Shatrunjaya+Palitana+Gujarat",
-    image: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/Jain_temples_at_Palitana.JPG/800px-Jain_temples_at_Palitana.JPG",
-    lat: 21.5000,
-    lng: 71.8333,
-    nearby: [
-      { name: { en: "Kumarpal Temple", hi: "कुमारपाल मंदिर" }, distance: "Top" },
-      { name: { en: "Chaumukha Mandir", hi: "चौमुख मंदिर" }, distance: "Top" },
-      { name: { en: "Jindas Atishay Kshetra", hi: "जिनदास अतिशय क्षेत्र" }, distance: "2 km" }
-    ],
-    whatToVisit: {
-      en: "The majestic main Adishwar Temple, Chaumukha Temple (four-faced Adinath), Kumarpal Temple, the ancient Rayan Tree, and the famous Taleti Temple complex at the bottom.",
-      hi: "शिखर पर स्थित मुख्य आदिनाथ स्वामी जिनालय, चौमुख मंदिर, कुमारपाल मंदिर, अति प्राचीन रायन वृक्ष (जहाँ प्रभु ने ध्यान किया था) और तलहटी में स्थित भव्य समवशरण मंदिर समूह।"
-    },
-    howToReach: {
-      en: "By Air: Bhavnagar Airport (55 km) or Ahmedabad (215 km). By Train: Palitana local station or Sihor Jn. Road: regular State Transport buses run from Ahmedabad and Bhavnagar directly.",
-      hi: "हवाई मार्ग: भावनगर हवाई अड्डा (५५ किमी) या अहमदाबाद (२१५ किमी)। रेल मार्ग: पालीताना रेलवे स्टेशन या सिहोर जंक्शन। सड़क मार्ग: अहमदाबाद और भावनगर से पालीताना के लिए प्रतिदिन सीधी बसें और कारें उपलब्ध हैं।"
-    }
-  },
-  {
-    id: "dilwara",
-    name: { en: "Dilwara Marble Temples (दिलवाड़ा)", hi: "दिलवाड़ा देवल मंदिर" },
-    region: { en: "Mount Abu, Rajasthan", hi: "माउंट आबू, राजस्थान" },
-    significance: {
-      en: "World-renowned marble masterpieces built between 11th and 13th centuries, demonstrating surreal architectural carvings.",
-      hi: "११वीं से १३वीं शताब्दी के बीच निर्मित विश्व प्रसिद्ध संगमरमर के उत्कृष्ट मंदिर जो शिल्प कला का बेजोड़ नमूना हैं।"
-    },
-    history: {
-      en: "Constructed by Vimal Shah and Vastupal-Tejpal, these five legendary temples feature translucent stone ceiling carvings that defy gravity. The carvings of 'Luna Vasahi' temple are legendary.",
-      hi: "विमल शाह और वास्तुपाल-तेजपाल द्वारा निर्मित ये पांच भव्य मंदिर हैं। इनकी छतों और खंभों पर संगमरमर की ऐसी महीन नक्काशी है कि पत्थर भी पानी सा सजीव प्रतीत होता है।"
-    },
-    bestVisible: { en: "Throughout the year (Cool hill station climate)", hi: "साल भर (माउंट आबू के ठंडे वातावरण के कारण सदैव उत्तम)" },
-    rules: [
-      "Strict modest clothing required (no shorts, sleeveless tops).",
-      "Photography is prohibited within the temple complex to protect the heritage.",
-      "Silence must be maintained inside the garbhagriha (inner sanctum).",
-      "Leather belongings must be deposited at the cloak counter outside."
-    ],
-    rulesHi: [
-      "शालीन कपड़े पहनना अनिवार्य है (हाफ पैंट, बिना आस्तीन वाले टी-शर्ट वर्जित)।",
-      "मंदिर परिसर के भीतर फोटोग्राफी पूरी तरह प्रतिबंधित है ताकि धरोहर सुरक्षित रहे।",
-      "गर्भगृह के भीतर शांतचित्त होकर प्रभु दर्शन करें।",
-      "चमड़े का सारा सामान बाहर क्लॉक रूम पर जमा करना होता है।"
-    ],
-    coordinates: "https://maps.google.com/?q=Dilwara+Temples+Mount+Abu",
-    image: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/Marble_ceiling_at_Dilwara_Temple.jpg/800px-Marble_ceiling_at_Dilwara_Temple.jpg",
-    lat: 24.6014,
-    lng: 72.7111,
-    nearby: [
-      { name: { en: "Achalgarh Digambar Jain Temple", hi: "अचलगढ़ दिगंबर जैन मंदिर" }, distance: "8 km" },
-      { name: { en: "Nakoda Parshvanath Tirth", hi: "नाकोडा पार्श्वनाथ तीर्थ" }, distance: "120 km" }
-    ],
-    whatToVisit: {
-      en: "Vimal Vasahi Temple (dedicated to Lord Adinath), Luna Vasahi Temple (Lord Neminath), Pittalhar Temple (huge five-metal statue), Khartar Vasahi (three storeyed), and nearby Achalgarh Fort temples.",
-      hi: "विमल वसाही मंदिर (भगवान आदिनाथ), लूण वसाही मंदिर (भगवान नेमिनाथ), पीत्तलहर मंदिर (पीतल मिश्रित धातु की विशाल प्रतिमा), खरतर वसाही और ८ किमी दूर स्थित भव्य अचलगढ़ दिगंबर किला जिनमंदिर।"
-    },
-    howToReach: {
-      en: "By Air: Udaipur Airport (180 km). By Train: Abu Road Railway Station (ABR) is 28 km away with frequent taxis. Road: regular buses scale the Mount Abu ghat from Abu Road every 15 minutes.",
-      hi: "हवाई मार्ग: उदयपुर हवाई अड्डा (१८० किमी)। रेल मार्ग: आबू रोड रेलवे स्टेशन (ABR) जो केवल २८ किमी दूर है। सड़क मार्ग: आबू रोड रेलवे स्टेशन से माउंट आबू पहाड़ी के लिए प्रत्येक १५ मिनट में बसें और टैक्सियां चलती हैं।"
-    }
-  },
-  {
-    id: "girnar",
-    name: { en: "Girnarji Siddha Kshetra (गिरनारजी)", hi: "श्री गिरनारजी सिद्ध क्षेत्र" },
-    region: { en: "Junagadh, Gujarat", hi: "जूनागढ़, गुजरात" },
-    significance: {
-      en: "Salvation place of Lord Neminath, the 22nd Tirthankara, nestled atop ancient volcanic peaks.",
-      hi: "२२वें तीर्थंकर भगवान नेमिनाथ की दीक्षा, केवलज्ञान और मोक्ष कल्याणक की पवित्र भूमि।"
-    },
-    history: {
-      en: "Climbing nearly 10,000 stone steps takes you past magnificent historical architectures. The 5th peak is highly revered as the spot where Lord Neminath spent solitary tapasyas and reached infinite bliss.",
-      hi: "लगभग १०,००० प्राचीन सीढ़ियों को चढ़कर जूनागढ़ की भव्य वनस्पति के बीच इस चोटी पर पहुँचा जाता है। पांचवीं टोंक स्वयं भगवान नेमिनाथ की मोक्ष स्थली मानी जाती है।"
-    },
-    bestVisible: { en: "November to February", hi: "नवंबर से फरवरी (मानसून के बाद की हरियाली दर्शनीय होती है)" },
-    rules: [
-      "Avoid carry bag littering; monkeys are active and seek foodstuffs.",
-      "Wear strong grip hiking shoes; steps can be extremely steep.",
-      "Night treks are highly popular to avoid the intense daytime sun.",
-      "Be respectful to all monks and ascetics meditating along the path."
-    ],
-    rulesHi: [
-      "कचरा फैलाना रोकें; बंदर अत्यधिक सक्रिय हैं और खाने का सामान छीन सकते हैं।",
-      "मजूबत पकड़ वाले जूते पहनें क्योंकि चढ़ाई बहुत तीव्र और खड़ी है।",
-      "तेज धूप से बचने के लिए आधी रात या भोर में चढ़ाई शुरू करना बहुत लोकप्रिय है।",
-      "पहाड़ी के रास्ते में मौन तपस्या करते दिगंबर साधुओं का आदर करें।"
-    ],
-    coordinates: "https://maps.google.com/?q=Girnar+Jain+Temples+Junagadh",
-    image: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Girnar_Jain_Temples_Gujarat.jpg/800px-Girnar_Jain_Temples_Gujarat.jpg",
-    lat: 21.5264,
-    lng: 70.4792,
-    nearby: [
-      { name: { en: "Rajul Caves", hi: "राजीमती गुफा" }, distance: "On Route" },
-      { name: { en: "Sahasavan", hi: "सहसावन केवलज्ञान भूमि" }, distance: "Girnar Base" }
-    ],
-    whatToVisit: {
-      en: "The 1st peak temples featuring historic carving galleries, Rajul Caves, Sahasavan Koot, and the supreme 5th Peak (Neminath Moksha Tonk) with panoramic mountain views.",
-      hi: "प्रथम कूट पर स्थित प्राचीन भव्य दिगंबर-श्वेताम्बर मंदिर, माता राजीमती (राजील) की गुफाएं, सहसावन केवलज्ञान तपोभूमि, और सर्वोच्च ५वीं कूट (भगवान नेमिनाथ मोक्ष चरण पादुका)।"
-    },
-    howToReach: {
-      en: "By Air: Rajkot Airport (100 km). By Train: Junagadh Railway Station (JND) is 5 km from Girnar base. Ropeway: India's longest temple ropeway runs from base up to Ambaji peak, saving 5,000 steps.",
-      hi: "हवाई मार्ग: राजकोट हवाई अड्डा (१०० किमी)। रेल मार्ग: जूनागढ़ जंक्शन (JND) जो तलहटी से सिर्फ ५ किमी दूर है। उड़नखटोला (Ropeway): गिरनार बेस से अंबा कूट तक चलने वाली एशिया की सबसे लंबी रोपवे सेवा उपलब्ध है।"
-    }
-  },
-  {
-    id: "ranakpur",
-    name: { en: "Ranakpur Pillar Palace (रणकपुर)", hi: "रणकपुर चतुर्मुख जैन मंदिर" },
-    region: { en: "Pali, Rajasthan", hi: "पाली, राजस्थान" },
-    significance: {
-      en: "A massive marble temple with 1,444 uniquely carved pillars, designed like a divine celestial vehicle (Vimana).",
-      hi: "१,४४४ खंभों वाला विशाल संगमरमर मंदिर। आश्चर्य है कि कोई भी दो खंभे समान नक्काशी के नहीं हैं।"
-    },
-    history: {
-      en: "Built in the 15th century by Dharani Shah, a wealthy Jain merchant, after a dream of a heavenly flight. Dedicated to Lord Adinath, it features a grand four-faced (Chaumukha) idol and light filters beautifully.",
-      hi: "१५वीं शताब्दी में धरणी शाह नामक जैन श्रेष्ठी ने स्वप्न में देवविमान देखने के बाद राणा कुंभा की देखरेख में इसे बनवाया था। इसमें आदिनाथ भगवान की चार मुखों वाली भव्य मूर्ति है।"
-    },
-    bestVisible: { en: "September to March", hi: "सितंबर से मार्च (मरुस्थलीय सीमा होने से सर्दी सुखद होती है)" },
-    rules: [
-      "Shorts, mini-skirts, and sleeveless clothing are strictly prohibited inside.",
-      "No food items or leather allowed within outer gates.",
-      "Ensure silence while listening to the audio guides.",
-      "Strict worship entry timings for non-Jains (typically 12:00 PM to 5:00 PM)."
-    ],
-    rulesHi: [
-      "हाफ पैंट या छोटे कपड़े पहने पर्यटकों को भीतर प्रवेश की अनुमति नहीं है।",
-      "बाहरी सिंहद्वार के अंदर कोई भी खाद्य पदार्थ या चमड़े की वस्तुएं वर्जित हैं।",
-      "मंदिर परिसर की शांति भंग न करें।"
-    ],
-    coordinates: "https://maps.google.com/?q=Ranakpur+Jain+Temple+Rajasthan",
-    image: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Chaumukha_Temple_Ranakpur.jpg/800px-Chaumukha_Temple_Ranakpur.jpg",
-    lat: 25.1167,
-    lng: 73.4667,
-    nearby: [
-      { name: { en: "Parshvanath Devayatan", hi: "श्री पार्श्वनाथ देवायतन" }, distance: "Within Complex" },
-      { name: { en: "Sun Temple", hi: "सूर्य मंदिर रणकपुर" }, distance: "1 km" }
-    ],
-    whatToVisit: {
-      en: "The marvelous Chaumukha Temple with 29 halls and 1444 pillar vault, Parshvanath Temple featuring erotic style window frames, and the beautiful Sun Temple nearby.",
-      hi: "२२ विशाल मंडपों वाला अद्भुत १४४४ स्तंभों का चौमुख मंदिर, सुंदर पार्श्वनाथ मंदिर (जिसमें आकर्षक जालीदार पत्थर की खिड़कियां हैं) और परिसर से १ किमी दूर स्थित प्राचीन सूर्य मंदिर।"
-    },
-    howToReach: {
-      en: "By Air: Udaipur Airport (95 km). By Train: Falna Railway Station (FA) is 35 km away. Road: easily accessible via well-maintained national highways from Jodhpur or Udaipur.",
-      hi: "हवाई मार्ग: उदयपुर हवाई अड्डा (९५ किमी)। रेल मार्ग: फालना रेलवे स्टेशन (FA) जो यहाँ से ३५ किमी दूर है। सड़क मार्ग: उदयपुर, जोधपुर तथा माउंट आबू से रणकपुर के लिए सीधी बसें तथा निजी टैक्सियां आसानी से मिल जाती हैं।"
-    }
-  },
-  {
-    id: "shravanabelagola",
-    name: { en: "Shravanabelagola (श्रवणबेलगोला)", hi: "श्रवणबेलगोला महामस्तकाभिषेक" },
-    region: { en: "Hassan, Karnataka", hi: "हासन, कर्नाटक" },
-    significance: {
-      en: "Home to the colossal 57-foot continuous monolithic statue of Lord Bahubali (Gomateshwara), carved in 981 AD.",
-      hi: "९८१ ईस्वी में निर्मित भगवान बाहुबली (गोमटेश्वर) की ५७ फीट ऊंची विशालकाय एकाश्म (एक ही पत्थर से बनी) मूर्ति।"
-    },
-    history: {
-      en: "Carved under Chavundaraya, prime minister of Ganga Dynasty, atop Vindhyagiri hill. Once every 12 years, the spectacular 'Mahamastakabhisheka' ceremony bathes the statue in milk, saffron, turmeric, and gold coins.",
-      hi: "गंगा राजवंश के मंत्री चामुंडराय द्वारा विंध्यगिरि पहाड़ी पर निर्मित। प्रत्येक १२ वर्ष में यहाँ महामस्तकाभिषेक आयोजित होता है, जिससे भगवान बाहुबली की मूर्ति का अद्भुत अभिषेक होता है।"
-    },
-    bestVisible: { en: "October to February", hi: "अक्टूबर से फरवरी (पहाड़ी ग्रेनाइट पत्थरों पर धूप कम तीखी होती है)" },
-    rules: [
-      "Ascend the 600+ stone steps barefoot. Socks are allowed for elderly.",
-      "Worshipers can carry pure floral plates to offer at the top.",
-      "Keep yourself fully hydrated before starting the climb.",
-      "Photography has localized charge ticket and restricted angles."
-    ],
-    rulesHi: [
-      "६०० से अधिक चट्टानी सीढ़ियों की चढ़ाई नंगे पैर करनी होती है। बुजुर्गों के लिए मोजे अनुमत हैं।",
-      "पीने का पानी साथ रखें क्योंकि चढ़ाई से थकान हो सकती है।",
-      "मुख्य चोटी के आस पास पवित्रता एवं मर्यादा का उल्लंघन न करें।"
-    ],
-    coordinates: "https://maps.google.com/?q=Gomateshwara+Shravanabelagola+Karnataka",
-    image: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b2/Shravanabelgola_Bahubali_Monolithic_Statue_Karnataka.jpg/800px-Shravanabelgola_Bahubali_Monolithic_Statue_Karnataka.jpg",
-    lat: 12.8582,
-    lng: 76.4718,
-    nearby: [
-      { name: { en: "Chandragiri Hill Basadi", hi: "चंद्रगिरि पहाड़ी जैन बस्तियाँ" }, distance: "0.5 km" },
-      { name: { en: "Bhandari Basti", hi: "भंडारी बस्ती" }, distance: "Village Base" }
-    ],
-    whatToVisit: {
-      en: "The massive Gomateshwara Bahubali Statue on Vindhyagiri hill, Bhattaraka Matha historic murals, Tyagada Kamba pillar, and 14 Basadis (temples) atop Chandragiri hill opposite.",
-      hi: "विंध्यगिरि पहाड़ी पर स्थित भगवान गोमटेश्वर बाहुबली की विशालकाय प्रतिमा, भट्टारक स्वामी मठ के भित्तिचित्र, ऐतिहासिक त्यागद स्तंभ और सामने स्थित चंद्रगिरि पहाड़ी पर चंद्रगुप्त मौर्य की गुफा एवं १४ प्राचीन बस्तियां (जिनालय)।"
-    },
-    howToReach: {
-      en: "By Air: Bengaluru Airport (165 km). By Train: Shravanabelagola Railway Station (SBGA) connects to Hassan and Bengaluru. Road: major buses operate on national highways directly from Mysore and Bengaluru.",
-      hi: "हवाई मार्ग: केम्पेगौड़ा हवाई अड्डा बेंगलुरु (१६५ किमी)। रेल मार्ग: श्रवणबेलगोला रेलवे स्टेशन (SBGA) जो बेंगलुरु और हासन से सीधे जुड़ा है। सड़क मार्ग: हासन, मैसूर और बेंगलुरु से सीधी लग्जरी बसें और कार मार्ग उपलब्ध हैं।"
-    }
-  }
-];
+import { collection, onSnapshot } from 'firebase/firestore';
+import { db } from '../firebase';
+import { TIRTHS_DATA, ALL_60_TIRTHS, TirthItem, NearbyTemple } from '../data/tirthsData';
 
 const SIMULATED_CITIES = [
   { name: { en: "Indore (MP)", hi: "इन्दौर (म.प्र.)" }, lat: 22.7196, lng: 75.8577 },
@@ -315,6 +41,61 @@ export default function TirthPage() {
   const [search, setSearch] = useState('');
   const [selectedTirth, setSelectedTirth] = useState<TirthItem | null>(null);
   const [showHelpModal, setShowHelpModal] = useState(false);
+
+  // Firestore dynamic sync state
+  const [firestoreTirths, setFirestoreTirths] = useState<TirthItem[]>([]);
+
+  useEffect(() => {
+    // Subscribe to Firestore 'tirth' collection for live updates/additions
+    const q = collection(db, 'tirth');
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const docsData: TirthItem[] = [];
+      snapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        docsData.push({
+          id: docSnap.id,
+          name: data.name || { en: '', hi: '' },
+          region: data.region || { en: '', hi: '' },
+          significance: data.significance || { en: '', hi: '' },
+          history: data.history || { en: '', hi: '' },
+          bestVisible: data.bestVisible || { en: '', hi: '' },
+          rules: data.rules || [],
+          rulesHi: data.rulesHi || [],
+          coordinates: data.coordinates || '',
+          image: data.image || 'https://images.unsplash.com/photo-1609137144814-7f1543faf743?auto=format&fit=crop&q=80&w=800',
+          lat: data.lat || 20.0,
+          lng: data.lng || 75.0,
+          nearby: data.nearby || [],
+          whatToVisit: data.whatToVisit || { en: '', hi: '' },
+          howToReach: data.howToReach || { en: '', hi: '' },
+          bestSpotsToVisit: data.bestSpotsToVisit || { en: [], hi: [] }
+        });
+      });
+      setFirestoreTirths(docsData);
+    }, (error) => {
+      console.error("Firestore 'tirth' subscription error:", error);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // Merge static 60+ Tirths with dynamic live Firestore items
+  const combinedTirths = useMemo(() => {
+    const base = [...ALL_60_TIRTHS];
+    const merged = [...base];
+    
+    firestoreTirths.forEach(ft => {
+      // Find matching item by ID or name
+      const matchIdx = merged.findIndex(item => item.id === ft.id || item.name.en.toLowerCase() === ft.name.en.toLowerCase());
+      if (matchIdx !== -1) {
+        // Replace/update
+        merged[matchIdx] = { ...merged[matchIdx], ...ft };
+      } else {
+        // Append new custom added place
+        merged.push(ft);
+      }
+    });
+    return merged;
+  }, [firestoreTirths]);
 
   // New interactive states
   const [selectedCityIdx, setSelectedCityIdx] = useState<number>(0);
@@ -433,7 +214,7 @@ export default function TirthPage() {
     );
   };
 
-  const filtered = TIRTHS_DATA.filter(t => 
+  const filtered = combinedTirths.filter(t => 
     t.name.en.toLowerCase().includes(search.toLowerCase()) ||
     t.name.hi.toLowerCase().includes(search) ||
     t.region.en.toLowerCase().includes(search)
@@ -781,6 +562,37 @@ export default function TirthPage() {
                   </p>
                 </div>
 
+                {/* CURATED TOP 20 VISITING SPOTS (REQUESTED BY USER) */}
+                <div className="p-5 rounded-[2rem] bg-gradient-to-tr from-[#FF6D00]/10 via-[#FFD54F]/5 to-transparent border border-orange-500/20 space-y-4 text-left">
+                  <div className="flex items-center gap-2.5 text-orange-600 dark:text-[#FFD54F]">
+                    <Sparkles size={20} className="animate-pulse" />
+                    <div>
+                      <h4 className="text-sm font-black uppercase tracking-wider text-left">
+                        {lang === 'en' ? 'Top 20 Best Spots to Visit' : 'शीर्ष २० सर्वोत्तम दर्शनीय स्थल'}
+                      </h4>
+                      <span className="text-[9px] uppercase tracking-wider text-gray-400 block font-bold text-left">
+                        {lang === 'en' ? 'Curated Pilgrimage Checklist' : 'अनुशंसित यात्रा सूची'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-semibold">
+                    {(selectedTirth.bestSpotsToVisit?.[lang] || selectedTirth.bestSpotsToVisit?.en || []).map((spot: string, i: number) => (
+                      <div 
+                        key={i} 
+                        className="flex items-center gap-2.5 p-3 rounded-xl bg-white/80 dark:bg-zinc-900/40 border border-gray-100 dark:border-white/5 shadow-sm hover:border-orange-500/30 transition-all group"
+                      >
+                        <div className="w-6 h-6 rounded-lg bg-orange-100 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 flex items-center justify-center font-black shrink-0 text-[10px]">
+                          {i + 1}
+                        </div>
+                        <span className="text-gray-800 dark:text-zinc-200 leading-tight group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
+                          {spot.replace(/^\d+\.\s*/, '')}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
                 {/* How to Reach Guide */}
                 <div className="p-4 rounded-2xl bg-amber-550/5 dark:bg-amber-500/5 border border-amber-500/10 space-y-2 text-left">
                   <div className="flex items-center gap-2 text-amber-500">
@@ -1100,7 +912,7 @@ export default function TirthPage() {
                     : 'शिखरजी, कुण्डलपुर, गिरनार जी व सोनागिरि की निर्माण गाथा और वैज्ञानिक रहस्यों को जानें।'}
                 </li>
                 <li>
-                  <strong className="text-[#FFD54F]">{lang === 'en' ? 'Inter-City Distance Grid:' : 'दूरी मापन एवं जीपीएस नेविगेशन:'}</strong>{' '}
+                  <strong className="text-[#FFD54F]">{lang === 'en' ? 'Inter-City Distance Grid:' : 'दूरी मापन एवं जीपीएस नेвиगेशन:'}</strong>{' '}
                   {lang === 'en'
                     ? 'Select your base city (simulated or via browser GPS location) to instantly estimate direct distances to all listed holy lands.'
                     : 'अपने वर्तमान क्षेत्र या जीपीएस पोजीशन से प्रत्येक तीर्थ की वास्तविक दूरी तुरंत पता करें और सीधे गूगल मैप मार्ग खोलें।'}

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { Users, Info, ArrowLeft, Loader2, Search, Mic, MicOff, Star, Compass, Network, ArrowDown, Sparkles, Shield, AlertTriangle, Bell, MapPin, Navigation, Globe } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
@@ -190,7 +190,20 @@ export default function SaintsPage() {
     }
   };
 
-  const displaySaints = saints.length > 0 ? saints : FALLBACK_SAINTS;
+  const displaySaints = useMemo(() => {
+    const combined = [...FALLBACK_SAINTS];
+    saints.forEach((fs: any) => {
+      const matchIdx = combined.findIndex(item => 
+        (item.name?.en && fs.name?.en && item.name.en.toLowerCase() === fs.name.en.toLowerCase())
+      );
+      if (matchIdx !== -1) {
+        combined[matchIdx] = { ...combined[matchIdx], ...fs };
+      } else {
+        combined.push(fs);
+      }
+    });
+    return combined;
+  }, [saints]);
 
   const matchesSearch = (saint: any) => {
     if (!search.trim()) return true;

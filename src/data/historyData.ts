@@ -3,14 +3,16 @@
 // ancient temples, inscriptions, and heritage sites across India.
 
 export interface HeritageItem {
+  id?: string;
   period: string;
   title: { hi: string; en: string };
   image: string;
   desc: { hi: string; en: string };
-  color: string;
+  color?: string;
   category: "Temple" | "Monument" | "Inscription" | "Event" | "Heritage Site";
   state: string;
   era: string;
+  detailedText?: { hi: string; en: string };
 }
 
 // 8 Core Epochs of Jain History

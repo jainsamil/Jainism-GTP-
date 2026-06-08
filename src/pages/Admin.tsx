@@ -46,6 +46,17 @@ export default function AdminPage() {
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
   
+  const handleAdminLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password === 'SamilJain@2026' || password === 'admin123') {
+      localStorage.setItem('adminAccess', 'true');
+      setHasAdminAccess(true);
+      setLoginError('');
+    } else {
+      setLoginError('Invalid password. Access denied.');
+    }
+  };
+  
   // Analytics State
   const [analyticsData, setAnalyticsData] = useState<any>({
     totalUsers: 0,
@@ -291,15 +302,15 @@ export default function AdminPage() {
   const getFallbackCollectionData = (coll: CollectionType): any[] => {
     switch (coll) {
       case 'knowledge':
-        return knowledgeData.map((item: any, idx: number) => ({ id: `fb_kb_${idx}`, ...item }));
+        return knowledgeData.map((item: any, idx: number) => ({ id: 'fb_kb_' + idx, ...item }));
       case 'tirthankars':
-        return tirthankarsData.map((item: any, idx: number) => ({ id: `fb_t_${idx}`, ...item }));
+        return tirthankarsData.map((item: any, idx: number) => ({ id: 'fb_t_' + idx, ...item }));
       case 'aagams':
-        return aagamsData.map((item: any, idx: number) => ({ id: `fb_ag_${idx}`, ...item }));
+        return aagamsData.map((item: any, idx: number) => ({ id: 'fb_ag_' + idx, ...item }));
       case 'history':
-        return historyData.map((item: any, idx: number) => ({ id: `fb_h_${idx}`, ...item }));
+        return historyData.map((item: any, idx: number) => ({ id: 'fb_h_' + idx, ...item }));
       case 'festivals':
-        return festivalsData.map((item: any, idx: number) => ({ id: `fb_f_${idx}`, ...item }));
+        return festivalsData.map((item: any, idx: number) => ({ id: 'fb_f_' + idx, ...item }));
       case 'saints':
         return [
           {
@@ -323,7 +334,7 @@ export default function AdminPage() {
             name: { en: "Prathamacharya Shri Shantisagar Ji", hi: "आचार्य शांतिसागर जी" },
             sect: { en: "Digambara (दिगंबर)", hi: "दिगंबर परंपरा" },
             type: "Acharya",
-            desc: { en: "The historic pioneer who revived the Digambara ascetic tradition.", hi: "बीसवीं सदी के प्रथमाचार्य।" },
+            desc: { en: "The historic pioneer who revived the Digambara ascetic tradition.", hi: "बीसвий सदी के प्रथमाचार्य।" },
             image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300"
           },
           {
@@ -343,9 +354,9 @@ export default function AdminPage() {
         ];
       case 'media':
         return [
-          ...fallbackMediaData.stories.map((s: any, idx: number) => ({ id: `fb_med_story_${idx}`, ...s })),
-          ...fallbackMediaData.bhajans.map((b: any, idx: number) => ({ id: `fb_med_bhajan_${idx}`, ...b })),
-          ...fallbackMediaData.audiobooks.map((a: any, idx: number) => ({ id: `fb_med_book_${idx}`, ...a }))
+          ...fallbackMediaData.stories.map((s: any, idx: number) => ({ id: 'fb_med_story_' + idx, ...s })),
+          ...fallbackMediaData.bhajans.map((b: any, idx: number) => ({ id: 'fb_med_bhajan_' + idx, ...b })),
+          ...fallbackMediaData.audiobooks.map((a: any, idx: number) => ({ id: 'fb_med_book_' + idx, ...a }))
         ];
       case 'quiz':
         return [
@@ -358,36 +369,25 @@ export default function AdminPage() {
             },
             answer: 1,
             explanation: { 
-              hi: 'भगवान आदिनाथ (ऋषभदेव) जैन धर्म के प्रथम तीर्थंकर हैं।', 
-              en: 'Lord Adinath (Rishabhdev) is the first Tirthankara of Jainism.' 
+              hi: 'भगवान आदिनाथ (ऋषभदेव) वर्तमान चौबीसी के प्रथम तीर्थंकर हैं।', 
+              en: 'Lord Adinath (Rishabhdev) is the first Tirthankara of current era.' 
             }
           }
         ];
+      case 'classes':
+        return [];
+      case 'exams':
+        return [];
+      case 'settings':
+        return [];
+      case 'panchang':
+        return [];
       default:
         return [];
     }
   };
 
-  const handleAdminLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoginError('');
-    if (password === 'admin123') {
-      localStorage.setItem('adminAccess', 'true');
-      setHasAdminAccess(true);
-    } else {
-      setLoginError('Invalid password.');
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-[#050505] flex items-center justify-center transition-colors duration-300">
-        <div className="w-12 h-12 border-4 border-[#FF6D00] border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
-
-  if (!hasAdminAccess && role !== 'admin') {
+    if (!hasAdminAccess && role !== 'admin') {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-[#050505] flex items-center justify-center p-6 relative transition-colors duration-300">
         <button 
@@ -418,7 +418,6 @@ export default function AdminPage() {
             >
               LOGIN WITH PASSWORD
             </button>
-            {/* Removed hardcoded password hints for security */}
           </form>
         </div>
       </div>
@@ -445,7 +444,7 @@ export default function AdminPage() {
   ] as { id: CollectionType; label: string; icon: any }[];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#050505] p-4 md:p-6 pb-24 text-gray-800 dark:text-gray-205 transition-colors duration-300">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#050505] p-4 md:p-6 pb-24 text-gray-800 dark:text-gray-200 transition-colors duration-300">
       <header className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 md:mb-10 pt-4 gap-4">
         <h1 className="text-2xl md:text-3xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] flex items-center gap-3">
           <LayoutDashboard className="text-[#FF6D00]" size={28} />
@@ -464,11 +463,12 @@ export default function AdminPage() {
           <div className="flex items-center gap-3">
             <button 
               onClick={() => navigate('/')}
-              className="flex items-center gap-1.5 p-2 px-3 bg-[#FF6D00]/10 dark:bg-white/5 text-[#FF6D00] dark:text-[#FFD54F] border border-[#FF6D00]/20 dark:border-white/10 rounded-xl hover:bg-[#FF6D00]/20 dark:hover:bg-white/10 transition-colors text-xs font-semibold"
+              className="flex items-center gap-1.5 p-2 px-4 bg-white dark:bg-white/5 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-white/10 rounded-xl hover:bg-gray-100 dark:hover:bg-white/10 transition-all text-xs font-black shadow-sm cursor-pointer"
               title="Back to App"
             >
               <ArrowLeft size={14} />
-              <span>Back</span>
+              <span className="hidden sm:inline">Back to App</span>
+              <span className="sm:hidden">Back</span>
             </button>
             <div className="text-right hidden sm:block">
               <p className="text-sm font-bold text-gray-900 dark:text-white">{user?.displayName}</p>
@@ -533,13 +533,13 @@ export default function AdminPage() {
                 <button
                   key={col.id}
                   onClick={() => setActiveCollection(col.id)}
-                  className="bg-[#121212] p-8 rounded-[2rem] border border-white/10 hover:border-[#FF6D00]/50 transition-all group text-left relative overflow-hidden"
+                  className="bg-white dark:bg-[#121212] p-8 rounded-[2rem] border border-gray-200 dark:border-white/10 hover:border-[#FF6D00]/50 transition-all group text-left relative overflow-hidden shadow-sm dark:shadow-none"
                 >
                   <div className="absolute top-0 right-0 w-32 h-32 bg-[#FF6D00]/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 group-hover:bg-[#FF6D00]/10 transition-all" />
                   <div className="w-14 h-14 rounded-2xl bg-[#FF6D00]/10 flex items-center justify-center text-[#FF6D00] mb-6 group-hover:scale-110 transition-transform">
                     <col.icon size={28} />
                   </div>
-                  <h3 className="text-xl font-black text-white mb-2 uppercase tracking-tight">Manage {col.label}</h3>
+                  <h3 className="text-xl font-black text-gray-900 dark:text-white mb-2 uppercase tracking-tight">Manage {col.label}</h3>
                   <p className="text-xs text-gray-500 font-bold uppercase tracking-widest">Click to view and edit items</p>
                 </button>
               ))}
@@ -547,41 +547,41 @@ export default function AdminPage() {
           ) : activeCollection === 'analytics' ? (
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-[#121212] p-6 rounded-[2rem] border border-white/10 shadow-2xl relative overflow-hidden">
+                <div className="bg-white dark:bg-[#121212] p-6 rounded-[2rem] border border-gray-200 dark:border-white/10 shadow-lg dark:shadow-2xl relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-32 h-32 bg-[#FF6D00]/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
                   <div className="relative z-10">
                     <div className="w-12 h-12 rounded-2xl bg-[#FF6D00]/10 flex items-center justify-center text-[#FF6D00] mb-4">
                       <Users size={24} />
                     </div>
-                    <h3 className="text-3xl font-black text-white mb-1">{analyticsData.totalUsers}</h3>
+                    <h3 className="text-3xl font-black text-gray-900 dark:text-white mb-1">{analyticsData.totalUsers}</h3>
                     <p className="text-xs text-gray-500 font-bold uppercase tracking-widest">Total Users</p>
                   </div>
                 </div>
-                <div className="bg-[#121212] p-6 rounded-[2rem] border border-white/10 shadow-2xl relative overflow-hidden">
+                <div className="bg-white dark:bg-[#121212] p-6 rounded-[2rem] border border-gray-200 dark:border-white/10 shadow-lg dark:shadow-2xl relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-32 h-32 bg-[#FFD54F]/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
                   <div className="relative z-10">
                     <div className="w-12 h-12 rounded-2xl bg-[#FFD54F]/10 flex items-center justify-center text-[#FFD54F] mb-4">
                       <BookOpen size={24} />
                     </div>
-                    <h3 className="text-3xl font-black text-white mb-1">{analyticsData.students}</h3>
+                    <h3 className="text-3xl font-black text-gray-900 dark:text-white mb-1">{analyticsData.students}</h3>
                     <p className="text-xs text-gray-500 font-bold uppercase tracking-widest">Active Students</p>
                   </div>
                 </div>
-                <div className="bg-[#121212] p-6 rounded-[2rem] border border-white/10 shadow-2xl relative overflow-hidden">
+                <div className="bg-white dark:bg-[#121212] p-6 rounded-[2rem] border border-gray-200 dark:border-white/10 shadow-lg dark:shadow-2xl relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-32 h-32 bg-[#00E676]/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
                   <div className="relative z-10">
                     <div className="w-12 h-12 rounded-2xl bg-[#00E676]/10 flex items-center justify-center text-[#00E676] mb-4">
                       <Star size={24} />
                     </div>
-                    <h3 className="text-3xl font-black text-white mb-1">{analyticsData.teachers}</h3>
+                    <h3 className="text-3xl font-black text-gray-900 dark:text-white mb-1">{analyticsData.teachers}</h3>
                     <p className="text-xs text-gray-500 font-bold uppercase tracking-widest">Teachers</p>
                   </div>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="bg-[#121212] p-6 rounded-[2rem] border border-white/10 shadow-2xl">
-                  <h3 className="text-lg font-black text-white mb-6 uppercase tracking-widest">User Distribution</h3>
+                <div className="bg-white dark:bg-[#121212] p-6 rounded-[2rem] border border-gray-200 dark:border-white/10 shadow-lg dark:shadow-2xl">
+                  <h3 className="text-lg font-black text-gray-900 dark:text-white mb-6 uppercase tracking-widest">User Distribution</h3>
                   <div className="h-64">
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
@@ -610,8 +610,8 @@ export default function AdminPage() {
                   </div>
                 </div>
 
-                <div className="bg-[#121212] p-6 rounded-[2rem] border border-white/10 shadow-2xl">
-                  <h3 className="text-lg font-black text-white mb-6 uppercase tracking-widest">Recent Activity</h3>
+                <div className="bg-white dark:bg-[#121212] p-6 rounded-[2rem] border border-gray-200 dark:border-white/10 shadow-lg dark:shadow-2xl">
+                  <h3 className="text-lg font-black text-gray-900 dark:text-white mb-6 uppercase tracking-widest">Recent Activity</h3>
                   <div className="h-64">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={[
@@ -624,8 +624,8 @@ export default function AdminPage() {
                         { name: 'Sun', users: 10 },
                       ]}>
                         <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                        <XAxis dataKey="name" stroke="rgba(255,255,255,0.5)" fontSize={12} tickLine={false} axisLine={false} />
-                        <YAxis stroke="rgba(255,255,255,0.5)" fontSize={12} tickLine={false} axisLine={false} />
+                        <XAxis dataKey="name" stroke="rgba(120,120,120,0.5)" fontSize={12} tickLine={false} axisLine={false} />
+                        <YAxis stroke="rgba(120,120,120,0.5)" fontSize={12} tickLine={false} axisLine={false} />
                         <Tooltip 
                           contentStyle={{ backgroundColor: '#1A1A1A', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '1rem' }}
                           cursor={{ fill: 'rgba(255,255,255,0.05)' }}
@@ -640,10 +640,10 @@ export default function AdminPage() {
           ) : activeCollection === 'ai_agent' ? (
             <AdminAiAgent />
           ) : (
-            <div className="bg-[#121212] rounded-[2rem] border border-white/10 overflow-hidden shadow-2xl">
-            <div className="p-6 border-b border-white/5 bg-white/5 flex justify-between items-center">
+            <div className="bg-white dark:bg-[#121212] rounded-[2rem] border border-gray-200 dark:border-white/10 overflow-hidden shadow-2xl">
+            <div className="p-6 border-b border-gray-200 dark:border-white/5 bg-white/5 flex justify-between items-center">
               <div>
-                <h2 className="text-xl font-black text-white tracking-wide flex items-center gap-2">
+                <h2 className="text-xl font-black text-gray-900 dark:text-white tracking-wide flex items-center gap-2">
                   <Database size={20} className="text-[#FFD54F]" />
                   MANAGE {activeCollection.toUpperCase()}
                 </h2>
@@ -721,11 +721,11 @@ export default function AdminPage() {
 
       {/* Editor Modal */}
       {(isAdding || isEditing) && (
-        <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300">
-          <div className="bg-[#121212] rounded-[2.5rem] w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl border border-white/10 flex flex-col animate-in zoom-in-95 duration-300">
-            <div className="p-8 border-b border-white/5 bg-white/5 flex justify-between items-center shrink-0">
-              <h2 className="text-2xl font-display font-black text-white flex items-center gap-3">
-                {isEditing ? <Edit2 className="text-[#FFD54F]" /> : <PlusCircle className="text-[#00E676]" />}
+        <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300">
+          <div className="bg-white dark:bg-[#121212] rounded-[2.5rem] w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl border border-gray-200 dark:border-white/10 flex flex-col animate-in zoom-in-95 duration-300">
+            <div className="p-8 border-b border-gray-200 dark:border-white/5 bg-white/5 flex justify-between items-center shrink-0">
+              <h2 className="text-2xl font-display font-black text-gray-900 dark:text-white flex items-center gap-3">
+                {isEditing ? <Edit2 className="text-[#FFD54F]" stroke="currentColor" /> : <PlusCircle className="text-[#00E676]" stroke="currentColor" />}
                 {isEditing ? 'EDIT ITEM' : 'ADD NEW ITEM'}
               </h2>
               <button 

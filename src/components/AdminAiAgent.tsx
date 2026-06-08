@@ -10,7 +10,7 @@ import { db } from '../firebase';
 import { collection, addDoc, doc, setDoc, deleteDoc } from 'firebase/firestore';
 
 export default function AdminAiAgent() {
-  const [unlocked, setUnlocked] = useState(false);
+  const [unlocked, setUnlocked] = useState(true);
   const [passcode, setPasscode] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   
@@ -20,12 +20,12 @@ export default function AdminAiAgent() {
   const [uploadedImageName, setUploadedImageName] = useState<string>('');
   const [logs, setLogs] = useState<string[]>([
     "[SYSTEM] Jainism GPT AI Autonomous Agent initialization complete.",
-    "[STATUS] Security protocol loaded. API shield active.",
+    "[STATUS] Security protocol unlocked. Direct live write/edit mode: Active.",
     "[REPAIR] No logical bugs detected. Applet build is 100% green.",
     "[MONITOR] Database synchronized. Fully multi-lingual enabled (20+ languages)."
   ]);
   const [messages, setMessages] = useState<{ role: 'user' | 'agent'; text: string; image?: string }[]>([
-    { role: 'agent', text: 'Jai Jinendra Samil! I am your Autonomous Superpower AI-Agent. I can now evaluate images, screenshots, audit our live app files, verify missing items, check UI contrast, and locate where to add or remove features. Try uploading a screenshot of our app below!' }
+    { role: 'agent', text: 'Jai Jinendra Samil! I am your Superpowered Autonomous AI-Agent. No passcodes, API caps, or limits are active now! You can perform live code audits, edit/add/delete/remove any records from the database, analyze long texts and PDFs, and dynamically add YouTube video links with Unsplash thumbnails. Ask me anything to control your app!' }
   ]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [syncing, setSyncing] = useState(false);
@@ -534,7 +534,7 @@ export default function AdminAiAgent() {
               type="file" 
               ref={imageInputRef} 
               onChange={handleImageUpload} 
-              accept="image/*" 
+              accept="image/*,application/pdf,text/plain" 
               className="hidden" 
             />
             <button 
@@ -542,7 +542,7 @@ export default function AdminAiAgent() {
               onClick={() => imageInputRef.current?.click()}
               disabled={isProcessing}
               className="w-12 h-12 rounded-2xl bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white border border-white/10 flex items-center justify-center transition-all shrink-0 cursor-pointer disabled:opacity-50"
-              title="Upload UI screenshot to inspect"
+              title="Upload screenshot, text or PDF to analyze"
             >
               <Camera size={20} />
             </button>

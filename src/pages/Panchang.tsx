@@ -587,7 +587,7 @@ export default function PanchangPage() {
   const selectedDetails = selectedDate ? getPanchangDetails(selectedDate) : null;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#080808] text-gray-955 dark:text-white p-4 pb-24 overflow-x-hidden transition-colors duration-300">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#080808] text-gray-900 dark:text-white p-4 pb-24 overflow-x-hidden transition-colors duration-300">
       
       {/* Sticky Header with inline controls */}
       <header className="sticky top-0 z-40 bg-white/95 dark:bg-black/95 backdrop-blur-md -mx-4 -mt-4 px-4 pt-4 pb-4 mb-6 border-b border-gray-200 dark:border-white/5 flex items-center justify-between gap-2 md:gap-4">
@@ -612,7 +612,7 @@ export default function PanchangPage() {
             className="px-2.5 py-1.5 sm:px-3 sm:py-2 bg-[#FF3D00] text-white hover:bg-[#D50000] active:scale-95 transition-all shadow-sm rounded-xl flex items-center justify-center gap-1.5 font-bold text-[9px] sm:text-[10px] cursor-pointer border border-[#FF9100]/20 shrink-0 h-8 sm:h-9"
             title="Translate Language / भाषा बदलें"
           >
-            <Globe size={11} className="shrink-0 animate-spin-slow" />
+            <Globe size={11} className="shrink-0" />
             <span>{language === 'en' ? 'हिन्दी' : 'English'}</span>
           </button>
         </div>
@@ -631,11 +631,11 @@ export default function PanchangPage() {
                 {format(currentDate, 'MMMM yyyy', { locale: language === 'hi' ? hi : undefined })}
               </h2>
               <div className="flex gap-4 justify-center mt-2">
-                <span className="text-[10px] font-bold text-gray-450 dark:text-gray-500 tracking-widest uppercase">
+                <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400 tracking-widest uppercase">
                   {language === 'hi' ? `वि.सं. ${currentDate.getFullYear() + 57}` : `V.S. ${currentDate.getFullYear() + 57}`}
                 </span>
                 <span className="text-[10px] text-gray-300 dark:text-gray-700">|</span>
-                <span className="text-[10px] font-bold text-gray-450 dark:text-gray-500 tracking-widest uppercase">
+                <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400 tracking-widest uppercase">
                   {language === 'hi' ? `वी.नि.सं. ${currentDate.getFullYear() + 527}` : `V.N.S. ${currentDate.getFullYear() + 527}`}
                 </span>
               </div>
@@ -647,7 +647,7 @@ export default function PanchangPage() {
 
           <div className="grid grid-cols-7 gap-1 mb-8 relative z-10">
             {[t.sun, t.mon, t.tue, t.wed, t.thu, t.fri, t.sat].map((day) => (
-              <div key={day} className="text-center text-[10px] font-black text-gray-500 dark:text-gray-600 uppercase tracking-widest">
+              <div key={day} className="text-center text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">
                 {day}
               </div>
             ))}
@@ -683,7 +683,7 @@ export default function PanchangPage() {
                   </div>
                   <span className={cn(
                     "text-[8px] font-bold uppercase tracking-tighter opacity-70",
-                    isSelected ? "text-[#FF6D00] dark:text-[#FFD54F] opacity-100 font-extrabold" : "text-gray-500 dark:text-gray-450"
+                    isSelected ? "text-[#FF6D00] dark:text-[#FFD54F] opacity-100 font-extrabold" : "text-gray-500 dark:text-gray-400"
                   )}>
                     {details.tithi}
                   </span>

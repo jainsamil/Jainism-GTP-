@@ -126,7 +126,8 @@ app.post('/api/admin/ai-generate-data', async (req, res) => {
       contents: prompt,
       config: {
         systemInstruction,
-        responseMimeType: "application/json"
+        responseMimeType: "application/json",
+        tools: [{ googleSearch: {} }]
       }
     });
 
@@ -218,7 +219,8 @@ Do not wrap inside markdown code blocks, just return pure JSON.`;
       contents,
       config: {
         systemInstruction: nlpSystemInstruction,
-        responseMimeType: "application/json"
+        responseMimeType: "application/json",
+        tools: [{ googleSearch: {} }]
       }
     });
 

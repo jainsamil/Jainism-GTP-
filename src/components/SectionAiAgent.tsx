@@ -17,7 +17,7 @@ interface SectionAiAgentProps {
 export default function SectionAiAgent({ section }: SectionAiAgentProps) {
   const { language } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
-  const [unlocked, setUnlocked] = useState(false);
+  const [unlocked, setUnlocked] = useState(true);
   const [passcode, setPasscode] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   

@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { historyData, HeritageItem } from '../data/historyData';
 import SectionAiAgent from '../components/SectionAiAgent';
+import { collection, onSnapshot } from 'firebase/firestore';
+import { db } from '../firebase';
 
 export default function HistoryPage() {
   const { language, toggleLanguage } = useLanguage();
@@ -15,6 +17,34 @@ export default function HistoryPage() {
   const [visibleCount, setVisibleCount] = useState(18);
   const [showHelpModal, setShowHelpModal] = useState(false);
 
+  // Firestore dynamic sync state
+  const [firestoreHistory, setFirestoreHistory] = useState<HeritageItem[]>([]);
+
+  useEffect(() => {
+    const q = collection(db, 'history');
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const docsData: HeritageItem[] = [];
+      snapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        docsData.push({
+          id: docSnap.id,
+          title: data.title || { en: '', hi: '' },
+          desc: data.desc || { en: '', hi: '' },
+          detailedText: data.detailedText || { en: '', hi: '' },
+          era: data.era || { en: '', hi: '' },
+          image: data.image || 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=600',
+          category: data.category || 'Temple',
+          state: data.state || 'Madhya Pradesh',
+          period: data.period || 'Ancient'
+        });
+      });
+      setFirestoreHistory(docsData);
+    }, (error) => {
+      console.error("Firestore history subscription error:", error);
+    });
+    return () => unsubscribe();
+  }, []);
+
   // Reset page size on filter change
   useEffect(() => {
     setVisibleCount(18);
@@ -24,18 +54,34 @@ export default function HistoryPage() {
   const mainEpochs = useMemo(() => historyData.slice(0, 8), []);
   const repositoryItems = useMemo(() => historyData.slice(8), []);
 
+  // Merge static list with Firestore live updates/additions
+  const combinedHistoryItems = useMemo(() => {
+    const combined = [...repositoryItems];
+    firestoreHistory.forEach(fh => {
+      const matchIdx = combined.findIndex(item => 
+        item.id === fh.id || (item.title?.en && fh.title?.en && item.title.en.toLowerCase() === fh.title.en.toLowerCase())
+      );
+      if (matchIdx !== -1) {
+        combined[matchIdx] = { ...combined[matchIdx], ...fh };
+      } else {
+        combined.push(fh);
+      }
+    });
+    return combined;
+  }, [repositoryItems, firestoreHistory]);
+
   const statesList = useMemo(() => {
     const states = new Set<string>();
-    repositoryItems.forEach(item => {
+    combinedHistoryItems.forEach(item => {
       if (item.state) states.add(item.state);
     });
     return ['All', ...Array.from(states).sort()];
-  }, [repositoryItems]);
+  }, [combinedHistoryItems]);
 
   const categoriesList = ['All', 'Temple', 'Monument', 'Inscription', 'Heritage Site'];
 
   const filteredItems = useMemo(() => {
-    return repositoryItems.filter(item => {
+    return combinedHistoryItems.filter(item => {
       const titleText = (item.title?.[language] || item.title?.en || '').toLowerCase();
       const descText = (item.desc?.[language] || item.desc?.en || '').toLowerCase();
       const matchesSearch = titleText.includes(searchQuery.toLowerCase()) || descText.includes(searchQuery.toLowerCase());
@@ -45,7 +91,7 @@ export default function HistoryPage() {
 
       return matchesSearch && matchesCategory && matchesState;
     });
-  }, [repositoryItems, searchQuery, selectedCategory, selectedState, language]);
+  }, [combinedHistoryItems, searchQuery, selectedCategory, selectedState, language]);
 
   const introText = {
     en: "Explore the ancient heritage, historical monuments, prehistoric caves, and scriptures testifying to the rich legacy of Jain history.",
