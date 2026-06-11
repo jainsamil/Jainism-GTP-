@@ -82,12 +82,18 @@ export default function BhaktamarPage() {
     const handleCanPlay = () => {
       setAudioLoading(false);
     };
+    const getProxiedUrl = (url: string) => {
+      return url.startsWith('http') && !url.includes(window.location.host)
+        ? `/api/audio-proxy?url=${encodeURIComponent(url)}`
+        : url;
+    };
+
     const handleError = (e: any) => {
       console.error("Bhaktamar audio loading error:", e);
       setAudioLoading(false);
       setAudioError("Primary stotra stream offline. Switching to standby relaxation stream...");
       
-      const standbyUrl = "https://archive.org/download/BhaktamarStotra_201306/Bhaktamar%20Stotra.mp3";
+      const standbyUrl = getProxiedUrl("https://archive.org/download/BhaktamarStotra_201306/Bhaktamar%20Stotra.mp3");
       setTimeout(() => {
         if (audioInstanceRef.current) {
           audioInstanceRef.current.src = standbyUrl;
@@ -117,7 +123,7 @@ export default function BhaktamarPage() {
     audio.addEventListener('error', handleError);
 
     // Load authentic complete Bhaktamar Stotra audio
-    audio.src = "https://archive.org/download/BhaktamarStotra_201306/Bhaktamar%20Stotra.mp3";
+    audio.src = getProxiedUrl("https://archive.org/download/BhaktamarStotra_201306/Bhaktamar%20Stotra.mp3");
     audio.load();
 
     return () => {

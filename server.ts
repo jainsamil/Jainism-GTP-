@@ -4,6 +4,8 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 import path from 'path';
 import { GoogleGenAI } from "@google/genai";
+import https from 'https';
+import { URL } from 'url';
 
 const app = express();
 const httpServer = createServer(app);
@@ -301,6 +303,79 @@ Do not wrap the JSON in Markdown code block blocks. Just return the clean JSON s
   } catch (error: any) {
     console.error("Manuscript Image Translation error:", error);
     res.status(500).json({ error: error.message || 'Failed to analyze manuscript image.' });
+  }
+});
+
+// Audio streaming proxy to bypass CORS/iframe restrictions on archive.org or other open resources
+app.get('/api/audio-proxy', (req, res) => {
+  const targetUrl = req.query.url as string;
+  if (!targetUrl) {
+    return res.status(400).json({ error: 'URL parameter is required.' });
+  }
+
+  try {
+    const parsedUrl = new URL(targetUrl);
+    // Safety list: only handle known sources or general audio-sharing directories
+    if (!parsedUrl.hostname.endsWith('archive.org') && !parsedUrl.hostname.endsWith('soundhelix.com') && !parsedUrl.hostname.includes('archive')) {
+      return res.status(400).json({ error: 'Unrecognized audio host domain.' });
+    }
+
+    const headers: Record<string, string> = {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)',
+    };
+
+    if (req.headers.range) {
+      headers['Range'] = req.headers.range;
+    }
+
+    const options = {
+      method: 'GET',
+      headers,
+    };
+
+    const makeRequest = (requestUrl: string) => {
+      const clientReq = https.request(requestUrl, options, (clientRes) => {
+        // Automatically follow any HTTP 301/302/307 redirects on server context
+        if ([301, 302, 307, 308].includes(clientRes.statusCode || 0)) {
+          const redirectUrl = clientRes.headers.location;
+          if (redirectUrl) {
+            console.log(`Audio Proxy forwarding redirect to: ${redirectUrl}`);
+            makeRequest(redirectUrl);
+            return;
+          }
+        }
+
+        // Convey standard metadata and boundary descriptors
+        const responseHeaders: Record<string, string> = {};
+        if (clientRes.headers['content-type']) responseHeaders['Content-Type'] = clientRes.headers['content-type'];
+        if (clientRes.headers['content-length']) responseHeaders['Content-Length'] = clientRes.headers['content-length'];
+        if (clientRes.headers['content-range']) responseHeaders['Content-Range'] = clientRes.headers['content-range'];
+        if (clientRes.headers['accept-ranges']) responseHeaders['Accept-Ranges'] = clientRes.headers['accept-ranges'];
+
+        // Enforce CORS permissions explicitly inside sandboxed client context
+        responseHeaders['Access-Control-Allow-Origin'] = '*';
+        responseHeaders['Access-Control-Allow-Headers'] = 'Range';
+        responseHeaders['Access-Control-Expose-Headers'] = 'Content-Range, Content-Length, Accept-Ranges';
+
+        res.writeHead(clientRes.statusCode || 200, responseHeaders);
+        clientRes.pipe(res);
+      });
+
+      clientReq.on('error', (err) => {
+        console.error('Audio proxy request error:', err);
+        if (!res.headersSent) {
+          res.status(500).json({ error: 'Error processing third party remote connection.' });
+        }
+      });
+
+      clientReq.end();
+    };
+
+    makeRequest(targetUrl);
+
+  } catch (err: any) {
+    console.error('Core proxy error:', err);
+    res.status(500).json({ error: 'Malformed or invalid target location.' });
   }
 });
 

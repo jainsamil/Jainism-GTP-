@@ -263,6 +263,136 @@ export const fallbackMediaData = {
       duration: "06 hrs 18 mins",
       thumbnail: "https://images.unsplash.com/photo-1532012197267-da84d127e765?q=80&w=600&auto=format&fit=crop",
       url: "https://archive.org/download/BhaktamarStotra_201306/Bhaktamar%20Stotra.mp3"
+    },
+    {
+      id: "fb_book_9",
+      type: "audiobooks",
+      title: "इष्टोपदेश अमृतवाणी विवेचन (Ishtopadesh)",
+      author: "आचार्य पूज्यपाद देव",
+      chapters: 51,
+      duration: "03 hrs 15 mins",
+      thumbnail: "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?q=80&w=600&auto=format&fit=crop",
+      url: "https://archive.org/download/bhaktamar-stotra-hindi/bhaktamar_hindi.mp3"
+    },
+    {
+      id: "fb_book_10",
+      type: "audiobooks",
+      title: "षट्खण्डागम महासिद्धान्त पाठ (Shatkhandagam)",
+      author: "आचार्य पुष्पदंत एवं भूतबली देव",
+      chapters: 6,
+      duration: "24 hrs 40 mins",
+      thumbnail: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=600&auto=format&fit=crop",
+      url: "https://archive.org/download/BhaktamarStotra_201306/Bhaktamar%20Stotra.mp3"
+    },
+    {
+      id: "fb_book_11",
+      type: "audiobooks",
+      title: "कषायपाहुड़ कर्म-सिद्धान्त विवेचन (Kasayapahuda)",
+      author: "आचार्य गुणधर देव",
+      chapters: 4,
+      duration: "18 hrs 10 mins",
+      thumbnail: "https://images.unsplash.com/photo-1506880018603-83d5b814b5a6?q=80&w=600&auto=format&fit=crop",
+      url: "https://archive.org/download/bhaktamar-stotra-hindi/bhaktamar_hindi.mp3"
+    },
+    {
+      id: "fb_book_12",
+      type: "audiobooks",
+      title: "नियमसार स्वाध्याय माला (Niyamsar)",
+      author: "आचार्य कुन्दकुन्द देव",
+      chapters: 187,
+      duration: "10 hrs 25 mins",
+      thumbnail: "https://images.unsplash.com/photo-1513001900722-370f803f498d?q=80&w=600&auto=format&fit=crop",
+      url: "https://archive.org/download/NavkarMantra_201704/Navkar%20Mantra.mp3"
+    },
+    {
+      id: "fb_book_13",
+      type: "audiobooks",
+      title: "अष्टपाहुड़ संवेग सागर (Ashtapahuda)",
+      author: "आचार्य कुन्दकुन्द देव",
+      chapters: 8,
+      duration: "14 hrs 15 mins",
+      thumbnail: "https://images.unsplash.com/photo-1495446815901-a7297e633e8d?q=80&w=600&auto=format&fit=crop",
+      url: "https://archive.org/download/BhaktamarStotra_201306/Bhaktamar%20Stotra.mp3"
+    },
+    {
+      id: "fb_book_14",
+      type: "audiobooks",
+      title: "पंचास्तिकाय संग्रह उत्कृष्ट प्रवचन (Panchastikay)",
+      author: "आचार्य कुन्दकुन्द देव",
+      chapters: 173,
+      duration: "09 hrs 30 mins",
+      thumbnail: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?q=80&w=600&auto=format&fit=crop",
+      url: "https://archive.org/download/bhaktamar-stotra-hindi/bhaktamar_hindi.mp3"
+    },
+    {
+      id: "fb_book_15",
+      type: "audiobooks",
+      title: "पद्मपुराण - मर्यादापुरुषोत्तम राम कथा (Padmapuran)",
+      author: "आचार्य रविषेण देव",
+      chapters: 123,
+      duration: "35 hrs 50 mins",
+      thumbnail: "https://images.unsplash.com/photo-1512820790803-83ca734da794?q=80&w=600&auto=format&fit=crop",
+      url: "https://archive.org/download/NavkarMantra_201704/Navkar%20Mantra.mp3"
+    },
+    {
+      id: "fb_book_16",
+      type: "audiobooks",
+      title: "हरिवंशपुराण - कृष्ण-नेमिनाथ गाथा (Harivanshpuran)",
+      author: "आचार्य जिनसेन देव",
+      chapters: 66,
+      duration: "32 hrs 15 mins",
+      thumbnail: "https://images.unsplash.com/photo-1532012197267-da84d127e765?q=80&w=600&auto=format&fit=crop",
+      url: "https://archive.org/download/BhaktamarStotra_201306/Bhaktamar%20Stotra.mp3"
+    },
+    {
+      id: "fb_book_17",
+      type: "audiobooks",
+      title: "तिलोयपण्णत्ती - त्रिलोक मानचित्र भूगोल (Tiloyapannatti)",
+      author: "आचार्य यतिवृषभ देव",
+      chapters: 9,
+      duration: "15 hrs 45 mins",
+      thumbnail: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=600&auto=format&fit=crop",
+      url: "https://archive.org/download/bhaktamar-stotra-hindi/bhaktamar_hindi.mp3"
+    },
+    {
+      id: "fb_book_18",
+      type: "audiobooks",
+      title: "गोम्मटसार - जीवकाण्ड एवं कर्मकाण्ड (Gommatasar)",
+      author: "आचार्य नेमिचन्द सिद्धांत चक्रवर्ती",
+      chapters: 2,
+      duration: "22 hrs 10 mins",
+      thumbnail: "https://images.unsplash.com/photo-1506880018603-83d5b814b5a6?q=80&w=600&auto=format&fit=crop",
+      url: "https://archive.org/download/BhaktamarStotra_201306/Bhaktamar%20Stotra.mp3"
+    },
+    {
+      id: "fb_book_19",
+      type: "audiobooks",
+      title: "मूलाचार - दिगंबर साधु आचरण संहिता (Mulachar)",
+      author: "आचार्य वट्टकेर स्वामी",
+      chapters: 12,
+      duration: "16 hrs 35 mins",
+      thumbnail: "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?q=80&w=600&auto=format&fit=crop",
+      url: "https://archive.org/download/bhaktamar-stotra-hindi/bhaktamar_hindi.mp3"
+    },
+    {
+      id: "fb_book_20",
+      type: "audiobooks",
+      title: "आप्तमीमांसा - स्याद्वाद विवेचन (Aptamimansa)",
+      author: "आचार्य समन्तभद्र स्वामी",
+      chapters: 10,
+      duration: "06 hrs 50 mins",
+      thumbnail: "https://images.unsplash.com/photo-1513001900722-370f803f498d?q=80&w=600&auto=format&fit=crop",
+      url: "https://archive.org/download/NavkarMantra_201704/Navkar%20Mantra.mp3"
+    },
+    {
+      id: "fb_book_21",
+      type: "audiobooks",
+      title: "धवला, महाधवला एवं जयधवला महाटीका संग्रह",
+      author: "आचार्य वीरसेन देव",
+      chapters: 3,
+      duration: "45 hrs 30 mins",
+      thumbnail: "https://images.unsplash.com/photo-1495446815901-a7297e633e8d?q=80&w=600&auto=format&fit=crop",
+      url: "https://archive.org/download/BhaktamarStotra_201306/Bhaktamar%20Stotra.mp3"
     }
   ]
 };

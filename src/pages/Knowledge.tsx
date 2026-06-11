@@ -8,7 +8,7 @@ import { cn } from '../lib/utils';
 import { db } from '../firebase';
 import { collection, onSnapshot, query, addDoc } from 'firebase/firestore';
 import { useLanguage } from '../contexts/LanguageContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { knowledgeData as FALLBACK_KNOWLEDGE } from '../data/knowledgeBase';
 import { livingGuideData, LivingGuideCategory } from '../data/livingGuide';
 import SectionAiAgent from '../components/SectionAiAgent';
@@ -24,6 +24,7 @@ import { BAAL_BODH_BOOKS } from '../data/baalBodhData';
 
 export default function KnowledgePage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [activeTab, setActiveTab ] = useState<'qa' | 'guide' | 'baal_bodh' | 'quiz'>('qa');
   const [search, setSearch] = useState('');
   const { language: lang, toggleLanguage } = useLanguage();
@@ -33,7 +34,7 @@ export default function KnowledgePage() {
   const [isListening, setIsListening] = useState(false);
   const [speechError, setSpeechError] = useState('');
   
-  // Baal Bodh states
+  // Baal Bodh / Swadhyay states
   const [selectedBook, setSelectedBook] = useState<any>(null);
   const [selectedChapter, setSelectedChapter] = useState<any>(null);
   const [isSpeakingBook, setIsSpeakingBook] = useState(false);
@@ -129,6 +130,26 @@ export default function KnowledgePage() {
     
     return () => unsubscribe();
   }, [lang]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tabParam = params.get('tab');
+    const filterParam = params.get('filter');
+    const bookIdParam = params.get('bookId');
+    if (tabParam === 'baal_bodh' || tabParam === 'swadhyay_books') {
+      setActiveTab('baal_bodh');
+      if (filterParam === 'swadhyay' || filterParam === 'pathshala' || filterParam === 'all') {
+        setBookCategory(filterParam as any);
+      }
+      if (bookIdParam) {
+        const matchingBook = BAAL_BODH_BOOKS.find(b => b.id === bookIdParam);
+        if (matchingBook) {
+          setSelectedBook(matchingBook);
+          setSelectedChapter(matchingBook.chapters[0]);
+        }
+      }
+    }
+  }, [location]);
 
   useEffect(() => {
     if (terminalEndRef.current) {
@@ -299,7 +320,7 @@ export default function KnowledgePage() {
           )}
         >
           <BookOpen size={14} />
-          {lang === 'en' ? 'Baal Bodh' : 'बाल बोध संस्कार'}
+          {lang === 'en' ? 'Baal Bodh' : 'बालबोध पाठशाला'}
         </button>
         <button
           onClick={() => { setActiveTab('quiz'); setSearch(''); }}
@@ -608,7 +629,10 @@ export default function KnowledgePage() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {BAAL_BODH_BOOKS.map((book) => (
+                {BAAL_BODH_BOOKS.filter((book) => {
+                  const isPathshala = ['baal1', 'baal2', 'baal3', 'baal_stories', 'baal_conduct'].includes(book.id);
+                  return isPathshala;
+                }).map((book) => (
                   <div
                     key={book.id}
                     onClick={() => {

@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, BookOpen, ScrollText, Calendar, Plus, Save, Trash2, Edit2, CheckCircle2, FileText, Bookmark, Target, Timer, Play, Pause, RotateCcw, Sparkles, Globe } from 'lucide-react';
+import { ArrowLeft, BookOpen, ScrollText, Calendar, Plus, Save, Trash2, Edit2, CheckCircle2, FileText, Bookmark, Target, Timer, Play, Pause, RotateCcw, Sparkles, Globe, Volume2, VolumeX, Star, Search, ChevronRight } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { motion, AnimatePresence } from 'motion/react';
 import SectionAiAgent from '../components/SectionAiAgent';
+import { cn } from '../lib/utils';
+
+import { BAAL_BODH_BOOKS } from '../data/baalBodhData';
 
 interface SwadhyayLog {
   id: string;
@@ -32,6 +35,13 @@ export default function SwadhyayPage() {
   const [isAddingLog, setIsAddingLog] = useState(false);
   const [editingLogId, setEditingLogId] = useState<string | null>(null);
   const [showHelpModal, setShowHelpModal] = useState(false);
+
+  // Book Reading states inside notebook
+  const [selectedBook, setSelectedBook] = useState<any>(null);
+  const [selectedChapter, setSelectedChapter] = useState<any>(null);
+  const [isSpeakingBook, setIsSpeakingBook] = useState(false);
+  const [searchBookQuery, setSearchBookQuery] = useState('');
+  const [bookCategory, setBookCategory] = useState<'all' | 'swadhyay' | 'pathshala'>('swadhyay');
 
   // Swadhyay Timer States
   const [timerDuration, setTimerDuration] = useState(10 * 60); // Default 10 minutes in seconds
@@ -97,6 +107,13 @@ export default function SwadhyayPage() {
     }
     return () => clearInterval(interval);
   }, [isTimerRunning, timeLeft]);
+
+  // Stop speaking on unmount
+  useEffect(() => {
+    return () => {
+      window.speechSynthesis.cancel();
+    };
+  }, []);
 
   const handleStartTimer = () => {
     setIsTimerRunning(true);
@@ -404,6 +421,307 @@ export default function SwadhyayPage() {
             </div>
           ))}
         </div>
+      </div>
+
+      {/* ==================== SACRED SCRIPTURES & SWADHYAY BOOKS ==================== */}
+      <div className="bg-white/90 dark:bg-[#121212]/90 backdrop-blur-md border border-gray-200 dark:border-white/10 rounded-3xl p-6 mb-6 shadow-sm space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-100 dark:border-white/5 pb-4">
+          <div className="flex items-center gap-2.5">
+            <ScrollText className="text-[#FF6D00]" size={22} />
+            <div>
+              <h2 className="text-base font-display font-black text-gray-900 dark:text-white uppercase tracking-wide">
+                {lang === 'en' ? 'Jain Swadhyay Shastras' : 'जैन स्वाध्याय ग्रन्थमाला'}
+              </h2>
+              <p className="text-[10px] text-gray-500 font-semibold">
+                {lang === 'en' ? 'Direct reading, Hindi-English Translation & Voice narration' : 'समयसार, तत्वार्थसूत्र आदि दिगंबर ग्रन्थ स्वाध्याय, अनुवाद एवं वाचक आवाज'}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-1.5">
+            {[
+              { id: 'swadhyay', label: { en: 'Scriptures', hi: 'महाग्रन्थ' } },
+              { id: 'pathshala', label: { en: 'Moral/Pathshala', hi: 'बाल संस्कार' } },
+              { id: 'all', label: { en: 'All Books', hi: 'सभी' } }
+            ].map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => {
+                  setBookCategory(cat.id as any);
+                  setSelectedBook(null);
+                  setSelectedChapter(null);
+                  window.speechSynthesis.cancel();
+                  setIsSpeakingBook(false);
+                }}
+                className={cn(
+                  "px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider shadow-xs cursor-pointer border transition-all",
+                  bookCategory === cat.id
+                    ? "bg-gradient-to-r from-orange-500 to-[#FFD54F] text-black border-transparent"
+                    : "bg-gray-50 dark:bg-white/5 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-white/5 hover:bg-gray-100 dark:hover:bg-white/10"
+                )}
+              >
+                {lang === 'en' ? cat.label.en : cat.label.hi}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {!selectedBook ? (
+          /* ================= BOOKS INDEX GRID ================= */
+          <div className="space-y-4">
+            {/* Search Input */}
+            <div className="relative">
+              <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 pointer-events-none">
+                <Search size={14} />
+              </span>
+              <input
+                type="text"
+                placeholder={lang === 'en' ? 'Search scriptures (e.g. Samaysar, Dravya)...' : 'ग्रन्थ खोजें (उदा. समयसार, तत्वार्थसूत्र)...'}
+                value={searchBookQuery}
+                onChange={(e) => setSearchBookQuery(e.target.value)}
+                className="w-full bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/5 rounded-2xl pl-9 pr-4 py-2.5 text-xs text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-orange-500 transition-all font-semibold"
+                id="search-swadhyay-books"
+              />
+            </div>
+
+            {/* Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[360px] overflow-y-auto pr-1">
+              {BAAL_BODH_BOOKS.filter((book) => {
+                // Category filter
+                const isPathshala = ['baal1', 'baal2', 'baal3', 'baal_stories', 'baal_conduct'].includes(book.id);
+                if (bookCategory === 'swadhyay') {
+                  if (isPathshala) return false;
+                } else if (bookCategory === 'pathshala') {
+                  if (!isPathshala) return false;
+                }
+                // Search filter
+                if (searchBookQuery.trim() !== '') {
+                  const query = searchBookQuery.toLowerCase();
+                  const hiTitle = book.title.hi.toLowerCase();
+                  const enTitle = book.title.en.toLowerCase();
+                  return hiTitle.includes(query) || enTitle.includes(query);
+                }
+                return true;
+              }).map((book) => (
+                <div
+                  key={book.id}
+                  onClick={() => {
+                    setSelectedBook(book);
+                    setSelectedChapter(book.chapters[0]);
+                  }}
+                  className="p-4 bg-gray-50/50 dark:bg-black/10 border border-gray-100 dark:border-white/5 rounded-2xl hover:border-orange-500/30 hover:shadow-md cursor-pointer transition-all duration-300 flex items-center justify-between gap-3 group animate-in fade-in"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className={cn("w-11 h-11 rounded-xl bg-gradient-to-br flex items-center justify-center text-xl shrink-0 shadow-xs", book.color)}>
+                      {book.image}
+                    </div>
+                    <div className="min-w-0">
+                      <h3 className="font-display font-black text-xs text-gray-800 dark:text-gray-100 truncate group-hover:text-orange-500 transition-colors">
+                        {lang === 'en' ? book.title.en : book.title.hi}
+                      </h3>
+                      <p className="text-[10px] text-gray-500 dark:text-gray-400 font-bold truncate max-w-[200px] mt-0.5 animate-pulse">
+                        {lang === 'en' ? book.description.en : book.description.hi}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded-md bg-orange-500/10 text-orange-600 dark:text-orange-400">
+                      {book.chapters.length} {lang === 'en' ? 'Ch' : 'अध्याय'}
+                    </span>
+                    <ChevronRight size={14} className="text-gray-400 group-hover:translate-x-0.5 transition-all" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          /* ================= INLINE ACTIVE BOOK READER ================= */
+          <div className="space-y-4 animate-in fade-in duration-300">
+            {/* Navigation Header */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-gray-50 dark:bg-black/25 p-3.5 rounded-2xl border border-gray-100 dark:border-white/5">
+              <button
+                onClick={() => {
+                  setSelectedBook(null);
+                  setSelectedChapter(null);
+                  window.speechSynthesis.cancel();
+                  setIsSpeakingBook(false);
+                }}
+                className="flex items-center gap-1.5 text-[10px] font-black text-gray-500 dark:text-gray-400 hover:text-orange-500 uppercase tracking-wider transition-colors cursor-pointer"
+              >
+                ← {lang === 'en' ? 'Back to Library' : 'लाइब्रेरी पर लौटें'}
+              </button>
+              
+              <div className="text-right sm:text-left">
+                <span className="text-[9px] font-black text-[#FF6D00] uppercase tracking-wider block">स्वाध्याय ग्रन्थ</span>
+                <span className="font-display font-black text-xs text-gray-800 dark:text-white leading-tight">
+                  {lang === 'en' ? selectedBook.title.en : selectedBook.title.hi}
+                </span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-start">
+              {/* Chapters List Menu */}
+              <div className="md:col-span-4 bg-gray-50/50 dark:bg-black/10 border border-gray-100 dark:border-white/5 rounded-2xl p-3.5 space-y-2">
+                <span className="text-[9px] font-black tracking-widest text-[#FF6D00] uppercase block pb-1 border-b border-gray-100 dark:border-white/5">विषय सूची (INDEX)</span>
+                <div className="space-y-1.5 max-h-[180px] overflow-y-auto pr-1">
+                  {selectedBook.chapters.map((chap: any, idx: number) => {
+                    const isActive = selectedChapter?.title.hi === chap.title.hi;
+                    return (
+                      <button
+                        key={idx}
+                        onClick={() => {
+                          setSelectedChapter(chap);
+                          window.speechSynthesis.cancel();
+                          setIsSpeakingBook(false);
+                        }}
+                        className={cn(
+                          "w-full text-left p-2.5 rounded-xl border text-[11px] font-bold transition-all flex items-center justify-between gap-1.5 cursor-pointer",
+                          isActive
+                            ? "bg-orange-500/10 border-orange-500/25 text-orange-500 dark:text-orange-400"
+                            : "bg-transparent border-transparent text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5"
+                        )}
+                      >
+                        <span className="truncate">{lang === 'en' ? chap.title.en : chap.title.hi}</span>
+                        <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", isActive ? "bg-orange-500 animate-pulse" : "bg-transparent")} />
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Lesson Viewer */}
+              <div className="md:col-span-8 bg-gray-50/50 dark:bg-black/5 border border-gray-100 dark:border-white/5 rounded-2xl p-4.5 space-y-4">
+                {selectedChapter && (
+                  <>
+                    <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 pb-3 border-b border-gray-100 dark:border-white/5">
+                      <div>
+                        <span className="text-[9px] font-black tracking-widest text-orange-500 uppercase block">ACTIVE CHAPTER</span>
+                        <h4 className="font-display font-black text-sm text-gray-900 dark:text-white">
+                          {lang === 'en' ? selectedChapter.title.en : selectedChapter.title.hi}
+                        </h4>
+                      </div>
+
+                      {/* Text-To-Speech Narrator Toggle */}
+                      <button
+                        onClick={() => {
+                          const speechText = `${selectedChapter.title.hi}. ${selectedChapter.content.hi}. नैतिक शिक्षा: ${selectedChapter.moral.hi}`;
+                          if (isSpeakingBook) {
+                            window.speechSynthesis.cancel();
+                            setIsSpeakingBook(false);
+                          } else {
+                            window.speechSynthesis.cancel();
+                            const cleanText = speechText.replace(/\*/g, '').replace(/॥/g, '').replace(/ॐ ह्रीं श्रीं/g, 'ओम ह्रीम श्रीम');
+                            const utterance = new SpeechSynthesisUtterance(cleanText);
+                            utterance.lang = 'hi-IN';
+                            utterance.rate = 0.8;
+                            utterance.onend = () => setIsSpeakingBook(false);
+                            utterance.onerror = () => setIsSpeakingBook(false);
+
+                            const allVoices = window.speechSynthesis.getVoices();
+                            const premiumVoice = allVoices.find(v => 
+                              (v.lang.startsWith('hi') || v.lang.startsWith('sa')) && 
+                              (v.name.toLowerCase().includes('google') || v.name.toLowerCase().includes('neural') || v.name.toLowerCase().includes('natural'))
+                            ) || allVoices.find(v => v.lang.startsWith('hi') || v.lang.startsWith('sa'));
+                            
+                            if (premiumVoice) {
+                              utterance.voice = premiumVoice;
+                            }
+
+                            window.speechSynthesis.speak(utterance);
+                            setIsSpeakingBook(true);
+                          }
+                        }}
+                        className={cn(
+                          "px-3 py-1.5 rounded-full border text-[10px] font-black tracking-wide flex items-center justify-center gap-1.5 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer select-none shrink-0 w-fit",
+                          isSpeakingBook
+                            ? "bg-red-500 text-white border-red-400 animate-pulse"
+                            : "bg-[#FF6D00] text-white border-transparent hover:bg-[#FF8100]"
+                        )}
+                      >
+                        {isSpeakingBook ? (
+                          <>
+                            <VolumeX size={12} />
+                            <span>{lang === 'en' ? 'Stop Voice' : 'आवाज रोकें'}</span>
+                          </>
+                        ) : (
+                          <>
+                            <Volume2 size={12} />
+                            <span>{lang === 'en' ? 'Listen Online' : 'सजीव आवाज'}</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+
+                    {/* Quick study helpers shortcuts! */}
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        onClick={() => {
+                          const taskTitle = `${lang === 'en' ? 'Study' : 'स्वाध्याय'}: ${selectedBook.title[lang]} - ${selectedChapter.title[lang]}`;
+                          const gId = Date.now().toString();
+                          const updated = [...goals, { id: gId, title: taskTitle, completed: false }];
+                          setGoals(updated);
+                          localStorage.setItem('swadhyay_goals', JSON.stringify(updated));
+                        }}
+                        className="px-2.5 py-1 bg-orange-500/5 text-orange-600 dark:text-orange-400 border border-orange-500/10 rounded-lg text-[9px] font-black uppercase hover:bg-orange-500/10 transition-all cursor-pointer"
+                      >
+                        🎯 {lang === 'en' ? 'Add to Study Targets' : 'लक्ष्य में जोड़ें'}
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          setNewLog({
+                            textName: selectedBook.title[lang],
+                            chapter: selectedChapter.title[lang],
+                            insight: '',
+                            resolution: ''
+                          });
+                          setIsAddingLog(true);
+                          setTimeout(() => {
+                            const elem = document.getElementById('swadhyay-form-block');
+                            if (elem) elem.scrollIntoView({ behavior: 'smooth' });
+                          }, 100);
+                        }}
+                        className="px-2.5 py-1 bg-green-500/5 text-green-600 dark:text-green-400 border border-green-500/10 rounded-lg text-[9px] font-black uppercase hover:bg-green-500/10 transition-all cursor-pointer"
+                      >
+                        📝 {lang === 'en' ? 'Write Study Insights' : 'चिंतन पत्रक भरें'}
+                      </button>
+                    </div>
+
+                    {/* Book context */}
+                    <div className="space-y-3.5 text-xs text-gray-800 dark:text-gray-200">
+                      {/* Hindi block */}
+                      <div className="p-4 rounded-xl bg-orange-50/10 dark:bg-orange-500/[0.01] border border-orange-500/5 space-y-1">
+                        <span className="text-[8px] font-black tracking-widest text-orange-500 uppercase">मूल हिन्दी अनुवाद</span>
+                        <p className="whitespace-pre-line font-medium leading-relaxed">
+                          {selectedChapter.content.hi}
+                        </p>
+                      </div>
+
+                      {/* English block */}
+                      <div className="p-4 rounded-xl bg-blue-50/10 dark:bg-blue-500/[0.01] border border-[#FF6D00]/10 space-y-1">
+                        <span className="text-[8px] font-black tracking-widest text-blue-550 uppercase">English Translation</span>
+                        <p className="whitespace-pre-line leading-relaxed text-gray-600 dark:text-gray-400">
+                          {selectedChapter.content.en}
+                        </p>
+                      </div>
+
+                      {/* Moral summary block */}
+                      <div className="p-3 bg-emerald-500/5 dark:bg-emerald-500/[0.02] border border-emerald-500/10 rounded-xl flex gap-2.5 items-start">
+                        <Star className="fill-emerald-550 text-emerald-555 shrink-0 mt-0.5" size={14} />
+                        <div>
+                          <span className="text-[8px] font-black tracking-widest text-emerald-600 uppercase block">संक्षिप्त संस्करण सीख (Moral)</span>
+                          <p className="font-extrabold text-emerald-700 dark:text-emerald-450 leading-relaxed text-[11px] mt-0.5">
+                            {lang === 'en' ? selectedChapter.moral.en : selectedChapter.moral.hi}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Adding Reflection Section */}

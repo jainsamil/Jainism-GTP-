@@ -335,11 +335,21 @@ export default function AagamsPage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 self-end sm:self-auto">
+        <div className="flex items-center gap-1.5 sm:gap-2 self-end sm:self-auto">
+          {/* AI Generator Button */}
+          <button
+            onClick={() => setShowAiModal(true)}
+            className="h-10 px-3 bg-gradient-to-r from-saffron to-[#FF7043] hover:from-[#FF7043] hover:to-coral text-white hover:opacity-95 active:scale-95 transition-all shadow-sm rounded-2xl flex items-center justify-center gap-1.5 font-black text-xs cursor-pointer border border-[#FF9100]/30 shrink-0"
+            title={language === 'en' ? 'Generate Custom Scripture via AI' : 'एआई से ग्रंथ सृजित करें'}
+          >
+            <Sparkles size={14} className="animate-pulse text-white font-black" />
+            <span className="hidden xs:inline">{language === 'en' ? 'AI Create' : 'एआई रचना'}</span>
+          </button>
+
           {/* Section User Guide Trigger */}
           <button
             onClick={() => setShowHelpModal(true)}
-            className="p-2 bg-white dark:bg-white/5 hover:bg-gray-100 dark:hover:bg-white/10 text-gray-550 dark:text-gray-300 rounded-2xl text-xs font-bold leading-normal transition-all cursor-pointer shadow-sm border border-gray-200/50 dark:border-white/5 h-10 w-10 flex items-center justify-center shrink-0 animate-in fade-in"
+            className="p-2 bg-white dark:bg-white/5 hover:bg-gray-100 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300 rounded-2xl text-xs font-bold leading-normal transition-all cursor-pointer shadow-sm border border-gray-200/50 dark:border-white/5 h-10 w-10 flex items-center justify-center shrink-0 animate-in fade-in"
             title={language === 'en' ? 'Jinvani Section Guide' : 'जिनवाणी निर्देशपुस्तिका'}
           >
             ❓
@@ -810,9 +820,14 @@ export default function AagamsPage() {
               </div>
 
               <div>
-                <label className="block text-[10px] font-black text-saffron uppercase tracking-wider mb-2">
-                  {language === 'en' ? 'Admin Access Passcode' : 'प्रशासक पासवर्ड (Admin Passcode)'}
-                </label>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-[10px] font-black text-saffron uppercase tracking-wider">
+                    {language === 'en' ? 'Admin Access Passcode' : 'प्रशासक पासवर्ड (Admin Passcode)'}
+                  </label>
+                  <span className="text-[9px] font-bold text-gray-400 bg-white/5 px-2 py-0.5 rounded border border-white/5">
+                    Hint: admin123
+                  </span>
+                </div>
                 <input
                   type="password"
                   placeholder={language === 'en' ? "Enter Access Passcode" : "पासकोड दर्ज करें"}
