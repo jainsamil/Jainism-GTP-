@@ -271,7 +271,7 @@ export default function JainNewsPage() {
           <button
             type="button"
             onClick={() => setHelpOpen(true)}
-            className="w-10 h-10 rounded-2xl bg-zinc-950 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 flex items-center justify-center text-[#ff3d3d] hover:text-[#ff6e6e] font-black text-lg shadow-sm hover:scale-105 active:scale-95 transition-all cursor-pointer select-none shrink-0"
+            className="w-9 h-9 rounded-xl bg-zinc-950 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 flex items-center justify-center text-[#ff3d3d] hover:text-[#ff6e6e] font-black text-sm shadow-sm hover:scale-105 active:scale-95 transition-all cursor-pointer select-none shrink-0"
             title={lang === 'en' ? 'About Jain Chronicle News' : 'जैन समाचार प्रभाग के बारे में'}
           >
             ?
@@ -281,11 +281,11 @@ export default function JainNewsPage() {
           <button
             type="button"
             onClick={toggleLanguage}
-            className="px-5 py-2 h-10 rounded-2xl bg-[#FF3D00] hover:bg-[#D50000] text-white flex items-center gap-2 font-black text-xs md:text-sm shadow-sm hover:scale-105 active:scale-95 transition-all cursor-pointer border border-[#FF3D00]/20 shrink-0"
-            title={lang === 'en' ? 'Change Language' : 'भाषा बदलें'}
+            className="px-2.5 py-1.5 h-9 rounded-xl bg-[#FF3D00] hover:bg-[#D50000] text-white flex items-center justify-center gap-1 font-black text-[10px] shadow-sm hover:scale-105 active:scale-95 transition-all cursor-pointer border border-[#FF9100]/30 shrink-0"
+            title={lang === 'en' ? 'Translate / भाषा बदलें' : 'अंग्रेज़ी में बदलें'}
           >
-            <Globe size={15} className="shrink-0" />
-            <span>{lang === 'en' ? 'English' : 'हिन्दी'}</span>
+            <Globe size={11} className="animate-spin-slow shrink-0" />
+            <span>{lang === 'en' ? 'हिन्दी' : 'English'}</span>
           </button>
         </div>
       </header>

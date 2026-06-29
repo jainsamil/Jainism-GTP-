@@ -584,7 +584,7 @@ app.get('/api/jain-news', async (req, res) => {
         }
       }
     } catch (dbError) {
-      console.warn("Firestore Read Error while checking news cache:", dbError);
+      console.log("Firestore Read Info: Checking news cache status:", dbError);
     }
 
     // 2. If no cache exists for today, fetch fresh live news via Gemini API
@@ -679,7 +679,7 @@ app.get('/api/jain-news', async (req, res) => {
         await setDoc(docRef, data);
         console.log(`[Firestore Cache Write] Successfully cached Jain news for ${currentDate}`);
       } catch (dbError) {
-        console.warn("Firestore Write Error while saving news cache:", dbError);
+        console.log("Firestore Write Info: Saving news cache status:", dbError);
       }
       
       return res.json(data);
@@ -688,7 +688,7 @@ app.get('/api/jain-news', async (req, res) => {
     }
 
   } catch (error: any) {
-    console.warn("Jain News Fetch warning (falling back to Firestore history/offline fallback):", error?.message || error);
+    console.log("Jain News Status (using fallback database/offline fallback):", error?.message || error);
     
     // 4. Fallback to latest available news in Firestore
     try {
@@ -696,14 +696,14 @@ app.get('/api/jain-news', async (req, res) => {
       const q = query(collection(firestoreDb, 'daily_jain_news'), orderBy('lastUpdated', 'desc'), limit(1));
       const querySnap = await getDocs(q);
       if (!querySnap.empty) {
-        const latestCachedData = querySnap.docs[0].data();
-        if (latestCachedData && latestCachedData.articles && latestCachedData.articles.length > 0) {
-          console.log(`[Firestore Fallback Success] Found news cached on ${latestCachedData.lastUpdated}`);
-          return res.json(latestCachedData);
-        }
+         const latestCachedData = querySnap.docs[0].data();
+         if (latestCachedData && latestCachedData.articles && latestCachedData.articles.length > 0) {
+           console.log(`[Firestore Fallback Success] Found news cached on ${latestCachedData.lastUpdated}`);
+           return res.json(latestCachedData);
+         }
       }
     } catch (fallbackDbError) {
-      console.warn("Firestore Fallback Error:", fallbackDbError);
+      console.log("Firestore Fallback Info status:", fallbackDbError);
     }
 
     // 5. Hardcoded high-quality bilingual offline fallbacks

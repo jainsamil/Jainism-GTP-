@@ -680,7 +680,7 @@ export default function JainStorePage() {
           <button
             type="button"
             onClick={() => setHelpOpen(true)}
-            className="w-10 h-10 rounded-2xl bg-zinc-950 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 flex items-center justify-center text-[#ff3d3d] hover:text-[#ff6e6e] font-black text-lg shadow-sm hover:scale-105 active:scale-95 transition-all cursor-pointer select-none shrink-0"
+            className="w-9 h-9 rounded-xl bg-zinc-950 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 flex items-center justify-center text-[#ff3d3d] hover:text-[#ff6e6e] font-black text-sm shadow-sm hover:scale-105 active:scale-95 transition-all cursor-pointer select-none shrink-0"
             title={lang === 'en' ? 'About Jain Dharma Store' : 'जैन धर्म स्टोर के बारे में'}
           >
             ?
@@ -690,7 +690,7 @@ export default function JainStorePage() {
           <button
             type="button"
             onClick={toggleLanguage}
-            className="px-3.5 py-1.5 bg-[#FF3D00] text-white hover:bg-[#D50000] active:scale-95 transition-all shadow-sm rounded-xl flex items-center justify-center gap-1.5 font-black text-[10px] cursor-pointer border border-[#FF9100]/30 shrink-0 h-9"
+            className="px-2.5 py-1.5 bg-[#FF3D00] text-white hover:bg-[#D50000] active:scale-95 transition-all shadow-sm rounded-xl flex items-center justify-center gap-1 font-black text-[10px] cursor-pointer border border-[#FF9100]/30 shrink-0 h-9"
             title={lang === 'en' ? 'Translate / भाषा बदलें' : 'अंग्रेज़ी में बदलें'}
           >
             <Globe size={11} className="animate-spin-slow shrink-0" />
