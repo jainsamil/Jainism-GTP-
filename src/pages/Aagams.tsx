@@ -31,6 +31,7 @@ import { collection, onSnapshot, query, addDoc } from 'firebase/firestore';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 import SectionAiAgent from '../components/SectionAiAgent';
+import UnifiedSearchBar from '../components/UnifiedSearchBar';
 
 import { aagamsData } from '../data/aagamsData';
 
@@ -61,12 +62,7 @@ export default function AagamsPage() {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [speechRate, setSpeechRate] = useState<number>(0.9);
 
-  const [showAiModal, setShowAiModal] = useState(false);
   const [showHelpModal, setShowHelpModal] = useState(false);
-  const [aiTitle, setAiTitle] = useState('');
-  const [adminPassword, setAdminPassword] = useState('');
-  const [isAiGenerating, setIsAiGenerating] = useState(false);
-  const [aiError, setAiError] = useState('');
 
   const readerRef = useRef<HTMLDivElement>(null);
 
@@ -168,43 +164,7 @@ export default function AagamsPage() {
     };
   }, []);
 
-  const handleAiGenerate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!aiTitle.trim()) return;
-    if (!adminPassword.trim()) {
-      setAiError(language === 'en' ? 'Admin passcode is required.' : 'प्रशासक पासवर्ड आवश्यक है।');
-      return;
-    }
-    setIsAiGenerating(true);
-    setAiError('');
-    try {
-      const response = await fetch('/api/gemini/generate-scripture', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: aiTitle, category: activeCat, adminPassword }),
-      });
-      const data = await response.json();
-      if (response.ok && data.content) {
-        const newDoc = {
-          title: aiTitle,
-          category: activeCat,
-          content: data.content,
-          createdAt: new Date().toISOString()
-        };
-        await addDoc(collection(db, 'aagams'), newDoc);
-        setAiTitle('');
-        setAdminPassword('');
-        setShowAiModal(false);
-      } else {
-        setAiError(data.error || 'Failed to generate scripture');
-      }
-    } catch (err: any) {
-      console.error(err);
-      setAiError('Connection failed. Please check setup.');
-    } finally {
-      setIsAiGenerating(false);
-    }
-  };
+
 
   useEffect(() => {
     // Initialize Speech Recognition
@@ -239,14 +199,26 @@ export default function AagamsPage() {
     const q = query(collection(db, 'aagams'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const firebaseDocs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      const merged = [...FALLBACK_AAGAMS];
-      // append unique user-created documents
-      firebaseDocs.forEach((doc: any) => {
-        if (!merged.some(item => item.id === doc.id || item.title === doc.title)) {
-          merged.push(doc);
+      
+      // Merge logic: Merge firebaseDocs with FALLBACK_AAGAMS by matching ID or title
+      const dataMap = new Map(firebaseDocs.map(doc => [doc.id, doc]));
+      const merged = FALLBACK_AAGAMS.map(fallbackItem => {
+        let matchedItem = dataMap.get(fallbackItem.id);
+        if (!matchedItem) {
+          const matchByTitle = firebaseDocs.find((d: any) => 
+            d.title && d.title === fallbackItem.title
+          );
+          if (matchByTitle) {
+            matchedItem = matchByTitle;
+            dataMap.delete(matchByTitle.id);
+          }
+        } else {
+          dataMap.delete(fallbackItem.id);
         }
+        return matchedItem ? { ...fallbackItem, ...matchedItem } : fallbackItem;
       });
-      setAagams(merged);
+      const finalAagams = [...merged, ...Array.from(dataMap.values())];
+      setAagams(finalAagams);
       setLoading(false);
     }, (error) => {
       console.error('Error fetching aagams:', error);
@@ -336,16 +308,6 @@ export default function AagamsPage() {
         </div>
 
         <div className="flex items-center gap-1.5 sm:gap-2 self-end sm:self-auto">
-          {/* AI Generator Button */}
-          <button
-            onClick={() => setShowAiModal(true)}
-            className="h-10 px-3 bg-gradient-to-r from-saffron to-[#FF7043] hover:from-[#FF7043] hover:to-coral text-white hover:opacity-95 active:scale-95 transition-all shadow-sm rounded-2xl flex items-center justify-center gap-1.5 font-black text-xs cursor-pointer border border-[#FF9100]/30 shrink-0"
-            title={language === 'en' ? 'Generate Custom Scripture via AI' : 'एआई से ग्रंथ सृजित करें'}
-          >
-            <Sparkles size={14} className="animate-pulse text-white font-black" />
-            <span className="hidden xs:inline">{language === 'en' ? 'AI Create' : 'एआई रचना'}</span>
-          </button>
-
           {/* Section User Guide Trigger */}
           <button
             onClick={() => setShowHelpModal(true)}
@@ -371,13 +333,13 @@ export default function AagamsPage() {
       {/* Intro info box */}
       <div className="mb-6 bg-gradient-to-r from-saffron/10 to-coral/5 rounded-3xl p-5 border border-saffron/10 flex items-start gap-3.5 shadow-sm">
         <div className="w-10 h-10 bg-saffron/10 text-saffron rounded-2xl flex items-center justify-center shrink-0 border border-saffron/10">
-          <Sparkles size={20} className="animate-pulse" />
+          <BookOpen size={20} className="animate-pulse" />
         </div>
         <div>
           <span className="text-[9px] font-black uppercase text-saffron tracking-wider block mb-0.5">
             {language === 'en' ? 'Sacred Jinvani Repository' : 'परम पावन मन्दिर स्वाध्याय'}
           </span>
-          <p className="text-xs text-gray-600 dark:text-gray-300 font-medium leading-relaxed">
+          <p className="text-xs text-gray-600 dark:text-gray-300 font-semibold leading-relaxed">
             {language === 'en' 
               ? "All holy Pujans, Stutis, Vidhans and Chalisas are provided in full detail without any missing verses. Enable the Full-Screen reader below to start chanting."
               : "समस्त पूजा, भक्ति, चालीसा एवं दशलक्षण/सिद्धचक्र विधान मंत्र यहाँ पूर्ण रूप में उपलब्ध हैं। स्वाध्याय या मंदिर जी में पाठ हेतु पूर्ण स्क्रीन रीडर सक्रिय करें।"}
@@ -410,30 +372,12 @@ export default function AagamsPage() {
       )}
 
       {/* Search Input */}
-      <div className="relative mb-6 group">
-        <div className="absolute -inset-0.5 bg-gradient-to-r from-saffron to-coral rounded-2xl blur opacity-10 dark:opacity-20 group-hover:opacity-30 transition duration-500"></div>
-        <div className="relative flex items-center">
-          <Search className="absolute left-4 text-saffron" size={18} />
-          <input
-            type="text"
-            placeholder={language === 'en' ? "Search Pujans, Stotra, Bhajan..." : "पूजन, भक्ति, चालीसा खोजें..."}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-white/90 dark:bg-[#121212]/90 backdrop-blur-xl border border-gray-150 dark:border-white/5 rounded-2xl pl-11 pr-11 py-3.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-saffron/50 shadow-sm transition-all"
-          />
-          <button 
-            onClick={toggleListening}
-            className={cn(
-              "absolute right-4 p-1.5 rounded-full transition-all cursor-pointer",
-              isListening ? "bg-red-500/20 text-red-500 animate-pulse" : "text-gray-400 hover:text-saffron hover:bg-saffron/10"
-            )}
-          >
-            {isListening ? <MicOff size={18} /> : <Mic size={18} />}
-          </button>
-        </div>
-        {speechError && (
-          <p className="text-red-500 text-xs mt-1.5 ml-2">{speechError}</p>
-        )}
+      <div className="mb-6">
+        <UnifiedSearchBar
+          value={search}
+          onChange={(val) => setSearch(val)}
+          placeholder={language === 'en' ? "Search Pujans, Stotra, Bhajan..." : "पूजन, भक्ति, चालीसा खोजें..."}
+        />
       </div>
 
       {/* Category selector slider */}
@@ -784,83 +728,7 @@ export default function AagamsPage() {
         </div>
       )}
 
-      {/* AI Scripture Generation Modal */}
-      {showAiModal && (
-        <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-[110] flex items-center justify-center p-4 animate-in fade-in duration-300 pointer-events-auto">
-          <div className="bg-[#121212] rounded-[2rem] w-full max-w-md overflow-hidden shadow-2xl border border-white/10 p-6 sm:p-8 flex flex-col relative animate-in zoom-in-95 duration-300">
-            <button 
-              onClick={() => { setShowAiModal(false); setAiError(''); }}
-              className="absolute top-6 right-6 p-2 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white rounded-full transition-colors cursor-pointer"
-            >
-              ✕
-            </button>
-            <h2 className="text-xl md:text-2xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-saffron to-coral mb-2.5 uppercase tracking-wide">
-              {activeCat} AI Generator
-            </h2>
-            <p className="text-xs text-gray-400 mb-6 font-semibold leading-relaxed">
-              {language === 'en'
-                ? `Provide the title of the Digambar ${activeCat} you want to retrieve. Jainism GPT will fetch standard verses, translations and chants instantly.`
-                : `जिस ${activeCat} को आप चाहते हैं उसका नाम लिखें। जैन धर्म AI प्राचीन पाण्डुलिपियों से शुद्ध देवनागरी पाठ संकलित कर आपके समक्ष प्रस्तुत करेगा।`}
-            </p>
-            
-            <form onSubmit={handleAiGenerate} className="space-y-5">
-              <div>
-                <label className="block text-[10px] font-black text-saffron uppercase tracking-wider mb-2">
-                  {language === 'en' ? 'Scripture Name / Title' : 'ग्रंथ / पाठ का शीर्षक'}
-                </label>
-                <input
-                  type="text"
-                  placeholder={language === 'en' ? "e.g. आदिनाथ भगवान आरती" : "जैसे: श्री पार्श्वनाथ अष्टक पूजा"}
-                  value={aiTitle}
-                  onChange={(e) => setAiTitle(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:border-saffron/50 outline-none text-sm font-bold"
-                  required
-                  disabled={isAiGenerating}
-                />
-              </div>
 
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label className="block text-[10px] font-black text-saffron uppercase tracking-wider">
-                    {language === 'en' ? 'Admin Access Passcode' : 'प्रशासक पासवर्ड (Admin Passcode)'}
-                  </label>
-                  <span className="text-[9px] font-bold text-gray-400 bg-white/5 px-2 py-0.5 rounded border border-white/5">
-                    Hint: admin123
-                  </span>
-                </div>
-                <input
-                  type="password"
-                  placeholder={language === 'en' ? "Enter Access Passcode" : "पासकोड दर्ज करें"}
-                  value={adminPassword}
-                  onChange={(e) => setAdminPassword(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:border-saffron/50 outline-none text-sm font-bold"
-                  required
-                  disabled={isAiGenerating}
-                />
-              </div>
-              
-              {aiError && (
-                <p className="text-red-500 text-xs font-semibold bg-red-500/10 border border-red-500/20 p-3 rounded-lg leading-relaxed">{aiError}</p>
-              )}
-
-              <button
-                type="submit"
-                disabled={isAiGenerating}
-                className="w-full py-3.5 bg-gradient-to-r from-saffron to-coral text-white font-black uppercase text-xs tracking-widest rounded-xl hover:scale-102 active:scale-98 transition-all disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center gap-2 shadow-lg shadow-saffron/10 cursor-pointer"
-              >
-                {isAiGenerating ? (
-                  <>
-                    <Loader2 className="animate-spin text-white" size={16} />
-                    {language === 'en' ? 'GENERATING HOLY TEXT...' : 'पवित्र पाठ संकलित हो रहा है...'}
-                  </>
-                ) : (
-                  language === 'en' ? 'ACTIVATE GENERATOR' : ' AI पाठ देववाणी सृजन करें'
-                )}
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
 
       {/* Dynamic JBT Premium Help Modal */}
       {showHelpModal && (

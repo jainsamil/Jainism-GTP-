@@ -5,7 +5,8 @@ import {
   Library, ScrollText, Calendar, Quote,
   PlaySquare, Landmark, HelpCircle, PartyPopper,
   Disc, Navigation, Flame, FileText, Heart, Utensils,
-  Sparkles, Sun, Moon, MapPin, Shield, Hotel, Languages
+  Sparkles, Sun, Moon, MapPin, Shield, Hotel, Languages,
+  Newspaper, ShoppingBag
 } from 'lucide-react';
 import { db } from '../firebase';
 import { collection, query, limit, doc, onSnapshot } from 'firebase/firestore';
@@ -85,9 +86,11 @@ export default function HomePage() {
     { title: 'Bhaktamar', icon: Heart, path: '/bhaktamar', color: 'from-[#F50057] to-[#FF80AB]', shadow: 'shadow-[0_0_15px_rgba(245,0,87,0.3)]', enabled: true },
     { title: 'Jain Diet Guide', icon: Utensils, path: '/diet', color: 'from-[#00BFA5] to-[#64FFDA]', shadow: 'shadow-[0_0_15px_rgba(0,191,165,0.3)]', enabled: true },
     { title: 'Jain Food Locator', icon: MapPin, path: '/verified-food', color: 'from-[#FF3D00] to-[#FF9100]', shadow: 'shadow-[0_0_15px_rgba(255,61,0,0.3)]', enabled: true },
-    { title: 'Monk Vihar Tracker', icon: Shield, path: '/vihar-tracker', color: 'from-[#2979FF] to-[#29B6F6]', shadow: 'shadow-[0_0_15px_rgba(41,121,255,0.3)]', enabled: true },
-    { title: 'Dharamshala Booking', icon: Hotel, path: '/dharamshala-booking', color: 'from-[#00E676] to-[#69F0AE]', shadow: 'shadow-[0_0_15px_rgba(0,230,118,0.3)]', enabled: true },
+    { title: 'Jain Dharamshalas', icon: Hotel, path: '/dharamshalas', color: 'from-[#FF6D00] to-[#FFAB40]', shadow: 'shadow-[0_0_15px_rgba(255,109,0,0.3)]', enabled: true },
+    { title: 'Sadhu Vihar Tracker', icon: Shield, path: '/vihar-tracker', color: 'from-[#2979FF] to-[#29B6F6]', shadow: 'shadow-[0_0_15px_rgba(41,121,255,0.3)]', enabled: true },
     { title: 'Manuscript Library', icon: Languages, path: '/manuscript-library', color: 'from-[#AA00FF] to-[#EA80FC]', shadow: 'shadow-[0_0_15px_rgba(170,0,255,0.3)]', enabled: true },
+    { title: 'Jain News', icon: Newspaper, path: '/news', color: 'from-[#FF3D00] to-[#FF9100]', shadow: 'shadow-[0_0_15px_rgba(255,61,0,0.3)]', enabled: true },
+    { title: 'Jain Store', icon: ShoppingBag, path: '/store', color: 'from-[#00C853] to-[#64FFDA]', shadow: 'shadow-[0_0_15px_rgba(0,200,83,0.3)]', enabled: true },
   ];
 
   return (
@@ -202,7 +205,7 @@ export default function HomePage() {
             </div>
             <div className="flex items-center gap-2.5">
               <span className="w-1.5 h-1.5 rounded-full bg-[#FF6D00] shrink-0" />
-              <span>Secure <strong className="text-gray-850 dark:text-gray-300 font-bold">Jain Dharamshala Bookings</strong> at major pilgrimage sites (Tirths)</span>
+              <span>Verified <strong className="text-gray-850 dark:text-gray-300 font-bold">Jain Dharamshala & Food Timings</strong> at major pilgrimage sites (Tirths)</span>
             </div>
             <div className="flex items-center gap-2.5">
               <span className="w-1.5 h-1.5 rounded-full bg-[#FFD54F] shrink-0" />
@@ -232,7 +235,11 @@ export default function HomePage() {
             </div>
             <div className="flex items-center gap-2.5">
               <span className="w-1.5 h-1.5 rounded-full bg-[#FF6D00] shrink-0" />
-              <span>Daily spiritual self-assessment on the <strong className="text-gray-850 dark:text-gray-300 font-bold">Daily Jain Quiz</strong> trivia deck</span>
+              <span>World-class moral learning via our <strong className="text-gray-850 dark:text-gray-300 font-bold">Jain Kids Games</strong> suite</span>
+            </div>
+            <div className="flex items-center gap-2.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#FFD54F] shrink-0" />
+              <span>Advanced <strong className="text-gray-850 dark:text-gray-300 font-bold">Jain Dharma Store</strong> supporting UPI and Cash on Delivery</span>
             </div>
           </div>
         </div>

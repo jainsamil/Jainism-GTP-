@@ -363,11 +363,11 @@ export default function ProfilePage() {
                       </div>
 
                       <div className="p-3 bg-gray-100/50 dark:bg-white/5 rounded-xl border border-gray-200/50 dark:border-white/5">
-                        <div className="font-extrabold text-[#FF6D00] text-[13px] mb-1">7. Tirth Dharamshala Bookings</div>
+                        <div className="font-extrabold text-[#FF6D00] text-[13px] mb-1">7. Tirth Dharamshala Directory</div>
                         <p className="text-gray-500 dark:text-gray-400 font-medium leading-relaxed">
-                          <strong className="text-gray-800 dark:text-gray-300">काम (Function):</strong> Holy pilgrimage room registrations.
+                          <strong className="text-gray-800 dark:text-gray-300">काम (Function):</strong> Verified dharamshala listings, room capacity details, and trust inquiries.
                           <br />
-                          <strong className="text-gray-800 dark:text-gray-300">विवरण (Description):</strong> Allows users to explore canonical Jain dharamshalas near holy shrines, book rooms, and state arrival plans while ensuring full compliance with dietary rules.
+                          <strong className="text-gray-800 dark:text-gray-300">विवरण (Description):</strong> Allows users to discover verified canonical Jain dharamshalas near holy shrines, check room capacities, access direct Trust contact numbers, and trace early meal service timings for pure diets.
                         </p>
                       </div>
 

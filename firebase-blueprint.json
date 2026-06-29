@@ -246,6 +246,59 @@
         "createdAt": { "type": "string" }
       },
       "required": ["id", "dharamshalaId", "pilgrimName", "checkInDate", "roomType", "status"]
+    },
+    "jain_news": {
+      "title": "Jain News",
+      "description": "Verified Jain news articles",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "summary": { "type": "string" },
+        "content": { "type": "string" },
+        "category": { "type": "string" },
+        "date": { "type": "string" },
+        "impact": { "type": "string" },
+        "source": { "type": "string" },
+        "url": { "type": "string" },
+        "isVerified": { "type": "boolean" }
+      },
+      "required": ["title", "summary", "category", "date"]
+    },
+    "jain_store": {
+      "title": "Jain Store Profile",
+      "description": "Jain vendor mini store profiles",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "vendorName": { "type": "string" },
+        "storeName": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "description": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
+        "logoUrl": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "vendorName", "storeName", "email", "status"]
+    },
+    "jain_product": {
+      "title": "Jain Store Product",
+      "description": "Products listed under a Jain store",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "storeId": { "type": "string" },
+        "storeName": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "price": { "type": "number" },
+        "category": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
+        "contactNo": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "storeId", "storeName", "title", "price", "category", "status"]
     }
   },
   "firestore": {
@@ -264,6 +317,9 @@
     "/homework_submissions/{id}": { "schema": "homework_submissions", "description": "Homework student answers" },
     "/kitchens/{id}": { "schema": "kitchen", "description": "Verified Jain kitchens and registrations" },
     "/dharamshalas/{id}": { "schema": "dharamshala", "description": "Dharamshala properties" },
-    "/dharamshala_bookings/{id}": { "schema": "dharamshala_booking", "description": "Bookings table for notifications and approvals" }
+    "/dharamshala_bookings/{id}": { "schema": "dharamshala_booking", "description": "Bookings table for notifications and approvals" },
+    "/jain_news/{id}": { "schema": "jain_news", "description": "Verified news updates" },
+    "/jain_stores/{id}": { "schema": "jain_store", "description": "Vendor stores" },
+    "/jain_products/{id}": { "schema": "jain_product", "description": "Vendor items" }
   }
 }

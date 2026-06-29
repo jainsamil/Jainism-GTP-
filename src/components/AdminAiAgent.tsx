@@ -62,14 +62,25 @@ export default function AdminAiAgent() {
     }
   };
 
-  const handleUnlock = (e: React.FormEvent) => {
+  const handleUnlock = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (passcode === 'SamilJain@2026' || passcode === 'samil123') {
-      setUnlocked(true);
-      setErrorMsg('');
-      addLog("[DEVELOPER] Developer Samil Jain authenticated successfully. AI-Core activated.");
-    } else {
-      setErrorMsg('Incorrect Developer Master Pass');
+    setErrorMsg('');
+    try {
+      const response = await fetch('/api/verify-passcode', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ passcode })
+      });
+      const data = await response.json();
+      if (response.ok && data.verified) {
+        setUnlocked(true);
+        setErrorMsg('');
+        addLog("[DEVELOPER] Developer Samil Jain authenticated successfully. AI-Core activated.");
+      } else {
+        setErrorMsg('Incorrect Developer Master Pass');
+      }
+    } catch (err) {
+      setErrorMsg('Security gateway offline. Please try again.');
     }
   };
 
@@ -325,7 +336,7 @@ export default function AdminAiAgent() {
             Authenticate AI Core
           </button>
         </form>
-        <p className="text-[10px] text-gray-600 mt-4 font-mono">Hint: Use passcode 'samil123' or 'SamilJain@2026'</p>
+        <p className="text-[10px] text-gray-600 mt-4 font-mono">Hint: Enter authorized developer passcode</p>
       </div>
     );
   }

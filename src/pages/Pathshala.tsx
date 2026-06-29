@@ -18,13 +18,14 @@ import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfi
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import SectionAiAgent from '../components/SectionAiAgent';
+import PathshalaFlashcardsDeck, { FLASHCARDS_DATA } from '../components/PathshalaFlashcardsDeck';
 
 export default function PathshalaPage() {
   const { theme } = useTheme();
   const { language, toggleLanguage } = useLanguage();
   const isDark = theme === 'dark';
   const navigate = useNavigate();
-  const { user: authUser, login: authLogin } = useAuth();
+  const { user: authUser, loading: authLoading, login: authLogin } = useAuth();
 
   const [pathshalaUser, setPathshalaUser] = useState<any>(null);
   const [isTeacher, setIsTeacher] = useState(false);
@@ -41,7 +42,7 @@ export default function PathshalaPage() {
   const [studentClassName, setStudentClassName] = useState('');
   const [authError, setAuthError] = useState('');
 
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'classes' | 'homework' | 'exams' | 'results' | 'discussions' | 'users'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'classes' | 'homework' | 'exams' | 'results' | 'discussions' | 'users' | 'flashcards'>('dashboard');
   const [classes, setClasses] = useState<any[]>([]);
   const [homeworks, setHomeworks] = useState<any[]>([]);
   const [exams, setExams] = useState<any[]>([]);
@@ -547,10 +548,24 @@ export default function PathshalaPage() {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await auth.signOut();
+    } catch (e) {
+      console.error('Error signing out:', e);
+    }
     setPathshalaUser(null);
     localStorage.removeItem('pathshala_user_id');
   };
+
+  if (authLoading && !pathshalaUser) {
+    return (
+      <div className={cn("min-h-screen flex flex-col items-center justify-center p-6", isDark ? "bg-[#050505]" : "bg-gray-50")}>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#FF6D00] mb-4 animate-pulse"></div>
+        <p className="text-xs font-black uppercase tracking-widest text-[#FF6D00]">Initializing Pathshala...</p>
+      </div>
+    );
+  }
 
   if (!pathshalaUser) {
     if (showGoogleRoleSetup) {
@@ -951,6 +966,7 @@ export default function PathshalaPage() {
 
   const t = {
     dashboard: language === 'hi' ? 'डैशबोर्ड' : 'DASHBOARD',
+    flashcards: language === 'hi' ? 'फ्लैशकार्ड' : 'FLASHCARDS',
     classes: language === 'hi' ? 'कक्षाएं' : 'CLASSES',
     exams: language === 'hi' ? 'परीक्षा' : 'EXAMS',
     results: language === 'hi' ? 'परिणाम' : 'RESULTS',
@@ -1049,9 +1065,7 @@ export default function PathshalaPage() {
               </div>
               <div className="flex flex-col gap-1">
                 <button 
-                  onClick={async () => {
-                    await auth.signOut();
-                  }}
+                  onClick={handleLogout}
                   className="text-[10px] font-bold text-gray-500 hover:text-white transition-colors uppercase tracking-widest bg-white/5 px-2 py-1 rounded"
                 >
                   Logout
@@ -1070,7 +1084,7 @@ export default function PathshalaPage() {
 
       {/* Navigation Tabs */}
       <div className={cn("flex gap-2 mb-6 p-1 rounded-2xl border overflow-x-auto hide-scrollbar", isDark ? "bg-[#121212]/60 border-white/5" : "bg-white border-gray-200 shadow-sm")}>
-        {['dashboard', 'classes', 'homework', 'exams', 'results', 'discussions', 'users'].map((tab) => (
+        {['dashboard', 'flashcards', 'classes', 'homework', 'exams', 'results', 'discussions', 'users'].map((tab) => (
           <button 
             key={tab}
             onClick={() => setActiveTab(tab as any)} 
@@ -1217,6 +1231,57 @@ export default function PathshalaPage() {
               )}
             </div>
           </div>
+        </div>
+      )}
+
+      {activeTab === 'flashcards' && (
+        <div className="space-y-6 animate-in fade-in duration-300">
+          {/* Header & Gamified progress */}
+          <div className={cn("rounded-[2.5rem] p-6 border relative overflow-hidden", isDark ? "bg-[#121212]/85 border-[#FF6D00]/25" : "bg-white border-orange-100 shadow-sm")}>
+            <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/5 rounded-full blur-3xl pointer-events-none" />
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <div>
+                <span className="text-[10px] font-black text-[#FF6D00] uppercase tracking-widest bg-orange-500/10 px-3 py-1 rounded-full border border-orange-500/10 inline-block mb-2">
+                  🎓 {language === 'hi' ? 'बाल संस्कार पाठशाला' : 'Spiritual Kids Academy'}
+                </span>
+                <h2 className={cn("text-2xl font-display font-black leading-tight", isDark ? "text-white" : "text-gray-900")}>
+                  {language === 'hi' ? 'इंटरएक्टिव ज्ञान फ्लैशकार्ड' : 'Interactive Gyan Flashcards'}
+                </h2>
+                <p className="text-gray-500 text-xs mt-1">
+                  {language === 'hi' ? 'सुंदर एनीमेशन, शुद्ध उच्चारण और चित्रों के साथ जैन धर्म की बुनियादी बातें सीखें।' : 'Learn Jain symbols, 24 Tirthankars\' emblems, and terms with beautiful flip cards & voice pronunciation.'}
+                </p>
+              </div>
+
+              {/* Junior Scholar Progress Widget */}
+              <div className="bg-orange-500/5 border border-orange-500/10 p-4 rounded-2xl flex items-center gap-3 w-full md:w-auto">
+                <div className="w-12 h-12 bg-gradient-to-br from-[#FF6D00] to-[#FFD54F] rounded-xl flex items-center justify-center text-black text-2xl shrink-0 font-bold shadow-md">
+                  🏆
+                </div>
+                <div>
+                  <span className="text-[9px] font-black text-orange-550 dark:text-orange-400 uppercase tracking-widest block">
+                    {language === 'hi' ? 'बाल विद्वान स्तर' : 'JUNIOR SCHOLAR RANK'}
+                  </span>
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                    <span className="font-extrabold text-sm text-gray-800 dark:text-white leading-none">
+                      {JSON.parse(localStorage.getItem('pathshala_mastered_cards') || '[]').length} / {FLASHCARDS_DATA.length}
+                    </span>
+                    <span className="text-[10px] text-gray-400 font-bold">
+                      {language === 'hi' ? 'कार्ड्स सीखे' : 'Cards Learned'}
+                    </span>
+                  </div>
+                  <div className="w-28 h-1.5 bg-gray-200 dark:bg-white/5 rounded-full mt-1.5 overflow-hidden">
+                    <div 
+                      className="h-full bg-gradient-to-r from-orange-500 to-[#FFD54F] rounded-full transition-all duration-500"
+                      style={{ width: `${Math.min(100, (JSON.parse(localStorage.getItem('pathshala_mastered_cards') || '[]').length / FLASHCARDS_DATA.length) * 100)}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Flashcards implementation view */}
+          <PathshalaFlashcardsDeck isDark={isDark} language={language} />
         </div>
       )}
 

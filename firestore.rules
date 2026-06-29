@@ -179,5 +179,33 @@ service cloud.firestore {
     match /dharamshala_bookings/{id} {
       allow read, write: if true;
     }
+
+    match /tirth/{id} {
+      allow read, write: if true;
+    }
+
+    match /jain_news/{id} {
+      allow read, write: if true;
+    }
+
+    match /jain_stores/{id} {
+      allow read, write: if true;
+    }
+
+    match /jain_products/{id} {
+      allow read, write: if true;
+    }
+
+    match /jain_orders/{id} {
+      allow read, write: if true;
+    }
+
+    match /daily_jain_news/{id} {
+      allow read, write: if true;
+    }
+
+    match /test/{id} {
+      allow read, write: if true;
+    }
   }
 }

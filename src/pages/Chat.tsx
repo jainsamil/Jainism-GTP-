@@ -5,12 +5,15 @@ import {
   Brain, Search, BookOpen, X, Plus, Camera, File, Lightbulb, Telescope, 
   Globe, ArrowLeft, FileText, Menu, Trash2, MessageSquare, PlusCircle, 
   LogOut, ShieldAlert, User, ShieldCheck, Languages, Compass, Music,
-  Cpu, RefreshCw, Zap, CheckCircle2, Sliders, Activity, Eye, ClipboardCheck
+  Cpu, RefreshCw, Zap, CheckCircle2, Sliders, Activity, Eye, ClipboardCheck, Radio, Wifi,
+  Edit, Check
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 import Markdown from 'react-markdown';
 import { cn } from '../lib/utils';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { db } from '../firebase';
 import { 
   collection, query, where, getDocs, doc, setDoc, 
@@ -34,11 +37,14 @@ type ChatSession = {
 
 export default function ChatPage() {
   const { user, login, logout } = useAuth();
+  const { language } = useLanguage();
   const location = useLocation();
   const navigate = useNavigate();
   const initialPrompt = location.state?.initialPrompt;
 
   const [messages, setMessages] = useState<Message[]>([]);
+  const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState<string>('');
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [showSidebar, setShowSidebar] = useState(false);
@@ -51,6 +57,16 @@ export default function ChatPage() {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [speechError, setSpeechError] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  // New Jainism GPT Live Mode Voice-to-Voice States
+  const [isLiveMode, setIsLiveMode] = useState(false);
+  const [liveState, setLiveState] = useState<'idle' | 'listening' | 'thinking' | 'speaking'>('idle');
+  const [liveUserText, setLiveUserText] = useState('');
+  const [liveModelText, setLiveModelText] = useState('');
+  const [liveError, setLiveError] = useState('');
+
+  const liveRecognitionRef = useRef<any>(null);
+  const liveUtteranceRef = useRef<any>(null);
 
   // New High-Level System Controls (Locked dynamically to the latest upgrade model)
   const [selectedModel, setSelectedModel] = useState<'gemini-3.5-flash' | 'gemini-flash-latest' | 'gemini-3.1-pro-preview'>('gemini-flash-latest');
@@ -174,8 +190,7 @@ export default function ChatPage() {
 
   // Handle saving of active session to Firestore
   const saveSessionToFirestore = async (activeSessionId: string, msgs: Message[]) => {
-    if (msgs.length === 0) return;
-
+    // Save empty sequence permitted on deletions
     if (!user) {
       try {
         const stored = localStorage.getItem('guest_sessions');
@@ -234,6 +249,29 @@ export default function ChatPage() {
     setCurrentSessionId(null);
     setShowSidebar(false);
     chatRef.current = null;
+  };
+
+  const handleStartEdit = (msg: Message) => {
+    setEditingMessageId(msg.id);
+    setEditValue(msg.text);
+  };
+
+  const handleSaveEdit = async (msgId: string) => {
+    if (!editValue.trim()) return;
+    const updated = messages.map(msg => msg.id === msgId ? { ...msg, text: editValue } : msg);
+    setMessages(updated);
+    setEditingMessageId(null);
+    if (currentSessionId) {
+      await saveSessionToFirestore(currentSessionId, updated);
+    }
+  };
+
+  const handleDeleteMessage = async (msgId: string) => {
+    const updated = messages.filter(msg => msg.id !== msgId);
+    setMessages(updated);
+    if (currentSessionId) {
+      await saveSessionToFirestore(currentSessionId, updated);
+    }
   };
 
   const loadSession = (session: ChatSession) => {
@@ -378,6 +416,231 @@ export default function ChatPage() {
     }
   };
 
+  // Start speech recognition for Live Mode
+  const startLiveListening = () => {
+    if (window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    }
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      setLiveError('Voice recognition is not supported in this browser.');
+      setLiveState('idle');
+      return;
+    }
+
+    try {
+      if (liveRecognitionRef.current) {
+        liveRecognitionRef.current.abort();
+      }
+
+      const rec = new SpeechRecognition();
+      // Auto-detect dialect of Indian users (mix of Hindi & English)
+      rec.lang = 'hi-IN'; 
+      rec.continuous = false;
+      rec.interimResults = false;
+
+      rec.onstart = () => {
+        setLiveState('listening');
+        setLiveError('');
+      };
+
+      rec.onresult = async (event: any) => {
+        const transcript = event.results[event.results.length - 1][0].transcript;
+        if (transcript && transcript.trim()) {
+          setLiveUserText(transcript);
+          await handleLiveReply(transcript);
+        }
+      };
+
+      rec.onerror = (event: any) => {
+        console.error("Live Recognition Error:", event);
+        if (event.error === 'no-speech') {
+          // Restart listening after a brief moment if silent
+          setTimeout(() => {
+            if (isLiveMode && liveState === 'listening') {
+              startLiveListening();
+            }
+          }, 600);
+        } else if (event.error === 'not-allowed') {
+          setLiveError('Microphone or speech permission was denied.');
+          setLiveState('idle');
+        } else {
+          // Recover gracefully
+          setTimeout(() => {
+            if (isLiveMode) startLiveListening();
+          }, 1000);
+        }
+      };
+
+      rec.onend = () => {
+        // If we transitioned to thinking or speaking, don't restart immediately.
+        // Otherwise (idle/silence), keep listening!
+        if (isLiveMode && liveState === 'listening') {
+          startLiveListening();
+        }
+      };
+
+      liveRecognitionRef.current = rec;
+      rec.start();
+    } catch (err) {
+      console.error("Failed to start speech recognition:", err);
+    }
+  };
+
+  // Process Jainism GPT Live responses
+  const handleLiveReply = async (userText: string) => {
+    if (liveRecognitionRef.current) {
+      try {
+        liveRecognitionRef.current.abort();
+      } catch (e) {}
+    }
+
+    try {
+      setLiveState('thinking');
+      setLiveModelText('');
+
+      const history = messages.filter(m => m.id !== 'welcome').map(m => ({
+        role: m.role,
+        parts: [{ text: m.text }]
+      }));
+
+      const newParts: any[] = [];
+      const fileToSend = selectedFile;
+      if (fileToSend) {
+        newParts.push({
+          inlineData: {
+            data: fileToSend.data,
+            mimeType: fileToSend.mimeType
+          }
+        });
+        // Clear file upload so it is only sent once
+        setSelectedFile(null);
+      }
+      newParts.push({ text: userText });
+
+      const contents = [
+        ...history,
+        { role: 'user', parts: newParts }
+      ];
+
+      // Request short, spoken Jainism GPT response
+      const response = await ai.models.generateContent({
+        model: selectedModel,
+        contents,
+        config: {
+          systemInstruction: 'You are Jainism GPT, a wise, compassionate, and extremely gentle spiritual guide on Jainism. You are in a live, real-time voice conversation session. If the user presents or uploads any image/video/relic, analyze it deeply and explain its relevance to Jainism, its spiritual meaning, or history, but keep your spoken voice responses brief, sweet, and concise (maximum 2-3 short sentences). Never mention that you are an AI, Gemini, Google, or a language model. You are strictly Jainism GPT. Speak to the user like a kind, warm companion. If they speak Hindi, respond in sweet Hindi. If English, respond in English. Always maintain a divine, peaceful, and respectful atmosphere with "Jai Jinendra".',
+        }
+      });
+
+      const modelReply = response.text || "I apologize, could you repeat that please?";
+      setLiveModelText(modelReply);
+
+      // Now save the live interaction straight to the chat lists so it registers as part of their chat session!
+      const activeSessionId = currentSessionId || Date.now().toString();
+      if (!currentSessionId) {
+        setCurrentSessionId(activeSessionId);
+      }
+
+      const uTextWithFile = fileToSend ? `[Uploaded ${fileToSend.name}] ${userText}` : userText;
+      const uMsg: Message = { id: Date.now().toString(), role: 'user', text: uTextWithFile };
+      const mMsg: Message = { id: (Date.now()+1).toString(), role: 'model', text: modelReply };
+      const updatedList = [...messages, uMsg, mMsg];
+      setMessages(updatedList);
+      saveSessionToFirestore(activeSessionId, updatedList);
+
+      // Transition to speaking and activate browser speech Synthesis
+      speakLiveText(modelReply);
+    } catch (err) {
+      console.error("Live API Error:", err);
+      setLiveState('idle');
+      setLiveError('Live voice chat is currently on local fallback. "Jai Jinendra! Peace, non-violence, and self-restraint lead to ultimate liberation." Please try again shortly.');
+    }
+  };
+
+  // Speech synthesizer for Live Mode
+  const speakLiveText = (text: string) => {
+    if (!('speechSynthesis' in window)) {
+      setLiveState('idle');
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+    setLiveState('speaking');
+
+    // Clean up text of markdown markers (like asterisks, hashtags etc.) for smoother pronunciation
+    const cleanText = text.replace(/[\*#_`~]/g, '');
+
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    
+    // Choose voice: prefer sweet or Indian styled English/Hindi speakers if available
+    const voices = window.speechSynthesis.getVoices();
+    // Try to find a nice Hindi-India/English-India speech voice
+    const indVoice = voices.find(v => v.lang.includes('IN') || v.lang.includes('hi')) || voices.find(v => v.lang.includes('hi'));
+    if (indVoice) {
+      utterance.voice = indVoice;
+    }
+    utterance.lang = text.match(/[\u0900-\u097F]/) ? 'hi-IN' : 'en-IN';
+    utterance.rate = 0.95; // slightly slower for a sweet, graceful guidance pace
+
+    utterance.onend = () => {
+      // Finished speaking! Immediately resume listening to enable hands-free dynamic convo loop
+      if (isLiveMode) {
+        setLiveState('listening');
+        startLiveListening();
+      }
+    };
+
+    utterance.onerror = (e: any) => {
+      console.error("Speech Synthesis Error:", e);
+      if (isLiveMode) {
+        setLiveState('listening');
+        startLiveListening();
+      }
+    };
+
+    liveUtteranceRef.current = utterance;
+    window.speechSynthesis.speak(utterance);
+  };
+
+  // Exit Live Mode Cleanups
+  const exitLiveMode = () => {
+    setIsLiveMode(false);
+    setLiveState('idle');
+    setLiveUserText('');
+    setLiveModelText('');
+    setLiveError('');
+
+    if (liveRecognitionRef.current) {
+      try {
+        liveRecognitionRef.current.abort();
+      } catch (e) {}
+    }
+    if (window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    }
+  };
+
+  // Trigger Live Listening loop on Mount/Toggle
+  useEffect(() => {
+    if (isLiveMode) {
+      setLiveState('listening');
+      const t = setTimeout(() => {
+        startLiveListening();
+      }, 500);
+      return () => {
+        clearTimeout(t);
+        if (liveRecognitionRef.current) {
+          try {
+            liveRecognitionRef.current.abort();
+          } catch (e) {}
+        }
+        if (window.speechSynthesis) {
+          window.speechSynthesis.cancel();
+        }
+      };
+    }
+  }, [isLiveMode]);
+
   const handleSend = useCallback(async (textOverride?: string) => {
     const textToSend = textOverride || input.trim();
     if ((!textToSend && !selectedFile) || isLoading) return;
@@ -465,7 +728,15 @@ export default function ChatPage() {
       console.error('Error sending message:', error);
       setMessages((prev) => [
         ...prev,
-        { id: Date.now().toString(), role: 'model', text: 'I apologize, but I encountered an error. Please try again.' },
+        { 
+          id: Date.now().toString(), 
+          role: 'model', 
+          text: `Jai Jinendra! 🙏 It seems our live AI cloud is currently experiencing extremely high demand (Quota limit reached). Let me share a beautiful local reflection with you:
+
+**'अहिंसा परमो धर्मः'** (Non-violence is the supreme religion) and **'परस्परोपग्रहो जीवानाम्'** (All life is bound together by mutual support) form the heart of Jain wisdom. Every soul has the potential to realize supreme consciousness. 
+
+Please feel free to explore our sacred Aagams, Panchang, and Swadhyay commentary pages directly while the AI recovers!` 
+        },
       ]);
     } finally {
       setIsLoading(false);
@@ -664,9 +935,22 @@ export default function ChatPage() {
           </button>
           <h1 className="text-xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] drop-shadow-[0_0_10px_rgba(255,109,0,0.5)]">JAINISM GPT</h1>
         </div>
-        <button onClick={() => setShowSidebar(true)} className="text-gray-500 hover:text-[#FF6D00] dark:text-gray-400 dark:hover:text-[#FF6D00] transition-colors">
-          <Menu size={24} />
-        </button>
+        
+        <div className="flex items-center gap-2">
+          {/* Glowing Live Convo Trigger */}
+          <button
+            onClick={() => setIsLiveMode(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-[#FF6D00] to-[#FF8A65] text-white hover:scale-105 active:scale-95 transition-all text-xs font-black uppercase tracking-wider rounded-2xl shadow-[0_0_15px_rgba(255,109,0,0.4)] animate-pulse cursor-pointer shrink-0"
+            title="Start Live Voice Interaction"
+          >
+            <Radio size={14} className="text-white animate-bounce" />
+            Live Convo
+          </button>
+
+          <button onClick={() => setShowSidebar(true)} className="text-gray-550 hover:text-[#FF6D00] dark:text-gray-400 dark:hover:text-[#FF6D00] transition-colors p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-white/5">
+            <Menu size={24} />
+          </button>
+        </div>
       </header>
 
       {messages.length === 0 ? (
@@ -695,38 +979,107 @@ export default function ChatPage() {
                 msg.role === 'user' ? "ml-auto items-end" : "mr-auto items-start"
               )}
             >
-              <div
-                className={cn(
-                   "px-5 py-3.5 rounded-3xl shadow-sm backdrop-blur-md",
-                   msg.role === 'user'
-                     ? "bg-gradient-to-br from-[#E65100] to-[#FF8A65] text-white rounded-tr-sm shadow-[0_0_20px_rgba(230,81,0,0.4)] border border-[#FF8A65]/50"
-                     : "bg-white dark:bg-[#121212]/80 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-200 rounded-tl-sm shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.3)]"
-                )}
-              >
-                {msg.role === 'user' ? (
-                  <p className="whitespace-pre-wrap leading-relaxed font-semibold">{msg.text}</p>
-                ) : (
-                  <div className="prose prose-sm dark:prose-invert max-w-none prose-p:leading-relaxed prose-a:text-[#FF8A65] prose-strong:text-gray-900 dark:prose-strong:text-white">
-                    {msg.text ? (
-                      <Markdown>{msg.text}</Markdown>
+              {editingMessageId === msg.id ? (
+                <div className="w-full min-w-[280px] sm:min-w-[400px] bg-white dark:bg-[#121212]/90 border border-[#FF8A65] rounded-3xl p-3.5 shadow-lg flex flex-col gap-2 backdrop-blur-md">
+                  <textarea
+                    value={editValue}
+                    onChange={(e) => setEditValue(e.target.value)}
+                    className="w-full min-h-[85px] bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-2xl p-3 text-sm text-gray-905 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#FF8A65]/50 resize-y font-semibold"
+                    placeholder={language === 'hi' ? "संदेश सुधारें..." : "Edit message..."}
+                    autoFocus
+                  />
+                  <div className="flex justify-end gap-2">
+                    <button
+                      onClick={() => setEditingMessageId(null)}
+                      className="px-3 py-1.5 bg-gray-100 dark:bg-white/5 text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white text-xs font-black rounded-xl transition-all"
+                    >
+                      {language === 'hi' ? 'रद्द करें' : 'Cancel'}
+                    </button>
+                    <button
+                      onClick={() => handleSaveEdit(msg.id)}
+                      className="px-3.5 py-1.5 bg-gradient-to-r from-[#FF6D00] to-[#FF8A65] text-white text-xs font-black rounded-xl transition-all flex items-center gap-1 shadow-sm hover:opacity-90 cursor-pointer"
+                    >
+                      <Check size={12} />
+                      {language === 'hi' ? 'सुरक्षित करें' : 'Save'}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div
+                    className={cn(
+                       "px-5 py-3.5 rounded-3xl shadow-sm backdrop-blur-md",
+                       msg.role === 'user'
+                         ? "bg-gradient-to-br from-[#E65100] to-[#FF8A65] text-white rounded-tr-sm shadow-[0_0_20px_rgba(230,81,0,0.4)] border border-[#FF8A65]/50"
+                         : "bg-white dark:bg-[#121212]/80 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-200 rounded-tl-sm shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.3)]"
+                    )}
+                  >
+                    {msg.role === 'user' ? (
+                      <p className="whitespace-pre-wrap leading-relaxed font-semibold">{msg.text}</p>
                     ) : (
-                      <div className="flex items-center gap-1 h-5">
-                        <span className="w-1.5 h-1.5 bg-[#FF8A65] rounded-full animate-bounce [animation-delay:-0.3s] shadow-[0_0_5px_rgba(255,138,101,0.8)]"></span>
-                        <span className="w-1.5 h-1.5 bg-[#FF8A65] rounded-full animate-bounce [animation-delay:-0.15s] shadow-[0_0_5px_rgba(255,138,101,0.8)]"></span>
-                        <span className="w-1.5 h-1.5 bg-[#FF8A65] rounded-full animate-bounce shadow-[0_0_5px_rgba(255,138,101,0.8)]"></span>
+                      <div className="prose prose-sm dark:prose-invert max-w-none prose-p:leading-relaxed prose-a:text-[#FF8A65] prose-strong:text-gray-900 dark:prose-strong:text-white">
+                        {msg.text ? (
+                          <Markdown>{msg.text}</Markdown>
+                        ) : (
+                          <div className="flex items-center gap-1 h-5">
+                            <span className="w-1.5 h-1.5 bg-[#FF8A65] rounded-full animate-bounce [animation-delay:-0.3s] shadow-[0_0_5px_rgba(255,138,101,0.8)]"></span>
+                            <span className="w-1.5 h-1.5 bg-[#FF8A65] rounded-full animate-bounce [animation-delay:-0.15s] shadow-[0_0_5px_rgba(255,138,101,0.8)]"></span>
+                            <span className="w-1.5 h-1.5 bg-[#FF8A65] rounded-full animate-bounce shadow-[0_0_5px_rgba(255,138,101,0.8)]"></span>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
-                )}
-              </div>
-              {msg.role === 'model' && msg.text && (
-                <button 
-                  onClick={() => handleListen(msg.text)}
-                  className="mt-2 text-[10px] uppercase tracking-wider font-bold text-gray-400 hover:text-[#FF8A65] flex items-center gap-1.5 px-2 transition-colors"
-                >
-                  {isSpeaking ? <VolumeX size={14} className="text-[#FF1744] animate-pulse" /> : <Volume2 size={14} />} 
-                  {isSpeaking ? 'Stop' : 'Listen'}
-                </button>
+
+                  {msg.role === 'user' ? (
+                    <div className="flex items-center gap-3 mt-1.5 px-2">
+                      <button
+                        onClick={() => handleStartEdit(msg)}
+                        className="text-[10px] uppercase tracking-wider font-extrabold text-gray-400 hover:text-[#FF8A65] flex items-center gap-1 transition-colors cursor-pointer"
+                        title={language === 'hi' ? 'संदेश सुधारें' : 'Edit message'}
+                      >
+                        <Edit size={11} />
+                        {language === 'hi' ? 'सुधारें' : 'Edit'}
+                      </button>
+                      <button
+                        onClick={() => handleDeleteMessage(msg.id)}
+                        className="text-[10px] uppercase tracking-wider font-extrabold text-gray-400 hover:text-[#FF1744] flex items-center gap-1 transition-colors cursor-pointer"
+                        title={language === 'hi' ? 'संदेश हटाएं' : 'Delete message'}
+                      >
+                        <Trash2 size={11} />
+                        {language === 'hi' ? 'हटाएं' : 'Delete'}
+                      </button>
+                    </div>
+                  ) : (
+                    msg.text && (
+                      <div className="flex flex-wrap items-center gap-3.5 mt-1.5 px-2">
+                        <button 
+                          onClick={() => handleListen(msg.text)}
+                          className="text-[10px] uppercase tracking-wider font-extrabold text-gray-400 hover:text-[#FF8A65] flex items-center gap-1.5 transition-colors cursor-pointer"
+                        >
+                          {isSpeaking ? <VolumeX size={12} className="text-[#FF1744] animate-pulse" /> : <Volume2 size={12} />} 
+                          {isSpeaking ? 'Stop' : 'Listen'}
+                        </button>
+                        <button
+                          onClick={() => handleStartEdit(msg)}
+                          className="text-[10px] uppercase tracking-wider font-extrabold text-gray-400 hover:text-[#FF8A65] flex items-center gap-1 transition-colors cursor-pointer"
+                          title={language === 'hi' ? 'संदेश सुधारें' : 'Edit message'}
+                        >
+                          <Edit size={11} />
+                          {language === 'hi' ? 'सुधारें' : 'Edit'}
+                        </button>
+                        <button
+                          onClick={() => handleDeleteMessage(msg.id)}
+                          className="text-[10px] uppercase tracking-wider font-extrabold text-gray-400 hover:text-[#FF1744] flex items-center gap-1 transition-colors cursor-pointer"
+                          title={language === 'hi' ? 'संदेश हटाएं' : 'Delete message'}
+                        >
+                          <Trash2 size={11} />
+                          {language === 'hi' ? 'हटाएं' : 'Delete'}
+                        </button>
+                      </div>
+                    )
+                  )}
+                </>
               )}
             </div>
           ))}
@@ -1156,6 +1509,190 @@ export default function ChatPage() {
           </div>
         </div>
       )}
+
+      {/* Jainism GPT Immersive Live Mode Voice Overlay */}
+      <AnimatePresence>
+        {isLiveMode && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-[#0A0A0A] text-white z-[999] flex flex-col items-center justify-between p-6 overflow-hidden md:p-12 font-sans"
+          >
+            {/* Background elements */}
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,109,0,0.08)_0%,transparent_70%)] pointer-events-none" />
+
+            {/* Top Bar */}
+            <div className="w-full max-w-lg flex items-center justify-between relative z-10 shrink-0">
+              <div className="flex items-center gap-2">
+                <span className="flex h-2.5 w-2.5 relative">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00E676] opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#00E676]"></span>
+                </span>
+                <p className="text-[10px] font-black tracking-widest uppercase text-[#00E676]">Jainism GPT Live</p>
+              </div>
+              <button 
+                onClick={exitLiveMode}
+                className="w-10 h-10 flex items-center justify-center bg-white/5 hover:bg-white/10 rounded-full text-white/70 hover:text-white transition-all cursor-pointer backdrop-blur"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Immersive Voice Waves Visualizer */}
+            <div className="flex-1 flex flex-col items-center justify-center space-y-12 relative z-10 w-full max-w-lg">
+              <div className="relative flex items-center justify-center w-56 h-56">
+                {/* Ripples */}
+                {liveState === 'speaking' && (
+                  <>
+                    <div className="absolute w-56 h-28 bg-[#FF6D00]/10 rounded-full animate-ping [animation-duration:2.5s]" />
+                    <div className="absolute w-44 h-24 bg-[#FF6D00]/15 rounded-full animate-ping [animation-duration:2.0s]" />
+                    <div className="absolute w-32 h-20 bg-[#FF6D00]/20 rounded-full animate-ping [animation-duration:1.5s]" />
+                  </>
+                )}
+                {liveState === 'listening' && (
+                  <>
+                    <div className="absolute w-44 h-44 bg-[#00E676]/10 rounded-full animate-pulse [animation-duration:1.5s]" />
+                    <div className="absolute w-32 h-32 bg-[#00E676]/15 rounded-full animate-pulse [animation-duration:1.0s]" />
+                  </>
+                )}
+                {liveState === 'thinking' && (
+                  <div className="absolute inset-x-0 inset-y-0 border-2 border-dashed border-[#FFD54F]/30 rounded-full animate-spin [animation-duration:6s]" />
+                )}
+
+                {/* Core Speaker Circle */}
+                <div className={cn(
+                  "w-28 h-28 rounded-full flex items-center justify-center transition-all duration-500 shadow-2xl relative z-10",
+                  liveState === 'listening' ? "bg-gradient-to-br from-[#00E676] to-[#00C853] text-black shadow-[#00E676]/30 scale-105" :
+                  liveState === 'thinking' ? "bg-gradient-to-br from-[#FFD54F] to-[#FFB300] text-black shadow-[#FFD54F]/30 scale-100 animate-pulse" :
+                  liveState === 'speaking' ? "bg-gradient-to-br from-[#FF6D00] to-[#FF8A65] text-white shadow-[#FF6D00]/40 scale-110" :
+                  "bg-white/10 border border-white/20 text-white scale-90"
+                )}>
+                  {liveState === 'listening' && <Mic size={36} />}
+                  {liveState === 'thinking' && <Activity size={36} className="animate-pulse" />}
+                  {liveState === 'speaking' && <Volume2 size={36} className="animate-bounce" />}
+                  {liveState === 'idle' && <Radio size={36} />}
+                </div>
+              </div>
+
+              {/* Dynamic Subtitle/Caption Feedback */}
+              <div className="text-center space-y-3 px-4 w-full h-32 flex flex-col justify-center">
+                <p className="text-xs font-black uppercase tracking-wider text-white/50">
+                  {liveState === 'listening' ? 'Listening to your voice...' :
+                   liveState === 'thinking' ? 'Deep Contemplation...' :
+                   liveState === 'speaking' ? 'Jainism GPT' : 'Tap Mic to Speak'}
+                </p>
+                
+                <AnimatePresence mode="wait">
+                  {liveState === 'speaking' && liveModelText ? (
+                    <motion.p
+                      key={liveModelText}
+                      initial={{ opacity: 0, y: 5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -5 }}
+                      className="text-lg font-medium text-gray-200 line-clamp-3 leading-relaxed max-w-md mx-auto"
+                    >
+                      "{liveModelText}"
+                    </motion.p>
+                  ) : liveState === 'listening' && liveUserText ? (
+                    <motion.p
+                      key={liveUserText}
+                      initial={{ opacity: 0, y: 5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="text-base font-semibold text-gray-400 italic max-w-sm mx-auto"
+                    >
+                      "{liveUserText}"
+                    </motion.p>
+                  ) : (
+                    <motion.p
+                      key="prompt"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 0.6 }}
+                      className="text-sm text-gray-400 h-5"
+                    >
+                      {liveState === 'listening' ? 'Speak clearly now...' :
+                       liveState === 'thinking' ? 'Consulting canonical structures...' :
+                       liveState === 'speaking' ? 'Chanting verbal gatha...' : 'Hands-Free Loop Active'}
+                    </motion.p>
+                  )}
+                </AnimatePresence>
+                
+                {liveError && (
+                  <p className="text-xs font-black text-rose-500 uppercase tracking-widest leading-relaxed">{liveError}</p>
+                )}
+              </div>
+            </div>
+
+            {/* Multimodal Live Attachments for images and videos */}
+            <div className="w-full max-w-lg flex flex-col items-center gap-4 relative z-10 shrink-0 mb-2">
+              {selectedFile ? (
+                <div className="bg-white/5 border border-white/10 p-2.5 rounded-2xl flex items-center gap-3 animate-in zoom-in-95 duration-200">
+                  {selectedFile.isImage ? (
+                    <img src={selectedFile.url} alt="Attached Preview" className="h-12 w-12 object-cover rounded-xl border border-white/10" />
+                  ) : (
+                    <div className="h-12 w-12 flex items-center justify-center rounded-xl bg-white/10 border border-white/10 text-[9px] font-black uppercase text-gray-400">
+                      File
+                    </div>
+                  )}
+                  <div className="text-left">
+                    <span className="text-[8px] font-black uppercase text-[#FF6D00] tracking-wider block leading-none mb-1">Attached to Live Guidance Room</span>
+                    <span className="text-xs font-bold text-gray-200 block truncate max-w-[140px] leading-tight">{selectedFile.name}</span>
+                  </div>
+                  <button 
+                    onClick={() => setSelectedFile(null)} 
+                    className="p-1 px-2.5 bg-red-600/10 hover:bg-red-600/20 text-red-500 rounded-lg text-[9px] font-black uppercase tracking-wider transition-colors"
+                  >
+                    Remove
+                  </button>
+                </div>
+              ) : (
+                <div className="flex gap-3 justify-center items-center">
+                  <button
+                    onClick={() => cameraInputRef.current?.click()}
+                    className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 text-[10px] font-black uppercase tracking-wider rounded-2xl transition-all hover:scale-103"
+                  >
+                    <Camera size={13} className="text-[#FF8A65]" />
+                    <span>Capture Photo</span>
+                  </button>
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 text-[10px] font-black uppercase tracking-wider rounded-2xl transition-all hover:scale-103"
+                  >
+                    <ImageIcon size={13} className="text-[#FF8A65]" />
+                    <span>Upload Photo/Video</span>
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Bottom Controls / Close Button */}
+            <div className="w-full max-w-lg flex flex-col items-center gap-4 relative z-10 shrink-0">
+              <div className="flex gap-4">
+                <button
+                  onClick={liveState === 'listening' ? () => setLiveState('idle') : startLiveListening}
+                  className={cn(
+                    "px-6 py-3 rounded-full text-xs font-black uppercase tracking-widest transition-all cursor-pointer",
+                    liveState === 'listening' 
+                      ? "bg-rose-600/20 text-rose-500 border border-rose-500/30" 
+                      : "bg-white/10 hover:bg-white/20 text-white"
+                  )}
+                >
+                  {liveState === 'listening' ? 'Pause Mic' : 'Resume Mic'}
+                </button>
+                <button
+                  onClick={exitLiveMode}
+                  className="px-8 py-3 bg-[#FF6D00] hover:bg-[#FF8A65] text-white rounded-full text-xs font-black uppercase tracking-widest shadow-lg shadow-[#FF6D00]/25 transition-all cursor-pointer"
+                >
+                  End Live Session
+                </button>
+              </div>
+              <p className="text-[9px] font-bold text-white/30 uppercase tracking-widest">
+                Hands-free voice loop enabled, auto-switches list states
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

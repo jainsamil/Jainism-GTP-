@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { historyData, HeritageItem } from '../data/historyData';
 import SectionAiAgent from '../components/SectionAiAgent';
+import UnifiedSearchBar from '../components/UnifiedSearchBar';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 
@@ -51,23 +52,56 @@ export default function HistoryPage() {
   }, [searchQuery, selectedCategory, selectedState]);
 
   // Separation of the 8 Main Epochs of Jinas vs the Generated Reference Library items
-  const mainEpochs = useMemo(() => historyData.slice(0, 8), []);
+  const mainEpochs = useMemo(() => {
+    const staticEpochs = historyData.slice(0, 8);
+    const firestoreEpochs = firestoreHistory.filter(item => item.category === 'Event' || item.id?.startsWith('event'));
+    
+    const dataMap = new Map(firestoreEpochs.map(doc => [doc.id, doc]));
+    const merged = staticEpochs.map(fallbackItem => {
+      let matchedItem = dataMap.get(fallbackItem.id);
+      if (!matchedItem) {
+        const matchByTitle = firestoreEpochs.find((d: any) => 
+          (d.title?.en && d.title.en === fallbackItem.title?.en) ||
+          (d.title?.hi && d.title.hi === fallbackItem.title?.hi)
+        );
+        if (matchByTitle) {
+          matchedItem = matchByTitle;
+          dataMap.delete(matchByTitle.id);
+        }
+      } else {
+        dataMap.delete(fallbackItem.id);
+      }
+      return matchedItem ? { ...fallbackItem, ...matchedItem } : fallbackItem;
+    });
+    
+    return [...merged, ...Array.from(dataMap.values())];
+  }, [firestoreHistory]);
+
   const repositoryItems = useMemo(() => historyData.slice(8), []);
 
   // Merge static list with Firestore live updates/additions
   const combinedHistoryItems = useMemo(() => {
-    const combined = [...repositoryItems];
-    firestoreHistory.forEach(fh => {
-      const matchIdx = combined.findIndex(item => 
-        item.id === fh.id || (item.title?.en && fh.title?.en && item.title.en.toLowerCase() === fh.title.en.toLowerCase())
-      );
-      if (matchIdx !== -1) {
-        combined[matchIdx] = { ...combined[matchIdx], ...fh };
+    const firestoreRepo = firestoreHistory.filter(item => item.category !== 'Event' && !item.id?.startsWith('event'));
+    
+    const dataMap = new Map(firestoreRepo.map(doc => [doc.id, doc]));
+    const merged = repositoryItems.map(fallbackItem => {
+      let matchedItem = dataMap.get(fallbackItem.id);
+      if (!matchedItem) {
+        const matchByTitle = firestoreRepo.find((d: any) => 
+          (d.title?.en && d.title.en === fallbackItem.title?.en) ||
+          (d.title?.hi && d.title.hi === fallbackItem.title?.hi)
+        );
+        if (matchByTitle) {
+          matchedItem = matchByTitle;
+          dataMap.delete(matchByTitle.id);
+        }
       } else {
-        combined.push(fh);
+        dataMap.delete(fallbackItem.id);
       }
+      return matchedItem ? { ...fallbackItem, ...matchedItem } : fallbackItem;
     });
-    return combined;
+    
+    return [...merged, ...Array.from(dataMap.values())];
   }, [repositoryItems, firestoreHistory]);
 
   const statesList = useMemo(() => {
@@ -172,12 +206,12 @@ export default function HistoryPage() {
         </div>
       </div>
 
-      {/* SECTION 2: Search & Filter 350+ Jain Monuments */}
+      {/* SECTION 2: Search & Filter Curated Jain Monuments */}
       <div className="mt-12 pt-8 border-t border-gray-200 dark:border-white/5">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <div className="text-left">
             <h2 className="text-xl font-bold text-gray-900 dark:text-white tracking-wide">
-              {language === 'hi' ? '३५०+ जैन धरोहर एवं तीर्थ दीर्घा' : '350+ HERITAGE SITES & MONUMENTS'}
+              {language === 'hi' ? 'सत्यापित जैन धरोहर एवं तीर्थ दीर्घा' : 'CURATED JAIN HERITAGE & MONUMENTS'}
             </h2>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
               {language === 'hi' ? 'श्रेणी, स्थान और राज्यों के अनुसार प्राचीन मंदिरों, प्रतिमाओं व अभिलेखों को खोजें' : 'Search & locate historical temples, grotto caves, inscriptions & relics'}
@@ -187,16 +221,11 @@ export default function HistoryPage() {
 
         {/* Filters and Search Bar Container */}
         <div className="bg-white dark:bg-[#121212] p-5 rounded-3xl border border-gray-200 dark:border-white/5 shadow-inner mb-6 space-y-4 text-left">
-          <div className="relative">
-            <Search className="absolute left-4 top-3.5 text-gray-400 dark:text-gray-500" size={18} />
-            <input 
-              type="text" 
-              placeholder={language === 'hi' ? "इतिहास, मंदिर, स्थान, काल या शब्द खोजें..." : "Search temples, relics, structures, or centuries..."}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 bg-gray-100 dark:bg-[#0a0a0a] text-gray-900 dark:text-white rounded-2xl border border-gray-200 dark:border-white/15 focus:border-[#FF6D00] focus:ring-1 focus:ring-[#FF6D00] transition-all text-xs font-bold font-mono outline-none"
-            />
-          </div>
+          <UnifiedSearchBar
+            value={searchQuery}
+            onChange={(val) => setSearchQuery(val)}
+            placeholder={language === 'hi' ? "इतिहास, मंदिर, स्थान, काल या शब्द खोजें..." : "Search temples, relics, structures, or centuries..."}
+          />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {/* Category Filter */}
@@ -242,7 +271,7 @@ export default function HistoryPage() {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
           <div className="bg-white dark:bg-[#121212]/80 border border-gray-200 dark:border-white/5 p-4 rounded-2xl text-center shadow-sm dark:shadow-[0_5px_15px_rgba(0,0,0,0.3)] transition-colors duration-300">
             <span className="text-[9px] font-mono font-bold text-gray-500 uppercase tracking-widest block mb-1">{language === 'hi' ? 'कुल संकलित कड़ियां' : 'TOTAL REGISTRY'}</span>
-            <span className="text-lg font-black text-[#FFD54F]">355+ {language === 'hi' ? 'धरोहर' : 'Relics'}</span>
+            <span className="text-lg font-black text-[#FFD54F]">{combinedHistoryItems.length} {language === 'hi' ? 'धरोहर' : 'Relics'}</span>
           </div>
           <div className="bg-white dark:bg-[#121212]/80 border border-gray-200 dark:border-white/5 p-4 rounded-2xl text-center shadow-sm dark:shadow-[0_5px_15px_rgba(0,0,0,0.3)] transition-colors duration-300">
             <span className="text-[9px] font-mono font-bold text-gray-500 uppercase tracking-widest block mb-1">{language === 'hi' ? 'भारतीय राज्य' : 'COVERED STATES'}</span>

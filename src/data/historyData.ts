@@ -1,6 +1,6 @@
 // Programmatic Jain Heritage and History Database containing hand-curated major epochs
-// and a massive searchable digital repository of exactly 355 Digambar Jain historical monuments,
-// ancient temples, inscriptions, and heritage sites across India.
+// and a search-optimized digital repository of exactly 24 unique, highly detailed Digambar Jain historical monuments,
+// ancient temples, inscriptions, and heritage sites across India, with ZERO repetition.
 
 export interface HeritageItem {
   id?: string;
@@ -15,7 +15,7 @@ export interface HeritageItem {
   detailedText?: { hi: string; en: string };
 }
 
-// 8 Core Epochs of Jain History
+// 8 Core Epochs of Jain History (Major Timelines)
 const CORE_EPOCHS: HeritageItem[] = [
   {
     period: "Pre-historical / अनादि काल",
@@ -87,7 +87,7 @@ const CORE_EPOCHS: HeritageItem[] = [
     title: { hi: "श्रवणबेलगोला में बाहुबली का महामस्तकाभिषेक", en: "Bahubali Monolith & Mahamastakabhisheka" },
     image: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&q=80&w=600",
     desc: {
-      hi: "गंग राजवंश के सेनापति और मंत्री चामुंडराय ने ९८१ ईस्वी में विंध्यगिरि पहाड़ी (श्रवणबेलगोला, कर्नाटक) पर भगवान बाहुबली की ५७ फीट की विशालकाय एकाश्म (एक ही पत्थर से बनी) भव्य प्रतिमा का निर्माण कराया। यह विश्व के महानतम कला कृतियों में से एक है। प्रत्येक १२ वर्ष में यहाँ 'महामस्तकाभिषेक' महोत्सव आयोजित किया जाता है, जहाँ लाखों श्रद्धालु एकत्र होकर जल, दूध, चंदन, केशर और स्वर्ण भस्म से भगवान का अभिषेक करते हैं। यह प्रतिमा त्याग, शांति, और राग-द्वेष रहित वीतरागता का सर्वोच्च प्रतीक है।",
+      hi: "गंग राजवंश के सेनापति and मंत्री चामुंडराय ने ९८१ ईस्वी में विंध्यगिरि पहाड़ी (श्रवणबेलगोला, कर्नाटक) पर भगवान बाहुबली की ५७ फीट की विशालकाय एकाश्म (एक ही पत्थर से बनी) भव्य प्रतिमा का निर्माण कराया। यह विश्व के महानतम कला कृतियों में से एक है। प्रत्येक १२ वर्ष में यहाँ 'महामस्तकाभिषेक' महोत्सव आयोजित किया जाता है, जहाँ लाखों श्रद्धालु एकत्र होकर जल, दूध, चंदन, केशर और स्वर्ण भस्म से भगवान का अभिषेक करते हैं। यह प्रतिमा त्याग, शांति, और राग-द्वेष रहित वीतरागता का सर्वोच्च प्रतीक है।",
       en: "In 981 CE, Chavundaraya, the brilliant prime minister and general of the Western Ganga Dynasty, commissioned the erection of the legendary 57-foot tall monolithic statue of Lord Bahubali atop Vindhyagiri Hill in Shravanabelagola, Karnataka. This colossal work of art is carved out of a single block of fine granite. Every twelve years, millions of devotees gather to celebrate the grand event of 'Mahamastakabhisheka', bathing the monolith in milk, sugarcane juice, saffron paste, and sandal powder. The statue remains a timeless global symbol of absolute renunciation, inner peace, and non-violence."
     },
     color: "bg-green-600",
@@ -123,67 +123,321 @@ const CORE_EPOCHS: HeritageItem[] = [
   }
 ];
 
-// Generator Arrays for 350+ entries
-const STATES = ["Madhya Pradesh", "Karnataka", "Rajasthan", "Uttar Pradesh", "Bihar", "Gujarat", "Maharashtra", "Odisha", "Tamil Nadu", "Jharkhand"];
-
-const LOCATIONS = [
-  { nameEn: "Sonagiri Hills", nameHi: "सोनागिरी सिद्धक्षेत्र", state: "Madhya Pradesh", descEn: "A peaceful Digambar Jain holy hill containing 77 ancient temples with dazzling white spires, popular for self-purification and meditation.", descHi: "७७ भव्य श्वेत शिखरों वाले प्राचिन जिनालयों से सुशोभित निष्पावन सिद्धभूमि, जहाँ अनगिनत मुनिराजों ने तपस्या कर समाधि व मोक्ष प्राप्त किया।" },
-  { nameEn: "Kundalpur", nameHi: "कुण्डलपुर सिद्धक्षेत्र", state: "Madhya Pradesh", descEn: "The historical land featuring the monumental 15-foot high 'Bade Baba' Adinatha monolithic statue with exquisite Chola and Gupta architectural traces.", descHi: "ऐतिहासिक पावन धरा जहाँ १५ फीट ऊंचे विशालकाय 'बड़े बाबा' भगवान आदिनाथ की अनुपम पद्मासन वीतराग प्रतिमा विराजमान है।" },
-  { nameEn: "Deogarh Hills", nameHi: "देवगढ़ किला मंदिर", state: "Uttar Pradesh", descEn: "An archaeological paradise on the Betwa river basin containing 31 spectacular classical Jain temples and over 2,000 historic inscriptions.", descHi: "बेतवा तट पर स्थित पुरातात्विक दुर्ग जहाँ ३१ ऐतिहासिक जिनालय और २००० से अधिक प्राचीन कलात्मक पाषाण प्रतिमाएं खुदी हुई हैं।" },
-  { nameEn: "Gwalior Gopachal Rock Cut Cutouts", nameHi: "ग्वालियर गोपाचल पर्वत गुफाएं", state: "Madhya Pradesh", descEn: "Breathtaking towering monolithic rock-cut Tirthankara figures carved directly into the cliff-faces of Gwalior Fort during the Tomar rule.", descHi: "ग्वालियर दुर्ग की चट्टानों को सीधे काटकर बनाई गई अद्वितीय गगनचुंबी दिगंबर जैन प्रतिमाएं, जो तोमरकालीन स्थापत्य कला का गौरव हैं।" },
-  { nameEn: "Khajuraho Eastern Group of Temples", nameHi: "खजुराहो पूर्वी जैन मंदिर", state: "Madhya Pradesh", descEn: "UNESCO World Heritage site containing magnificent sandstone temples like the Parshvanath and Adinath temples with gorgeous intricate carvings.", descHi: "विश्व सुप्रसिद्ध यूनेस्को वैशविक धरोहर स्थल जिसमें पार्श्वनाथ व आदिनाथ के वास्तुकला से उत्कृष्ट नक्काशीदार मंदिर शामिल हैं।" },
-  { nameEn: "Moodabidri (1000 Pillars Temple)", nameHi: "मूडबिद्री हजार खंभा मंदिर", state: "Karnataka", descEn: "The legendary Tribhuvana Tilaka Chudamani temple showcasing marvelous woodwork and 1,000 unique pillars, preserving ancient copper manuscripts.", descHi: "त्रिभुवन तिलक चूड़ामणि मंदिर जहाँ काष्टकला व पाषाण के १००० अद्वितीय स्तंभ मुनिराजों के इतिहास व जिनवाणी को सहेजते हैं।" },
-  { nameEn: "Karkala Monolithic Statue", nameHi: "कारकल बाहुबली महाप्रतिमा", state: "Karnataka", descEn: "A magnificent 42-foot high giant monolithic statue of Lord Bahubali standing on an elevated rocky platform, erected in 1432 CE.", descHi: "४२ फीट ऊंची भगवान बाहुबली की एकाश्म दिगंबर पाषाण प्रतिमा जो १४३२ ईस्वी में भैरव राजवंश द्वारा स्थापित की गई थी।" },
-  { nameEn: "Muktagiri Siddha Kshetra", nameHi: "मुक्तागिरी सिद्धक्षेत्र", state: "Maharashtra", descEn: "An enchanting gorge boasting 52 ancient temples built into waterfall valleys, where pearls are said to have showered upon reaching Nirvana.", descHi: "५२ प्राचीन पवित्र जिनालयों की श्रृंखला जो प्राकृतिक झरनों के सम्मुख पहाड़ियों पर स्थित है, जहाँ तपस्वियों पर मुक्ताओं की वर्षा हुई थी।" },
-  { nameEn: "Chanderi Fort Inscriptions", nameHi: "चंदेरी ऐतिहासिक जैन मंदिर", state: "Madhya Pradesh", descEn: "The ancient hub of Jain culture of Pratihar era, home to the superb Bavan Gaja colossus and beautiful rock cut inscriptions.", descHi: "प्रतिहार काल की दिगंबर जैन संस्कृति का केंद्र, जहाँ प्रख्यात बावनगजा प्रतिमा और शिलाओं पर लिखे लेख आज भी धरोहर हैं।" },
-  { nameEn: "Sravanabelagola Chandragiri Hill", nameHi: "श्रवणबेलगोला चंद्रगिरि पहाड़ी", state: "Karnataka", descEn: "The sacred hill holding 14 ancient basadis and memorials of Emperor Chandragupta Maurya and legendary Acharya Bhadrabahu.", descHi: "महान प्रतापी सम्राट चंद्रगुप्त मौर्य व श्रुतकेवली भद्रबाहु के समाधि स्थलों व १४ ऐतिहासिक बस्तियों से युक्त तपोभूमि।" }
-];
-
-const ENTIRE_VIRTUOUS_TITLES = [
-  "Ancient Stone Inscription of Jinvar", "Pristine Cave Relic of Tirthankara", "Sacred Temple Sanctum of Digambar Ascetics",
-  "Samadhistan of Muni Sangha", "Historical bronze idol of Jinendra", "Heritage Rock Temple of Acharya Kundakund",
-  "Ancient Manuscript Preservation Site", "Sacred Footprints (Charan) of Arihant", "Venerable Stupa of Mathura Kankali Tila",
-  "Heritage Gatha Inscription", "Vitraga Monolithic Statue Base", "Spiritual Tapobhoomi Grotto of Jinvani"
-];
-
-const ENTIRE_VIRTUOUS_TITLES_HI = [
-  "जिनवर का प्राचीन शिला अभिलेख", "तीर्थंकर की गुफा कला और अवशेष", "दिगंबर संतों का पवित्र जिनालय गर्भगृह",
-  "मुनि संघ का प्राचीन समाधि स्थल", "जिनेन्द्र देव की ऐतिहासिक धातु प्रतिमा", "आचार्य कुंदकुंद देव की तपोस्थली शिला",
-  "प्राचीन ताम्रपत्र व शास्त्र संरक्षण पीठ", "अरिहंत प्रभु के पावन चरण चिन्ह", "मथुरा कंकाली टीले का पुरातत्व स्तूप",
-  "धरोहर जैन गाथा पाषाण उत्कीर्णन", "वीतराग एकाश्म प्रतिमा फलक", "पवित्र तपः पूत जिनवाणी शिला गुफा"
-];
-
-// Generate exactly 355 items programmatically to guarantee comprehensive repository scale
-const generatedHeritage: HeritageItem[] = [];
-
-for (let i = 0; i < 350; i++) {
-  const locIndex = i % LOCATIONS.length;
-  const titleIndex = i % ENTIRE_VIRTUOUS_TITLES.length;
-  const stateIndex = i % STATES.length;
-  
-  const loc = LOCATIONS[locIndex];
-  const titlePartEn = ENTIRE_VIRTUOUS_TITLES[titleIndex];
-  const titlePartHi = ENTIRE_VIRTUOUS_TITLES_HI[titleIndex];
-  const century = 1 + (i % 15);
-  
-  const item: HeritageItem = {
-    period: `${century}${century === 1 ? 'st' : century === 2 ? 'nd' : century === 3 ? 'rd' : 'th'} Century CE`,
-    title: {
-      hi: `${loc.nameHi} - ${titlePartHi} (${i + 1})`,
-      en: `${loc.nameEn} - ${titlePartEn} (${i + 1})`
-    },
-    image: `https://images.unsplash.com/photo-${1510000000000 + i * 36521}?auto=format&fit=crop&q=80&w=400`,
+// Pristine list of exactly 24 hand-curated unique historical sites (No copy-paste, No duplicates)
+const CURATED_HERITAGE: HeritageItem[] = [
+  {
+    period: "Eternal / प्राचीन",
+    title: { hi: "श्री सम्मेद शिखरजी महातीर्थ - पार्श्वनाथ पर्वत", en: "Shri Sammed Shikharji - Parasnath Hills" },
+    image: "https://images.unsplash.com/photo-1609137144814-7f1543faf743?auto=format&fit=crop&q=80&w=600",
     desc: {
-      hi: `${loc.nameHi}, जो ${loc.state} में स्थित है, यहाँ एक भव्य प्राचीन दिगंबर जैन विरासती संकुल मिला है। इसकी उत्पत्ति लगभग ${century}वीं सदी की मानी जाती है। इसका आध्यात्मिक महत्त्व यह है कि यहाँ मुनियों ने कठोर तप किया और यह हमारी दिगंबर जैन संस्कृति का अटूट प्रतीक बना हुआ है।`,
-      en: `Located at the cultural site of ${loc.nameEn}, ${loc.state}. This monument dates back approximately to the ${century}${century === 1 ? 'st' : century === 2 ? 'nd' : century === 3 ? 'rd' : 'th'} Century CE during ancient Indian dynasties. It serves as a monumental proof of unbroken Digambar ascetic heritage of supreme self-control and Ahimsa.`
+      hi: "झारखंड के गिरिडीह जिले में स्थित जैन धर्म का सर्वोच्च पावन महातीर्थ। यहाँ २४ में से २० जैन तीर्थंकरों ने कठोर तपस्या कर निर्वाण (मोक्ष) प्राप्त किया था। यह पावन पर्वत प्रत्येक जैन धर्मावलंबी की अगाध श्रद्धा का तपोमय और अविचल और शाश्वत केंद्र है।",
+      en: "Located in Giridih district, Jharkhand. It is the absolute highest spiritual pilgrimage site for Jains, where 20 out of 24 Tirthankaras attained supreme liberation (Nirvana). The sacred mountain remains a place of intense silence and deep penance."
     },
-    color: i % 3 === 0 ? "bg-orange-500" : i % 3 === 1 ? "bg-amber-500" : "bg-yellow-600",
-    category: i % 4 === 0 ? "Temple" : i % 4 === 1 ? "Monument" : i % 4 === 2 ? "Inscription" : "Heritage Site",
-    state: loc.state,
-    era: `${century}th Century CE`
-  };
-  generatedHeritage.push(item);
-}
+    color: "bg-orange-500",
+    category: "Heritage Site",
+    state: "Jharkhand",
+    era: "Ancient"
+  },
+  {
+    period: "9th Century CE / ९वीं सदी",
+    title: { hi: "सोनागिरी सिद्धक्षेत्र - दतिया", en: "Sonagiri Siddha Kshetra - Datia" },
+    image: "https://images.unsplash.com/photo-1447069387593-a5de0862481e?auto=format&fit=crop&q=80&w=600",
+    desc: {
+      hi: "मध्य प्रदेश के दतिया में स्थित भगवान चंद्रप्रभु का अति पावन क्षेत्र। सुंदर पहाड़ी के मार्ग पर ७७ भव्य श्वेत गगनचुंबी शिखरदार जिनालय सुशोभित हैं। यहाँ प्राचीन काल में साढ़े पांच करोड़ मुनियों ने ध्यान लगाकर आत्मसाधना व मोक्ष को वरण किया था।",
+      en: "Located in Datia, Madhya Pradesh. A pristine spiritual hill hosting 77 brilliant white-spired temples dating to the 9th Century. Historically, over 55 million ascetics reached Nirvana on these peaceful rocky slopes dedicated to Lord Chandraprabhu."
+    },
+    color: "bg-amber-500",
+    category: "Temple",
+    state: "Madhya Pradesh",
+    era: "9th Century CE"
+  },
+  {
+    period: "Early Medieval / मध्यकाल",
+    title: { hi: "कुण्डलपुर सिद्धक्षेत्र - बड़े बाबा", en: "Kundalpur Siddha Kshetra - Bade Baba colossus" },
+    image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&q=80&w=600",
+    desc: {
+      hi: "मध्य प्रदेश के दमोह जिले में स्थित ऐतिहासिक सिद्ध भूमि, जहाँ १५ फीट ऊंची पद्मासन लाल पाषाण की भगवान आदिनाथ (बड़े बाबा) की अनुपम चमत्कारी और वीतराग दिगंबर प्रतिमा विराजमान है, जिसकी प्राचीनता इतिहास में अमूल्य है।",
+      en: "Located in Damoh, Madhya Pradesh. It is a historical and highly revered holy site displaying the ancient, monumental 15-foot high monolithic statue of Lord Adinatha (popularly known as Bade Baba) in cross-legged lotus posture."
+    },
+    color: "bg-yellow-600",
+    category: "Temple",
+    state: "Madhya Pradesh",
+    era: "10th Century CE"
+  },
+  {
+    period: "15th Century CE / १५वीं सदी",
+    title: { hi: "ग्वालियर दुर्ग गोपाचल शैल प्रतिमाएं", en: "Gopachal Rock-Cut Monoliths - Gwalior" },
+    image: "https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&q=80&w=600",
+    desc: {
+      hi: "ग्वालियर ऐतिहासिक दुर्ग के चट्टानों को सीधे काटकर उकेरी गई २५ से ४० फीट की ऊंची अविस्मरणीय दिगंबर जैन प्रतिमाएं। तोमर शासकों के समय मुनिराजों की प्रेरणा से इन अनुपम जिनेश्वर मूर्तियों का निर्माण संपन्न हुआ था।",
+      en: "Located inside Gwalior Fort, Madhya Pradesh. Outstanding, gigantic monolithic statues of Digambar Tirthankaras carved directly out of solid rock faces. Created during the Tomar Dynasty's rule under the guidance of illustrious ascetics."
+    },
+    color: "bg-purple-500",
+    category: "Monument",
+    state: "Madhya Pradesh",
+    era: "15th Century CE"
+  },
+  {
+    period: "10th Century CE / १०वीं सदी",
+    title: { hi: "खजुराहो पूर्वी जैन मंदिर - पार्श्वनाथ व आदिनाथ", en: "Khajuraho Eastern Jain Temples" },
+    image: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&q=80&w=600",
+    desc: {
+      hi: "यूनेस्को विश्व धरोहर समूह, जहाँ बलुआ पत्थरों पर सूक्ष्म नक्काशी कर पार्श्वनाथ मंदिर की दीवारों पर गृहस्थ चर्या व देव पूजन के अनुपम दृश्यों को निखारा गया है। चंदेल स्थापत्य का यह उत्कृष्टतम और दिव्यतम केंद्र है।",
+      en: "A UNESCO World Heritage site in Chhatarpur, Madhya Pradesh. Comprises majestic sandstone Jain temples built by Chandela Kings, including Lord Parshvanath & Lord Adinath temples, famed worldwide for their unparalleled intricate carvings."
+    },
+    color: "bg-blue-500",
+    category: "Temple",
+    state: "Madhya Pradesh",
+    era: "10th Century CE"
+  },
+  {
+    period: "8th-12th Century / ८वीं-१२वीं सदी",
+    title: { hi: "देवगढ़ दुर्ग बेतवा घाटी जैन मंदिर", en: "Deogarh Fort Jain Temple Complex" },
+    image: "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&q=80&w=600",
+    desc: {
+      hi: "उत्तर प्रदेश के ललितपुर में बेतवा नदी के तट पर स्थित एक अलौकिक पुरातत्व संकुल। इसके शांत परकोटे में ३१ प्राचीन जैन मंदिर हैं, जहाँ २,००० से अधिक ऐतिहासिक गुप्त व प्रतिहार कालीन उत्कृष्ट शिलालेख और प्रतिमाएं सुरक्षित हैं।",
+      en: "Located on the banks of Betwa River in Lalitpur, Uttar Pradesh. An ancient fortress sheltering 31 medieval Jain temples and over 2,000 intricately crafted relics, depicting Gupta and Gurjara-Pratihara iconographic styles."
+    },
+    color: "bg-green-600",
+    category: "Temple",
+    state: "Uttar Pradesh",
+    era: "9th Century CE"
+  },
+  {
+    period: "15th Century CE / १५वीं सदी",
+    title: { hi: "मूडबिद्री हजार खंभा त्रिभुवन मुकुट जिनालय", en: "Moodabidri 1000-Pillars Basadi" },
+    image: "https://images.unsplash.com/photo-1502444330042-d1a1ddf9bb5c?auto=format&fit=crop&q=80&w=600",
+    desc: {
+      hi: "कर्नाटक के दक्षिण कन्नड़ जिले का उत्कृष्ट काष्ठ व पाषाण चमत्कारी मंदिर (हजार खंभा)। यहाँ काष्ठ वास्तुकला से उत्कृष्ट नक्कशीदार स्तंभ हैं, जिनमें से हर एक का स्वरूप अनूठा है। मंदिर में प्राचीन ताड़पत्र शास्त्र संगृहीत हैं।",
+      en: "Located in Moodabidri, Karnataka. Famed as the '1000 Pillars Basadi' (Saavira Kambada Basadi). Known for its highly ornate stone pillars, wooden eaves, and the preservation of rare ancient copper-plate manuscripts."
+    },
+    color: "bg-red-500",
+    category: "Temple",
+    state: "Karnataka",
+    era: "15th Century CE"
+  },
+  {
+    period: "15th Century CE / १५वीं सदी",
+    title: { hi: "कारकल बाहुबली महाप्रतिमा", en: "Karkala Monolithic Bahubali Statue" },
+    image: "https://images.unsplash.com/photo-1609137144814-7f1543faf743?auto=format&fit=crop&q=80&w=600",
+    desc: {
+      hi: "कर्नाटक के कारकल में १४३२ ईस्वी में भैरव राजवंश द्वारा स्थापित ४२ फीट ऊंची भव्य और विशालकाय एकाश्म दिगंबर बाहुबली प्रतिमा। यह पाषाण स्तंभों व दुर्गम घाटी के शिखर पर गर्व से सिर उठाए आत्म-संयम की गाथा सुनाती है।",
+      en: "Located in Karkala, Karnataka. Constructed in 1432 CE by the ruler Veera Pandya, this magnificent 42-foot-tall monolithic statue of Lord Bahubali stands on a rocky hilltop, radiating peace and spiritual victory."
+    },
+    color: "bg-stone-500",
+    category: "Monument",
+    state: "Karnataka",
+    era: "15th Century CE"
+  },
+  {
+    period: "13th Century CE / १३वीं सदी",
+    title: { hi: "मुक्तागिरी सिद्धक्षेत्र - सतपुड़ा झरना धाम", en: "Muktagiri waterfall Jain Sanctuaries" },
+    image: "https://images.unsplash.com/photo-1606293926075-69a00dbfde81?auto=format&fit=crop&q=80&w=600",
+    desc: {
+      hi: "महाराष्ट्र के अमरावती मंडल में हरी-भरी सतपुड़ा पहाड़ी और नदी घाटियों के मध्य स्थित ५२ प्राचीन तपोमय दिगंबर जिनालय। वर्षा काल में झरनों के बीच स्थित यह मंदिर समूह प्रकृति व अध्यात्म का दिव्यतम संकर है।",
+      en: "Located in Amravati district, Maharashtra. A breathtaking gorge hosting 52 ancient Jain temples nestled along canyon waterfall cliffs, where numerous ancient saints meditated and attained supreme Nirvana status."
+    },
+    color: "bg-orange-500",
+    category: "Temple",
+    state: "Maharashtra",
+    era: "13th Century CE"
+  },
+  {
+    period: "15th Century CE / १५वीं सदी",
+    title: { hi: "रणकपुर चतुर्मुख स्थापत्य - पाली", en: "Ranakpur Chaturmukha Temple - Pali" },
+    image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&q=80&w=600",
+    desc: {
+      hi: "राजस्थान के पाली जिले में अरावली पहाड़ियों में श्वेत संगमरमर का अलौकिक जिन मंदिर, जो अपने १४४४ नक्काशीदार स्तंभों के लिए प्रसिद्ध है, जिसमें कोई भी दो स्तंभ एक जैसे देखने को नहीं मिलते।",
+      en: "Located in Pali, Rajasthan. A sprawling, white-marble masterpiece dedicated to Lord Adinath, worldwide famous for its 1,444 hand-carved colossal pillars, none of which repeat their intricate designs."
+    },
+    color: "bg-amber-500",
+    category: "Temple",
+    state: "Rajasthan",
+    era: "15th Century CE"
+  },
+  {
+    period: "11th-13th Century / ११-१३वीं सदी",
+    title: { hi: "दिलवाड़ा संगमरमर उत्कृष्ट मंदिर - माउंट आबू", en: "Dilwara Temple Complex - Mount Abu" },
+    image: "https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&q=80&w=600",
+    desc: {
+      hi: "राजस्थान के सर्वोच्च पर्वत आबू पर संगमरमर की महीन एवं मनमोहक कलाकारी से बने विमल व तेजपाल मंदिर। इनकी बारीक कारीगरी और वास्तुकला को देखने हेतु देश-विदेश के पर्यटक आकर्षित होते हैं।",
+      en: "Located in Mount Abu, Rajasthan. Unparalleled white marble temples (built by Solanki ministers) globally highly respected for their intricate floral designs, delicate dome carvings, and pure aesthetics."
+    },
+    color: "bg-yellow-600",
+    category: "Temple",
+    state: "Rajasthan",
+    era: "12th Century CE"
+  },
+  {
+    period: "2nd Century BCE / २वीं सदी ई.पू.",
+    title: { hi: "उदयगिरि एवं खंडगिरि शिला गुफाएं", en: "Udayagiri & Khandagiri Caves - Bhubaneswar" },
+    image: "https://images.unsplash.com/photo-1447069387593-a5de0862481e?auto=format&fit=crop&q=80&w=600",
+    desc: {
+      hi: "उड़ीसा की राजधानी के निकट कलिंग महाराजा खारवेल द्वारा जैन मुनिराजों के वर्षावास और गहन ध्यान हेतु चैतन्य मय शिला गुफाएं (३३ गुफाएं)। यहाँ प्रसिद्ध हाथीगुम्फा अभिलेख उकेरा हुआ है।",
+      en: "Located near Bhubaneswar, Odisha. A set of 33 rock-cut sandstone caves carved under Emperor Kharavela's patronage as monsoon retreats (Vassavasa) for meditating Jain ascetics, boasting early Brahmi scripts."
+    },
+    color: "bg-purple-500",
+    category: "Monument",
+    state: "Odisha",
+    era: "Ancient"
+  },
+  {
+    period: "6th Century BCE / ६ठी सदी ई.पू.",
+    title: { hi: "पावापुरी जल मंदिर सिद्धक्षेत्र", en: "Pavapuri Marble Water Temple" },
+    image: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&q=80&w=600",
+    desc: {
+      hi: "२४वें तीर्थंकर भगवान महावीर स्वामी की पावन निर्वाण (मोक्ष) स्थली। कमल वाटिका से सुशोभित विशाल निर्मल जलाशय के बीचो-बीच श्वेत संगमरमर का दिव्यतम जल मंदिर सुशोभित है, जहाँ प्रभु की चरण पादुकाएं विराजमान हैं।",
+      en: "Located in Nalanda, Bihar. The sacred spot where Lord Mahavira attained final liberation (Moksha). Featuring a pristine white-marble shrine sitting afloat in the center of a large lotus-filled pool."
+    },
+    color: "bg-blue-500",
+    category: "Temple",
+    state: "Bihar",
+    era: "Ancient"
+  },
+  {
+    period: "9th Century CE / ९वीं सदी",
+    title: { hi: "एलोरा जैन गुफाएं (गुफा ३० - ३४)", en: "Ellora Ancient Jain Cave Group" },
+    image: "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&q=80&w=600",
+    desc: {
+      hi: "महाराष्ट्र के संभाजीनगर जिले की विश्वप्रसिद्ध एलोरा श्रृंखला का जैन भाग। गुफा ३२ (इंद्र सभा) अपने दो मंजिला मंडप, बारीक स्तंभ नक्काशी, हाथी प्रतिमाओं व गजगामी तीर्थंकरों की शांत मुद्रा हेतु विख्यात है।",
+      en: "Located in Aurangabad district, Maharashtra. Consists of marvelous rock-cut monolith caverns (Caves 30 to 34), with Cave 32 (Indra Sabha) housing highly expressive sculptures of Lord Mahavira & Baahubali."
+    },
+    color: "bg-green-600",
+    category: "Monument",
+    state: "Maharashtra",
+    era: "9th Century CE"
+  },
+  {
+    period: "Early Era / आदि काल",
+    title: { hi: "मांगीतुंगी सिद्धक्षेत्र - पावन द्वि-शिखर", en: "Mangi-Tungi Siddha Kshetra - Nashik" },
+    image: "https://images.unsplash.com/photo-1502444330042-d1a1ddf9bb5c?auto=format&fit=crop&q=80&w=600",
+    desc: {
+      hi: "नासिक में स्थित दो महान पर्वत चोटियां (मांगी और तुंगी)। यहाँ राम-लक्ष्मण, सुग्रीव और ९९ करोड़ मुनिराजों ने तप कर मुक्ति पाई थी। यहाँ विशाल चट्टानों को काटकर अनेक सुंदर प्राचीन दिगंबर प्रतिमाएं खुदी हैं।",
+      en: "Located in Nashik, Maharashtra. A holy dual-peaked mountain where Lord Rama, Lakshmana, and millions of monks performed self-realization. Houses ancient rock-carved sanctuaries and a massive modern colossus."
+    },
+    color: "bg-stone-500",
+    category: "Heritage Site",
+    state: "Maharashtra",
+    era: "Ancient"
+  },
+  {
+    period: "7th Century CE / ७वीं सदी",
+    title: { hi: "सिट्टनवासल रॉक-कट गुफा भित्तिचित्र", en: "Sittanavasal Jain Caves - Tamil Nadu" },
+    image: "https://images.unsplash.com/photo-1609137144814-7f1543faf743?auto=format&fit=crop&q=80&w=600",
+    desc: {
+      hi: "तमिलनाडु के पुदुक्कोट्टई जिले में पल्लव काल का एक सुंदर जैन मठ। गुफा की छत पर प्राचीन काल के मनमोहक प्राकृतिक वानस्पतिक रंगों से सजे शानदार भित्तिचित्र हैं, जो समवशरण के दृश्यों को रेखांकित करते हैं।",
+      en: "Located in Pudukkottai, Tamil Nadu. A historic Pallava-era rock-cut Jain monastic cave holding outstanding vegetable-paint fresco murals depicting the sacred celestial assembly of Jinas (Samavasarana)."
+    },
+    color: "bg-orange-500",
+    category: "Heritage Site",
+    state: "Tamil Nadu",
+    era: "7th Century CE"
+  },
+  {
+    period: "Ancient / प्राचीन",
+    title: { hi: "चंपापुरी सिद्धक्षेत्र - भागलपुर", en: "Champapuri Siddha Kshetra - Bhagalpur" },
+    image: "https://images.unsplash.com/photo-1606293926075-69a00dbfde81?auto=format&fit=crop&q=80&w=600",
+    desc: {
+      hi: "१२वें तीर्थंकर भगवान वासुपूज्य की गर्भ, जन्म, तप, केवलज्ञान और मोक्ष (पंचकल्याणक) भूमि। चंपापुरी का इतिहास जैन धर्म के आदि काल से जुड़ा है। यहाँ प्राचीन मंदिर ट्रस्ट, चरण पादुकाएं और ऐतिहासिक टीला स्थित हैं।",
+      en: "Located in Bhagalpur, Bihar. An ancient, unique holy site celebrated as the Panch-Kalyanak (all 5 major life-events) birthplace and liberation soil of the 12th Tirthankara, Lord Vasupujya."
+    },
+    color: "bg-amber-500",
+    category: "Heritage Site",
+    state: "Bihar",
+    era: "Ancient"
+  },
+  {
+    period: "12th Century CE / १२वीं सदी",
+    title: { hi: "कुम्भोज बाहुबली अतिशय क्षेत्र - कोल्हापुर", en: "Kumbhoj Bahubali Colossus" },
+    image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&q=80&w=600",
+    desc: {
+      hi: "महाराष्ट्र के कोल्हापुर जिले में स्थित पावन नगरी। यहाँ बाहुबली भगवान की २८ फीट ऊंची विशाल खड़ी धवल पाषाण प्रतिमा विराजमान है, जिनका प्रत्येक वर्ष होने वाला महामस्तकाभिषेक श्रद्धा का महाकुंभ माना जाता है।",
+      en: "Located in Kolhapur, Maharashtra. A spectacular, serene hill sanctuary hosting a magnificent 28-foot tall standing white monolith of Lord Bahubali, attracting millions for annual abhisheka rituals."
+    },
+    color: "bg-yellow-600",
+    category: "Monument",
+    state: "Maharashtra",
+    era: "12th Century CE"
+  },
+  {
+    period: "Ancient / प्राचीन",
+    title: { hi: "सिद्धवरकूट सिद्धक्षेत्र - नर्मदा तट", en: "Siddhavarakut Siddha Kshetra - Omkareshwar" },
+    image: "https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&q=80&w=600",
+    desc: {
+      hi: "नर्मदा नदी के सुरम्य किनारे ओंकारेश्वर के निकट स्थित परम पावन तपोभूमि, जहाँ प्राचीन समय में चक्रवर्ती महाराजाओं और अनेक दिगंबर मुनिराजों ने घोर आत्मसाधना कर मोक्ष की प्राप्ति संपन्न की थी।",
+      en: "Located near Omkareshwar, Madhya Pradesh. An ancient Siddha Kshetra on the scenic banks of Narmada River, where multiple royalty-turned-ascetics and saints took vows and achieved final liberation."
+    },
+    color: "bg-purple-500",
+    category: "Heritage Site",
+    state: "Madhya Pradesh",
+    era: "Ancient"
+  },
+  {
+    period: "1st Century CE / १वीं सदी",
+    title: { hi: "गिरनार चंद्र गुफा शास्त्र स्थल", en: "Girnar Chandra Cave - Junagadh Heritage" },
+    image: "https://images.unsplash.com/photo-1447069387593-a5de0862481e?auto=format&fit=crop&q=80&w=600",
+    desc: {
+      hi: "जूनागढ़ के ऐतिहासिक गिरनार पर्वत पर स्थित 'चंद्र गुफा' जहाँ महान आचार्य धरसेन ने मुनि पुष्पदंत और भूतबली को प्राचीन ताड़पत्र शास्त्र का अंग ज्ञान दिया, जिससे प्रथम जैन लिखित ग्रंथ षट्खंडागम की रचना हुई।",
+      en: "Located in Junagadh, Gujarat. The legendary 'Chandra Cave' on Mt. Girnar where Acharya Dharasena initiated his pupils Pushpadanta & Bhutabali into scriptural memory, yielding the first written text, Shatkhandagama."
+    },
+    color: "bg-blue-500",
+    category: "Inscription",
+    state: "Gujarat",
+    era: "1st Century CE"
+  },
+  {
+    period: "Ancient / पौराणिक काल",
+    title: { hi: "हस्तिनापुर जम्बूद्वीप एवं कैलाश पर्वत", en: "Hastinapur Jambudweep & Ancient Temples" },
+    image: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&q=80&w=600",
+    desc: {
+      hi: "उत्तर प्रदेश में तीन महान तीर्थंकरों (शांतिनाथ, कुंथुनाथ, अरहनाथ) की पावन जन्मभूमि। यहाँ पूज्य ज्ञानमती माताजी की प्रेरणा से ब्रह्मांडीय जैन भूगोल को दर्शाने वाले अद्वितीय जम्बूद्वीप मॉडल की रचना की गई थी।",
+      en: "Located in Meerut, Uttar Pradesh. The birthplace of three prominent Tirthankaras. Exhibits a massive, structurally accurate geographic-cosmological map of Jambudweep constructed in fine sandstone."
+    },
+    color: "bg-green-600",
+    category: "Temple",
+    state: "Uttar Pradesh",
+    era: "Ancient"
+  },
+  {
+    period: "11th Century CE / ११वीं सदी",
+    title: { hi: "पालीताणा शत्रुंजय गिरि मंदिर नगरी", en: "Palitana Shatrunjaya Hills Temple-City" },
+    image: "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&q=80&w=600",
+    desc: {
+      hi: "गुजरात का पवित्र पर्वत शिखर जिस पर ८६० से अधिक अनुपम नक्काशीदार संगमरमर के जैन मंदिर बने हैं। इसे विश्व की सबसे बड़ी और भव्य 'मंदिर नगरी' (Temple City) होने का गौरव प्राप्त है।",
+      en: "Located in Bhavnagar, Gujarat. A legendary mountain harboring an astronomical cluster of over 860 uniquely sculpted marble shrines, making it one of the largest temple-cities in the world."
+    },
+    color: "bg-red-500",
+    category: "Heritage Site",
+    state: "Gujarat",
+    era: "11th Century CE"
+  },
+  {
+    period: "Ancient / प्राचीन",
+    title: { hi: "गिरनार पर्वत पंचम टोंक नेमिनाथ", en: "Lord Neminath 5th Tonk - Girnar" },
+    image: "https://images.unsplash.com/photo-1502444330042-d1a1ddf9bb5c?auto=format&fit=crop&q=80&w=600",
+    desc: {
+      hi: "२२वें तीर्थंकर भगवान नेमिनाथ की दीक्षा व परम मोक्ष स्थली। गिरनार पर्वत की पंचम टोंक पर प्राचीन विशालकाय दिगंबर जैन चरण पादुकाएं और गुफा स्थापित हैं, जो सदियों से तप की अखंड प्रेरणा हैं।",
+      en: "Located in Junagadh, Gujarat. The ultimate Nirvana venue of Lord Neminath, the 22nd Tirthankara. Peak 5 (5th Tonk) holds the ancient footprint carvings of the Jina, surrounded by sheer mist-covered cliffs."
+    },
+    color: "bg-stone-500",
+    category: "Heritage Site",
+    state: "Gujarat",
+    era: "Ancient"
+  },
+  {
+    period: "1st-2nd Century / १-२वीं सदी",
+    title: { hi: "मथुरा कंकाली टीला पुरातत्व स्तूप", en: "Mathura Kankali Tila Excavations" },
+    image: "https://images.unsplash.com/photo-1609137144814-7f1543faf743?auto=format&fit=crop&q=80&w=600",
+    desc: {
+      hi: "उत्तर प्रदेश के मथुरा के निकट कंकाली टीला से उत्खनित प्राचीन जैन स्तूप, कुषाणकालीन जैन मूर्तियां, आयागपट और अभिलेख, जो जैन इतिहास की अटूट परंपरा और जीवन शैली की वैज्ञानिकता को सिद्ध करते हैं।",
+      en: "Located in Mathura, Uttar Pradesh. A stellar archeological node that yielded early Kushan-period Jain sculptures, stone tablet Ayagapatas, and massive ruined stupas proving ancient Jain antiquity."
+    },
+    color: "bg-orange-500",
+    category: "Inscription",
+    state: "Uttar Pradesh",
+    era: "1st Century CE"
+  }
+];
 
 // Export combined history data representing historical Timeline + searchable digital repository
-export const historyData: HeritageItem[] = [...CORE_EPOCHS, ...generatedHeritage];
+export const historyData: HeritageItem[] = [...CORE_EPOCHS, ...CURATED_HERITAGE];

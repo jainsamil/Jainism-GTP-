@@ -8,6 +8,8 @@ import {
 import { useLanguage } from '../contexts/LanguageContext';
 import { cn } from '../lib/utils';
 import SectionAiAgent from '../components/SectionAiAgent';
+import UnifiedSearchBar from '../components/UnifiedSearchBar';
+import { generateSadhus } from '../data/generatedSadhus';
 
 interface Hazard {
   id: string;
@@ -37,71 +39,10 @@ interface ViharRoute {
   sanghSect: 'Digambar' | 'Svetambar';
   activeMilestones: Milestone[];
   hazards: Hazard[];
+  saintType?: 'acharya' | 'muni' | 'aryika' | 'shraman';
 }
 
-const INITIAL_ROUTES: ViharRoute[] = [
-  {
-    id: 'vr-1',
-    saintName: { en: "108 Pujya Muni Shri Prasanna Sagar Ji Maharaj Sangh", hi: "१०८ पूज्य मुनि श्री प्रसन्न सागर जी महाराज संघ" },
-    groupSize: { en: "Muni Shri + 3 walking escorts", hi: "मुनिश्री + ३ स्थानीय सेवादार पदयात्री" },
-    currentRoute: { en: "NH-44 Salem Bypass to Krishnagiri Highway", hi: "एनएच-४४ सलेम बाईपास से कृष्णगिरि हाईवे, तमिल नाडु" },
-    trafficSafety: 'vigilant',
-    escortsRegistered: 18,
-    upcomingHalt: { en: "Krishnagiri Digambar Jain Temple Dharamshala", hi: "कृष्णगिरि दिगंबर जैन चैत्यालय धर्मशाला" },
-    contact: "+91 94440 22391",
-    latLngDistance: "Within 10 km from your area",
-    sanghSect: 'Digambar',
-    activeMilestones: [
-      { name: { en: 'Salem Bypass', hi: 'सलेम बाईपास प्रस्थान' }, distance: 'Start', cleared: true, haltName: { en: 'Chouka base', hi: 'प्रारंभिक चौका' } },
-      { name: { en: 'Toll plaza NH-44', hi: 'टोल प्लाजा एनएच-४४' }, distance: '12 km', cleared: true, haltName: { en: 'Dharamshala halt', hi: 'धर्मशाला अल्पविश्राम' } },
-      { name: { en: 'Dharmapuri Border', hi: 'धर्मपुरी जिला सीमा' }, distance: '28 km', cleared: false, haltName: { en: 'Aravind temple', hi: 'अरविन्द जैन मंदिर' } },
-      { name: { en: 'Krishnagiri Vault', hi: 'कृष्णगिरि गंतव्य' }, distance: '45 km', cleared: false, haltName: { en: 'Digambar Temple', hi: 'दिगंबर चैत्यालय' } }
-    ],
-    hazards: [
-      { id: 'h1', type: 'Fog', reportedBy: 'राजेश जैन', description: { hi: 'सुबह छाए घने कोहरे के कारण दृश्यता कम है।', en: 'Damp heavy morning fog reducing highway visibility.' }, timeReported: '06:00 AM' }
-    ]
-  },
-  {
-    id: 'vr-2',
-    saintName: { en: "Aryika Shri 105 Vishuddha Mati Mataji Sangha (11 Aryikas)", hi: "आर्यिका १०५ विशुद्ध मति माताजी संघ (११ आर्यिका माताएं)" },
-    groupSize: { en: "11 Mothers + 6 Shravaks on foot", hi: "११ संयमी आर्यिका माताएं + ६ सह-यात्री श्रावक" },
-    currentRoute: { en: "State Highway 12, Mandar Hill to Deoghar Boundary", hi: "स्टेट हाईवे १२, मंदारगिरि से देवघर सीमा, झारखंड" },
-    trafficSafety: 'safe',
-    escortsRegistered: 34,
-    upcomingHalt: { en: "Deoghar Digambar Jain Bhavan", hi: "देवघर दिगंबर जैन धर्मशाला" },
-    contact: "+91 91700 88200",
-    latLngDistance: "Within 45 km from your area",
-    sanghSect: 'Digambar',
-    activeMilestones: [
-      { name: { en: 'Mandar Foothill', hi: 'मंदार गिरी तलहटी' }, distance: 'Start', cleared: true, haltName: { en: 'Temple base', hi: 'मंदिर परिसर' } },
-      { name: { en: 'Dumka Border Road', hi: 'दुमका बॉर्डर मोड़' }, distance: '15 km', cleared: true, haltName: { en: 'Rural school', hi: 'प्राथमिक विद्यालय अल्पविश्राम' } },
-      { name: { en: 'Deoghar Boundary', hi: 'देवघर पावन चौक सीमा' }, distance: '32 km', cleared: false, haltName: { en: 'Digambar Bhavan', hi: 'देवघर दिगंबर भवन' } }
-    ],
-    hazards: []
-  },
-  {
-    id: 'vr-3',
-    saintName: { en: "Acharya Shri 108 Vardhaman Sagar Ji Maharaj Assembly", hi: "आचार्य १०८ वर्धमान सागर जी महाराज संघ" },
-    groupSize: { en: "Acharya Dev + 9 Digambar Monks", hi: "आचार्यश्री + ९ परम दिगंबर महामुनिराज" },
-    currentRoute: { en: "NH-21 Agra-Jaipur Highway, Bharatpur Link Toll", hi: "एनएच-२१ आगरा-जयपुर हाईवे, भरतपुर बाईपास" },
-    trafficSafety: 'critical',
-    escortsRegistered: 7,
-    upcomingHalt: { en: "Bharatpur Shravaka Niwas", hi: "भरतपुर जैन श्रावक निवास धर्मशाला" },
-    contact: "+91 98290 11400",
-    latLngDistance: "Within 3 km (Immediate Warning!)",
-    sanghSect: 'Digambar',
-    activeMilestones: [
-      { name: { en: 'Agra Exit', hi: 'आगरा बाईपास निकास' }, distance: 'Start', cleared: true, haltName: { en: 'Ahar base', hi: 'आहारशाला क्षेत्र' } },
-      { name: { en: 'Fatehpur Sikri cut', hi: 'फ़तेहपुर सीकरी कट' }, distance: '22 km', cleared: true, haltName: { en: 'Sikri kothi', hi: 'सीकरी कोठी धर्मशाला' } },
-      { name: { en: 'Bharatpur Bypass Toll', hi: 'भरतपुर टोल नाका' }, distance: '40 km', cleared: false, haltName: { en: 'Highway temple', hi: 'हाईवे जैन जिनालय' } },
-      { name: { en: 'Bharatpur Town', hi: 'भरतपुर जैन श्रावक निवास' }, distance: '48 km', cleared: false, haltName: { en: 'Shravak Bhavan', hi: 'श्रावक भवन' } }
-    ],
-    hazards: [
-      { id: 'h2', type: 'Trucks', reportedBy: 'विपिन दोषी', description: { hi: 'भारी डंपर और कंटेनर गाड़ियों की तेज रफ़्तार।', en: 'High-speed heavy container trailers on narrow lanes.' }, timeReported: '05:30 AM' },
-      { id: 'h3', type: 'Darkness', reportedBy: 'नीरज जैन', description: { hi: 'हाईवे पर स्ट्रीट लाइटें बंद हैं, घना अंधेरा है।', en: 'Street lights are completely broken, absolute dark spot.' }, timeReported: '05:45 AM' }
-    ]
-  }
-];
+const INITIAL_ROUTES: ViharRoute[] = generateSadhus();
 
 export default function ViharTrackerPage() {
   const { language, toggleLanguage } = useLanguage();
@@ -132,6 +73,45 @@ export default function ViharTrackerPage() {
   const [haltEn, setHaltEn] = useState('');
   const [contact, setContact] = useState('');
   const [sect, setSect] = useState<'Digambar' | 'Svetambar'>('Digambar');
+
+  // Search & Filter State
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedType, setSelectedType] = useState<'all' | 'acharya' | 'muni' | 'aryika' | 'Svetambar'>('all');
+  const [selectedSafety, setSelectedSafety] = useState<'all' | 'safe' | 'vigilant' | 'critical'>('all');
+  const [visibleCount, setVisibleCount] = useState(20);
+
+  // Multi-dimensional Stats Counters for 200+ Sadhus / Matajis
+  const totalCounts = routes.length;
+  const acharyaCount = routes.filter(r => r.saintType === 'acharya').length;
+  const muniCount = routes.filter(r => r.saintType === 'muni').length;
+  const aryikaCount = routes.filter(r => r.saintType === 'aryika').length;
+  const svetambarCount = routes.filter(r => r.sanghSect === 'Svetambar').length;
+  const criticalCount = routes.filter(r => r.trafficSafety === 'critical').length;
+  const totalEscorts = routes.reduce((acc, curr) => acc + curr.escortsRegistered, 0);
+
+  // Dynamic filter function
+  const filteredRoutes = routes.filter(route => {
+    const query = searchQuery.toLowerCase();
+    const matchesSearch = 
+      route.saintName.hi.includes(searchQuery) ||
+      route.saintName.en.toLowerCase().includes(query) ||
+      route.currentRoute.hi.includes(searchQuery) ||
+      route.currentRoute.en.toLowerCase().includes(query) ||
+      route.upcomingHalt.hi.includes(searchQuery) ||
+      route.upcomingHalt.en.toLowerCase().includes(query);
+      
+    const matchesType = 
+      selectedType === 'all' ||
+      (selectedType === 'acharya' && route.saintType === 'acharya') ||
+      (selectedType === 'muni' && route.saintType === 'muni') ||
+      (selectedType === 'aryika' && route.saintType === 'aryika') ||
+      (selectedType === 'Svetambar' && route.sanghSect === 'Svetambar');
+      
+    const matchesSafety = 
+      selectedSafety === 'all' || route.trafficSafety === selectedSafety;
+      
+    return matchesSearch && matchesType && matchesSafety;
+  });
 
   // Emergency flashing timer effect
   useEffect(() => {
@@ -246,10 +226,10 @@ export default function ViharTrackerPage() {
           <div className="min-w-0">
             <h1 className="text-sm sm:text-base md:text-lg lg:text-xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#2962FF] to-[#00E5FF] flex items-center gap-1.5 sm:gap-2 truncate">
               <Compass className="text-[#2962FF] w-4 h-4 sm:w-6 sm:h-6 md:w-8 md:h-8 shrink-0" />
-              <span className="truncate">{language === 'en' ? 'SAGE VIHAR SAFETY' : 'मुनि विहार सेवा'}</span>
+              <span className="truncate">{language === 'en' ? 'SADHU VIHAR TRACKER' : 'साधु विहार ट्रैकर'}</span>
             </h1>
             <p className="text-[9px] sm:text-[10px] text-gray-550 font-black dark:text-gray-400 truncate hidden xs:block">
-              {language === 'en' ? 'Live Route Coordinator' : 'पैदल विहार संतों की सुरक्षा लाइव'}
+              {language === 'en' ? 'Live Sage Journeys & Escorts' : 'पूज्य दिगंबर/श्वेतांबर विहार रक्षक एवं संतों का लाइव विवरण'}
             </p>
           </div>
         </div>
@@ -290,7 +270,7 @@ export default function ViharTrackerPage() {
           </h3>
           <p className="text-[11px] leading-relaxed text-gray-750 dark:text-gray-300">
             {language === 'en' 
-              ? 'Click to turn your mobile screen into a high-visibility hazard beacon. Useful when walking directly behind monks at dark blind curves or during foggy rain conditions.' 
+              ? 'Click to turn your mobile screen into a high-visibility hazard beacon. Useful when walking directly behind Sadhus & Matajis at dark blind curves or during foggy rain conditions.' 
               : 'इस सुरक्षा मोड को चालू करके अपने मोबाइल स्क्रीन को बहुत तेज चमकीले लाल-नारंगी बीकन फ्लैशर में तब्दील करें। रात और अंधेरे में संतों के पीछे चलते समय यह दूर से ही तेज वाहनों को सतर्क करता है।'}
           </p>
         </div>
@@ -363,13 +343,103 @@ export default function ViharTrackerPage() {
         </p>
       </div>
 
+      {/* SAGE/SADHU STATS BENTO GRID - Rich Premium Visual Touch */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div className="p-4 bg-white dark:bg-[#111] border border-gray-150/40 dark:border-white/5 rounded-3xl text-center md:text-left space-y-1">
+          <span className="text-[9px] uppercase font-black text-gray-400 tracking-wider block">{language === 'en' ? 'Total Active Sadhus' : 'कुल सक्रिय विहार संत'}</span>
+          <p className="text-xl md:text-2xl font-black text-[#2962FF]">{totalCounts} {language === 'en' ? 'Sanghs' : 'पूज्य संघ'}</p>
+        </div>
+
+        <div className="p-4 bg-white dark:bg-[#111] border border-gray-150/40 dark:border-white/5 rounded-3xl text-center md:text-left space-y-1">
+          <span className="text-[9px] uppercase font-black text-gray-400 tracking-wider block">{language === 'en' ? 'Aryika Mataji Sanghas' : 'आर्यिका माताजी संघ'}</span>
+          <p className="text-xl md:text-2xl font-black text-pink-500">{aryikaCount} {language === 'en' ? 'Matajis' : 'आर्यिका माताजी'}</p>
+        </div>
+
+        <div className="p-4 bg-white dark:bg-[#111] border border-gray-150/40 dark:border-white/5 rounded-3xl text-center md:text-left space-y-1">
+          <span className="text-[9px] uppercase font-black text-gray-400 tracking-wider block">{language === 'en' ? 'Critical Traffic Zones' : 'अत्यधिक खतरे का मार्ग'}</span>
+          <p className="text-xl md:text-2xl font-black text-red-500 animate-pulse">{criticalCount} {language === 'en' ? 'Warnings' : 'अलर्ट मार्ग'}</p>
+        </div>
+
+        <div className="p-4 bg-white dark:bg-[#111] border border-gray-150/40 dark:border-white/5 rounded-3xl text-center md:text-left space-y-1">
+          <span className="text-[9px] uppercase font-black text-gray-400 tracking-wider block">{language === 'en' ? 'Enrolled Volunteers' : 'विहार रक्षक पहरेदार'}</span>
+          <p className="text-xl md:text-2xl font-black text-emerald-500">{totalEscorts} {language === 'en' ? 'Active Guards' : 'सक्रिय रक्षक'}</p>
+        </div>
+      </div>
+
+      {/* ADVANCED DIALOG SEARCH & FILTER BAR */}
+      <div className="p-5 bg-white dark:bg-[#111] border border-gray-150/40 dark:border-white/5 rounded-[2rem] space-y-4 mb-6 shadow-xs">
+        <div className="flex flex-col md:flex-row gap-4 items-center">
+          
+          {/* Quick Search Input */}
+          <div className="w-full md:flex-1">
+            <UnifiedSearchBar
+              value={searchQuery}
+              onChange={(val) => {
+                setSearchQuery(val);
+                setVisibleCount(20); // reset page on search
+              }}
+              placeholder={language === 'en' ? 'Search Saint name, current route, halt location...' : 'संत का नाम, हाईवे मार्ग या गंतव्य धर्मशाला खोजें...'}
+            />
+          </div>
+
+          <div className="flex gap-2 w-full md:w-auto shrink-0">
+            {/* Safety status selector */}
+            <select
+              value={selectedSafety}
+              onChange={(e) => {
+                setSelectedSafety(e.target.value as any);
+                setVisibleCount(20);
+              }}
+              className="w-full md:w-44 bg-gray-50 dark:bg-[#181818] border border-gray-200 dark:border-white/5 rounded-2xl p-3 text-xs font-semibold focus:outline-none text-gray-700 dark:text-gray-300"
+            >
+              <option value="all">🛡️ {language === 'en' ? 'All Safety States' : 'सभी सुरक्षा स्तर'}</option>
+              <option value="safe">🟢 {language === 'en' ? 'Safe Routes' : 'सुरक्षित मार्ग (Safe)'}</option>
+              <option value="vigilant">🟡 {language === 'en' ? 'Vigilant Zones' : 'सतर्कता क्षेत्र (Vigilant)'}</option>
+              <option value="critical">🔴 {language === 'en' ? 'Critical Highway' : 'जोखिमपूर्ण मार्ग (Critical)'}</option>
+            </select>
+          </div>
+
+        </div>
+
+        {/* Sect and Saint Classification Tab Pills */}
+        <div className="flex items-center gap-1.5 flex-wrap border-t border-gray-150/30 dark:border-white/5 pt-3">
+          {[
+            { id: 'all', label: language === 'en' ? 'All Saints / सभी संघ' : 'सभी संत संघ' },
+            { id: 'acharya', label: language === 'en' ? 'Acharyas / आचार्य' : 'आचार्य संघ' },
+            { id: 'muni', label: language === 'en' ? 'Muni Sanghs / मुनिराज' : 'मुनिराज संघ' },
+            { id: 'aryika', label: language === 'en' ? 'Matajis / माताजी' : 'आर्यिका माताजी' },
+            { id: 'Svetambar', label: language === 'en' ? 'Svetambar / श्वेतांबर' : 'श्वेतांबर श्रमण' }
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => {
+                setSelectedType(tab.id as any);
+                setVisibleCount(20);
+              }}
+              className={cn(
+                "px-3.5 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer border",
+                selectedType === tab.id
+                  ? "bg-[#2962FF] text-white border-transparent shadow-xs"
+                  : "bg-gray-100 dark:bg-white/5 text-gray-650 dark:text-gray-350 border-gray-200 dark:border-white/10 hover:bg-gray-200 dark:hover:bg-white/10"
+              )}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Control Actions buttons */}
-      <div className="mb-6 flex justify-end">
+      <div className="mb-6 flex justify-between items-center bg-white dark:bg-[#111] p-4 border border-gray-150/40 dark:border-white/5 rounded-3xl">
+        <span className="text-[10px] font-black uppercase tracking-wider text-gray-550 dark:text-gray-400">
+          👀 {language === 'en' ? `Showing ${Math.min(visibleCount, filteredRoutes.length)} of ${filteredRoutes.length} matching routes` : `प्रदर्शित: ${Math.min(visibleCount, filteredRoutes.length)} / कुल ${filteredRoutes.length} अनुकूल विहार मार्ग`}
+        </span>
+        
         <button
           onClick={() => setShowForm(!showForm)}
-          className="px-5 py-3.5 bg-[#2962FF] hover:bg-blue-700 text-white rounded-2xl text-xs font-black uppercase tracking-wider flex items-center gap-2 cursor-pointer shadow-lg transition-transform hover:scale-[1.02]"
+          className="px-4 py-2.5 bg-[#2962FF] hover:bg-blue-700 text-white rounded-xl text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 cursor-pointer shadow-sm transition-transform hover:scale-[1.02]"
         >
-          <PlusCircle size={16} />
+          <PlusCircle size={14} />
           {language === 'en' ? 'Report New active Vihar' : 'नया विहार मार्ग संकलन अपडेट करें'}
         </button>
       </div>
@@ -378,7 +448,7 @@ export default function ViharTrackerPage() {
       {showForm && (
         <form onSubmit={handleCreateRoute} className="bg-white dark:bg-[#111] border border-[#2962FF]/20 p-6 rounded-[2rem] mb-8 space-y-4 shadow-xl animate-in slide-in-from-top-4 duration-300">
           <h3 className="font-display font-black text-sm text-[#2962FF] uppercase tracking-wider">
-            {language === 'en' ? 'INPUT LIVE MARICHING MONK DETAILS' : 'नवीन पूज्य मुनि विहार मार्ग प्रविष्टि'}
+            {language === 'en' ? 'INPUT LIVE MARCHING SADHU / MATAJI DETAILS' : 'नवीन पूज्य मुनि विहार मार्ग प्रविष्टि'}
           </h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -487,7 +557,20 @@ export default function ViharTrackerPage() {
 
       {/* MUTI-CARD VIHAR PROGRESSIONS */}
       <div className="space-y-6">
-        {routes.map(route => (
+        {filteredRoutes.length === 0 ? (
+          <div className="p-12 text-center bg-white dark:bg-[#111] border border-dashed border-gray-200 dark:border-white/5 rounded-[2rem] space-y-2">
+            <p className="text-xl">🔍</p>
+            <p className="text-sm font-extrabold text-gray-800 dark:text-white">
+              {language === 'en' ? 'No Matching Sadhus / Matajis Found' : 'कोई मेल खाता हुआ ससंघ मार्ग विवरण नहीं मिला'}
+            </p>
+            <p className="text-xs text-gray-500 max-w-sm mx-auto leading-relaxed">
+              {language === 'en' 
+                ? 'Try adjusting your search filters or text query, or report a new live march to let others know about an active Vihar.'
+                : 'कृपया अपनी खोज अथवा फ़िल्टर बदलें, या नया लाइव विहार मार्ग संकलित करके समाज को सूचित करें।'}
+            </p>
+          </div>
+        ) : (
+          filteredRoutes.slice(0, visibleCount).map(route => (
           <div 
             key={route.id}
             className="bg-white dark:bg-[#111] border border-gray-150/40 dark:border-white/5 rounded-[2rem] p-5 hover:border-[#2962FF]/55 transition-all duration-300 space-y-4"
@@ -656,8 +739,21 @@ export default function ViharTrackerPage() {
             </div>
 
           </div>
-        ))}
+        ))
+      )}
       </div>
+
+      {/* SAGE LOAD MORE PAGINATION BUTTON */}
+      {visibleCount < filteredRoutes.length && (
+        <div className="mt-8 flex justify-center">
+          <button
+            onClick={() => setVisibleCount(prev => prev + 25)}
+            className="px-8 py-3.5 bg-white dark:bg-[#111] hover:bg-gray-100 dark:hover:bg-white/10 text-gray-800 dark:text-white border border-gray-200 dark:border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest cursor-pointer shadow-sm transition-transform active:scale-95"
+          >
+            ⏬ {language === 'en' ? 'LOAD MORE SAGE JOURNEYS' : 'अन्य विहार मार्ग प्रविष्ठियां लोड करें'}
+          </button>
+        </div>
+      )}
 
       {/* Dynamic JBT Premium Help Modal */}
       {showHelpModal && (
@@ -699,7 +795,7 @@ export default function ViharTrackerPage() {
             {/* Help Scrollable Content */}
             <div className="overflow-y-auto pr-1 space-y-4.5 text-left text-zinc-355 dark:text-zinc-300 text-xs text-medium leading-relaxed relative z-10 max-h-[55vh]">
               <p className="font-bold text-white text-sm">
-                {language === 'en' ? 'Welcome to Monk Vihar Safety & Escort Tracker!' : 'मुनि विहार सेवा व राजमार्ग रक्षक पटल में आपका स्वागत है!'}
+                {language === 'en' ? 'Welcome to Sadhu Vihar Safety & Escort Tracker!' : 'साधु विहार सेवा व राजमार्ग रक्षक पटल में आपका स्वागत है!'}
               </p>
               <p className="font-semibold text-gray-400">
                 {language === 'en' 

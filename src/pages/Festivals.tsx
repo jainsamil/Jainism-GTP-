@@ -6,6 +6,7 @@ import { collection, onSnapshot, query } from 'firebase/firestore';
 import { useLanguage } from '../contexts/LanguageContext';
 import { festivalsData as FALLBACK_FESTIVALS } from '../data/festivalsData';
 import SectionAiAgent from '../components/SectionAiAgent';
+import UnifiedSearchBar from '../components/UnifiedSearchBar';
 
 // Comprehensive authentic mapping of major & minor Jain festivals for 2026 & 2027
 const FESTIVAL_DATE_MAP: Record<string, { [key: string]: string }> = {
@@ -141,18 +142,25 @@ export default function FestivalsPage() {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       const preparedSeed = FALLBACK_FESTIVALS.map((seed, idx) => ({ id: `seed_${idx}`, ...seed }));
       
-      const merged = [...data];
-      preparedSeed.forEach(seed => {
-        const isDuplicate = data.some((d: any) => 
-          (d.name?.en && d.name.en === seed.name?.en) || 
-          (d.name?.hi && d.name.hi === seed.name?.hi)
-        );
-        if (!isDuplicate) {
-          merged.push(seed);
+      const dataMap = new Map(data.map(item => [item.id, item]));
+      const merged = preparedSeed.map(seedItem => {
+        let matchedItem = dataMap.get(seedItem.id);
+        if (!matchedItem) {
+          const matchByName = data.find((d: any) => 
+            (d.name?.en && d.name.en === seedItem.name?.en) ||
+            (d.name?.hi && d.name.hi === seedItem.name?.hi)
+          );
+          if (matchByName) {
+            matchedItem = matchByName;
+            dataMap.delete(matchByName.id);
+          }
+        } else {
+          dataMap.delete(seedItem.id);
         }
+        return matchedItem ? { ...seedItem, ...matchedItem } : seedItem;
       });
-
-      setRawFestivals(merged);
+      const finalFestivals = [...merged, ...Array.from(dataMap.values())];
+      setRawFestivals(finalFestivals);
       setLoading(false);
     }, (error) => {
       console.error('Error fetching festivals:', error);
@@ -307,14 +315,11 @@ export default function FestivalsPage() {
 
       {/* Advanced Filter Toolbar */}
       <div className="bg-white dark:bg-[#121212]/80 border border-gray-200 dark:border-white/5 p-4 rounded-3xl mb-8 flex flex-col md:flex-row gap-4 justify-between items-center shadow-sm">
-        <div className="relative w-full md:max-w-md">
-          <Search className="absolute left-4 top-3 text-gray-450 dark:text-gray-500" size={16} />
-          <input 
-            type="text"
-            placeholder={language === 'hi' ? "पर्व का नाम, तिथि या विवरण खोजें..." : "Search festival, tithi, or month..."}
+        <div className="w-full md:max-w-md">
+          <UnifiedSearchBar
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-gray-100 dark:bg-[#0a0a0a] border border-gray-200 dark:border-white/10 rounded-xl py-2 pl-11 pr-4 text-xs font-bold text-gray-900 dark:text-white focus:outline-none focus:border-[#FF6D00] transition-colors"
+            onChange={(val) => setSearchQuery(val)}
+            placeholder={language === 'hi' ? "पर्व का नाम, तिथि या विवरण खोजें..." : "Search festival, tithi, or month..."}
           />
         </div>
 

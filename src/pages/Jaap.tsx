@@ -27,6 +27,7 @@ export default function JaapPage() {
   const [isAutoChanting, setIsAutoChanting] = useState(false);
   const [autoChantSpeed, setAutoChantSpeed] = useState(4); // seconds per bead interval
   const [showHelpModal, setShowHelpModal] = useState(false);
+  const [showResetModal, setShowResetModal] = useState(false);
 
   useEffect(() => {
     // Load persisted stats
@@ -177,22 +178,7 @@ export default function JaapPage() {
   }, [isAutoChanting, autoChantSpeed, count, totalCounts, malas, streak]);
 
   const handleReset = () => {
-    const resetBeads = window.confirm(lang === 'en' ? 'Do you want to reset current Mala beads count?' : 'क्या आप वर्तमान माला जाप संख्या (Beads Count) रीसेट करना चाहते हैं?');
-    if (resetBeads) {
-      setCount(0);
-      
-      const resetAll = window.confirm(lang === 'en' ? 'Do you also want to completely clear and reset all lifetime totals and completed malas to 0?' : 'क्या आप कुल सामूहिक जाप (All Lifetime Totals - 13) और माला संख्या को भी बिल्कुल शून्य (0) करना चाहते हैं?');
-      if (resetAll) {
-        setCount(0);
-        setTotalCounts(0);
-        setMalas(0);
-        setStreak(0);
-        localStorage.removeItem('jaap_total_count');
-        localStorage.removeItem('jaap_total_malas');
-        localStorage.removeItem('jaap_streak');
-        localStorage.removeItem('jaap_last_session');
-      }
-    }
+    setShowResetModal(true);
   };
 
   // Speaks out the mantra if enabled
@@ -312,20 +298,10 @@ export default function JaapPage() {
             <button 
               onClick={(e) => {
                 e.stopPropagation();
-                const resetAll = window.confirm(lang === 'en' ? 'Do you want to completely reset and clear your total counts and malas back to 0?' : 'क्या आप अपने कुल जाप (Total counts) और मालाओं की संख्या को पूर्ण रूप से शून्य (0) करना चाहते हैं?');
-                if (resetAll) {
-                  setCount(0);
-                  setTotalCounts(0);
-                  setMalas(0);
-                  setStreak(0);
-                  localStorage.removeItem('jaap_total_count');
-                  localStorage.removeItem('jaap_total_malas');
-                  localStorage.removeItem('jaap_streak');
-                  localStorage.removeItem('jaap_last_session');
-                }
+                setShowResetModal(true);
               }}
               className="p-1 rounded-md text-gray-400 hover:text-red-500 hover:bg-red-500/10 transition-all cursor-pointer"
-              title={lang === 'en' ? "Reset Totals to 0" : "कुल जाप शून्य करें"}
+              title={lang === 'en' ? "Reset Totals to 0" : "कुल जाप रीसेट करें"}
               id="btn-reset-totals"
             >
               <RotateCcw size={13} className="shrink-0" />
@@ -434,9 +410,83 @@ export default function JaapPage() {
 
       {/* Main Interactive Chanting Counter Dial */}
       <div className="flex flex-col items-center justify-center my-6 relative py-4">
-        {/* Beads progress ring (108 beads) */}
+        {/* Beads progress ring (108 golden beads - Sone K Moti) */}
         <div className="absolute inset-0 flex items-center justify-center max-w-full pointer-events-none">
-          <div className="w-[310px] h-[310px] md:w-[350px] md:h-[350px] rounded-full border-4 border-dashed border-gray-200 dark:border-white/10 animate-[spin_120s_linear_infinite]" />
+          <div className="w-[310px] h-[310px] md:w-[350px] md:h-[350px] relative flex items-center justify-center">
+            <svg 
+              className="w-full h-full absolute transform -rotate-90 pointer-events-none" 
+              viewBox="0 0 400 400"
+            >
+              <defs>
+                {/* Inactive golden bead - rich brushed premium gold pearl texture */}
+                <radialGradient id="gold-bead-inactive" cx="35%" cy="35%" r="65%">
+                  <stop offset="0%" stopColor="#FFE082" />
+                  <stop offset="40%" stopColor="#FFB300" />
+                  <stop offset="75%" stopColor="#B38F00" />
+                  <stop offset="100%" stopColor="#5D4037" />
+                </radialGradient>
+
+                {/* Active golden bead - highly polished, radiant shining gold pearl */}
+                <radialGradient id="gold-bead-active" cx="35%" cy="35%" r="65%">
+                  <stop offset="0%" stopColor="#FFFFFF" />
+                  <stop offset="20%" stopColor="#FFF59D" />
+                  <stop offset="50%" stopColor="#FFD54F" />
+                  <stop offset="80%" stopColor="#FF8F00" />
+                  <stop offset="100%" stopColor="#E65100" />
+                </radialGradient>
+
+                {/* Glowing aura filter for active/completed beads */}
+                <filter id="gold-glow" x="-50%" y="-50%" width="200%" height="200%">
+                  <feGaussianBlur stdDeviation="4" result="blur" />
+                  <feComponentTransfer in="blur" result="brightBlur">
+                    <feFuncA type="linear" slope="2"/>
+                  </feComponentTransfer>
+                  <feMerge>
+                    <feMergeNode in="brightBlur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+              </defs>
+
+              {/* A beautiful solid golden thread connecting all the pearls (Suvarna Sutra) */}
+              <circle 
+                cx="200" 
+                cy="200" 
+                r="182" 
+                fill="none" 
+                stroke="url(#gold-bead-active)" 
+                strokeWidth="2" 
+                className="opacity-70" 
+                filter="url(#gold-glow)"
+              />
+
+              {/* Render 108 auspicious golden beads */}
+              {Array.from({ length: 108 }).map((_, idx) => {
+                // To start from the top, our angle goes clockwise from 0 to 360
+                const angle = (idx * 360) / 108;
+                const angleRad = (angle * Math.PI) / 180;
+                const cx = 200 + 182 * Math.cos(angleRad);
+                const cy = 200 + 182 * Math.sin(angleRad);
+
+                const isCompleted = idx < count;
+                const isCurrent = idx === count;
+
+                return (
+                  <circle
+                    key={idx}
+                    cx={cx}
+                    cy={cy}
+                    r={isCurrent ? 7.5 : isCompleted ? 6 : 5}
+                    fill={isCompleted || isCurrent ? "url(#gold-bead-active)" : "url(#gold-bead-inactive)"}
+                    filter={isCompleted || isCurrent ? "url(#gold-glow)" : "none"}
+                    stroke={isCurrent ? "#FF3D00" : isCompleted ? "#FFD54F" : "#AA7C11"}
+                    strokeWidth={isCurrent ? 1.8 : 0.8}
+                    className="transition-all duration-300"
+                  />
+                );
+              })}
+            </svg>
+          </div>
         </div>
 
         {/* Outer Circular Trigger */}
@@ -602,6 +652,64 @@ export default function JaapPage() {
                 className="w-full bg-[#FF6D00] hover:bg-orange-600 text-black py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest cursor-pointer hover:scale-[1.02] active:scale-95 transition-all text-center"
               >
                 {lang === 'en' ? 'UNDERSTOOD & CONTINUE' : 'पूर्ण समझ आया, आगे बढ़ें'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Dynamic Reset Modal */}
+      {showResetModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-350 pointer-events-auto">
+          <div className="bg-[#121212] border border-white/10 rounded-[2.5rem] w-full max-w-sm p-6 md:p-8 shadow-2xl relative overflow-hidden flex flex-col text-center">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-red-500/10 rounded-full blur-3xl pointer-events-none" />
+
+            <div className="w-16 h-16 mx-auto mb-4 bg-red-500/10 border border-red-500/20 text-red-500 rounded-full flex items-center justify-center shadow-lg">
+              <RotateCcw size={28} className="animate-spin-slow" />
+            </div>
+
+            <h2 className="text-xl font-display font-black text-white mb-2 uppercase tracking-wide">
+              {lang === 'en' ? 'RESET JAAP OPTIONS' : 'जाप रीसेट विकल्प'}
+            </h2>
+            <p className="text-xs text-gray-400 mb-6 leading-relaxed">
+              {lang === 'en' 
+                ? 'Please select the type of reset you want to perform on your spiritual chanting log.' 
+                : 'कृपया उस रीसेट विकल्प को चुनें जिसे आप सक्रिय करना चाहते हैं।'}
+            </p>
+
+            <div className="space-y-3">
+              <button
+                onClick={() => {
+                  setCount(0);
+                  setShowResetModal(false);
+                }}
+                className="w-full bg-white/5 hover:bg-white/10 text-white py-3 px-4 rounded-xl text-xs font-semibold border border-white/10 cursor-pointer transition-all hover:scale-101 active:scale-99"
+              >
+                {lang === 'en' ? 'Reset Only Current Bead Count to 0' : 'केवल वर्तमान माला संख्या (Beads) रीसेट करें'}
+              </button>
+
+              <button
+                onClick={() => {
+                  setCount(0);
+                  setTotalCounts(0);
+                  setMalas(0);
+                  setStreak(0);
+                  localStorage.removeItem('jaap_total_count');
+                  localStorage.removeItem('jaap_total_malas');
+                  localStorage.removeItem('jaap_streak');
+                  localStorage.removeItem('jaap_last_session');
+                  setShowResetModal(false);
+                }}
+                className="w-full bg-red-500 hover:bg-red-600 text-white py-3 px-4 rounded-xl text-xs font-bold cursor-pointer transition-all hover:scale-101 active:scale-99 shadow-lg shadow-red-500/10"
+              >
+                {lang === 'en' ? 'Reset Everything (Totals, Malas, Streaks)' : 'सभी डेटा रीसेट करें (माला, कुल जाप, श्रृंखला)'}
+              </button>
+
+              <button
+                onClick={() => setShowResetModal(false)}
+                className="w-full bg-transparent hover:bg-white/5 text-gray-500 py-2.5 rounded-xl text-xs font-medium cursor-pointer transition-all"
+              >
+                {lang === 'en' ? 'Cancel' : 'रद्द करें'}
               </button>
             </div>
           </div>

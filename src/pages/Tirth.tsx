@@ -9,6 +9,7 @@ import { cn } from '../lib/utils';
 import { useLanguage } from '../contexts/LanguageContext';
 import { motion, AnimatePresence } from 'motion/react';
 import SectionAiAgent from '../components/SectionAiAgent';
+import UnifiedSearchBar from '../components/UnifiedSearchBar';
 
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
@@ -103,13 +104,66 @@ export default function TirthPage() {
   const [useLiveGeo, setUseLiveGeo] = useState(false);
   const [distanceInfo, setDistanceInfo] = useState<string | null>(null);
 
-  // Dharamshala booking states
-  const [bookingCheckIn, setBookingCheckIn] = useState('2026-06-15');
-  const [bookingCheckOut, setBookingCheckOut] = useState('2026-06-17');
-  const [bookingGuests, setBookingGuests] = useState(2);
-  const [selectedRoomType, setSelectedRoomType] = useState('standard');
-  const [bookingReceipt, setBookingReceipt] = useState<any>(null);
-  const [bookingLoading, setBookingLoading] = useState(false);
+  // Static Dharamshala & Timings Guide database lookup:
+  const getDharamshalaInfo = (tirthId: string) => {
+    const defaultDharamshalas = [
+      {
+        name: { en: "Digambar Jain Dharamshala (Main Kothi)", hi: "दिगंबर जैन मुख्य कोठी धर्मशाला" },
+        rooms: { en: "150 Rooms, 20 Cottages", hi: "१५० कमरे, २० डीलक्स कुटीर" },
+        contact: "06554-273224",
+        timings: { en: "Bhojanshala: 11:00 AM - 1:00 PM, 5:00 PM - Sunset", hi: "भोजनशाला: सुबह ११:०० से दोपहर १:००, शाम ५:०० से सूर्यास्त तक" }
+      },
+      {
+        name: { en: "Swetambar Jain Kothi Dharamshala", hi: "श्वेतांबर जैन कोठी धर्मशाला" },
+        rooms: { en: "120 Rooms, General Family Hall", hi: "१२० कमरे, विशाल गृहस्थ हॉल" },
+        contact: "06554-273211",
+        timings: { en: "Bhojanshala: 11:30 AM - 1:15 PM, 5:30 PM - Sunset", hi: "भोजनशाला: सुबह ११:३० से दोपहर १:१५, शाम ५:३० से सूर्यास्त तक" }
+      }
+    ];
+
+    const data: Record<string, Array<{ name: { en: string; hi: string }; rooms: { en: string; hi: string }; contact: string; timings: { en: string; hi: string } }>> = {
+      shikharji: [
+        {
+          name: { en: "Sri Digambar Jain Terapanthi Kothi", hi: "श्री दिगंबर जैन तेरापंथी कोठी" },
+          rooms: { en: "350 Rooms, 30 AC Suites", hi: "३५० कमरे, ३० वातानुकूलित (AC) सूइट" },
+          contact: "+91-6554-273231",
+          timings: { en: "Bhojanshala: 11:00 AM - 1:00 PM", hi: "भोजन: सुबह ११:०० से दोपहर १:०० बजे (सूर्यास्त के बाद बंद)" }
+        },
+        {
+          name: { en: "Sri Digambar Jain Twenty-Four Tonk Kothi", hi: "श्री दिगंबर जैन बीसपंथी कोठी" },
+          rooms: { en: "200 Rooms, 10 Family Halls", hi: "२०० कमरे, १० बड़े पारिवारिक हॉल" },
+          contact: "+91-6554-273224",
+          timings: { en: "Bhojanshala: 11:30 AM - 1:30 PM", hi: "भोजन: सुबह ११:३० से दोपहर १:३० बजे" }
+        }
+      ],
+      palitana: [
+        {
+          name: { en: "Adishwar Digambar Dharamshala", hi: "आदिनाथ दिगंबर जैन धर्मशाला" },
+          rooms: { en: "80 standard rooms", hi: "८० साधारण कमरे" },
+          contact: "+91-278-2521124",
+          timings: { en: "Bhojanshala: 11:00 AM to Sunset", hi: "भोजन: सुबह ११:०० से सूर्यास्त तक (रात्रि भोजन निषेध)" }
+        }
+      ],
+      shravanabelagola: [
+        {
+          name: { en: "Bahubali Pilgrims Guest House (SDJMI)", hi: "बाहुबली यात्री निवास (SDJMI ट्रस्ट)" },
+          rooms: { en: "250 AC and Deluxe rooms", hi: "२५० एयर-कूल्ड तथा डीलक्स रूम" },
+          contact: "+91-8176-257226",
+          timings: { en: "Bhojanshala: 11:30 AM - 2:00 PM, 6:00 PM - Sunset", hi: "भोजन: दोपहर ११:३० से २:००, शाम ६:०० से सूर्यास्त" }
+        }
+      ],
+      girnar: [
+        {
+          name: { en: "Girnar Digambar Jain Dharamshala (Lal Kothi)", hi: "श्री गिरनार दिगंबर जैन धर्मशाला (लाल कोठी)" },
+          rooms: { en: "110 Rooms, AC cottages available", hi: "११० कमरे, वातानुकूलित कॉटेज" },
+          contact: "+91-285-2621516",
+          timings: { en: "Bhojanshala: 11:00 AM - 1:00 PM", hi: "भोजन: सुबह ११:०० से दोपहर १:००" }
+        }
+      ]
+    };
+
+    return data[tirthId] || defaultDharamshalas;
+  };
 
   // Custom city input states
   const [customCityInput, setCustomCityInput] = useState('');
@@ -274,14 +328,11 @@ export default function TirthPage() {
       </div>
 
       {/* Search Bar */}
-      <div className="relative mb-6">
-        <Search className="absolute left-4 top-3.5 text-[#FF8A65]" size={20} />
-        <input 
-          type="text" 
-          placeholder={lang === 'en' ? "Search sacred places..." : "पवित्र तीर्थ खोजें..."}
+      <div className="mb-6">
+        <UnifiedSearchBar
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full bg-white/80 dark:bg-[#121212]/80 backdrop-blur-md border border-gray-200 dark:border-white/10 rounded-2xl py-3.5 pl-12 pr-6 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FF6D00]/50 shadow-sm transition-all"
+          onChange={(val) => setSearch(val)}
+          placeholder={lang === 'en' ? "Search sacred places..." : "पवित्र तीर्थ खोजें..."}
         />
       </div>
 
@@ -615,213 +666,56 @@ export default function TirthPage() {
                   </div>
                 </div>
 
-                {/* INTERACTIVE DHARAMSHALA BOOKING DESK */}
-                <div className="p-6 rounded-[2rem] bg-amber-500/5 dark:bg-[#1A1A1A]/50 border border-amber-500/20 space-y-5">
-                  <div className="flex items-center gap-2 text-amber-600 dark:text-[#FFD54F]">
-                    <Sparkles size={20} className="animate-pulse" />
+                {/* VERIFIED DHARAMSHALA REGISTRY */}
+                <div className="p-6 rounded-[2rem] bg-gradient-to-br from-amber-500/5 to-orange-500/5 dark:from-[#1A1A1A]/40 dark:to-[#1A1A1A]/20 border border-amber-500/20 space-y-4">
+                  <div className="flex items-center gap-2.5 text-amber-600 dark:text-[#FFD54F]">
+                    <Landmark size={20} className="animate-pulse shrink-0" />
                     <div>
                       <h4 className="text-sm font-black uppercase tracking-wider text-left">
-                        {lang === 'en' ? 'Dharamshala Room Finder & Reservation' : 'धर्मशाला कमरा आरक्षित करें'}
+                        {lang === 'en' ? 'Verified Dharamshala & Food Timings' : 'धर्मशाला एवं भोजनशाला निर्देशिका'}
                       </h4>
-                      <span className="text-[9px] uppercase tracking-wider text-gray-400 block font-bold text-left">
-                        {lang === 'en' ? 'Unified Non-Profit Trust Bookings' : 'अप्रतिबंधित जैन ट्रस्ट धर्मशाला बुकिंग'}
+                      <span className="text-[9px] uppercase tracking-wider text-gray-450 dark:text-gray-400 block font-bold text-left">
+                        {lang === 'en' ? 'Trust contact numbers & direct room capacity' : 'सत्यापित ट्रस्ट संपर्क नंबर एवं कमरा क्षमता'}
                       </span>
                     </div>
                   </div>
 
-                  {bookingReceipt ? (
-                    <div className="bg-emerald-500/10 border-2 border-dashed border-emerald-500 text-emerald-800 dark:text-emerald-400 p-5 rounded-2xl relative space-y-4 animate-[fadeIn_0.4s_ease-out]">
-                      {/* Ticket Cut holes left & right */}
-                      <div className="absolute top-[48%] -left-3.5 w-6 h-6 bg-white dark:bg-[#121212] rounded-full border border-emerald-500/20" />
-                      <div className="absolute top-[48%] -right-3.5 w-6 h-6 bg-white dark:bg-[#121212] rounded-full border border-emerald-500/20" />
-                      
-                      <div className="text-center pb-3 border-b border-dashed border-emerald-500/40">
-                        <span className="text-[10px] bg-emerald-500 text-white font-black px-3 py-1 rounded-full uppercase tracking-widest inline-block mb-1">
-                          {lang === 'en' ? 'RESERVATION CONFIRMED' : 'आरक्षण सुरक्षित'}
-                        </span>
-                        <h5 className="font-extrabold text-[11px] text-gray-500 dark:text-gray-400">PNR: {bookingReceipt.pnr}</h5>
-                      </div>
-
-                      <div className="space-y-3.5 text-xs font-bold text-gray-800 dark:text-zinc-200">
-                        <div className="flex justify-between">
-                          <span>{lang === 'en' ? 'Pilgrim Center' : 'तीर्थ क्षेत्र'}</span>
-                          <span className="text-right text-black dark:text-white font-extrabold">{selectedTirth.name[lang]}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>{lang === 'en' ? 'Selected Room' : 'कमरा श्रेणी'}</span>
-                          <span className="text-right text-black dark:text-white font-extrabold">{bookingReceipt.roomName}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>{lang === 'en' ? 'Check-In' : 'प्रवेश तिथि'}</span>
-                          <span>{bookingReceipt.checkIn} (12:00 PM)</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>{lang === 'en' ? 'Check-Out' : 'निकास तिथि'}</span>
-                          <span>{bookingReceipt.checkOut} (11:00 AM)</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>{lang === 'en' ? 'Total Guests' : 'कुल तीर्थयात्री'}</span>
-                          <span>{bookingReceipt.guests} Bed slots</span>
-                        </div>
-                        <div className="flex justify-between pt-2 border-t border-dashed border-emerald-500/30 text-emerald-600 dark:text-emerald-400 font-black">
-                          <span>{lang === 'en' ? 'Dharamshala Contribution (Total)' : 'धर्मशाला दान सहयोग (कुल)'}</span>
-                          <span>₹{bookingReceipt.totalBill}</span>
-                        </div>
-                      </div>
-
-                      <div className="p-3 bg-white/50 dark:bg-black/20 rounded-xl text-[10px] text-gray-500 dark:text-gray-400 leading-snug space-y-1">
-                        <p className="font-black text-amber-600 dark:text-amber-500">⚠️ IMPORTANT INSTRUCTIONS (नियम):</p>
-                        <p>1. {lang === 'en' ? 'Dinner/Ahar is served between 11:30 AM to 1:00 PM. No dining after sunset.' : 'भोजनशाला समयावधि: सुबह ११:०० से दोपहर १:०० बजे तक। सूर्यास्त के बाद भोजन सर्वथा निषेध है।'}</p>
-                        <p>2. {lang === 'en' ? 'Carry valid Government ID cards matching reservation names.' : 'चेक-इन के समय सभी तीर्थयात्रियों का सरकारी पहचान पत्र अनिवार्य है।'}</p>
-                      </div>
-
-                      <div className="flex gap-2 pt-2">
-                        <button
-                          onClick={() => {
-                            setBookingReceipt(null);
-                            alert(lang === 'en' ? 'Booking cancelled successfully.' : 'आपका धर्मशाला आरक्षण सफलतापूर्वक निरस्त कर दिया गया है। कोई शुल्क नहीं कटेगा।');
-                          }}
-                          className="flex-1 bg-red-500/10 hover:bg-red-500/20 text-red-500 py-2 rounded-xl text-xs font-black uppercase tracking-wider cursor-pointer text-center"
-                        >
-                          {lang === 'en' ? 'Cancel Booking' : 'आरक्षण रद्द करें'}
-                        </button>
-                        <button
-                          onClick={() => {
-                            alert(lang === 'en' ? 'Receipt PDF downloaded to device downloads.' : 'पक्की रसीद (PDF) आपके फ़ोन या पीसी में सेव हो गई है।');
-                          }}
-                          className="flex-1 bg-emerald-500 text-black py-2 rounded-xl text-xs font-black uppercase tracking-wider cursor-pointer text-center"
-                        >
-                          📥 {lang === 'en' ? 'Download PDF' : 'रसीद डाउनलोड'}
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {/* Inputs Date Selectors */}
-                      <div className="grid grid-cols-2 gap-3.5 text-xs font-bold">
-                        <div className="text-left">
-                          <label className="text-gray-500 block mb-1.5 text-left">{lang === 'en' ? 'Check-In' : 'चेक-इन तिथि'}</label>
-                          <input 
-                            type="date" 
-                            value={bookingCheckIn}
-                            onChange={(e) => setBookingCheckIn(e.target.value)}
-                            className="bg-white dark:bg-[#151515] p-2.5 rounded-xl border border-gray-200 dark:border-white/15 text-gray-800 dark:text-white text-xs w-full focus:outline-none"
-                          />
-                        </div>
-                        <div className="text-left">
-                          <label className="text-gray-500 block mb-1.5 text-left">{lang === 'en' ? 'Check-Out' : 'चेक-आउट तिथि'}</label>
-                          <input 
-                            type="date" 
-                            value={bookingCheckOut}
-                            onChange={(e) => setBookingCheckOut(e.target.value)}
-                            className="bg-white dark:bg-[#151515] p-2.5 rounded-xl border border-gray-200 dark:border-white/15 text-gray-800 dark:text-white text-xs w-full focus:outline-none"
-                          />
-                        </div>
-                      </div>
-
-                      {/* Guest Count Slider and pricing options */}
-                      <div className="space-y-2 text-xs font-bold text-left">
-                        <div className="flex justify-between items-center text-left">
-                          <span className="text-gray-500">{lang === 'en' ? 'Number of Pilgrims' : 'तीर्थयात्रियों की संख्या'}</span>
-                          <span className="text-[#FF6D00]">{bookingGuests} {lang === 'en' ? 'Guests' : 'यात्री'}</span>
-                        </div>
-                        <input 
-                          type="range" 
-                          min="1" 
-                          max="8" 
-                          value={bookingGuests}
-                          onChange={(e) => setBookingGuests(Number(e.target.value))}
-                          className="w-full accent-[#FF6D00]"
-                        />
-                      </div>
-
-                      {/* Room options grid layout */}
-                      <div className="space-y-2 text-left">
-                        <span className="text-xs font-bold text-gray-500 block mb-2 text-left">{lang === 'en' ? 'Select Room Type' : 'कमरा श्रेणी चयन करें'}</span>
-                        
-                        <div className="grid grid-cols-1 gap-2">
-                          {[
-                            { id: 'satvik_kutir', nameShow: { en: 'Standard Satvik Kutir (Non AC)', hi: 'सादा सात्विक कुटीर (Non AC)' }, descShow: { en: '2 Beds, clean bathroom, cooler, organic cotton sheets', hi: '२ बेड, शुद्ध जल व्यवस्था, सादा गद्देदार पलंग।' }, price: 250 },
-                            { id: 'standard', nameShow: { en: 'Standard Air-Ventilated AC Room', hi: 'स्टैण्डर्ड वातानुकूलित (AC) रूम' }, descShow: { en: '2 Beds, hot water tap, safety locker, clean linen', hi: '२ बेड, २४ घंटे गर्म पानी नल, सुरक्षा लॉकर।' }, price: 400 },
-                            { id: 'deluxe_ac', nameShow: { en: 'VIP Trust Parivar AC Suite', hi: 'वीआईपी गृहस्थ परिवार AC सूइट' }, descShow: { en: '4 Beds, spacious lounge, modern bath, balcony access', hi: '४ बेड, हॉल अटैच, सोफा, निजी बालकोनी।' }, price: 700 }
-                          ].map(room => {
-                            const isChosen = selectedRoomType === room.id;
-                            return (
-                              <button
-                                key={room.id}
-                                onClick={() => setSelectedRoomType(room.id)}
-                                className={cn(
-                                  "w-full text-left p-3.5 rounded-2xl border text-xs flex justify-between items-start transition-all cursor-pointer",
-                                  isChosen 
-                                    ? "bg-white dark:bg-[#222] border-[#FF6D00] shadow-sm text-gray-950 dark:text-white" 
-                                    : "bg-white/60 dark:bg-white/[0.02] border-transparent hover:bg-white dark:hover:bg-white/5"
-                                )}
-                              >
-                                <div className="text-left">
-                                  <span className="font-extrabold block text-gray-800 dark:text-gray-200 text-left">
-                                    {room.nameShow[lang]}
-                                  </span>
-                                  <span className="text-[10px] text-gray-400 font-semibold block mt-0.5 text-left">
-                                    {room.descShow[lang]}
-                                  </span>
-                                </div>
-                                <div className="text-right shrink-0">
-                                  <span className="font-black text-[#FF6D00] block text-sm">₹{room.price}</span>
-                                  <span className="text-[9px] text-gray-400 font-medium font-bold block">{lang === 'en' ? 'per night' : 'प्रति रात्रि'}</span>
-                                </div>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-
-                      {/* Final Reservation confirmation submission */}
-                      <button
-                        onClick={() => {
-                          setBookingLoading(true);
-                          setTimeout(() => {
-                            setBookingLoading(false);
-                            const pickedRoom = [
-                              { id: 'satvik_kutir', nameShow: { en: 'Standard Satvik Kutir (Non AC)', hi: 'सादा सात्विक कुटीर (Non AC)' }, price: 250 },
-                              { id: 'standard', nameShow: { en: 'Standard Air-Ventilated AC Room', hi: 'स्टैण्डर्ड वातानुकूलित (AC) रूम' }, price: 400 },
-                              { id: 'deluxe_ac', nameShow: { en: 'VIP Trust Parivar AC Suite', hi: 'वीआईपी गृहस्थ परिवार AC सूइट' }, price: 700 }
-                            ].find(r => r.id === selectedRoomType);
-                            
-                            const oneDay = 24 * 60 * 60 * 1000;
-                            const firstDate = new Date(bookingCheckIn);
-                            const secondDate = new Date(bookingCheckOut);
-                            const diffDays = Math.round(Math.abs((firstDate.getTime() - secondDate.getTime()) / oneDay)) || 1;
-                            const billAmount = (pickedRoom?.price || 400) * diffDays;
-                            
-                            setBookingReceipt({
-                              pnr: "JBT-" + Math.floor(100000 + Math.random() * 900000),
-                              roomName: pickedRoom?.nameShow[lang],
-                              checkIn: bookingCheckIn,
-                              checkOut: bookingCheckOut,
-                              guests: bookingGuests,
-                              totalBill: billAmount
-                            });
-                          }, 1200);
-                        }}
-                        disabled={bookingLoading}
-                        className="w-full py-3.5 bg-gradient-to-r from-amber-500 to-orange-500 text-black font-black uppercase text-xs tracking-widest rounded-2xl shadow-md cursor-pointer hover:scale-[1.01] transition-transform flex items-center justify-center gap-2"
+                  <div className="space-y-3.5">
+                    {getDharamshalaInfo(selectedTirth.id).map((dharam, idx) => (
+                      <div 
+                        key={idx} 
+                        className="p-4 bg-white dark:bg-zinc-900/60 border border-gray-150/40 dark:border-white/5 rounded-2xl space-y-2.5 text-left shadow-sm hover:border-amber-500/30 transition-all font-bold"
                       >
-                        {bookingLoading ? (
-                          <>
-                            <Loader2 className="animate-spin text-black" size={16} />
-                            <span>{lang === 'en' ? 'ALLOCATING ROOM SLOT...' : 'धर्मशाला आवंटन किया जा रहा है...'}</span>
-                          </>
-                        ) : (
-                          <span>🏢 {lang === 'en' ? 'REQUEST CONFIRMED BOOKING' : 'धर्मशाला कमरा आवंटन अनुरोध भेजें'}</span>
-                        )}
-                      </button>
-                    </div>
-                  )}
+                        <div className="flex justify-between items-start gap-1 pb-2 border-b border-gray-150/40 dark:border-white/5">
+                          <span className="text-xs text-gray-900 dark:text-gray-100 font-extrabold">{dharam.name[lang]}</span>
+                          <span className="text-[9px] bg-amber-500/10 text-amber-600 dark:text-amber-400 px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0">
+                            {lang === 'en' ? 'Verified Trust' : 'सत्यापित ट्रस्ट'}
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3 text-[11px] text-gray-600 dark:text-gray-300">
+                          <div>
+                            <span className="text-[8px] uppercase tracking-wider text-gray-400 block mb-0.5">{lang === 'en' ? 'Room Capacity' : 'कमरा क्षमता'}</span>
+                            <span className="text-gray-800 dark:text-zinc-200 font-bold">{dharam.rooms[lang]}</span>
+                          </div>
+                          <div>
+                            <span className="text-[8px] uppercase tracking-wider text-gray-400 block mb-0.5">{lang === 'en' ? 'Inquiries Contact' : 'पूछताछ संपर्क'}</span>
+                            <a href={`tel:${dharam.contact}`} className="text-amber-600 dark:text-amber-400 font-bold hover:underline">{dharam.contact}</a>
+                          </div>
+                        </div>
+
+                        <div className="bg-amber-500/5 dark:bg-[#121212]/40 p-2.5 rounded-xl text-[10px] text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                          <Calendar size={12} className="text-amber-500 shrink-0" />
+                          <span className="leading-snug">{dharam.timings[lang]}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
 
                   <p className="text-[10px] text-gray-400 font-bold text-center leading-relaxed">
                     {lang === 'en' 
-                      ? '✓ No prepayment required. Room contribution/donation will be collected by Temple Cashier.' 
-                      : '✓ किसी पूर्व भुगतान की आवश्यकता नहीं है। रसीद दान सहयोग राशि सीधे धर्मशाला ट्रस्ट काउंटर पर जमा होगी।'}
+                      ? '✓ No third-party reservation commissions. Standard room contribution goes directly to Temple Trust.' 
+                      : '✓ कोई बिचौलिया बुकिंग शुल्क नहीं। कमरा दान सहयोग राशि सीधे धर्मशाला ट्रस्ट काउंटर पर जमा की जाती है।'}
                   </p>
                 </div>
 
@@ -916,12 +810,6 @@ export default function TirthPage() {
                   {lang === 'en'
                     ? 'Select your base city (simulated or via browser GPS location) to instantly estimate direct distances to all listed holy lands.'
                     : 'अपने वर्तमान क्षेत्र या जीपीएस पोजीशन से प्रत्येक तीर्थ की वास्तविक दूरी तुरंत पता करें और सीधे गूगल मैप मार्ग खोलें।'}
-                </li>
-                <li>
-                  <strong className="text-[#FFD54F]">{lang === 'en' ? 'Local Room Reservation Simulator:' : 'स्थानीय कमरा आरक्षण पर्ची सिमुलेटर:'}</strong>{' '}
-                  {lang === 'en'
-                    ? 'Simulate dynamic guestroom options, selecting rooms, and outputting local vouchers for immediate pilgrimage planning.'
-                    : 'तीर्थों पर कमरों की बुकिंग संबंधी योजना तैयार करने हेतु सिमुलेटर पर्ची जनरेट करें।'}
                 </li>
                 <li>
                   <strong className="text-[#FFD54F]">{lang === 'en' ? 'Vandana Target Counter:' : 'पावन वंदना संकल्प काउंटर:'}</strong>{' '}

@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Clock, MapPin, Calendar, Heart, Shield, CheckCircle2, Award, Info, RefreshCw, Globe } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { motion } from 'motion/react';
+import { cn } from '../lib/utils';
 import SectionAiAgent from '../components/SectionAiAgent';
 
 interface CityPreset {
@@ -46,6 +47,18 @@ const PACHKHANS = [
     }
   },
   {
+    id: "ayambil",
+    title: { en: "Ayambil (आयंबिल)", hi: "आयंबिल तप प्रत्याख्यान" },
+    desc: {
+      en: "Eating once a day in one sitting, strictly dry food. Complete avoidance of the six vigai flavors (ghee, oil, milk, curd, sugar, and fried items). No green vegetables or fruits.",
+      hi: "दिन में एक बार भोजन, वह भी सर्वथा रुखा-सूखा बिना घी, तेल, दूध, दही, शक्कर, हरी सब्जी, मेवा या मसालों के (छह विगय का पूर्ण त्याग)।"
+    },
+    sankalpa: {
+      en: "I vow to consume only simple dry food once today, completely avoiding the six vigai flavors.",
+      hi: "आयंबिलं पच्चकखामी; असणं पाणं खादिमं सादिमं एग असणं भुंजिस्सामि विगदिवर्जितं।"
+    }
+  },
+  {
     id: "ekasana",
     title: { en: "Ekasana / Beasna (एकासन)", hi: "एकासन / बियासन" },
     desc: {
@@ -80,6 +93,172 @@ export default function FastingPage() {
   const [activeFasts, setActiveFasts] = useState<string[]>([]);
   const [fastStreak, setFastStreak] = useState(0);
   const [showHelpModal, setShowHelpModal] = useState(false);
+  const [autoRing, setAutoRing] = useState(true);
+
+  // Scheduler & Rules states
+  const [scheduledFasts, setScheduledFasts] = useState<Record<string, string>>(() => {
+    try {
+      const saved = localStorage.getItem('fasting_schedule_planner');
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  const [rulesChecklist, setRulesChecklist] = useState<Record<string, boolean>>(() => {
+    try {
+      const saved = localStorage.getItem('fasting_rules_checklist');
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  // Synthesized Web Audio Brass Bowl Bell
+  const playSunsetBell = () => {
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      
+      const osc1 = ctx.createOscillator();
+      const osc2 = ctx.createOscillator();
+      const gainNode = ctx.createGain();
+      
+      osc1.type = 'sine';
+      osc1.frequency.setValueAtTime(293.66, ctx.currentTime); // D4 fundamental
+      
+      osc2.type = 'triangle';
+      osc2.frequency.setValueAtTime(587.33, ctx.currentTime); // D5 overtone
+      
+      gainNode.gain.setValueAtTime(0.6, ctx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 3.5);
+      
+      osc1.connect(gainNode);
+      osc2.connect(gainNode);
+      gainNode.connect(ctx.destination);
+      
+      osc1.start();
+      osc2.start();
+      
+      osc1.stop(ctx.currentTime + 3.6);
+      osc2.stop(ctx.currentTime + 3.6);
+    } catch (err) {
+      console.warn("Audio Context blocked by browser auto-play policy or not supported:", err);
+    }
+  };
+
+  const toggleFastingRule = (ruleId: string) => {
+    const isCompleted = !rulesChecklist[ruleId];
+    const updated = { ...rulesChecklist, [ruleId]: isCompleted };
+    setRulesChecklist(updated);
+    localStorage.setItem('fasting_rules_checklist', JSON.stringify(updated));
+
+    // +5 Punya Points on completion, -5 on deselect
+    const nextPunya = isCompleted ? punyaScore + 5 : Math.max(0, punyaScore - 5);
+    setPunyaScore(nextPunya);
+    localStorage.setItem('tapasya_punya_score', nextPunya.toString());
+  };
+
+  const getNextSevenDays = () => {
+    const days = [];
+    const weekdays = lang === 'en' 
+      ? ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+      : ["रविवार", "सोमवार", "मंगलवार", "बुधवार", "गुरुवार", "शुक्रवार", "शनिवार"];
+      
+    for (let i = 0; i < 7; i++) {
+      const d = new Date();
+      d.setDate(d.getDate() + i);
+      const dateStr = d.toLocaleDateString();
+      days.push({
+        dateStr,
+        dayName: weekdays[d.getDay()],
+        dateNum: d.getDate(),
+        monthName: d.toLocaleString(lang === 'en' ? 'en-US' : 'hi-IN', { month: 'short' }),
+        isToday: i === 0
+      });
+    }
+    return days;
+  };
+
+  const handleScheduleFast = (dateStr: string, fastType: string) => {
+    const updated = { ...scheduledFasts, [dateStr]: fastType };
+    setScheduledFasts(updated);
+    localStorage.setItem('fasting_schedule_planner', JSON.stringify(updated));
+
+    // Also add to active fasts if scheduled for today
+    const todayStr = new Date().toLocaleDateString();
+    if (dateStr === todayStr && fastType !== 'none') {
+      if (!activeFasts.includes(fastType)) {
+        const nextActive = [...activeFasts, fastType];
+        setActiveFasts(nextActive);
+        localStorage.setItem('active_fasts_logged', JSON.stringify(nextActive));
+        
+        const nextStreak = fastStreak + 1;
+        setFastStreak(nextStreak);
+        localStorage.setItem('fasting_streak', nextStreak.toString());
+
+        const nextPunya = punyaScore + 20;
+        setPunyaScore(nextPunya);
+        localStorage.setItem('tapasya_punya_score', nextPunya.toString());
+      }
+    }
+  };
+
+  // New Interactive Feature: Auspicious Tithi Calendar and Punya Points state
+  const [punyaScore, setPunyaScore] = useState(() => {
+    try {
+      const saved = localStorage.getItem('tapasya_punya_score');
+      return saved ? parseInt(saved, 10) : 0;
+    } catch {
+      return 0;
+    }
+  });
+
+  const [loggedObservances, setLoggedObservances] = useState<Record<string, boolean>>(() => {
+    try {
+      const saved = localStorage.getItem('logged_tithi_observances');
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  const [rasaTyaga, setRasaTyaga] = useState<Record<string, boolean>>(() => {
+    try {
+      const saved = localStorage.getItem('logged_rasa_tyaga');
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  const toggleTithiObservance = (id: string) => {
+    const isObserving = !loggedObservances[id];
+    const updated = { ...loggedObservances, [id]: isObserving };
+    setLoggedObservances(updated);
+    localStorage.setItem('logged_tithi_observances', JSON.stringify(updated));
+
+    // Update Punya Points: adding +50 points when observing a Tithi fast
+    const nextPunya = isObserving ? punyaScore + 50 : Math.max(0, punyaScore - 50);
+    setPunyaScore(nextPunya);
+    localStorage.setItem('tapasya_punya_score', nextPunya.toString());
+  };
+
+  const toggleRasaTyaga = (id: string) => {
+    const isObserving = !rasaTyaga[id];
+    const updated = { ...rasaTyaga, [id]: isObserving };
+    setRasaTyaga(updated);
+    localStorage.setItem('logged_rasa_tyaga', JSON.stringify(updated));
+
+    // Update Punya Points: adding +15 points for flavor sacrifice
+    const nextPunya = isObserving ? punyaScore + 15 : Math.max(0, punyaScore - 15);
+    setPunyaScore(nextPunya);
+    localStorage.setItem('tapasya_punya_score', nextPunya.toString());
+  };
+
+  // Track if sunset bell already rung today to prevent duplicate chime
+  const lastRungRef = useRef<string | null>(null);
 
   // Parse sunset timers count down
   useEffect(() => {
@@ -103,6 +282,13 @@ export default function FastingPage() {
         let diffMs = sunsetDate.getTime() - now.getTime();
         if (diffMs < 0) {
           setTimeRemaining(lang === 'en' ? 'Sunset reached (Observing Chauvihar)' : 'सूर्यास्त हो चुका है (चौविहार नियम प्रभावी)');
+          
+          // Auto ring bell at exactly sunset
+          const todayKey = now.toLocaleDateString();
+          if (autoRing && lastRungRef.current !== todayKey && Math.abs(diffMs) < 60000) {
+            lastRungRef.current = todayKey;
+            playSunsetBell();
+          }
         } else {
           const totalSecs = Math.floor(diffMs / 1000);
           const hrs = Math.floor(totalSecs / 3600);
@@ -118,7 +304,7 @@ export default function FastingPage() {
     calculateCountdown();
     const interval = setInterval(calculateCountdown, 1000);
     return () => clearInterval(interval);
-  }, [selectedCity, lang]);
+  }, [selectedCity, lang, autoRing]);
 
   // Load streak state
   useEffect(() => {
@@ -136,6 +322,7 @@ export default function FastingPage() {
 
   const handleToggleFast = (id: string) => {
     let updated: string[];
+    const isAdding = !activeFasts.includes(id);
     if (activeFasts.includes(id)) {
       updated = activeFasts.filter(x => x !== id);
     } else {
@@ -145,13 +332,25 @@ export default function FastingPage() {
     localStorage.setItem('active_fasts_logged', JSON.stringify(updated));
 
     // Update streak based on additions
-    if (updated.length > activeFasts.length) {
+    if (isAdding) {
       const nextStreak = fastStreak + 1;
       setFastStreak(nextStreak);
       localStorage.setItem('fasting_streak', nextStreak.toString());
-    } else if (updated.length === 0) {
-      setFastStreak(0);
-      localStorage.setItem('fasting_streak', '0');
+
+      // Reward +20 Punya Points
+      const nextPunya = punyaScore + 20;
+      setPunyaScore(nextPunya);
+      localStorage.setItem('tapasya_punya_score', nextPunya.toString());
+    } else {
+      // Cancel/refrain reduces score
+      const nextPunya = Math.max(0, punyaScore - 20);
+      setPunyaScore(nextPunya);
+      localStorage.setItem('tapasya_punya_score', nextPunya.toString());
+      
+      if (updated.length === 0) {
+        setFastStreak(0);
+        localStorage.setItem('fasting_streak', '0');
+      }
     }
   };
 
@@ -234,13 +433,33 @@ export default function FastingPage() {
         </div>
 
         {/* Timer countdown readout */}
-        <div className="my-5 relative z-10">
+        <div className="my-5 relative z-10 flex flex-col items-center justify-center">
           <span className="text-[9px] font-black text-gray-400 dark:text-gray-500 tracking-[0.2em] uppercase block mb-1">
             {lang === 'en' ? 'TIME REMAINING UNTIL SUNSET' : 'सूर्यास्त में शेष समयावधि'}
           </span>
-          <span className="text-3xl font-mono font-black text-red-500 tracking-wider block drop-shadow-[0_2px_10px_rgba(239,68,68,0.2)]">
-            {timeRemaining}
-          </span>
+          <div className="flex items-center justify-center gap-3.5">
+            <span className="text-3xl font-mono font-black text-red-500 tracking-wider block drop-shadow-[0_2px_10px_rgba(239,68,68,0.2)]">
+              {timeRemaining}
+            </span>
+            <button
+              type="button"
+              onClick={playSunsetBell}
+              className="p-2 rounded-full bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 border border-amber-500/20 transition-all cursor-pointer text-sm font-bold flex items-center justify-center h-8 w-8"
+              title={lang === 'en' ? "Test Sunset Bell Sound" : "सूर्यास्त घंटी बजाकर देखें"}
+            >
+              🔔
+            </button>
+          </div>
+          
+          <label className="mt-3 flex items-center gap-2 cursor-pointer text-[10px] text-gray-500 dark:text-gray-400 font-bold justify-center select-none">
+            <input 
+              type="checkbox" 
+              checked={autoRing} 
+              onChange={(e) => setAutoRing(e.target.checked)} 
+              className="accent-amber-500 h-3.5 w-3.5 rounded"
+            />
+            <span>{lang === 'en' ? 'Auto-ring bell at Sunset (Chauvihar Chime)' : 'सूर्यास्त पर स्वतः अलार्म घंटी बजाएं (चौविहार अलर्ट)'}</span>
+          </label>
         </div>
 
         {/* Dynamic Warning Caution Banner */}
@@ -254,25 +473,283 @@ export default function FastingPage() {
         </div>
       </div>
 
-      {/* Fasting Streaks display */}
-      <div className="bg-white dark:bg-[#121212] rounded-3xl p-5 border border-gray-100 dark:border-white/5 shadow-sm mb-6 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-orange-500/10 text-[#FF6D00] rounded-2xl flex items-center justify-center font-black">
-            <Award size={24} className="animate-pulse" />
-          </div>
-          <div>
-            <span className="text-[8px] font-black uppercase text-orange-500 tracking-wider block">{lang === 'en' ? 'TAPASYA STREAK' : 'आज की तपस्या निरन्तरता'}</span>
-            <span className="text-sm font-black text-gray-800 dark:text-white">
-              {lang === 'en' ? `${fastStreak} Fasting Milestones Logged` : `${fastStreak} व्रत/प्रत्याख्यान नियम स्वीकृत`}
+      {/* Dynamic Vrat & Fasting Planner */}
+      <div className="bg-white dark:bg-[#121212] rounded-3xl p-6 border border-gray-150 dark:border-white/5 shadow-md mb-6 space-y-6">
+        <div className="flex items-center gap-2.5 text-orange-600 dark:text-[#FFD54F]">
+          <span className="text-xl">📅</span>
+          <div className="text-left">
+            <h3 className="font-display font-black text-sm uppercase tracking-wider">
+              {lang === 'en' ? 'Jain Vrat & Fasting Planner' : 'जैन व्रत एवं तपस्या प्लानर'}
+            </h3>
+            <span className="text-[9px] uppercase tracking-wider text-gray-400 block font-bold">
+              {lang === 'en' ? 'Schedule Upvas, Ekasana, or Chauvihar' : 'आगामी दिनों के लिए उपवास, एकासन या चौविहार नियम की योजना बनाएं'}
             </span>
           </div>
         </div>
-        
-        {fastStreak > 0 && (
-          <div className="bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] px-3.5 py-1.5 rounded-xl font-bold text-xs text-black shadow-sm">
-            🔥 {fastStreak} {lang === 'en' ? 'Active' : 'सक्रिय'}
+
+        {/* Horizontal Calendar Bar */}
+        <div className="grid grid-cols-2 sm:grid-cols-7 gap-3">
+          {getNextSevenDays().map((day) => {
+            const currentScheduled = scheduledFasts[day.dateStr] || 'none';
+            return (
+              <div 
+                key={day.dateStr}
+                className={cn(
+                  "p-3 rounded-2xl border text-center flex flex-col justify-between gap-2.5 transition-all",
+                  day.isToday 
+                    ? "bg-orange-500/5 border-orange-500/35" 
+                    : "bg-gray-50/50 dark:bg-white/[0.01] border-gray-150 dark:border-white/5"
+                )}
+              >
+                <div>
+                  <span className="text-[8px] font-black uppercase text-gray-400 dark:text-gray-500 block">
+                    {day.dayName}
+                  </span>
+                  <span className="text-lg font-black text-gray-800 dark:text-white block mt-0.5 leading-none">
+                    {day.dateNum}
+                  </span>
+                  <span className="text-[9px] font-bold text-orange-500 block uppercase">
+                    {day.monthName} {day.isToday && `(${lang === 'en' ? 'Today' : 'आज'})`}
+                  </span>
+                </div>
+
+                <div className="space-y-1">
+                  <select
+                    value={currentScheduled}
+                    onChange={(e) => handleScheduleFast(day.dateStr, e.target.value)}
+                    className="w-full text-[9px] font-black uppercase tracking-wider text-center bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg p-1 text-gray-700 dark:text-gray-300 focus:outline-none focus:border-orange-500 cursor-pointer"
+                  >
+                    <option value="none" className="dark:bg-[#121212]">{lang === 'en' ? 'No Vrat' : 'कोई नियम नहीं'}</option>
+                    <option value="upvas" className="dark:bg-[#121212]">{lang === 'en' ? 'Upvas' : 'उपवास'}</option>
+                    <option value="ekasana" className="dark:bg-[#121212]">{lang === 'en' ? 'Ekasana' : 'एकासन'}</option>
+                    <option value="beasana" className="dark:bg-[#121212]">{lang === 'en' ? 'Beasana' : 'बेआसन'}</option>
+                    <option value="chauvihar" className="dark:bg-[#121212]">{lang === 'en' ? 'Chauvihar' : 'चौविहार'}</option>
+                  </select>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Daily Fasting Rules Checklist */}
+        <div className="border-t border-gray-100 dark:border-white/5 pt-5 space-y-4">
+          <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-450">
+            <Shield size={16} />
+            <h4 className="text-xs font-black uppercase tracking-wider text-left">
+              {lang === 'en' ? 'Fasting Purity & Rules Checklist' : 'तपस्या शुद्धता एवं दैनिक नियम निर्देशिका'}
+            </h4>
           </div>
-        )}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {[
+              { id: "rule_sunset", en: "Strict Chauvihar: Finish all water & food before sunset.", hi: "दृढ़ चौविहार: सूर्यास्त पूर्व अन्न व जल का त्याग पूर्ण करें।" },
+              { id: "rule_sachitta", en: "Sachitta Tyaga: Consume only boiled/warm water & cooked food.", hi: "सचित्त त्याग: केवल प्राशुक (उबला हुआ) जल एवं पके भोजन का सेवन करें।" },
+              { id: "rule_rootveg", en: "Anantkay Abstinence: Avoid potatoes, onions, garlic & root veg.", hi: "अनंतकाय त्याग: आलू, प्याज, लहसुन, जमीकंद आदि का पूर्ण त्याग।" },
+              { id: "rule_dharmic", en: "Dharmic Swadhyay: Spend 24+ mins reading scriptures or mantra.", hi: "धर्म आराधना: कम से कम २४ मिनट ग्रंथों का स्वाध्याय या सामायिक करें।" },
+              { id: "rule_charitra", en: "Pure Conduct: Avoid anger, bad language or worldly gossips.", hi: "पवित्र आचरण: क्रोध, मान, माया, लोभ और कड़वे वचनों का त्याग रखें।" }
+            ].map((rule) => {
+              const isChecked = rulesChecklist[rule.id] || false;
+              return (
+                <div 
+                  key={rule.id}
+                  onClick={() => toggleFastingRule(rule.id)}
+                  className={cn(
+                    "p-3 rounded-2xl border text-left flex items-start gap-3 cursor-pointer transition-all hover:scale-[1.01]",
+                    isChecked 
+                      ? "bg-emerald-500/[0.03] border-emerald-500/30" 
+                      : "bg-gray-50/50 dark:bg-white/[0.01] border-gray-150 dark:border-white/5"
+                  )}
+                >
+                  <div className={cn(
+                    "w-4 h-4 rounded mt-0.5 border flex items-center justify-center transition-all shrink-0",
+                    isChecked ? "bg-emerald-500 border-transparent text-black" : "border-gray-300 dark:border-white/10"
+                  )}>
+                    {isChecked && <CheckCircle2 size={11} className="fill-white text-emerald-600" />}
+                  </div>
+                  <div>
+                    <p className={cn(
+                      "text-[10px] font-bold leading-normal",
+                      isChecked ? "text-emerald-600 dark:text-emerald-400" : "text-gray-700 dark:text-gray-300"
+                    )}>
+                      {lang === 'en' ? rule.en : rule.hi}
+                    </p>
+                    <span className="text-[8px] font-extrabold text-emerald-600 tracking-wider uppercase block mt-0.5">
+                      {isChecked ? '✓ Rule Maintained (+5 Punya!)' : '+5 Punya Points'}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Tapasya Streaks and Punya Meter Group */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+        {/* Fasting Streaks display */}
+        <div className="bg-white dark:bg-[#121212] rounded-3xl p-5 border border-gray-100 dark:border-white/5 shadow-sm flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-11 h-11 bg-orange-500/10 text-[#FF6D00] rounded-2xl flex items-center justify-center font-black shrink-0">
+              <Award size={22} className="animate-pulse" />
+            </div>
+            <div>
+              <span className="text-[8px] font-black uppercase text-orange-500 tracking-wider block text-left">{lang === 'en' ? 'TAPASYA STREAK' : 'तपस्या निरंतरता'}</span>
+              <span className="text-xs font-black text-gray-800 dark:text-white text-left block">
+                {lang === 'en' ? `${fastStreak} Milestones` : `${fastStreak} नियम स्वीकृत`}
+              </span>
+            </div>
+          </div>
+          
+          {fastStreak > 0 && (
+            <div className="bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] px-2.5 py-1 rounded-xl font-black text-[10px] text-black shadow-sm">
+              🔥 {fastStreak} {lang === 'en' ? 'Active' : 'सक्रिय'}
+            </div>
+          )}
+        </div>
+
+        {/* Punya Point Meter (GAMIFIED EXPERIENCE) */}
+        <div className="bg-white dark:bg-[#121212] rounded-3xl p-5 border border-gray-100 dark:border-white/5 shadow-sm flex items-center justify-between relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-full blur-2xl pointer-events-none" />
+          <div className="flex items-center gap-3">
+            <div className="w-11 h-11 bg-emerald-500/10 text-emerald-500 rounded-2xl flex items-center justify-center font-black shrink-0">
+              <Award size={22} className="text-emerald-500" />
+            </div>
+            <div>
+              <span className="text-[8px] font-black uppercase text-emerald-500 tracking-wider block text-left">{lang === 'en' ? 'PUNYA POINTS' : 'साधना पुण्य अंक'}</span>
+              <span className="text-xs font-black text-gray-800 dark:text-white text-left block">
+                {lang === 'en' ? `${punyaScore} Tapasya points` : `${punyaScore} पुण्य अंक अर्जित`}
+              </span>
+            </div>
+          </div>
+          <div className="bg-emerald-500 text-black px-2.5 py-1 rounded-xl font-black text-[10px] uppercase shadow-sm shrink-0">
+            ✨ {lang === 'en' ? 'Punya' : 'पुण्य'}
+          </div>
+        </div>
+      </div>
+
+      {/* samyak tithi calendar - EXCITING NEW FEATURE ADDED */}
+      <div className="bg-white dark:bg-[#121212] rounded-3xl p-6 border border-gray-100 dark:border-white/5 shadow-sm mb-6 space-y-4">
+        <div className="flex items-center gap-2.5 text-orange-600 dark:text-[#FFD54F]">
+          <Calendar size={18} className="shrink-0" />
+          <div>
+            <h3 className="font-display font-black text-sm uppercase tracking-wider text-left">
+              {lang === 'en' ? 'Sacred Monthly Parv Tithis' : 'शाश्वत जैन पर्व तिथियां एवं व्रत'}
+            </h3>
+            <span className="text-[9px] uppercase tracking-wider text-gray-400 block font-bold text-left">
+              {lang === 'en' ? 'Auspicious days for practicing mental detachment' : 'अष्टमी व चतुर्दशी तिथियों को व्रत करने की गौरवशाली जैन परंपरा'}
+            </span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {[
+            { id: "ashtami_k", name: { en: "Krishna Ashtami (अष्टमी)", hi: "कृष्ण पक्ष अष्टमी व्रत" }, tithi: { en: "8th Waning Moon", hi: "अष्टमी तिथि" }, desc: { en: "Minimize business stress and focus on self-study.", hi: "इंद्रिय असंयम को टालने एवं स्वाध्याय हेतु सर्वश्रेष्ठ पर्व दिन।" } },
+            { id: "chaturdashi_k", name: { en: "Krishna Chaturdashi (चतुर्दशी)", hi: "कृष्ण पक्ष चतुर्दशी व्रत" }, tithi: { en: "14th Waning Moon", hi: "चतुर्दशी तिथि" }, desc: { en: "Green vegetable abstinence, Ekasana or Upwas suggested.", hi: "हरी शाक-सब्जी का विवेकपूर्ण त्याग कर एकासन या उपवास की परम्परा।" } },
+            { id: "ashtami_s", name: { en: "Shukla Ashtami (अष्टमी)", hi: "शुक्ल पक्ष अष्टमी व्रत" }, tithi: { en: "8th Waxing Moon", hi: "अष्टमी तिथि" }, desc: { en: "Observed through silences and continuous chanting.", hi: "मौनपूर्वक आत्म-तत्त्व चिंतन तथा ६ हजार श्वास प्रज्ञा मंत्र जप।" } },
+            { id: "chaturdashi_s", name: { en: "Shukla Chaturdashi (चतुर्दशी)", hi: "शुक्ल पक्ष चतुर्दशी व्रत" }, tithi: { en: "14th Waxing Moon", hi: "चतुर्दशी तिथि" }, desc: { en: "Highest energetic phase for dissolving karmic loads.", hi: "साधना की सर्वोच्च तिथि। मन-वचन-काय को शुद्ध कर उपवास धारण करें।" } }
+          ].map(item => {
+            const isObserved = loggedObservances[item.id] || false;
+            return (
+              <div 
+                key={item.id}
+                className={`p-4 rounded-2xl border text-left flex flex-col justify-between gap-3 transition-all ${
+                  isObserved 
+                    ? "bg-emerald-500/5 dark:bg-emerald-500/10 border-emerald-500/40" 
+                    : "bg-white/50 dark:bg-zinc-900/40 border-gray-100 dark:border-white/5 hover:border-orange-500/25"
+                }`}
+              >
+                <div>
+                  <div className="flex justify-between items-start gap-1 mb-1.5">
+                    <span className="font-extrabold text-xs text-gray-900 dark:text-gray-100 leading-tight">
+                      {item.name[lang]}
+                    </span>
+                    <span className="text-[8px] bg-orange-500/10 text-orange-600 dark:text-[#FFD54F] px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0 font-bold">
+                      {item.tithi[lang]}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-gray-500 dark:text-gray-400 font-bold leading-relaxed">
+                    {item.desc[lang]}
+                  </p>
+                </div>
+
+                <button
+                  onClick={() => toggleTithiObservance(item.id)}
+                  className={`w-full py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                    isObserved 
+                      ? "bg-emerald-500 text-black shadow-sm" 
+                      : "bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/10 border border-gray-200/50 dark:border-white/5"
+                  }`}
+                >
+                  {isObserved ? (
+                    <>
+                      <CheckCircle2 size={12} />
+                      <span>{lang === 'en' ? 'OBSERVED (+50 Punya!)' : 'व्रत पूर्ण स्वीकृत (+५० पुण्य!)'}</span>
+                    </>
+                  ) : (
+                    <span>{lang === 'en' ? 'LOG TODAY AS MY PARV FAST' : 'आज मेरा पर्व व्रत नियम दर्ज करें'}</span>
+                  )}
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Rasa Tyaga Section */}
+      <div className="bg-white dark:bg-[#121212] rounded-3xl p-6 border border-gray-100 dark:border-white/5 shadow-sm mb-6 space-y-4">
+        <div className="flex items-center gap-2.5 text-orange-600 dark:text-[#FFD54F]">
+          <span className="text-xl">🧂</span>
+          <div>
+            <h3 className="font-display font-black text-sm uppercase tracking-wider text-left">
+              {lang === 'en' ? 'Daily Rasa Tyaga (Flavor Renunciation)' : 'दैनिक रस त्याग एवं इन्द्रिय संयम'}
+            </h3>
+            <span className="text-[9px] uppercase tracking-wider text-gray-400 block font-bold text-left">
+              {lang === 'en' ? 'Renounce specific flavors today for practicing physical self-control' : 'जीभ के स्वाद पर नियंत्रण और तपस्या हेतु आज की मर्यादा सहेजें'}
+            </span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+          {[
+            { id: "lavan", name: { en: "Lavan Tyaga (No Salt)", hi: "नमक त्याग (अलौकिक तप)" }, icon: "🧂", points: 15, desc: { en: "Strictly avoid salt in any meal today to cool desires.", hi: "आज किसी भी आहार में नमक का पूर्ण त्याग (आचाम्ल भाव)।" } },
+            { id: "madhur", name: { en: "Madhur Tyaga (No Sugar)", hi: "शर्करा/मीठा त्याग" }, icon: "🍬", points: 15, desc: { en: "Avoid sugar, sweets, or sweetened beverages.", hi: "आज मीठे पकवान, चीनी व शर्करा युक्त भोजन का पूर्ण त्याग।" } },
+            { id: "ghee_oil", name: { en: "Sneh Tyaga (No Ghee/Oil)", hi: "घी एवं तेल त्याग" }, icon: "🏺", points: 15, desc: { en: "Avoid fats, butter, ghee, and oily substances.", hi: "आज चिकनाई, मक्खन, घी एवं तैलीय पदार्थों का पूर्ण त्याग।" } },
+            { id: "milk_curd", name: { en: "Gorasa Tyaga (No Dairy)", hi: "गोरस (दूध-दही) त्याग" }, icon: "🥛", points: 15, desc: { en: "Avoid consumption of milk and curd today.", hi: "दूध, दही और मलाई जैसी स्वास्थ्यवर्धक विगय का त्याग।" } },
+            { id: "shital_jal", name: { en: "Shital Jal Tyaga", hi: "शीतल जल त्याग" }, icon: "❄️", points: 15, desc: { en: "Avoid chilled carbonated or refrigerated water.", hi: "फ्रिज के ठंडे जल या बर्फ युक्त कृत्रिम पेयों का त्याग।" } },
+            { id: "bahya_sanyam", name: { en: "Pramada Tyaga", hi: "प्रमाद त्याग संयम" }, icon: "📱", points: 15, desc: { en: "Avoid social scrolling or digital gossip today.", hi: "आज दिनभर व्यर्थ सोशल मीडिया व मनोरंजन स्क्रॉलिंग का त्याग।" } }
+          ].map(item => {
+            const isObserved = rasaTyaga[item.id] || false;
+            return (
+              <button
+                key={item.id}
+                onClick={() => toggleRasaTyaga(item.id)}
+                className={`p-3.5 rounded-2xl border text-left flex flex-col justify-between gap-2.5 transition-all outline-none cursor-pointer ${
+                  isObserved 
+                    ? "bg-amber-500/5 dark:bg-amber-500/10 border-amber-500/40 shadow-sm" 
+                    : "bg-white/50 dark:bg-zinc-900/40 border-gray-100 dark:border-white/5 hover:border-amber-500/25"
+                }`}
+              >
+                <div className="flex justify-between items-start w-full">
+                  <span className="text-xl shrink-0">{item.icon}</span>
+                  <span className={`text-[8px] px-1.5 py-0.5 rounded-md font-black uppercase tracking-wider shrink-0 duration-300 ${isObserved ? 'bg-amber-500 text-black' : 'bg-gray-100 dark:bg-white/5 text-gray-400 dark:text-gray-500'}`}>
+                    +{item.points} P
+                  </span>
+                </div>
+                <div>
+                  <h4 className="font-bold text-[11px] text-gray-900 dark:text-gray-100 leading-tight">
+                    {item.name[lang]}
+                  </h4>
+                  <p className="text-[9px] text-gray-500 dark:text-gray-400 font-medium leading-normal mt-1">
+                    {item.desc[lang]}
+                  </p>
+                </div>
+                <div className={`text-[9px] font-black uppercase tracking-widest mt-1 text-right ${isObserved ? 'text-amber-500' : 'text-gray-400 dark:text-gray-600'}`}>
+                  {isObserved ? (lang === 'en' ? 'Renounced ✓' : 'त्याग स्वीकृत ✓') : (lang === 'en' ? 'Take Vow' : 'त्याग नियम')}
+                </div>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Pachkhan List */}

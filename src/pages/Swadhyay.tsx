@@ -5,6 +5,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { motion, AnimatePresence } from 'motion/react';
 import SectionAiAgent from '../components/SectionAiAgent';
 import { cn } from '../lib/utils';
+import UnifiedSearchBar from '../components/UnifiedSearchBar';
 
 import { BAAL_BODH_BOOKS } from '../data/baalBodhData';
 
@@ -23,6 +24,15 @@ interface StudyGoal {
   completed: boolean;
 }
 
+interface HighlightedVerse {
+  id: string;
+  bookTitle: string;
+  chapterTitle: string;
+  text: string;
+  langType: 'hi' | 'en';
+  createdAt: string;
+}
+
 export default function SwadhyayPage() {
   const navigate = useNavigate();
   const { language: lang, toggleLanguage } = useLanguage();
@@ -30,11 +40,36 @@ export default function SwadhyayPage() {
   // States
   const [logs, setLogs] = useState<SwadhyayLog[]>([]);
   const [goals, setGoals] = useState<StudyGoal[]>([]);
+  const [highlights, setHighlights] = useState<HighlightedVerse[]>([]);
   const [newLog, setNewLog] = useState({ textName: '', chapter: '', insight: '', resolution: '' });
   const [newGoal, setNewGoal] = useState('');
   const [isAddingLog, setIsAddingLog] = useState(false);
   const [editingLogId, setEditingLogId] = useState<string | null>(null);
   const [showHelpModal, setShowHelpModal] = useState(false);
+
+  // Toggle Highlight Helper
+  const toggleHighlight = (text: string, langType: 'hi' | 'en') => {
+    if (!selectedBook || !selectedChapter) return;
+    const isHighlighted = highlights.some(h => h.text === text);
+    let updated: HighlightedVerse[];
+    if (isHighlighted) {
+      updated = highlights.filter(h => h.text !== text);
+    } else {
+      updated = [
+        ...highlights,
+        {
+          id: Date.now().toString(),
+          bookTitle: selectedBook.title[lang],
+          chapterTitle: selectedChapter.title[lang],
+          text,
+          langType,
+          createdAt: new Date().toLocaleDateString()
+        }
+      ];
+    }
+    setHighlights(updated);
+    localStorage.setItem('swadhyay_highlights', JSON.stringify(updated));
+  };
 
   // Book Reading states inside notebook
   const [selectedBook, setSelectedBook] = useState<any>(null);
@@ -43,11 +78,106 @@ export default function SwadhyayPage() {
   const [searchBookQuery, setSearchBookQuery] = useState('');
   const [bookCategory, setBookCategory] = useState<'all' | 'swadhyay' | 'pathshala'>('swadhyay');
 
+  // Swadhyay Commentary AI States
+  const [commentaryContent, setCommentaryContent] = useState<string>('');
+  const [isCommentaryLoading, setIsCommentaryLoading] = useState<boolean>(false);
+  const [commentaryError, setCommentaryError] = useState<string>('');
+
+  // Markdown parser for premium traditional manuscript layout
+  const renderCommentaryMarkdown = (text: string) => {
+    if (!text) return null;
+    const lines = text.split('\n');
+    return lines.map((line, idx) => {
+      const trimmed = line.trim();
+      if (!trimmed) return <div key={idx} className="h-2" />;
+      
+      // Headings
+      if (trimmed.startsWith('***') && trimmed.endsWith('***')) {
+        const title = trimmed.replace(/\*/g, '');
+        return <h5 key={idx} className="text-[#FF6D00] dark:text-[#FFAB40] font-black text-xs tracking-wide uppercase mt-4 mb-2">{title}</h5>;
+      }
+      if (trimmed.startsWith('**') && trimmed.endsWith('**')) {
+        const title = trimmed.replace(/\*/g, '');
+        return <h5 key={idx} className="text-[#FF6D00] dark:text-[#FFAB40] font-black text-xs tracking-wide uppercase mt-4 mb-2">{title}</h5>;
+      }
+      if (trimmed.startsWith('#') || trimmed.toLowerCase().includes('मंगलाचरण') || trimmed.toLowerCase().includes('गाथा श्लोक') || trimmed.toLowerCase().includes('टीका') || trimmed.toLowerCase().includes('संकल्प')) {
+        const cleanHeading = trimmed.replace(/#/g, '').replace(/\*/g, '');
+        return (
+          <h5 key={idx} className="text-[#FF6D00] dark:text-[#FFAB40] font-black text-xs tracking-wider uppercase border-b border-orange-500/10 dark:border-white/5 pb-1 mt-5 mb-3 flex items-center gap-1.5">
+            <ScrollText size={12} className="text-[#FF6D00]" />
+            <span>{cleanHeading}</span>
+          </h5>
+        );
+      }
+      
+      // Verses / Quotes (often inside * or starting with Sanskrit characters like || or ॥)
+      const isVerse = (trimmed.startsWith('*') && trimmed.endsWith('*')) || trimmed.includes('॥') || trimmed.includes('|') || trimmed.includes('ॐ');
+      if (isVerse) {
+        const cleanVerse = trimmed.replace(/\*/g, '');
+        return (
+          <div key={idx} className="my-3 p-3 bg-orange-500/5 dark:bg-orange-500/[0.02] border-l-2 border-orange-550 dark:border-orange-400 rounded-r-xl text-center italic text-xs font-semibold leading-relaxed text-orange-850 dark:text-orange-300 whitespace-pre-line">
+            {cleanVerse}
+          </div>
+        );
+      }
+
+      // Bullets
+      if (trimmed.startsWith('-') || trimmed.startsWith('*')) {
+        const cleanBullet = trimmed.slice(1).trim().replace(/\*/g, '');
+        return (
+          <div key={idx} className="flex items-start gap-2 text-[11px] text-gray-700 dark:text-gray-300 pl-4 py-0.5">
+            <span className="text-[#FF6D00] mt-1">•</span>
+            <span>{cleanBullet}</span>
+          </div>
+        );
+      }
+
+      // Plain paragraphs
+      const cleanPara = trimmed.replace(/\*/g, '');
+      return (
+        <p key={idx} className="text-[11px] text-gray-600 dark:text-gray-300 leading-relaxed tracking-wide font-medium whitespace-pre-line text-justify">
+          {cleanPara}
+        </p>
+      );
+    });
+  };
+
   // Swadhyay Timer States
   const [timerDuration, setTimerDuration] = useState(10 * 60); // Default 10 minutes in seconds
   const [timeLeft, setTimeLeft] = useState(10 * 60);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [timerCompleted, setTimerCompleted] = useState(false);
+
+  // Fetch full details / commentaries dynamically from Gemini
+  const fetchChapterCommentary = async () => {
+    if (!selectedBook || !selectedChapter) return;
+    setIsCommentaryLoading(true);
+    setCommentaryError('');
+    setCommentaryContent('');
+    
+    try {
+      const response = await fetch('/api/gemini/swadhyay-details', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          bookTitle: selectedBook.title.hi + " (" + selectedBook.title.en + ")",
+          chapterTitle: selectedChapter.title.hi + " (" + selectedChapter.title.en + ")",
+          context: selectedChapter.content.hi
+        })
+      });
+      const data = await response.json();
+      if (response.ok && data.content) {
+        setCommentaryContent(data.content);
+      } else {
+        setCommentaryError(data.error || 'Failed to fetch scripture commentary. Please try again.');
+      }
+    } catch (err: any) {
+      console.error(err);
+      setCommentaryError('Server connectivity error. Please make sure the server is online.');
+    } finally {
+      setIsCommentaryLoading(false);
+    }
+  };
 
   // Load persisted study notes
   useEffect(() => {
@@ -91,6 +221,15 @@ export default function SwadhyayPage() {
       ];
       setGoals(defaultGoals);
       localStorage.setItem('swadhyay_goals', JSON.stringify(defaultGoals));
+    }
+
+    const savedHighlights = localStorage.getItem('swadhyay_highlights');
+    if (savedHighlights) {
+      try {
+        setHighlights(JSON.parse(savedHighlights));
+      } catch (e) {
+        console.warn(e);
+      }
     }
   }, [lang]);
 
@@ -423,6 +562,76 @@ export default function SwadhyayPage() {
         </div>
       </div>
 
+      {/* Highlighted Verses & Key Insights Widget */}
+      <div className="bg-white/90 dark:bg-[#121212]/90 backdrop-blur-md border border-gray-200 dark:border-white/10 rounded-3xl p-5 mb-6 shadow-sm">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <Star className="text-amber-500 fill-amber-500" size={18} />
+            <h2 className="text-sm font-black uppercase tracking-wider text-gray-800 dark:text-gray-200">
+              {lang === 'en' ? 'My Highlighted Verses' : 'मेरे मुख्य श्लोक व चिंतन'}
+            </h2>
+          </div>
+          <span className="text-[9px] font-black text-gray-400 bg-gray-100 dark:bg-white/5 px-2.5 py-1 rounded-full border border-gray-200 dark:border-white/5">
+            {highlights.length} {lang === 'en' ? 'Highlighted' : 'चिह्नित'}
+          </span>
+        </div>
+
+        {highlights.length === 0 ? (
+          <div className="text-center py-6 px-4 bg-gray-50/50 dark:bg-white/[0.02] border border-dashed border-gray-200 dark:border-white/5 rounded-2xl">
+            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">
+              {lang === 'en' ? 'No highlights yet' : 'कोई मुख्य श्लोक चिह्नित नहीं है'}
+            </p>
+            <p className="text-[9px] text-gray-400 mt-1 max-w-[220px] mx-auto leading-relaxed">
+              {lang === 'en' ? 'Click the star icon next to any verse inside the scripture reader below to save it!' : 'नीचे ग्रन्थ स्वाध्याय में किसी भी श्लोक या अनुवाद के पास वाले स्टार (★) बटन को दबाकर सहेजें!'}
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-3 max-h-72 overflow-y-auto pr-1">
+            {highlights.map((h) => (
+              <div 
+                key={h.id}
+                className="p-3.5 bg-amber-500/[0.02] dark:bg-amber-500/[0.01] border border-amber-500/15 rounded-2xl space-y-1.5 hover:border-amber-500/30 transition-all text-left"
+              >
+                <div className="flex justify-between items-start gap-2">
+                  <div>
+                    <span className="text-[9px] font-black text-amber-600 dark:text-amber-400 block uppercase tracking-wider">
+                      📚 {h.bookTitle}
+                    </span>
+                    <span className="text-[9px] font-bold text-gray-400 block mt-0.5">
+                      📍 {h.chapterTitle}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => {
+                      const updated = highlights.filter(item => item.id !== h.id);
+                      setHighlights(updated);
+                      localStorage.setItem('swadhyay_highlights', JSON.stringify(updated));
+                    }}
+                    className="text-gray-400 hover:text-red-500 p-1 shrink-0 cursor-pointer"
+                    title={lang === 'en' ? 'Remove Bookmark' : 'हटाएं'}
+                  >
+                    <Trash2 size={12} />
+                  </button>
+                </div>
+
+                <p className="text-xs font-semibold leading-relaxed text-gray-750 dark:text-gray-200 bg-amber-500/[0.01] p-2 rounded-xl border border-amber-500/5 whitespace-pre-line italic font-sans">
+                  "{h.text}"
+                </p>
+
+                <div className="flex justify-between items-center text-[8px] text-gray-400">
+                  <span className="font-bold uppercase bg-white/5 px-2 py-0.5 rounded border border-white/5">
+                    {h.langType === 'hi' ? 'Hindi / हिन्दी' : 'English / A'}
+                  </span>
+                  <span className="font-medium">
+                    📅 {h.createdAt}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
       {/* ==================== SACRED SCRIPTURES & SWADHYAY BOOKS ==================== */}
       <div className="bg-white/90 dark:bg-[#121212]/90 backdrop-blur-md border border-gray-200 dark:border-white/10 rounded-3xl p-6 mb-6 shadow-sm space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-100 dark:border-white/5 pb-4">
@@ -470,19 +679,12 @@ export default function SwadhyayPage() {
           /* ================= BOOKS INDEX GRID ================= */
           <div className="space-y-4">
             {/* Search Input */}
-            <div className="relative">
-              <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 pointer-events-none">
-                <Search size={14} />
-              </span>
-              <input
-                type="text"
-                placeholder={lang === 'en' ? 'Search scriptures (e.g. Samaysar, Dravya)...' : 'ग्रन्थ खोजें (उदा. समयसार, तत्वार्थसूत्र)...'}
-                value={searchBookQuery}
-                onChange={(e) => setSearchBookQuery(e.target.value)}
-                className="w-full bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/5 rounded-2xl pl-9 pr-4 py-2.5 text-xs text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-orange-500 transition-all font-semibold"
-                id="search-swadhyay-books"
-              />
-            </div>
+            <UnifiedSearchBar
+              value={searchBookQuery}
+              onChange={(val) => setSearchBookQuery(val)}
+              placeholder={lang === 'en' ? 'Search scriptures (e.g. Samaysar, Dravya)...' : 'ग्रन्थ खोजें (उदा. समयसार, तत्वार्थसूत्र)...'}
+              id="search-swadhyay-books"
+            />
 
             {/* Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[360px] overflow-y-auto pr-1">
@@ -573,6 +775,8 @@ export default function SwadhyayPage() {
                           setSelectedChapter(chap);
                           window.speechSynthesis.cancel();
                           setIsSpeakingBook(false);
+                          setCommentaryContent('');
+                          setCommentaryError('');
                         }}
                         className={cn(
                           "w-full text-left p-2.5 rounded-xl border text-[11px] font-bold transition-all flex items-center justify-between gap-1.5 cursor-pointer",
@@ -690,16 +894,46 @@ export default function SwadhyayPage() {
                     {/* Book context */}
                     <div className="space-y-3.5 text-xs text-gray-800 dark:text-gray-200">
                       {/* Hindi block */}
-                      <div className="p-4 rounded-xl bg-orange-50/10 dark:bg-orange-500/[0.01] border border-orange-500/5 space-y-1">
-                        <span className="text-[8px] font-black tracking-widest text-orange-500 uppercase">मूल हिन्दी अनुवाद</span>
+                      <div className="p-4 rounded-xl bg-orange-50/10 dark:bg-orange-500/[0.01] border border-orange-500/5 space-y-2">
+                        <div className="flex justify-between items-center">
+                          <span className="text-[8px] font-black tracking-widest text-orange-500 uppercase">मूल हिन्दी अनुवाद</span>
+                          <button
+                            type="button"
+                            onClick={() => toggleHighlight(selectedChapter.content.hi, 'hi')}
+                            className={cn(
+                              "p-1.5 rounded-lg border transition-colors cursor-pointer",
+                              highlights.some(h => h.text === selectedChapter.content.hi)
+                                ? "bg-amber-500/10 border-amber-500/25 text-amber-500"
+                                : "bg-white/5 border-white/5 text-gray-400 hover:text-amber-500"
+                            )}
+                            title={lang === 'en' ? "Highlight Verse" : "श्लोक हाईलाइट करें"}
+                          >
+                            <Star size={11} className={highlights.some(h => h.text === selectedChapter.content.hi) ? "fill-amber-500 text-amber-500" : ""} />
+                          </button>
+                        </div>
                         <p className="whitespace-pre-line font-medium leading-relaxed">
                           {selectedChapter.content.hi}
                         </p>
                       </div>
 
                       {/* English block */}
-                      <div className="p-4 rounded-xl bg-blue-50/10 dark:bg-blue-500/[0.01] border border-[#FF6D00]/10 space-y-1">
-                        <span className="text-[8px] font-black tracking-widest text-blue-550 uppercase">English Translation</span>
+                      <div className="p-4 rounded-xl bg-blue-50/10 dark:bg-blue-500/[0.01] border border-[#FF6D00]/10 space-y-2">
+                        <div className="flex justify-between items-center">
+                          <span className="text-[8px] font-black tracking-widest text-blue-550 uppercase">English Translation</span>
+                          <button
+                            type="button"
+                            onClick={() => toggleHighlight(selectedChapter.content.en, 'en')}
+                            className={cn(
+                              "p-1.5 rounded-lg border transition-colors cursor-pointer",
+                              highlights.some(h => h.text === selectedChapter.content.en)
+                                ? "bg-amber-500/10 border-amber-500/25 text-amber-500"
+                                : "bg-white/5 border-white/5 text-gray-400 hover:text-amber-500"
+                            )}
+                            title={lang === 'en' ? "Highlight Verse" : "श्लोक हाईलाइट करें"}
+                          >
+                            <Star size={11} className={highlights.some(h => h.text === selectedChapter.content.en) ? "fill-amber-500 text-amber-500" : ""} />
+                          </button>
+                        </div>
                         <p className="whitespace-pre-line leading-relaxed text-gray-600 dark:text-gray-400">
                           {selectedChapter.content.en}
                         </p>
@@ -714,6 +948,83 @@ export default function SwadhyayPage() {
                             {lang === 'en' ? selectedChapter.moral.en : selectedChapter.moral.hi}
                           </p>
                         </div>
+                      </div>
+
+                      {/* Dynamic Advanced Commentary card (satisfies 'full details' / 'full content') */}
+                      <div className="mt-5 border border-dashed border-orange-500/20 dark:border-white/10 rounded-2xl p-4 bg-[#FF6D00]/[0.01] space-y-3.5 shadow-sm animate-in fade-in">
+                        <div className="flex items-center justify-between gap-4">
+                          <div className="flex items-center gap-2">
+                            <Sparkles className="text-orange-500 animate-pulse shrink-0" size={15} />
+                            <div>
+                              <span className="text-[10px] font-black uppercase tracking-widest text-[#FF6D00] dark:text-[#FFAB40] block">
+                                {lang === 'en' ? 'Detailed Spiritual Commentary' : 'विस्तृत ग्रन्थ रहस्य एवं टीका'}
+                              </span>
+                              <span className="text-[9px] text-gray-550 dark:text-gray-400 block font-bold leading-tight">
+                                {lang === 'en' ? 'Sanskrit verses, word-by-word interpretation & Acharya analyses' : 'मूल संस्कृत गाथा श्लोक, सूक्ष्म शब्दार्थ एवं आचार्य गाथा देव-रहस्य'}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {!commentaryContent && !isCommentaryLoading && (
+                          <div className="text-center py-4 bg-white/50 dark:bg-black/10 border border-orange-500/5 rounded-xl p-4">
+                            <p className="text-[10px] text-gray-600 dark:text-gray-400 font-bold mb-3">
+                              {lang === 'en' 
+                                ? 'Retrieve authentic traditional commentaries, Prakrit/Sanskrit verses, and word meanings from sacred libraries.' 
+                                : 'स्वाध्याय के लिए आचार्य-सहमत प्राचीन टीका, मूल प्राकृत/संस्कृत गाथा, शब्दार्थ एवं गूढ़ अर्थ जिनवाणी ज्ञान सागर से उद्घाटित करें।'}
+                            </p>
+                            <button
+                              onClick={fetchChapterCommentary}
+                              className="px-5 py-2 rounded-full bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-500 hover:to-orange-400 text-white font-extrabold text-[10px] tracking-wider uppercase shadow-md hover:scale-[1.03] active:scale-[0.97] transition-all cursor-pointer flex items-center gap-1.5 mx-auto"
+                            >
+                              <ScrollText size={12} />
+                              <span>{lang === 'en' ? 'Generate Full Book Details' : 'टीका और मूल श्लोक खोलें ✨'}</span>
+                            </button>
+                          </div>
+                        )}
+
+                        {isCommentaryLoading && (
+                          <div className="text-center py-8 bg-white/50 dark:bg-black/10 border border-orange-500/5 rounded-xl p-4 flex flex-col items-center justify-center space-y-3">
+                            <div className="w-8 h-8 rounded-full border-2 border-orange-500 border-t-transparent animate-spin" />
+                            <p className="text-[10px] font-black text-orange-650 dark:text-orange-400 animate-pulse tracking-wide">
+                              {lang === 'en' ? 'CONSULTING SACRED LIBRARIES...' : 'शास्त्र भण्डार व जिनवाणी का मंथन चल रहा है...'}
+                            </p>
+                            <span className="text-[9px] text-gray-450 italic">
+                              {lang === 'en' ? 'Generating Sanskrit verse and commentary' : 'मूल श्लोक, शब्द विश्लेषण और आचार्य देव टीका संकलित की जा रही है'}
+                            </span>
+                          </div>
+                        )}
+
+                        {commentaryError && (
+                          <div className="p-3 bg-red-500/5 border border-red-500/10 text-red-655 dark:text-red-400 text-[10px] font-bold rounded-xl text-center">
+                            {commentaryError}
+                            <button 
+                              onClick={fetchChapterCommentary}
+                              className="block mx-auto mt-2 text-[#FF6D00] hover:underline"
+                            >
+                              {lang === 'en' ? 'Retry Action' : 'पुनः प्रयास करें'}
+                            </button>
+                          </div>
+                        )}
+
+                        {commentaryContent && (
+                          <div className="bg-white/80 dark:bg-[#121212]/85 border border-orange-500/10 rounded-2xl p-4 space-y-4 shadow-inner max-h-[350px] overflow-y-auto">
+                            <div className="flex items-center justify-between border-b pb-1 dark:border-white/5">
+                              <span className="text-[9px] font-black text-[#FF6D00] uppercase tracking-wider block">
+                                {lang === 'en' ? 'Ancient Manuscript Commentary' : 'प्राचीन जिनवाणी टीका पत्रक'}
+                              </span>
+                              <button
+                                onClick={fetchChapterCommentary}
+                                className="text-[8px] font-black text-[#FF6D00] hover:underline uppercase"
+                              >
+                                {lang === 'en' ? 'Regenerate' : 'पुनः मंथन करें'}
+                              </button>
+                            </div>
+                            <div className="space-y-3 text-justify">
+                              {renderCommentaryMarkdown(commentaryContent)}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </>

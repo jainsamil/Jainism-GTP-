@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { tirthankarData } from '../data/tirthankars';
 import SectionAiAgent from '../components/SectionAiAgent';
+import UnifiedSearchBar from '../components/UnifiedSearchBar';
 
 // Panch Kalyanaka Tithis for 24 Tirthankaras
 const KALYANAK_DATES: Record<string, { n: string; hi: string; tithi: string; hiTithi: string }[]> = {
@@ -395,7 +396,7 @@ export default function TirthankarsPage() {
         number: (d.number !== undefined && d.number !== null && !isNaN(Number(d.number))) ? Number(d.number) : 99
       }));
 
-      // Merge and deduplicate by stringified ID to prevent non-unique keys in list rendering
+      // Show complete merged list
       const combined = [...mergedList, ...extraTirthankars];
       const uniqueList: any[] = [];
       const seenIds = new Set<string>();
@@ -643,21 +644,6 @@ export default function TirthankarsPage() {
         </div>
 
         <div className="flex items-center gap-2 self-end sm:self-auto">
-          {/* Advanced DB Sync Cog Trigger */}
-          <button
-            onClick={handleRepairAndSyncDB}
-            disabled={syncing}
-            className={cn(
-              "p-2 rounded-2xl text-xs font-bold transition-all cursor-pointer shadow-sm border h-10 w-10 flex items-center justify-center shrink-0",
-              syncing 
-                ? "bg-orange-500/10 border-orange-500/20 text-orange-500" 
-                : "bg-white dark:bg-white/5 hover:bg-gray-100 dark:hover:bg-white/10 text-gray-500 dark:text-gray-300 border-gray-200/50 dark:border-white/5 active:scale-95"
-            )}
-            title={lang === 'en' ? 'Repair & Sync Database' : 'डेटाबेस सुधार व सिंक'}
-          >
-            <RefreshCw size={14} className={cn(syncing && "animate-spin text-[#FF6D00]")} />
-          </button>
-
           {/* Section User Guide Trigger */}
           <button
             onClick={() => setShowHelpModal(true)}
@@ -688,31 +674,13 @@ export default function TirthankarsPage() {
       </div>
 
       {/* Typing & Voice Search Input */}
-      <div className="relative mb-6">
-        <Search className="absolute left-4 top-3.5 text-[#FF6D00]" size={20} />
-        <input 
-          type="text" 
-          placeholder={lang === 'en' ? "Search Tirthankar or Symbol (e.g., Adinath, Lion)..." : "तीर्थंकर या चिन्ह खोजें (जैसे: आदिनाथ, सिंह)..."}
+      <div className="mb-6">
+        <UnifiedSearchBar
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full bg-white dark:bg-[#121212] border border-gray-200 dark:border-white/10 rounded-2xl py-3.5 pl-12 pr-12 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FF6D00]/50 shadow-sm transition-all"
+          onChange={(val) => setSearch(val)}
+          placeholder={lang === 'en' ? "Search Tirthankar or Symbol (e.g., Adinath, Lion)..." : "तीर्थंकर या चिन्ह खोजें (जैसे: आदिनाथ, सिंह)..."}
         />
-        <button 
-          onClick={toggleVoiceSearch}
-          className={`absolute right-3.5 top-2.5 p-1.5 rounded-xl transition-all ${isListening ? 'bg-red-500 text-white animate-pulse' : 'bg-gray-100 dark:bg-white/5 text-gray-400 hover:text-[#FF6D00]'}`}
-          title="Voice Search"
-        >
-          {isListening ? <MicOff size={16} /> : <Mic size={16} />}
-        </button>
       </div>
-
-      {/* Live Voice Feedback */}
-      {isListening && (
-        <div className="mb-4 text-xs bg-red-400/10 text-red-500 font-black tracking-wider uppercase border border-red-500/10 rounded-xl px-4 py-2.5 flex items-center justify-between animate-pulse">
-          <span>🎙️ Listening for Tirthankar Name...</span>
-          <span className="w-2.5 h-2.5 bg-red-500 rounded-full animate-ping" />
-        </div>
-      )}
 
       {/* Age Categories Tabs */}
       <div className="flex gap-3 mb-6 overflow-x-auto pb-2 scrollbar-none">

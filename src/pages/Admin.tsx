@@ -5,7 +5,7 @@ import {
   Database, HelpCircle, History, Calendar, Star,
   RefreshCw, CheckCircle2, ArrowLeft, LogOut, BarChart3,
   PlaySquare, Quote, MessageCircle, HelpCircle as QuizIcon,
-  Sparkles
+  Sparkles, Hotel, Store, ShoppingBag, Package
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useAuth } from '../contexts/AuthContext';
@@ -24,7 +24,7 @@ import {
 } from 'recharts';
 import AdminAiAgent from '../components/AdminAiAgent';
 
-type CollectionType = 'dashboard' | 'analytics' | 'ai_agent' | 'knowledge' | 'tirthankars' | 'aagams' | 'history' | 'festivals' | 'classes' | 'exams' | 'saints' | 'vichaar' | 'quiz' | 'media' | 'panchang' | 'settings';
+type CollectionType = 'dashboard' | 'analytics' | 'ai_agent' | 'knowledge' | 'tirthankars' | 'aagams' | 'history' | 'festivals' | 'classes' | 'exams' | 'saints' | 'vichaar' | 'quiz' | 'media' | 'panchang' | 'settings' | 'dharamshala_bookings' | 'jain_stores' | 'jain_products' | 'jain_orders';
 
 import { tirthankarsData } from '../data/tirthankarsData';
 import { aagamsData } from '../data/aagamsData';
@@ -46,14 +46,25 @@ export default function AdminPage() {
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
   
-  const handleAdminLogin = (e: React.FormEvent) => {
+  const handleAdminLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === 'SamilJain@2026' || password === 'admin123') {
-      localStorage.setItem('adminAccess', 'true');
-      setHasAdminAccess(true);
-      setLoginError('');
-    } else {
-      setLoginError('Invalid password. Access denied.');
+    setLoginError('');
+    try {
+      const response = await fetch('/api/verify-passcode', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ passcode: password })
+      });
+      const data = await response.json();
+      if (response.ok && data.verified) {
+        localStorage.setItem('adminAccess', 'true');
+        setHasAdminAccess(true);
+        setLoginError('');
+      } else {
+        setLoginError(data.error || 'Invalid passcode. Access denied.');
+      }
+    } catch (err) {
+      setLoginError('Security gateway offline. Please try again.');
     }
   };
   
@@ -291,9 +302,31 @@ export default function AdminPage() {
       case 'quiz':
         return { question: { hi: '', en: '' }, options: { hi: ['', '', '', ''], en: ['', '', '', ''] }, correctOptionIndex: 0, explanation: { hi: '', en: '' } };
       case 'media':
-        return { title: '', type: 'bhajan', url: '', artist: '', duration: '' };
+        return { 
+          title: { en: '', hi: '' }, 
+          description: { en: '', hi: '' }, 
+          type: 'movies', 
+          url: '', 
+          videoUrl: '', 
+          artist: '', 
+          author: '', 
+          duration: '', 
+          thumbnail: '', 
+          category: '', 
+          year: '2026', 
+          rating: 4.9, 
+          tags: [] 
+        };
       case 'panchang':
         return { tithi: '', paksha: '', festivals: [], kalyanak: [], acharyaDarpan: [], shubhMuhurat: [], vrat: [], sunrise: '', sunset: '' };
+      case 'dharamshala_bookings':
+        return { pilgrimName: '', contact: '', checkInDate: '', roomType: 'Deluxe Room', guestsCount: 2, status: 'pending', priceCollected: 250, dharamshalaName: 'Shree Bees Panthi Kothi Dharamshala', createdAt: new Date().toISOString() };
+      case 'jain_stores':
+        return { storeName: '', vendorName: '', email: '', phone: '', description: '', status: 'pending', createdAt: new Date().toISOString() };
+      case 'jain_products':
+        return { title: '', description: '', price: 100, category: 'Books', imageUrl: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80', status: 'approved', contactNo: '', storeName: 'Digambar Jin-Vani Prakashan', storeId: 'store_digambar_prakashan', createdAt: new Date().toISOString() };
+      case 'jain_orders':
+        return { customerName: '', customerPhone: '', customerAddress: '', shippingMethod: 'Standard Ahimsa Eco-Delivery', paymentMethod: 'UPI', upiTransactionId: '', totalAmount: 100, status: 'pending', items: [], createdAt: new Date().toISOString() };
       default:
         return {};
     }
@@ -440,6 +473,10 @@ export default function AdminPage() {
     { id: 'panchang', label: 'Panchang', icon: Calendar },
     { id: 'classes', label: 'Classes', icon: Users },
     { id: 'exams', label: 'Exams', icon: CheckCircle2 },
+    { id: 'dharamshala_bookings', label: 'Dharamshala Bookings', icon: Hotel },
+    { id: 'jain_stores', label: 'Store Vendors', icon: Store },
+    { id: 'jain_products', label: 'Store Products', icon: ShoppingBag },
+    { id: 'jain_orders', label: 'Store Orders', icon: Package },
     { id: 'settings', label: 'Settings', icon: Settings },
   ] as { id: CollectionType; label: string; icon: any }[];
 
@@ -677,6 +714,10 @@ export default function AdminPage() {
                            activeCollection === 'vichaar' ? item.hi :
                            activeCollection === 'quiz' ? item.q?.hi :
                            activeCollection === 'panchang' ? item.date :
+                           activeCollection === 'dharamshala_bookings' ? `${item.pilgrimName} (Rooms: ${item.guestsCount || 1})` :
+                           activeCollection === 'jain_stores' ? item.storeName :
+                           activeCollection === 'jain_products' ? item.title :
+                           activeCollection === 'jain_orders' ? `Order ${item.id} - ${item.customerName}` :
                            (item.name?.hi || item.question?.hi || item.title?.hi || item.title || 'Untitled Item')}
                         </h3>
                         <p className="text-xs text-gray-500 font-medium mt-1 uppercase tracking-widest">
@@ -687,6 +728,10 @@ export default function AdminPage() {
                            activeCollection === 'saints' ? item.type :
                            activeCollection === 'vichaar' ? item.source :
                            activeCollection === 'panchang' ? item.tithi :
+                           activeCollection === 'dharamshala_bookings' ? `CheckIn: ${item.checkInDate} • Paid: ₹${item.priceCollected} • [${item.status || 'pending'}]` :
+                           activeCollection === 'jain_stores' ? `Vendor: ${item.vendorName} • [${item.status || 'pending'}]` :
+                           activeCollection === 'jain_products' ? `Price: ₹${item.price} • Store: ${item.storeName || 'N/A'} • [${item.status || 'approved'}]` :
+                           activeCollection === 'jain_orders' ? `Total: ₹${item.totalAmount} • Phone: ${item.customerPhone} • [${item.status || 'pending'}]` :
                            (item.category || item.kaal || 'General')}
                         </p>
                       </div>
@@ -1094,62 +1139,176 @@ export default function AdminPage() {
 
                 {activeCollection === 'media' && (
                   <div className="space-y-6">
+                    <div className="p-4 bg-[#FF6D00]/10 border border-[#FF6D00]/20 rounded-2xl">
+                      <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Jain OTT Platform Media Entry</p>
+                      <p className="text-[10px] text-gray-500 mt-1 uppercase font-semibold">Supports traditional audiobooks/bhajans/stories AND movies/webseries/devotional videos!</p>
+                    </div>
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-4">
-                        <h3 className="text-xs font-black text-[#FFD54F] uppercase tracking-widest">Title</h3>
+                        <h3 className="text-xs font-black text-[#FFD54F] uppercase tracking-widest">Media Title (English)</h3>
                         <input 
                           type="text" required
-                          value={formData.title || ''}
-                          onChange={e => setFormData({...formData, title: e.target.value})}
+                          value={typeof formData.title === 'object' ? formData.title?.en || '' : formData.title || ''}
+                          onChange={e => {
+                            const val = e.target.value;
+                            if (typeof formData.title === 'object') {
+                              setFormData({...formData, title: {...formData.title, en: val}});
+                            } else {
+                              setFormData({...formData, title: { en: val, hi: formData.title || '' }});
+                            }
+                          }}
                           className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-[#FF6D00]/50 outline-none"
+                          placeholder="e.g. Lord Mahavira Life Epic"
                         />
                       </div>
                       <div className="space-y-4">
+                        <h3 className="text-xs font-black text-[#FFD54F] uppercase tracking-widest">Media Title (Hindi / देवनागरी)</h3>
+                        <input 
+                          type="text" required
+                          value={typeof formData.title === 'object' ? formData.title?.hi || '' : ''}
+                          onChange={e => {
+                            const val = e.target.value;
+                            if (typeof formData.title === 'object') {
+                              setFormData({...formData, title: {...formData.title, hi: val}});
+                            } else {
+                              setFormData({...formData, title: { en: formData.title || '', hi: val }});
+                            }
+                          }}
+                          className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-[#FF6D00]/50 outline-none"
+                          placeholder="उदा. भगवान महावीर जीवन गाथा"
+                        />
+                      </div>
+
+                      <div className="space-y-4">
                         <h3 className="text-xs font-black text-[#FFD54F] uppercase tracking-widest">Type</h3>
                         <select 
-                          value={formData.type || 'stories'}
+                          value={formData.type || 'movies'}
                           onChange={e => setFormData({...formData, type: e.target.value})}
                           className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-[#FF6D00]/50 outline-none"
                         >
-                          <option value="stories">Stories</option>
-                          <option value="bhajans">Bhajans</option>
-                          <option value="audiobooks">Audio Books</option>
+                          <option value="movies">🎥 Movie</option>
+                          <option value="webseries">📺 Web Series</option>
+                          <option value="digital_stories">📖 Digital Video Story</option>
+                          <option value="devotional_videos">🙏 Devotional Video</option>
+                          <option value="stories">🎵 Audio Story</option>
+                          <option value="bhajans">🎵 Bhajan (Audio)</option>
+                          <option value="audiobooks">📖 Audiobook (Audio)</option>
                         </select>
                       </div>
+
+                      <div className="space-y-4">
+                        <h3 className="text-xs font-black text-[#FFD54F] uppercase tracking-widest">Category / Genre</h3>
+                        <input 
+                          type="text" placeholder="e.g. Biography, Spiritual, Devotional"
+                          value={formData.category || ''}
+                          onChange={e => setFormData({...formData, category: e.target.value})}
+                          className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-[#FF6D00]/50 outline-none"
+                        />
+                      </div>
+
                       <div className="space-y-4">
                         <h3 className="text-xs font-black text-[#FFD54F] uppercase tracking-widest">Duration</h3>
                         <input 
-                          type="text" placeholder="e.g. 05:30" required
+                          type="text" placeholder="e.g. 1h 45m or 15:30" required
                           value={formData.duration || ''}
                           onChange={e => setFormData({...formData, duration: e.target.value})}
                           className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-[#FF6D00]/50 outline-none"
                         />
                       </div>
+
                       <div className="space-y-4">
-                        <h3 className="text-xs font-black text-[#FFD54F] uppercase tracking-widest">Artist / Author</h3>
+                        <h3 className="text-xs font-black text-[#FFD54F] uppercase tracking-widest">Artist / Author / Producer</h3>
                         <input 
-                          type="text"
+                          type="text" placeholder="e.g. Swadhyay Mandal, Singer Name"
                           value={formData.artist || formData.author || ''}
                           onChange={e => setFormData({...formData, artist: e.target.value, author: e.target.value})}
                           className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-[#FF6D00]/50 outline-none"
                         />
                       </div>
+
+                      <div className="space-y-4">
+                        <h3 className="text-xs font-black text-[#FFD54F] uppercase tracking-widest">Release Year</h3>
+                        <input 
+                          type="text" placeholder="e.g. 2026"
+                          value={formData.year || ''}
+                          onChange={e => setFormData({...formData, year: e.target.value})}
+                          className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-[#FF6D00]/50 outline-none"
+                        />
+                      </div>
+
+                      <div className="space-y-4">
+                        <h3 className="text-xs font-black text-[#FFD54F] uppercase tracking-widest">Rating (0.0 to 5.0)</h3>
+                        <input 
+                          type="number" step="0.1" min="1" max="5" placeholder="e.g. 4.9"
+                          value={formData.rating || ''}
+                          onChange={e => setFormData({...formData, rating: parseFloat(e.target.value) || 5.0})}
+                          className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-[#FF6D00]/50 outline-none"
+                        />
+                      </div>
                     </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-4">
+                        <h3 className="text-xs font-black text-[#FFD54F] uppercase tracking-widest">Description (English)</h3>
+                        <textarea 
+                          placeholder="Describe the media content..."
+                          value={typeof formData.description === 'object' ? formData.description?.en || '' : formData.description || ''}
+                          onChange={e => {
+                            const val = e.target.value;
+                            if (typeof formData.description === 'object') {
+                              setFormData({...formData, description: {...formData.description, en: val}});
+                            } else {
+                              setFormData({...formData, description: { en: val, hi: formData.description || '' }});
+                            }
+                          }}
+                          className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-[#FF6D00]/50 outline-none h-24"
+                        />
+                      </div>
+                      <div className="space-y-4">
+                        <h3 className="text-xs font-black text-[#FFD54F] uppercase tracking-widest">Description (Hindi / देवनागरी)</h3>
+                        <textarea 
+                          placeholder="विवरण हिंदी में..."
+                          value={typeof formData.description === 'object' ? formData.description?.hi || '' : ''}
+                          onChange={e => {
+                            const val = e.target.value;
+                            if (typeof formData.description === 'object') {
+                              setFormData({...formData, description: {...formData.description, hi: val}});
+                            } else {
+                              setFormData({...formData, description: { en: formData.description || '', hi: val }});
+                            }
+                          }}
+                          className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-[#FF6D00]/50 outline-none h-24"
+                        />
+                      </div>
+                    </div>
+
                     <div className="space-y-4">
-                      <h3 className="text-xs font-black text-[#FFD54F] uppercase tracking-widest">Audio URL</h3>
+                      <h3 className="text-xs font-black text-[#FFD54F] uppercase tracking-widest">Media Stream URL or YouTube Embed Link</h3>
                       <input 
-                        type="text" placeholder="https://..." required
-                        value={formData.url || ''}
-                        onChange={e => setFormData({...formData, url: e.target.value})}
+                        type="text" placeholder="https://www.youtube.com/embed/... or audio stream link" required
+                        value={formData.url || formData.videoUrl || ''}
+                        onChange={e => setFormData({...formData, url: e.target.value, videoUrl: e.target.value})}
                         className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-[#FF6D00]/50 outline-none"
                       />
                     </div>
+
                     <div className="space-y-4">
-                      <h3 className="text-xs font-black text-[#FFD54F] uppercase tracking-widest">Thumbnail URL</h3>
+                      <h3 className="text-xs font-black text-[#FFD54F] uppercase tracking-widest">Poster / Thumbnail URL</h3>
                       <input 
-                        type="text" placeholder="https://..."
+                        type="text" placeholder="https://images.unsplash.com/... or any picture URL"
                         value={formData.thumbnail || ''}
                         onChange={e => setFormData({...formData, thumbnail: e.target.value})}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-[#FF6D00]/50 outline-none"
+                      />
+                    </div>
+
+                    <div className="space-y-4">
+                      <h3 className="text-xs font-black text-[#FFD54F] uppercase tracking-widest">Tags (comma-separated, e.g. Ahimsa, Mahavir, Meditation)</h3>
+                      <input 
+                        type="text" placeholder="e.g. Ahimsa, Meditation, Guru"
+                        value={Array.isArray(formData.tags) ? formData.tags.join(', ') : formData.tags || ''}
+                        onChange={e => setFormData({...formData, tags: e.target.value.split(',').map((t: string) => t.trim()).filter(Boolean)})}
                         className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-[#FF6D00]/50 outline-none"
                       />
                     </div>
@@ -1385,6 +1544,307 @@ export default function AdminPage() {
                       >
                         <div className={cn("absolute top-1 w-6 h-6 bg-white rounded-full transition-all", formData.mediaEnabled ? "left-7" : "left-1")} />
                       </button>
+                    </div>
+                  </div>
+                )}
+
+                {activeCollection === 'dharamshala_bookings' && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      <label className="block text-xs font-black text-[#FFD54F] uppercase tracking-widest">Pilgrim (Name) *</label>
+                      <input 
+                        type="text" required
+                        value={formData.pilgrimName || ''}
+                        onChange={e => setFormData({...formData, pilgrimName: e.target.value})}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-[#FF6D00]/50"
+                      />
+                    </div>
+                    <div className="space-y-4">
+                      <label className="block text-xs font-black text-[#FFD54F] uppercase tracking-widest">Contact Phone *</label>
+                      <input 
+                        type="tel" required
+                        value={formData.contact || ''}
+                        onChange={e => setFormData({...formData, contact: e.target.value})}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-[#FF6D00]/50"
+                      />
+                    </div>
+                    <div className="space-y-4">
+                      <label className="block text-xs font-black text-[#FFD54F] uppercase tracking-widest">Check-In Date *</label>
+                      <input 
+                        type="date" required
+                        value={formData.checkInDate || ''}
+                        onChange={e => setFormData({...formData, checkInDate: e.target.value})}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-[#FF6D00]/50"
+                      />
+                    </div>
+                    <div className="space-y-4">
+                      <label className="block text-xs font-black text-[#FFD54F] uppercase tracking-widest">Room Type</label>
+                      <select 
+                        value={formData.roomType || 'Deluxe Room'}
+                        onChange={e => setFormData({...formData, roomType: e.target.value})}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-[#FF6D00]/50"
+                      >
+                        <option value="Standard Non-AC">Standard Non-AC (₹250)</option>
+                        <option value="Standard AC">Standard AC (₹500)</option>
+                        <option value="Deluxe Room">Deluxe AC Room (₹800)</option>
+                        <option value="Samyak Family Suite">Samyak Family Suite (₹1200)</option>
+                      </select>
+                    </div>
+                    <div className="space-y-4">
+                      <label className="block text-xs font-black text-[#FFD54F] uppercase tracking-widest">Total Guests / Rooms count</label>
+                      <input 
+                        type="number" required
+                        value={formData.guestsCount || 2}
+                        onChange={e => setFormData({...formData, guestsCount: parseInt(e.target.value)})}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-[#FF6D00]/50"
+                      />
+                    </div>
+                    <div className="space-y-4">
+                      <label className="block text-xs font-black text-[#FFD54F] uppercase tracking-widest">Price Collected (₹)</label>
+                      <input 
+                        type="number" required
+                        value={formData.priceCollected || 0}
+                        onChange={e => setFormData({...formData, priceCollected: parseInt(e.target.value)})}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-[#FF6D00]/50"
+                      />
+                    </div>
+                    <div className="space-y-4">
+                      <label className="block text-xs font-black text-[#FFD54F] uppercase tracking-widest">Dharamshala Name</label>
+                      <input 
+                        type="text" required
+                        value={formData.dharamshalaName || ''}
+                        onChange={e => setFormData({...formData, dharamshalaName: e.target.value})}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-[#FF6D00]/50"
+                      />
+                    </div>
+                    <div className="space-y-4">
+                      <label className="block text-xs font-black text-[#FFD54F] uppercase tracking-widest">Booking Status</label>
+                      <select 
+                        value={formData.status || 'pending'}
+                        onChange={e => setFormData({...formData, status: e.target.value})}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-[#FF6D00]/50"
+                      >
+                        <option value="pending">Pending Approval</option>
+                        <option value="approved">Approved & Booked</option>
+                        <option value="completed">Completed / Stayed</option>
+                        <option value="cancelled">Cancelled</option>
+                      </select>
+                    </div>
+                  </div>
+                )}
+
+                {activeCollection === 'jain_stores' && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      <label className="block text-xs font-black text-[#FFD54F] uppercase tracking-widest">Store/Organization Name *</label>
+                      <input 
+                        type="text" required
+                        value={formData.storeName || ''}
+                        onChange={e => setFormData({...formData, storeName: e.target.value})}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-[#FF6D00]/50"
+                      />
+                    </div>
+                    <div className="space-y-4">
+                      <label className="block text-xs font-black text-[#FFD54F] uppercase tracking-widest">Vendor Contact Person *</label>
+                      <input 
+                        type="text" required
+                        value={formData.vendorName || ''}
+                        onChange={e => setFormData({...formData, vendorName: e.target.value})}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-[#FF6D00]/50"
+                      />
+                    </div>
+                    <div className="space-y-4">
+                      <label className="block text-xs font-black text-[#FFD54F] uppercase tracking-widest">Email Address *</label>
+                      <input 
+                        type="email" required
+                        value={formData.email || ''}
+                        onChange={e => setFormData({...formData, email: e.target.value})}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-[#FF6D00]/50"
+                      />
+                    </div>
+                    <div className="space-y-4">
+                      <label className="block text-xs font-black text-[#FFD54F] uppercase tracking-widest">WhatsApp/Phone No *</label>
+                      <input 
+                        type="tel" required
+                        value={formData.phone || ''}
+                        onChange={e => setFormData({...formData, phone: e.target.value})}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-[#FF6D00]/50"
+                      />
+                    </div>
+                    <div className="md:col-span-2 space-y-4">
+                      <label className="block text-xs font-black text-[#FFD54F] uppercase tracking-widest">Store Description *</label>
+                      <textarea 
+                        required rows={3}
+                        value={formData.description || ''}
+                        onChange={e => setFormData({...formData, description: e.target.value})}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none h-24 focus:border-[#FF6D00]/50"
+                      />
+                    </div>
+                    <div className="space-y-4">
+                      <label className="block text-xs font-black text-[#FFD54F] uppercase tracking-widest">Store Status</label>
+                      <select 
+                        value={formData.status || 'pending'}
+                        onChange={e => setFormData({...formData, status: e.target.value})}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-[#FF6D00]/50"
+                      >
+                        <option value="pending">Pending Verification</option>
+                        <option value="approved">Approved Store</option>
+                        <option value="suspended">Suspended Store</option>
+                      </select>
+                    </div>
+                  </div>
+                )}
+
+                {activeCollection === 'jain_products' && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      <label className="block text-xs font-black text-[#FFD54F] uppercase tracking-widest">Product Title *</label>
+                      <input 
+                        type="text" required
+                        value={formData.title || ''}
+                        onChange={e => setFormData({...formData, title: e.target.value})}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-[#FF6D00]/50"
+                      />
+                    </div>
+                    <div className="space-y-4">
+                      <label className="block text-xs font-black text-[#FFD54F] uppercase tracking-widest">Product Price (₹) *</label>
+                      <input 
+                        type="number" required
+                        value={formData.price || 0}
+                        onChange={e => setFormData({...formData, price: parseInt(e.target.value)})}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-[#FF6D00]/50"
+                      />
+                    </div>
+                    <div className="space-y-4">
+                      <label className="block text-xs font-black text-[#FFD54F] uppercase tracking-widest">Category</label>
+                      <select 
+                        value={formData.category || 'Books'}
+                        onChange={e => setFormData({...formData, category: e.target.value})}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-[#FF6D00]/50"
+                      >
+                        <option value="Books">Books & Literature</option>
+                        <option value="Pooja Samagri">Pujan Dravyas</option>
+                        <option value="Organic Foods">Organic Shuddh Foods</option>
+                        <option value="Moral Games">Samyak Moral Games</option>
+                        <option value="Clothing">Spiritual Clothing / Chawri</option>
+                      </select>
+                    </div>
+                    <div className="space-y-4">
+                      <label className="block text-xs font-black text-[#FFD54F] uppercase tracking-widest">Product Image URL</label>
+                      <input 
+                        type="text" required
+                        value={formData.imageUrl || ''}
+                        onChange={e => setFormData({...formData, imageUrl: e.target.value})}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-[#FF6D00]/50"
+                      />
+                    </div>
+                    <div className="space-y-4">
+                      <label className="block text-xs font-black text-[#FFD54F] uppercase tracking-widest">Vending Store Name</label>
+                      <input 
+                        type="text" required
+                        value={formData.storeName || ''}
+                        onChange={e => setFormData({...formData, storeName: e.target.value})}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-[#FF6D00]/50"
+                      />
+                    </div>
+                    <div className="space-y-4">
+                      <label className="block text-xs font-black text-[#FFD54F] uppercase tracking-widest">Product Verification Status</label>
+                      <select 
+                        value={formData.status || 'approved'}
+                        onChange={e => setFormData({...formData, status: e.target.value})}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-[#FF6D00]/50"
+                      >
+                        <option value="pending">Pending review</option>
+                        <option value="approved">Approved & Visible</option>
+                        <option value="rejected">Rejected / Inappropriate</option>
+                      </select>
+                    </div>
+                    <div className="md:col-span-2 space-y-4">
+                      <label className="block text-xs font-black text-[#FFD54F] uppercase tracking-widest">Product Description *</label>
+                      <textarea 
+                        required rows={3}
+                        value={formData.description || ''}
+                        onChange={e => setFormData({...formData, description: e.target.value})}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white h-24 outline-none focus:border-[#FF6D00]/50"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {activeCollection === 'jain_orders' && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      <label className="block text-xs font-black text-[#FFD54F] uppercase tracking-widest">Customer Name *</label>
+                      <input 
+                        type="text" required
+                        value={formData.customerName || ''}
+                        onChange={e => setFormData({...formData, customerName: e.target.value})}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-[#FF6D00]/50"
+                      />
+                    </div>
+                    <div className="space-y-4">
+                      <label className="block text-xs font-black text-[#FFD54F] uppercase tracking-widest">Customer Phone *</label>
+                      <input 
+                        type="tel" required
+                        value={formData.customerPhone || ''}
+                        onChange={e => setFormData({...formData, customerPhone: e.target.value})}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-[#FF6D00]/50"
+                      />
+                    </div>
+                    <div className="md:col-span-2 space-y-4">
+                      <label className="block text-xs font-black text-[#FFD54F] uppercase tracking-widest">Shipping Address *</label>
+                      <textarea 
+                        required rows={2}
+                        value={formData.customerAddress || ''}
+                        onChange={e => setFormData({...formData, customerAddress: e.target.value})}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white h-20 outline-none focus:border-[#FF6D00]/50"
+                      />
+                    </div>
+                    <div className="space-y-4">
+                      <label className="block text-xs font-black text-[#FFD54F] uppercase tracking-widest">Total Bill Amount (₹) *</label>
+                      <input 
+                        type="number" required
+                        value={formData.totalAmount || 0}
+                        onChange={e => setFormData({...formData, totalAmount: parseInt(e.target.value)})}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-[#FF6D00]/50"
+                      />
+                    </div>
+                    <div className="space-y-4">
+                      <label className="block text-xs font-black text-[#FFD54F] uppercase tracking-widest">Shipping Option</label>
+                      <select 
+                        value={formData.shippingMethod || 'Standard Ahimsa Eco-Delivery'}
+                        onChange={e => setFormData({...formData, shippingMethod: e.target.value})}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-[#FF6D00]/50"
+                      >
+                        <option value="Standard Ahimsa Eco-Delivery">Standard Ahimsa Eco-Delivery</option>
+                        <option value="Express Post">Express speed post</option>
+                        <option value="Direct Temple Trust Collection">Direct Temple Counter Pick</option>
+                      </select>
+                    </div>
+                    <div className="space-y-4">
+                      <label className="block text-xs font-black text-[#FFD54F] uppercase tracking-widest">Payment Mode</label>
+                      <select 
+                        value={formData.paymentMethod || 'UPI'}
+                        onChange={e => setFormData({...formData, paymentMethod: e.target.value})}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-[#FF6D00]/50"
+                      >
+                        <option value="UPI">UPI Direct scan & pay</option>
+                        <option value="COD">Cash on Delivery (COD)</option>
+                      </select>
+                    </div>
+                    <div className="space-y-4">
+                      <label className="block text-xs font-black text-[#FFD54F] uppercase tracking-widest">Order Status</label>
+                      <select 
+                        value={formData.status || 'pending'}
+                        onChange={e => setFormData({...formData, status: e.target.value})}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-[#FF6D00]/50"
+                      >
+                        <option value="pending">Pending Validation</option>
+                        <option value="processing">Processing & Packing</option>
+                        <option value="dispatched">Dispatched / Sent</option>
+                        <option value="delivered">Delivered Successfully</option>
+                        <option value="cancelled">Cancelled</option>
+                      </select>
                     </div>
                   </div>
                 )}

@@ -7,6 +7,7 @@ import { collection, onSnapshot } from 'firebase/firestore';
 import { lineageData, LineageNode } from '../data/lineageData';
 import { cn } from '../lib/utils';
 import SectionAiAgent from '../components/SectionAiAgent';
+import UnifiedSearchBar from '../components/UnifiedSearchBar';
 
 const FALLBACK_SAINTS = [
   {
@@ -320,34 +321,13 @@ export default function SaintsPage() {
           </div>
 
           {/* Search Bar */}
-          <div className="relative group">
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] rounded-2xl blur opacity-10 dark:opacity-20 group-hover:opacity-30 transition duration-500 animate-pulse"></div>
-            <div className="relative">
-              <Search className="absolute left-4 top-3.5 text-[#FF6D00]" size={18} />
-              <input 
-                type="text" 
-                placeholder={language === 'en' ? "Search Saint (e.g., Kundakunda, Vidyasagar)..." : "संत का नाम खोजें (जैसे: कुंदकुंद, विद्यासागर)..."}
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full bg-white dark:bg-[#121212] border border-gray-200 dark:border-white/10 rounded-2xl py-3.5 pl-12 pr-12 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FF6D00]/50 shadow-sm transition-all"
-              />
-              <button 
-                onClick={toggleVoiceSearch}
-                className={`absolute right-3.5 top-2.5 p-1.5 rounded-xl transition-all cursor-pointer ${isListening ? 'bg-red-500 text-white animate-pulse' : 'bg-gray-100 dark:bg-white/5 text-gray-400 hover:text-[#FF6D00]'}`}
-                title="Voice Search"
-              >
-                {isListening ? <MicOff size={16} /> : <Mic size={16} />}
-              </button>
-            </div>
+          <div className="mb-4">
+            <UnifiedSearchBar
+              value={search}
+              onChange={(val) => setSearch(val)}
+              placeholder={language === 'en' ? "Search Saint (e.g., Kundakunda, Vidyasagar)..." : "संत का नाम खोजें (जैसे: कुंदकुंद, विद्यासागर)..."}
+            />
           </div>
-
-          {/* Voice Status Alert */}
-          {isListening && (
-            <div className="text-xs bg-red-500/10 text-red-500 font-black tracking-wider uppercase border border-red-500/20 rounded-xl px-4 py-2.5 flex items-center justify-between animate-pulse">
-              <span>🎙️ Listening now... speak saint's name</span>
-              <span className="w-2.5 h-2.5 bg-red-500 rounded-full animate-ping" />
-            </div>
-          )}
 
           {/* Directory List */}
           <div className="space-y-4">

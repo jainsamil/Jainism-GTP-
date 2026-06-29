@@ -2,7 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { 
   Search, BookOpen, ChevronDown, ChevronUp, Lightbulb, Microscope, 
   Sparkles, Loader2, Mic, MicOff, ArrowLeft, CheckCircle, XCircle, 
-  Compass, ShieldCheck, Home, Sunset, Droplet, Apple, Volume2, VolumeX, Star, HelpCircle, Globe
+  Compass, ShieldCheck, Home, Sunset, Droplet, Apple, Volume2, VolumeX, Star, HelpCircle, Globe,
+  Newspaper, Activity
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { db } from '../firebase';
@@ -12,6 +13,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { knowledgeData as FALLBACK_KNOWLEDGE } from '../data/knowledgeBase';
 import { livingGuideData, LivingGuideCategory } from '../data/livingGuide';
 import SectionAiAgent from '../components/SectionAiAgent';
+import UnifiedSearchBar from '../components/UnifiedSearchBar';
 
 const IconMap: Record<string, any> = {
   Home,
@@ -21,12 +23,16 @@ const IconMap: Record<string, any> = {
 };
 
 import { BAAL_BODH_BOOKS } from '../data/baalBodhData';
+import JainKidsGames from '../components/JainKidsGames';
+import { jainUpchaarData } from '../data/jainUpchaar';
 
 export default function KnowledgePage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [activeTab, setActiveTab ] = useState<'qa' | 'guide' | 'baal_bodh' | 'quiz'>('qa');
+  const [activeTab, setActiveTab ] = useState<'qa' | 'guide' | 'baal_bodh' | 'games' | 'upchaar'>('qa');
   const [search, setSearch] = useState('');
+  const [selectedUpchaarCat, setSelectedUpchaarCat] = useState<string>('All');
+  const [openUpchaarId, setOpenUpchaarId] = useState<string | null>(null);
   const { language: lang, toggleLanguage } = useLanguage();
   const [openIdx, setOpenIdx] = useState<string | null>(null);
   const [knowledge, setKnowledge] = useState<any[]>([]);
@@ -38,6 +44,7 @@ export default function KnowledgePage() {
   const [selectedBook, setSelectedBook] = useState<any>(null);
   const [selectedChapter, setSelectedChapter] = useState<any>(null);
   const [isSpeakingBook, setIsSpeakingBook] = useState(false);
+  const [baalBodhSubTab, setBaalBodhSubTab] = useState<'books' | 'games'>('books');
   
   // Q&A Category filter
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
@@ -107,19 +114,29 @@ export default function KnowledgePage() {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       const preparedSeed = FALLBACK_KNOWLEDGE.map((item, index) => ({ id: `seed_${index}`, ...item }));
       
-      // Merge Firestore documents with offline seeds, avoiding duplicates
-      const merged = [...data];
-      preparedSeed.forEach(seed => {
-        const isDuplicate = data.some((d: any) => 
-          (d.question?.en && d.question.en === seed.question?.en) || 
-          (d.question?.hi && d.question.hi === seed.question?.hi)
-        );
-        if (!isDuplicate) {
-          merged.push(seed);
+      // Merge: Keep all seeds, but if firestore overrides any by matching the question or ID, replace them.
+      // Also include any brand new items from Firestore.
+      const dataMap = new Map(data.map(item => [item.id, item]));
+      
+      const merged = preparedSeed.map(seedItem => {
+        let matchedItem = dataMap.get(seedItem.id);
+        if (!matchedItem) {
+          const matchByQuestion = data.find((d: any) => 
+            (d.question?.en && d.question.en === seedItem.question?.en) || 
+            (d.question?.hi && d.question.hi === seedItem.question?.hi)
+          );
+          if (matchByQuestion) {
+            matchedItem = matchByQuestion;
+            dataMap.delete(matchByQuestion.id);
+          }
+        } else {
+          dataMap.delete(seedItem.id);
         }
+        return matchedItem ? { ...seedItem, ...matchedItem } : seedItem;
       });
-
-      setKnowledge(merged);
+      
+      const finalKnowledge = [...merged, ...Array.from(dataMap.values())];
+      setKnowledge(finalKnowledge);
       setLoading(false);
     }, (error) => {
       console.error('Error fetching knowledge:', error);
@@ -134,14 +151,19 @@ export default function KnowledgePage() {
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const tabParam = params.get('tab');
-    const filterParam = params.get('filter');
     const bookIdParam = params.get('bookId');
-    if (tabParam === 'baal_bodh' || tabParam === 'swadhyay_books') {
+    if (tabParam === 'swadhyay_books') {
+      navigate(`/swadhyay?bookId=${bookIdParam || ''}`);
+      return;
+    }
+    if (tabParam === 'baal_bodh') {
       setActiveTab('baal_bodh');
-      if (filterParam === 'swadhyay' || filterParam === 'pathshala' || filterParam === 'all') {
-        setBookCategory(filterParam as any);
-      }
       if (bookIdParam) {
+        const isPathshala = ['baal1', 'baal2', 'baal3', 'baal_stories', 'baal_conduct'].includes(bookIdParam);
+        if (!isPathshala) {
+          navigate(`/swadhyay?bookId=${bookIdParam}`);
+          return;
+        }
         const matchingBook = BAAL_BODH_BOOKS.find(b => b.id === bookIdParam);
         if (matchingBook) {
           setSelectedBook(matchingBook);
@@ -149,7 +171,7 @@ export default function KnowledgePage() {
         }
       }
     }
-  }, [location]);
+  }, [location, navigate]);
 
   useEffect(() => {
     if (terminalEndRef.current) {
@@ -285,7 +307,7 @@ export default function KnowledgePage() {
       </header>
 
       {/* Main Mode / Tab Switcher */}
-      <div className="flex flex-wrap p-1 mb-8 bg-gray-200/50 dark:bg-white/5 backdrop-blur-md rounded-2xl w-full max-w-2xl mx-auto overflow-hidden gap-1 justify-center md:flex-nowrap">
+      <div className="flex flex-wrap p-1 mb-8 bg-gray-200/50 dark:bg-white/5 backdrop-blur-md rounded-2xl w-full max-w-3xl mx-auto overflow-hidden gap-1 justify-center md:flex-nowrap">
         <button
           onClick={() => { setActiveTab('qa'); setSearch(''); }}
           className={cn(
@@ -323,16 +345,28 @@ export default function KnowledgePage() {
           {lang === 'en' ? 'Baal Bodh' : 'बालबोध पाठशाला'}
         </button>
         <button
-          onClick={() => { setActiveTab('quiz'); setSearch(''); }}
+          onClick={() => { setActiveTab('games'); setSearch(''); }}
           className={cn(
             "flex-1 min-w-[90px] flex items-center justify-center gap-1.5 py-3 text-[9px] md:text-xs font-black tracking-wider uppercase rounded-xl transition-all duration-300 cursor-pointer",
-            activeTab === 'quiz' 
+            activeTab === 'games' 
               ? "bg-[#FF6D00] text-white shadow-md shadow-[#FF6D00]/20" 
               : "text-gray-600 dark:text-gray-400 hover:text-gray-950 dark:hover:text-white"
           )}
         >
           <Sparkles size={14} />
-          {lang === 'en' ? 'Pathshala Quiz' : 'पाठशाला क्विज'}
+          {lang === 'en' ? 'Jain Games' : 'जैन गेम्स'}
+        </button>
+        <button
+          onClick={() => { setActiveTab('upchaar'); setSearch(''); }}
+          className={cn(
+            "flex-1 min-w-[90px] flex items-center justify-center gap-1.5 py-3 text-[9px] md:text-xs font-black tracking-wider uppercase rounded-xl transition-all duration-300 cursor-pointer",
+            activeTab === 'upchaar' 
+              ? "bg-[#FF6D00] text-white shadow-md shadow-[#FF6D00]/20" 
+              : "text-gray-600 dark:text-gray-400 hover:text-gray-950 dark:hover:text-white"
+          )}
+        >
+          <Activity size={14} />
+          {lang === 'en' ? 'Jain Upchaar' : 'जैन उपचार'}
         </button>
       </div>
 
@@ -356,31 +390,11 @@ export default function KnowledgePage() {
           </div>
 
           {/* Search bar specifically for Q&A */}
-          <div className="relative group">
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] rounded-2xl blur opacity-10 dark:opacity-20 group-hover:opacity-30 transition duration-500"></div>
-            <div className="relative flex items-center">
-              <Search className="absolute left-4 text-[#FF8A65]" size={18} />
-              <input
-                type="text"
-                placeholder={lang === 'en' ? "Search spiritual/scientific questions..." : "शंका समाधान खोजें (जैसे: रात्रि भोजन, पानी)..."}
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full bg-white dark:bg-[#121212] border border-gray-200 dark:border-white/10 rounded-2xl pl-12 pr-12 py-3.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FF6D00]/50 shadow-sm transition-all"
-              />
-              <button 
-                onClick={toggleListening}
-                className={cn(
-                  "absolute right-4 p-2 rounded-full transition-all cursor-pointer",
-                  isListening ? "bg-red-500/20 text-red-500 animate-pulse" : "text-gray-400 hover:text-[#FF8A65] hover:bg-[#FF6D00]/10"
-                )}
-              >
-                {isListening ? <MicOff size={18} /> : <Mic size={18} />}
-              </button>
-            </div>
-            {speechError && (
-              <p className="text-red-500 text-xs mt-1 ml-2">{speechError}</p>
-            )}
-          </div>
+          <UnifiedSearchBar
+            value={search}
+            onChange={(val) => setSearch(val)}
+            placeholder={lang === 'en' ? "Search spiritual/scientific questions..." : "शंका समाधान खोजें (जैसे: रात्रि भोजन, पानी)..."}
+          />
 
           {/* Categories Pill Filters */}
           <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
@@ -822,334 +836,176 @@ export default function KnowledgePage() {
         </div>
       )}
 
-      {/* ==================== GAMIFIED PATHSHALA QUIZ TAB ==================== */}
-      {activeTab === 'quiz' && (
-        <div className="space-y-6 max-w-3xl mx-auto animate-in fade-in duration-300">
-          
-          {(() => {
-            const quizQuestions = [
-              {
-                id: 1,
-                question: {
-                  en: "What is the primary spiritual vow of a Jain household representing non-violence?",
-                  hi: "जैन धर्म का सर्वप्रमुख अणुव्रत कौन सा है जो सभी जीवों की रक्षा करने का उपदेश देता है?"
-                },
-                options: [
-                  { id: 'A', text: { en: "Ahimsa (Non-violence)", hi: "अहिंसा अणुव्रत" } },
-                  { id: 'B', text: { en: "Satya (Truthfulness)", hi: "सत्य अणुव्रत" } },
-                  { id: 'C', text: { en: "Achaurya (Non-Stealing)", hi: "अचौर्य अणुव्रत" } },
-                  { id: 'D', text: { en: "Aparigraha (Non-greed)", hi: "अपरिग्रह अणुव्रत" } }
-                ],
-                correctAnswer: 'A',
-                explanation: {
-                  en: "Ahimsa represents the foremost vow. Jain literature says: 'Ahimsa Paramo Dharmah' (Non-injury is the supreme religion).",
-                  hi: "अहिंसा जैन धर्म का मूल प्राण है। शास्त्र कहते हैं: 'अहिंसा परमो धर्मः' अर्थात किसी भी प्राणी को कष्ट न पहुँचाना ही सबसे बड़ा धर्म है।"
-                }
-              },
-              {
-                id: 2,
-                question: {
-                  en: "How many eternal, indestructible substances (Dravyas) comprise this uncreated universe?",
-                  hi: "जैन दर्शन के अनुसार यह सृष्टि कितने अनादि और अविनाशी द्रव्यों से मिलकर बनी है?"
-                },
-                options: [
-                  { id: 'A', text: { en: "Five (Panch)", hi: "५ द्रव्य" } },
-                  { id: 'B', text: { en: "Six (Chhah)", hi: "६ द्रव्य (जीव, पुद्गल, धर्म, अधर्म, आकाश, काल)" } },
-                  { id: 'C', text: { en: "Seven (Sapta)", hi: "७ तत्व" } },
-                  { id: 'D', text: { en: "Nine (Nav)", hi: "९ पदार्थ" } }
-                ],
-                correctAnswer: 'B',
-                explanation: {
-                  en: "According to Jain physics, the universe is comprised of 6 Substances: Jiva, Pudgala, Dharma, Adharma, Akasha, and Kala.",
-                  hi: "जैन भौतिकी के अनुसार ब्रह्मांड ६ स्वतंत्र द्रव्यों से बना है: जीव (चेतन), पुद्गल (जड़/मैटर), धर्म (गति), अधर्म (स्थिति), आकाश (स्थान), काल (परिवर्तन)।"
-                }
-              },
-              {
-                id: 3,
-                question: {
-                  en: "Which of these is NOT one of the three core attributes defining a True God (Dev)?",
-                  hi: "इनमें से कौन सा लक्षण एक 'सच्चे देव' (तीर्थंकर) का नहीं है?"
-                },
-                options: [
-                  { id: 'A', text: { en: "Vitaragi (Absence of attachment/anger)", hi: "वीतरागता (सभी विकारों का अभाव)" } },
-                  { id: 'B', text: { en: "Sarvajna (Knowing everything across time)", hi: "सर्वज्ञता (तीनों लोकों का प्रत्यक्ष ज्ञान)" } },
-                  { id: 'C', text: { en: "Hitopadeshi (Preaching absolute welfare)", hi: "हितोपदेशिता (कल्याणकारी उपदेश देना)" } },
-                  { id: 'D', text: { en: "Sadaayudhi (Holding physical weapons)", hi: "कषाययुक्त / अस्त्र-शस्त्र धारण करना" } }
-                ],
-                correctAnswer: 'D',
-                explanation: {
-                  en: "A true Dev is completely peaceful and detached, hence does not hold any weapons or decorations.",
-                  hi: "सच्चे देव वीतरागी होते हैं, वे अस्त्र-शस्त्र या राग-द्वेष करने वाले नहीं होते। अतः अस्त्र धारण करना उनका गुण नहीं है।"
-                }
-              },
-              {
-                id: 4,
-                question: {
-                  en: "What process during honey (Madhu) collection causes severe violence according to Jain rules?",
-                  hi: "जैन शास्त्रों में शहद (मधु) खाने का कड़ा निषेध क्यों कहा गया है?"
-                },
-                options: [
-                  { id: 'A', text: { en: "Honey collection destroys larvae and squeeze baby bees", hi: "यह प्रक्रिया छत्ते के लाखों नन्हे अंडों व मधुमक्खियों का नाश करती है" } },
-                  { id: 'B', text: { en: "Honey taste is salty", hi: "शहद का स्वाद तीखा होता है" } },
-                  { id: 'C', text: { en: "Honey is made of mud", hi: "शहद मिट्टी से बनता है" } },
-                  { id: 'D', text: { en: "Honey blocks breathing", hi: "शहद सांस लेने में रुकावट डालता है" } }
-                ],
-                correctAnswer: 'A',
-                explanation: {
-                  en: "Honey collection involves boiling/squeezing active beehives, killing millions of larval bees instantly.",
-                  hi: "शहद निचोड़ने में पूरे छत्ते को नष्ट कर दिया जाता है जिससे लाखों निरीह मधुमक्खी के बच्चों और अंडों की क्रूर हत्या होती है।"
-                }
-              },
-              {
-                id: 5,
-                question: {
-                  en: "Under who did the highly revered philosopher Kundakunda Dev study during his celestial sky journey?",
-                  hi: "आचार्य कुंदकुंद देव को किस साक्षात तीर्थंकर प्रभु के समवशरण में जाकर दिव्य उपदेश सुनने का गौरव प्राप्त हुआ?"
-                },
-                options: [
-                  { id: 'A', text: { en: "Lord Mahavira Dev", hi: "भगवान महावीर स्वामी" } },
-                  { id: 'B', text: { en: "Lord Simandhar Swami (Vidhar Kshetra)", hi: "विदेह क्षेत्र में साक्षात सीमंधर स्वामी प्रभु" } },
-                  { id: 'C', text: { en: "Lord Parasnath Dev", hi: "भगवान पार्श्वनाथ प्रभु" } },
-                  { id: 'D', text: { en: "Lord Rishabhdev Adinath", hi: "आदिनाथ भगवान" } }
-                ],
-                correctAnswer: 'B',
-                explanation: {
-                  en: "Traditional lore holds Kundakunda Dev visited Simandhar Swami in Videha Kshetra in a state of sky-flight.",
-                  hi: "परंपरा के अनुसार आचार्य कुंदकुंद देव वायुगमन विद्या द्वारा साक्षात सीमंधर स्वामी के समवशरण में गए और वहाँ आठ दिन रहकर वीतराग वाणी का रसपान कर जैन धर्म की नींव सुदृढ़ की।"
-                }
-              }
-            ];
+      {/* ==================== JAIN KIDS GAMES TAB ==================== */}
+      {activeTab === 'games' && (
+        <div className="space-y-6 max-w-5xl mx-auto animate-in fade-in duration-300">
+          <JainKidsGames language={lang} onBack={() => setActiveTab('baal_bodh')} />
 
-            const handleAnswerClick = (optionId: string) => {
-              if (showAnswerFeedback) return;
-              setSelectedAnswer(optionId);
-              setShowAnswerFeedback(true);
-              if (optionId === quizQuestions[currentQuestionIdx].correctAnswer) {
-                setQuizScore(prev => prev + 20);
-              }
-            };
 
-            const handleNextQuestion = () => {
-              setSelectedAnswer(null);
-              setShowAnswerFeedback(false);
-              if (currentQuestionIdx < quizQuestions.length - 1) {
-                setCurrentQuestionIdx(prev => prev + 1);
-              } else {
-                setQuizCompleted(true);
-              }
-            };
-
-            const resetQuiz = () => {
-              setCurrentQuestionIdx(0);
-              setSelectedAnswer(null);
-              setShowAnswerFeedback(false);
-              setQuizScore(0);
-              setQuizCompleted(false);
-              setCertificateGenerated(false);
-            };
-
-            const activeQ = quizQuestions[currentQuestionIdx];
-
-            return (
-              <div className="space-y-6">
-                
-                {/* Intro Rules */}
-                <div className="bg-gradient-to-br from-[#FF6D00]/10 to-[#FFD54F]/5 rounded-3xl p-5 border border-[#FF6D00]/25 text-center">
-                  <span className="text-[10px] font-black tracking-widest text-[#FF6D00] uppercase block mb-1">
-                    🎮 Play & Learn | सम्यक ज्ञान प्रश्नोत्तरी
-                  </span>
-                  <h3 className="text-lg font-display font-black text-gray-900 dark:text-white leading-tight">
-                    {lang === 'en' ? 'Digital Jain Pathshala Academy' : 'डिजिटल जैन गुरुकुल परीक्षा'}
-                  </h3>
-                  <p className="text-xs text-gray-500 font-bold max-w-md mx-auto mt-1 leading-normal">
-                    {lang === 'en' 
-                      ? 'Answer 5 high-fidelity moral lessons to earn your official Jain Bal Sanskar certification.' 
-                      : '५ महत्वपूर्ण बाल ज्ञान प्रश्नों के सही उत्तर दें और अपना प्रामाणिक जैन सुसंस्कार डिजिटल प्रमाण पत्र प्राप्त करें!'}
-                  </p>
-                </div>
-
-                {!quizCompleted ? (
-                  <div className="bg-white dark:bg-[#121212] border border-gray-150 dark:border-white/5 rounded-3xl p-6 shadow-sm space-y-6">
-                    {/* Progress tracking */}
-                    <div className="flex justify-between items-center text-xs font-black text-gray-550 border-b border-gray-100 dark:border-white/5 pb-3">
-                      <span>{lang === 'en' ? `Question ${currentQuestionIdx + 1} of ${quizQuestions.length}` : `प्रश्न ${currentQuestionIdx + 1} / ${quizQuestions.length}`}</span>
-                      <span className="text-[#FF6D00]">{lang === 'en' ? `Score: ${quizScore}/100` : `क्रिकेट स्कोर: ${quizScore}/100`}</span>
-                    </div>
-
-                    {/* Question text */}
-                    <div className="space-y-1 text-left">
-                      <span className="text-[10px] font-black tracking-wider text-orange-500 uppercase block">QUESTION:</span>
-                      <h4 className="text-sm md:text-base font-extrabold text-gray-850 dark:text-white leading-relaxed">
-                        {lang === 'en' ? activeQ.question.en : activeQ.question.hi}
-                      </h4>
-                    </div>
-
-                    {/* Options list selection */}
-                    <div className="grid gap-3">
-                      {activeQ.options.map(opt => {
-                        const isChosen = selectedAnswer === opt.id;
-                        const isCorrect = opt.id === activeQ.correctAnswer;
-                        const hasChecked = showAnswerFeedback;
-
-                        return (
-                          <button
-                            key={opt.id}
-                            disabled={hasChecked}
-                            onClick={() => handleAnswerClick(opt.id)}
-                            className={cn(
-                              "w-full text-left p-4 rounded-2xl border text-xs font-bold transition-all flex justify-between items-center cursor-pointer",
-                              !hasChecked && "bg-gray-50 dark:bg-white/[0.01] hover:bg-white dark:hover:bg-white/5 border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-300",
-                              hasChecked && isChosen && isCorrect && "bg-emerald-500/15 border-emerald-500 text-emerald-600 dark:text-emerald-400 font-extrabold",
-                              hasChecked && isChosen && !isCorrect && "bg-red-500/15 border-red-500 text-red-600 dark:text-red-400 font-extrabold",
-                              hasChecked && !isChosen && isCorrect && "bg-emerald-500/15 border-emerald-500 text-emerald-600 dark:text-emerald-400 font-extrabold",
-                              hasChecked && !isChosen && !isCorrect && "bg-gray-100 dark:bg-white/[0.01] border-transparent text-gray-400 cursor-not-allowed opacity-50"
-                            )}
-                          >
-                            <span>{opt.id}. {lang === 'en' ? opt.text.en : opt.text.hi}</span>
-                            {hasChecked && isCorrect && <span className="text-xs text-emerald-500 shrink-0">✓ Correct</span>}
-                            {hasChecked && isChosen && !isCorrect && <span className="text-xs text-red-500 shrink-0">✗ Wrong</span>}
-                          </button>
-                        );
-                      })}
-                    </div>
-
-                    {/* Scientific/spiritual Explanation */}
-                    {showAnswerFeedback && (
-                      <div className="p-4 bg-orange-500/5 dark:bg-orange-500/10 rounded-2xl border border-orange-500/20 text-xs font-semibold leading-relaxed space-y-1.5 animate-[fadeIn_0.3s_ease-out] text-left">
-                        <span className="text-[9px] font-black tracking-widest text-[#FF6D00] uppercase block">
-                          📖 KNOWLEDGE DECODED (महत्वपूर्ण सन्दर्भ):
-                        </span>
-                        <p className="text-gray-800 dark:text-gray-200">
-                          {lang === 'en' ? activeQ.explanation.en : activeQ.explanation.hi}
-                        </p>
-                        <button
-                          onClick={handleNextQuestion}
-                          className="w-full mt-3 py-2 bg-orange-600 hover:bg-[#E65100] text-white rounded-xl font-black uppercase text-[10px] tracking-wider cursor-pointer"
-                        >
-                          {currentQuestionIdx < quizQuestions.length - 1 ? (lang === 'en' ? 'CONTINUE TO NEXT QUESTION' : 'अगला प्रश्न देखें') : (lang === 'en' ? 'SUBMIT PRACTICAL EXAM' : 'परीक्षा परिणाम जमा करें')}
-                        </button>
-                      </div>
-                    )}
-
-                  </div>
-                ) : (
-                  <div className="bg-white dark:bg-[#121212] border border-gray-150 dark:border-white/5 rounded-3xl p-6 text-center space-y-6">
-                    
-                    <div className="space-y-2">
-                      <span className="text-5xl">🏆</span>
-                      <h4 className="text-xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-amber-500">
-                        {lang === 'en' ? 'Swadhyay Exam Completed!' : 'स्वाध्याय परीक्षा पूर्ण हुई!'}
-                      </h4>
-                      <p className="text-xs font-extrabold text-gray-500 block">
-                        {lang === 'en' ? `You secured: ${quizScore}/100 Bed Slot Credits` : `आपने अर्जित किए: १०० में से ${quizScore} अंक`}
-                      </p>
-                    </div>
-
-                    {/* Certificate customizer */}
-                    {!certificateGenerated ? (
-                      <div className="p-5.5 rounded-[1.5rem] bg-gray-50 dark:bg-white/[0.01] border border-gray-150 dark:border-white/5 text-left space-y-3.5 max-w-md mx-auto">
-                        <span className="text-[10px] font-black uppercase tracking-wider text-gray-400 block">{lang === 'en' ? 'Print Your Digital Sanad' : 'अपनी प्रमाण पत्र सनद कस्टमाइज़ करें'}</span>
-                        <input 
-                          type="text"
-                          placeholder={lang === 'en' ? "Enter Student/Kid Name..." : "विद्यार्थी या स्वयं का नाम लिखें..."}
-                          value={kidName}
-                          onChange={(e) => setKidName(e.target.value)}
-                          className="w-full p-3 text-xs font-semibold rounded-xl bg-white dark:bg-[#151515] border border-gray-200 dark:border-white/10 text-gray-800 dark:text-white"
-                        />
-                        <button
-                          onClick={() => {
-                            if (!kidName.trim()) {
-                              alert(lang === 'en' ? 'Please supply a candidate name.' : 'कृपया प्रमाण पत्र के लिए नाम दर्ज करें।');
-                              return;
-                            }
-                            setCertificateGenerated(true);
-                          }}
-                          className="w-full py-3 bg-[#FF6D00] hover:bg-[#E65100] text-white rounded-xl text-xs font-black uppercase tracking-widest cursor-pointer"
-                        >
-                          🎓 {lang === 'en' ? 'GENERATE OFFICIAL SANSKAR CERTIFICATE' : 'सुसंस्कार प्रमाण पत्र तैयार करें'}
-                        </button>
-                      </div>
-                    ) : (
-                      /* HIGH FIDELITY PRINTABLE CERTIFICATE */
-                      <div className="p-6 rounded-[2rem] border-8 border-double border-amber-500 bg-amber-500/[0.03] dark:bg-[#111111] max-w-lg mx-auto relative overflow-hidden text-center space-y-6 animate-[fadeIn_0.5s_ease-out]">
-                        
-                        {/* Frame border lines */}
-                        <div className="absolute inset-1.5 border border-amber-500/20" />
-                        
-                        <div className="relative z-10 space-y-1.5">
-                          <span className="text-2xl block text-amber-500">🌸</span>
-                          <span className="text-[7px] md:text-[8px] font-black uppercase tracking-[0.25em] text-amber-600 block leading-none">॥ सम्यक् दर्शन ज्ञान चारित्राणि मोक्षमार्गः ॥</span>
-                          <h4 className="text-xs font-extrabold uppercase text-[#FF6D00] dark:text-[#FFD54F] tracking-wider mt-1">{lang === 'en' ? 'JAIN BAL SANSKAR PATHSHALA' : 'श्री जैन बाल संस्कार पाठशाला सनद'}</h4>
-                        </div>
-
-                        <div className="relative z-10 space-y-2">
-                          <p className="text-[9px] text-gray-400 font-extrabold italic uppercase tracking-wider leading-none">This honors / यह प्रमाण पत्र सादर प्रदान किया जाता है</p>
-                          <h5 className="font-display font-black text-lg md:text-xl text-gray-900 dark:text-amber-100 border-b border-dashed border-amber-500/20 pb-1.5 max-w-[80%] mx-auto leading-tight">{kidName}</h5>
-                          <p className="text-[10px] text-gray-500 dark:text-gray-300 font-bold leading-normal max-w-sm mx-auto">
-                            {lang === 'en'
-                              ? `For successfully qualifying the introductory exam in Jain Basic moral codes, 6 substances, and Namokar Mantra glory with a grade of ${quizScore}%.`
-                              : `जिन्होंने बुनियादी श्रमण संस्कृति ज्ञान परीक्षा, पंचपरमेष्ठी महिमा, ८ मूलगुण एवं सदाचार जीवन शैली सिद्धांतों को आत्मसात कर ${quizScore}% अंकों से यह योग्यता अर्जित की।`}
-                          </p>
-                        </div>
-
-                        <div className="relative z-10 flex justify-between items-end border-t border-amber-500/10 pt-4.5 max-w-[85%] mx-auto text-[8px] font-black tracking-widest text-[#FF6D00] dark:text-[#FFD54F] uppercase">
-                          <div className="text-left space-y-1">
-                            <span className="block border-b border-gray-400 pb-0.5 leading-none">JBT ACADEMY</span>
-                            <span className="text-gray-400 text-[6px]">SANAD COORDINATOR</span>
-                          </div>
-                          
-                          {/* QR Mock code */}
-                          <div className="w-10 h-10 bg-white border border-gray-200 flex items-center justify-center text-[5px] text-black shrink-0 relative p-1">
-                            <span className="absolute inset-0 bg-gradient-to-br from-amber-500/20 via-transparent to-orange-500/10 pointer-events-none" />
-                            <div className="w-full h-full border border-dashed border-gray-400 flex flex-wrap gap-0.5 p-0.5">
-                              {Array.from({ length: 16 }).map((_, i) => (
-                                <span key={i} className={cn("inline-block w-1.5 h-1.5 bg-black", (i*3)%5 === 0 && 'bg-transparent')} />
-                              ))}
-                            </div>
-                          </div>
-
-                          <div className="text-right space-y-1">
-                            <span className="block border-b border-gray-400 pb-0.5 leading-none">VERIFIED SEALS</span>
-                            <span className="text-gray-400 text-[6px]">DIGITAL CERTIFICATE</span>
-                          </div>
-                        </div>
-
-                        {/* Save / back buttons */}
-                        <div className="flex gap-2 pt-3 relative z-10">
-                          <button
-                            onClick={() => setCertificateGenerated(false)}
-                            className="flex-1 bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-gray-300 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider cursor-pointer"
-                          >
-                            {lang === 'en' ? 'Modify Name' : 'नाम बदलें'}
-                          </button>
-                          <button
-                            onClick={() => {
-                              alert(lang === 'en' ? 'Sanad downloaded to device photo vault!' : 'आपकी जैन पाठशाला सनद (प्रमाण पत्र) गैलरी में सेव हो गई है!');
-                            }}
-                            className="flex-1 bg-amber-500 hover:bg-amber-600 text-black py-2 rounded-xl text-[10px] font-black uppercase tracking-wider cursor-pointer"
-                          >
-                            📥 {lang === 'en' ? 'Download Sanad' : 'सनद डाउनलोड करें'}
-                          </button>
-                        </div>
-                      </div>
-                    )}
-
-                    <button
-                      onClick={resetQuiz}
-                      className="text-xs text-[#FF6D00] font-black uppercase tracking-widest hover:underline pt-2 cursor-pointer inline-block"
-                    >
-                      🔄 {lang === 'en' ? 'TRY ANOTHER GRADUATION RUN' : 'पुनः परीक्षा शुरू करें'}
-                    </button>
-
-                  </div>
-                )}
-
-              </div>
-            );
-          })()}
 
         </div>
       )}
+
+      {/* ==================== JAIN UPCHAAR TAB ==================== */}
+      {activeTab === 'upchaar' && (
+        <div className="space-y-6 max-w-5xl mx-auto animate-in fade-in duration-300">
+          {/* Intro banner */}
+          <div className="bg-gradient-to-br from-[#FF3D00]/10 to-[#FFD54F]/5 backdrop-blur-xl rounded-3xl p-6 border border-[#FF3D00]/10 relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-[#FF3D00]/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-[#FF3D00]/10 transition-all duration-700" />
+            
+            <div className="flex items-center gap-2 text-[#FF3D00] dark:text-[#FF8A65] mb-2.5 relative z-10">
+              <Activity size={18} className="animate-pulse" />
+              <span className="text-xs font-black tracking-widest uppercase">Jain Pathological Treatment & Holistic Health | जैन स्वास्थ्य एवं अहिंसक उपचार पद्धति</span>
+            </div>
+            
+            <h2 className="text-xl font-display font-black text-gray-900 dark:text-white leading-tight">
+              {lang === 'en' ? 'Holistic Healing with Jain Dharma Principles' : 'जैन आचार और अहिंसा आधारित प्राकृतिक स्वास्थ्य उपचार'}
+            </h2>
+            <p className="text-gray-600 dark:text-gray-300 text-sm font-semibold mt-2 leading-relaxed">
+              {lang === 'en' 
+                ? "Jain Upchaar blends spiritual vibrations (Bhaktamar slokas & Navkar mantra) with scientific biological purification (boiled water, eating before sunset, and avoiding root vegetables) to heal body, mind, and soul in complete alignment with Ahimsa (non-violence)." 
+                : "जैन उपचार पद्धति अध्यात्म (णमोकार महामंत्र एवं भक्तामर स्तोत्र प्रभाव) और प्राकृतिक शुद्धता (मर्यादित छना जल, कंदमूल त्याग और चौविहार) का पावन संगम है। यह अहिंसा के पथ पर चलते हुए तन और मन को पूर्ण स्वस्थ व निरोगी बनाने में अत्यंत सहायक है।"}
+            </p>
+          </div>
+
+          {/* Search bar specifically for Upchaar */}
+          <UnifiedSearchBar
+            value={search}
+            onChange={(val) => setSearch(val)}
+            placeholder={lang === 'en' ? "Search diseases or treatments (e.g., acidity, joints)..." : "बीमारी या उपचार खोजें (जैसे: एसिडिटी, कब्ज, खांसी, दर्द)..."}
+          />
+
+          {/* Category filters */}
+          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
+            {['All', 'Digestive Disorders', 'Respiratory Illnesses', 'Joint Pain & Arthritis', 'Skin Disorders', 'General Wellness'].map((cat) => {
+              const displayName = lang === 'en' ? cat : (
+                cat === 'All' ? 'सभी श्रेणी' :
+                cat === 'Digestive Disorders' ? 'पाचन रोग' :
+                cat === 'Respiratory Illnesses' ? 'श्वसन रोग' :
+                cat === 'Joint Pain & Arthritis' ? 'जोड़ों का दर्द' :
+                cat === 'Skin Disorders' ? 'त्वचा रोग' : 'सामान्य स्वास्थ्य'
+              );
+              return (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedUpchaarCat(cat)}
+                  className={cn(
+                    "px-4 py-1.5 rounded-full text-xs font-black tracking-wider uppercase border whitespace-nowrap transition-all duration-300 cursor-pointer",
+                    selectedUpchaarCat === cat
+                      ? "bg-gradient-to-r from-[#FF6D00] to-[#FFB300] text-white border-transparent shadow-sm"
+                      : "bg-white dark:bg-[#121212] border-gray-200 dark:border-white/5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                  )}
+                >
+                  {displayName}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Treatments Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {jainUpchaarData
+              .filter(item => {
+                const matchesSearch = (
+                  item.disease.en.toLowerCase().includes(search.toLowerCase()) ||
+                  item.disease.hi.toLowerCase().includes(search.toLowerCase()) ||
+                  item.category.en.toLowerCase().includes(search.toLowerCase()) ||
+                  item.category.hi.toLowerCase().includes(search.toLowerCase()) ||
+                  item.jainMethod.en.toLowerCase().includes(search.toLowerCase()) ||
+                  item.jainMethod.hi.toLowerCase().includes(search.toLowerCase())
+                );
+                const matchesCat = selectedUpchaarCat === 'All' || item.category.en === selectedUpchaarCat;
+                return matchesSearch && matchesCat;
+              })
+              .map((item) => {
+                const isOpen = openUpchaarId === item.id;
+                return (
+                  <div
+                    key={item.id}
+                    className={cn(
+                      "bg-white dark:bg-[#121212]/90 backdrop-blur-md rounded-3xl border overflow-hidden shadow-sm transition-all duration-300",
+                      isOpen ? "border-[#FF6D00]/50 shadow-md dark:shadow-[0_0_20px_rgba(255,109,0,0.15)]" : "border-gray-200/50 dark:border-white/5 hover:border-[#FF6D00]/30"
+                    )}
+                  >
+                    {/* Card Header */}
+                    <button
+                      onClick={() => setOpenUpchaarId(isOpen ? null : item.id)}
+                      className="w-full p-5 flex items-center justify-between text-left group cursor-pointer"
+                    >
+                      <div className="space-y-1 min-w-0 pr-4">
+                        <span className="text-[9px] font-black tracking-wider text-[#FF6D00] uppercase bg-[#FF6D00]/10 px-2.5 py-0.5 rounded-full">
+                          {lang === 'en' ? item.category.en : item.category.hi}
+                        </span>
+                        <h3 className="font-display font-black text-base text-gray-800 dark:text-white group-hover:text-orange-500 dark:group-hover:text-orange-400 transition-colors mt-2">
+                          {lang === 'en' ? item.disease.en : item.disease.hi}
+                        </h3>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 font-medium line-clamp-1 mt-0.5">
+                          {lang === 'en' ? item.symptoms.en : item.symptoms.hi}
+                        </p>
+                      </div>
+                      <div className={cn(
+                        "w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-all duration-300",
+                        isOpen ? "bg-[#FF6D00]/10 text-[#FF8A65]" : "bg-gray-100 dark:bg-white/5 text-gray-500 group-hover:bg-gray-200 dark:group-hover:bg-white/10"
+                      )}>
+                        {isOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                      </div>
+                    </button>
+
+                    {/* Expandable Section */}
+                    {isOpen && (
+                      <div className="px-5 pb-6 border-t border-gray-100 dark:border-white/5 pt-4 space-y-4">
+                        {/* Symptoms block */}
+                        <div className="space-y-1">
+                          <span className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-wider block">
+                            {lang === 'en' ? 'Key Symptoms / Indicators' : 'प्रमुख लक्षण'}
+                          </span>
+                          <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                            {lang === 'en' ? item.symptoms.en : item.symptoms.hi}
+                          </p>
+                        </div>
+
+                        {/* Jain Method block */}
+                        <div className="p-4 rounded-2xl bg-orange-50/50 dark:bg-orange-600/5 border border-orange-100 dark:border-orange-500/10 space-y-1.5">
+                          <div className="flex items-center gap-2 text-[#FF6D00]">
+                            <Activity size={14} className="animate-pulse" />
+                            <span className="text-[10px] font-black uppercase tracking-wider">Jain Method & Natural Remedies | जैन पद्धति उपचार</span>
+                          </div>
+                          <p className="text-gray-700 dark:text-gray-300 text-xs md:text-sm leading-relaxed font-semibold">
+                            {lang === 'en' ? item.jainMethod.en : item.jainMethod.hi}
+                          </p>
+                        </div>
+
+                        {/* Dietary Rules block */}
+                        <div className="p-4 rounded-2xl bg-emerald-50/50 dark:bg-emerald-600/5 border border-emerald-100 dark:border-emerald-500/10 space-y-1.5">
+                          <div className="flex items-center gap-2 text-[#00C853]">
+                            <Apple size={14} />
+                            <span className="text-[10px] font-black uppercase tracking-wider">Strict Dietary Codes (Ahimsa Ahara) | आहार मर्यादा नियम</span>
+                          </div>
+                          <p className="text-gray-700 dark:text-gray-300 text-xs md:text-sm leading-relaxed font-semibold">
+                            {lang === 'en' ? item.dietRules.en : item.dietRules.hi}
+                          </p>
+                        </div>
+
+                        {/* Spiritual Chanting block */}
+                        <div className="p-4 rounded-2xl bg-blue-50/50 dark:bg-blue-600/5 border border-blue-100 dark:border-blue-500/10 space-y-1.5">
+                          <div className="flex items-center gap-2 text-[#2962FF]">
+                            <Sparkles size={14} className="fill-[#2962FF]/10" />
+                            <span className="text-[10px] font-black uppercase tracking-wider">Spiritual & Mantra Healing | आध्यात्मिक एवं मंत्र ध्वनि</span>
+                          </div>
+                          <p className="text-gray-700 dark:text-gray-300 text-xs md:text-sm leading-relaxed font-semibold">
+                            {lang === 'en' ? item.spiritualHeal.en : item.spiritualHeal.hi}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+          </div>
+        </div>
+      )}
+
+      {/* News Tab Removed */}
 
       {/* Dynamic JBT Premium Help Modal */}
       {showHelpModal && (
@@ -1218,10 +1074,10 @@ export default function KnowledgePage() {
                     : 'सदाचार और सुसंस्कार की नीव रखने वाले बालबोध भाग १, २, ३ का साक्षात अध्ययन करें, जिसमें आवाज़ स्वाध्याय सुविधा भी है।'}
                 </li>
                 <li>
-                  <strong className="text-[#FFD54F]">{lang === 'en' ? 'Academy Graduation Runs:' : 'संस्कार प्रमाण पत्र परीक्षा:'}</strong>{' '}
+                  <strong className="text-[#FFD54F]">{lang === 'en' ? 'Interactive Jain Games:' : 'जैन सुसंस्कार गेम्स:'}</strong>{' '}
                   {lang === 'en'
-                    ? 'Take 5-question moral exams, enter student names, and generate officially certified digital merit sheets.'
-                    : '५ महत्वपूर्ण प्रश्नों की गुरुकुल परीक्षा दें, विद्यार्थी का नाम दर्ज करें और सुसंस्कार सनद प्राप्त कर डाउनलोड करें।'}
+                    ? 'Play world-class Jain moral and philosophical games designed to learn and review values interactively.'
+                    : 'मनोरंजक एवं ज्ञानवर्धक विश्वस्तरीय जैन गेम्स खेलें और सुसंस्कार चर्या व जीवन मूल्यों को खेल-खेल में सीखें।'}
                 </li>
               </ul>
             </div>

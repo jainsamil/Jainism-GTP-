@@ -12,9 +12,10 @@ import { useLanguage } from '../contexts/LanguageContext';
 
 interface SectionAiAgentProps {
   section: string;
+  align?: 'left' | 'right';
 }
 
-export default function SectionAiAgent({ section }: SectionAiAgentProps) {
+export default function SectionAiAgent({ section, align = 'right' }: SectionAiAgentProps) {
   const { language } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [unlocked, setUnlocked] = useState(true);
@@ -68,7 +69,6 @@ export default function SectionAiAgent({ section }: SectionAiAgentProps) {
       panchang: 'festivals',
       'verified-food': 'knowledge',
       'vihar-tracker': 'saints',
-      'dharamshala-booking': 'tirth',
       'manuscript-library': 'aagams'
     };
 
@@ -114,15 +114,25 @@ export default function SectionAiAgent({ section }: SectionAiAgentProps) {
     }
   };
 
-  const handleUnlock = (e: React.FormEvent) => {
+  const handleUnlock = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Validate password securely without exposing any hints on screen
-    if (passcode === 'SamilJain@2026' || passcode === 'samil123') {
-      setUnlocked(true);
-      setErrorMsg('');
-      addLog(`[SECURITY] Developer authenticated successfully. Active control panel unlocked for ${section}.`);
-    } else {
-      setErrorMsg('Unauthorized Entry Code.');
+    setErrorMsg('');
+    try {
+      const response = await fetch('/api/verify-passcode', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ passcode })
+      });
+      const data = await response.json();
+      if (response.ok && data.verified) {
+        setUnlocked(true);
+        setErrorMsg('');
+        addLog(`[SECURITY] Developer authenticated successfully. Active control panel unlocked for ${section}.`);
+      } else {
+        setErrorMsg('Unauthorized Entry Code.');
+      }
+    } catch (err) {
+      setErrorMsg('Security gateway offline. Please try again.');
     }
   };
 
@@ -342,7 +352,10 @@ export default function SectionAiAgent({ section }: SectionAiAgentProps) {
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-24 left-6 md:left-auto md:right-24 w-12 h-12 rounded-full bg-gradient-to-r from-[#FF6D00] to-[#FF8A65] hover:from-[#FF8A65] hover:to-[#FF6D00] text-white flex items-center justify-center shadow-[0_4px_20px_rgba(255,109,0,0.4)] hover:scale-110 active:scale-95 transition-all z-40 border border-white/20 animate-bounce"
+        className={cn(
+          "fixed bottom-24 w-12 h-12 rounded-full bg-gradient-to-r from-[#FF6D00] to-[#FF8A65] hover:from-[#FF8A65] hover:to-[#FF6D00] text-white flex items-center justify-center shadow-[0_4px_20px_rgba(255,109,0,0.4)] hover:scale-110 active:scale-95 transition-all z-40 border border-white/20 animate-bounce",
+          align === 'left' ? "left-6" : "left-6 md:left-auto md:right-24"
+        )}
         title="Page Developer Agent (AI)"
       >
         <Sparkles size={18} className="drop-shadow-[0_0_4px_rgba(255,255,255,0.6)]" />

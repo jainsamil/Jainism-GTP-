@@ -32,9 +32,11 @@ import BhaktamarPage from './pages/Bhaktamar';
 import DietPage from './pages/Diet';
 
 import VerifiedFoodPage from './pages/VerifiedFood';
+import DharamshalaPage from './pages/Dharamshala';
 import ViharTrackerPage from './pages/ViharTracker';
-import DharamshalaBookingPage from './pages/DharamshalaBooking';
 import ManuscriptLibraryPage from './pages/ManuscriptLibrary';
+import JainNewsPage from './pages/JainNews';
+import JainStorePage from './pages/JainStore';
 
 import PrivacyPolicyPage from './pages/PrivacyPolicy';
 import TermsPage from './pages/Terms';
@@ -89,11 +91,13 @@ function Layout({ children }: { children: React.ReactNode }) {
            location.pathname !== '/saints' && 
            location.pathname !== '/verified-food' && 
            location.pathname !== '/vihar-tracker' && 
-           location.pathname !== '/dharamshala-booking' && 
            location.pathname !== '/manuscript-library' && 
            location.pathname !== '/privacy-policy' && 
            location.pathname !== '/terms' && 
-           location.pathname !== '/contact' && (
+           location.pathname !== '/contact' && 
+           location.pathname !== '/store' && 
+           location.pathname !== '/news' && 
+           location.pathname !== '/dharamshalas' && (
             <button
               onClick={toggleLanguage}
               className="w-10 h-10 bg-white/80 dark:bg-[#121212]/80 backdrop-blur-md border border-gray-200 dark:border-white/10 rounded-full flex items-center justify-center text-[#FF8A65] hover:bg-gray-100 dark:hover:bg-[#1A1A1A] transition-all shadow-sm"
@@ -187,9 +191,11 @@ export default function App() {
                 <Route path="/bhaktamar" element={<BhaktamarPage />} />
                 <Route path="/diet" element={<DietPage />} />
                 <Route path="/verified-food" element={<VerifiedFoodPage />} />
+                <Route path="/dharamshalas" element={<DharamshalaPage />} />
                 <Route path="/vihar-tracker" element={<ViharTrackerPage />} />
-                <Route path="/dharamshala-booking" element={<DharamshalaBookingPage />} />
                 <Route path="/manuscript-library" element={<ManuscriptLibraryPage />} />
+                <Route path="/news" element={<JainNewsPage />} />
+                <Route path="/store" element={<JainStorePage />} />
                 <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
                 <Route path="/terms" element={<TermsPage />} />
                 <Route path="/contact" element={<ContactPage />} />

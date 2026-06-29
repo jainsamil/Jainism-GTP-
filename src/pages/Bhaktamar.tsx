@@ -18,6 +18,7 @@ export default function BhaktamarPage() {
   const [audioError, setAudioError] = useState<string | null>(null);
   const [audioTime, setAudioTime] = useState(0);
   const [audioDuration, setAudioDuration] = useState(0);
+  const [streamOption, setStreamOption] = useState<'proxied' | 'direct' | 'backup'>('proxied');
   const audioInstanceRef = useRef<HTMLAudioElement | null>(null);
   const [activeTab, setActiveTab] = useState<'hindi' | 'english' | 'remedy' | 'jap'>('hindi');
 
@@ -82,35 +83,11 @@ export default function BhaktamarPage() {
     const handleCanPlay = () => {
       setAudioLoading(false);
     };
-    const getProxiedUrl = (url: string) => {
-      return url.startsWith('http') && !url.includes(window.location.host)
-        ? `/api/audio-proxy?url=${encodeURIComponent(url)}`
-        : url;
-    };
 
     const handleError = (e: any) => {
-      console.error("Bhaktamar audio loading error:", e);
+      console.error("Bhaktamar audio loading error:", e, audio.src);
       setAudioLoading(false);
-      setAudioError("Primary stotra stream offline. Switching to standby relaxation stream...");
-      
-      const standbyUrl = getProxiedUrl("https://archive.org/download/BhaktamarStotra_201306/Bhaktamar%20Stotra.mp3");
-      setTimeout(() => {
-        if (audioInstanceRef.current) {
-          audioInstanceRef.current.src = standbyUrl;
-          audioInstanceRef.current.load();
-          const playPromise = audioInstanceRef.current.play();
-          if (playPromise !== undefined) {
-            playPromise.catch(err => {
-              if (err.name === 'AbortError') {
-                console.log("Standby play aborted gracefully.");
-              } else {
-                console.error("Standby play failed:", err);
-                setAudioError("Standby playback failed.");
-              }
-            });
-          }
-        }
-      }, 1000);
+      setAudioError("Stotra stream connection timed out. Please try switching the audio channel below.");
     };
 
     audio.addEventListener('play', handlePlay);
@@ -121,10 +98,6 @@ export default function BhaktamarPage() {
     audio.addEventListener('loadstart', handleLoadStart);
     audio.addEventListener('canplay', handleCanPlay);
     audio.addEventListener('error', handleError);
-
-    // Load authentic complete Bhaktamar Stotra audio
-    audio.src = getProxiedUrl("https://archive.org/download/BhaktamarStotra_201306/Bhaktamar%20Stotra.mp3");
-    audio.load();
 
     return () => {
       audio.pause();
@@ -162,20 +135,55 @@ export default function BhaktamarPage() {
     }
   }, [isPlayingAudio]);
 
+  const initAudioSource = (opt: 'proxied' | 'direct' | 'backup') => {
+    const audio = audioInstanceRef.current;
+    if (!audio) return;
+    
+    setAudioLoading(true);
+    setAudioError(null);
+    audio.pause();
+
+    let targetUrl = "";
+    if (opt === 'proxied') {
+      targetUrl = `/api/audio-proxy?url=${encodeURIComponent("https://archive.org/download/BhaktamarStotra_201306/Bhaktamar%20Stotra.mp3")}`;
+    } else if (opt === 'direct') {
+      targetUrl = "https://ia800900.us.archive.org/15/items/BhaktamarStotra_201306/Bhaktamar%20Stotra.mp3";
+    } else {
+      targetUrl = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3";
+    }
+
+    audio.src = targetUrl;
+    audio.load();
+    audio.play().catch(err => {
+      console.warn("Failed to play current audio source option:", err);
+      if (opt === 'proxied') {
+        console.log("Preemptive auto-switch to direct node stream...");
+        setStreamOption('direct');
+        initAudioSource('direct');
+      } else {
+        setAudioError("Stream load failed. Please switch the audio channel tab below and try again.");
+      }
+    });
+  };
+
   const toggleBhaktamarPlay = () => {
     const audio = audioInstanceRef.current;
     if (!audio) return;
     if (isPlayingAudio) {
       audio.pause();
     } else {
+      // If source isn't init, load matching selection
+      if (!audio.src || audio.src === "" || audio.src === window.location.href) {
+        initAudioSource(streamOption);
+        return;
+      }
+      
       const playPromise = audio.play();
       if (playPromise !== undefined) {
         playPromise.catch(err => {
-          if (err.name === 'AbortError') {
-            console.log("Bhaktamar play request aborted gracefully.");
-          } else {
-            console.error("Bhaktamar audio active trigger error:", err);
-          }
+          console.error("Bhaktamar audio active trigger error:", err);
+          setAudioError("Autoplay restriction detected. Re-routing stream...");
+          initAudioSource(streamOption === 'proxied' ? 'direct' : 'backup');
         });
       }
     }
@@ -334,7 +342,7 @@ export default function BhaktamarPage() {
                 onClick={toggleBhaktamarPlay}
                 className={`w-11 h-11 rounded-full flex items-center justify-center shadow-md border cursor-pointer shrink-0 transition-transform hover:scale-105 ${
                   isPlayingAudio 
-                    ? 'bg-orange-500 border-orange-400 text-white animate-pulse' 
+                    ? 'bg-[#FF6D00] border-orange-400 text-white animate-pulse' 
                     : 'bg-white dark:bg-white/10 border-orange-500/20 text-[#FF6D00]'
                 }`}
                 id="shloka-play-btn"
@@ -344,7 +352,7 @@ export default function BhaktamarPage() {
 
               <div className="flex-1">
                 {audioError ? (
-                  <p className="text-[11px] text-amber-500 font-bold animate-pulse leading-normal">{audioError}</p>
+                  <p className="text-[10px] text-amber-500 font-bold animate-pulse leading-normal">{audioError}</p>
                 ) : (
                   <div className="space-y-1">
                     <input 
@@ -361,6 +369,60 @@ export default function BhaktamarPage() {
                     </div>
                   </div>
                 )}
+              </div>
+            </div>
+
+            {/* Symmetrical Stream Selection Toggles (Saves playbacks if local network is blocked) */}
+            <div className="mt-4 pt-3 w-full border-t border-orange-500/10 flex flex-col gap-2">
+              <div className="flex justify-between items-center text-[9px] font-black uppercase text-gray-400">
+                <span>{lang === 'en' ? 'Audio stream channel' : 'ऑडियो स्ट्रीम चैनल'}</span>
+                <span className="text-[#FF6D00] bg-orange-500/10 px-1.5 py-0.5 rounded text-[8px]">
+                  {streamOption === 'proxied' ? (lang === 'en' ? 'Server Proxy' : 'सर्वर प्रॉक्सी') : streamOption === 'direct' ? (lang === 'en' ? 'Direct Archive' : 'आर्काइव डायरेक्ट') : (lang === 'en' ? 'Backup Mode' : 'बैकअप चैनल')}
+                </span>
+              </div>
+              <div className="grid grid-cols-3 gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStreamOption('proxied');
+                    initAudioSource('proxied');
+                  }}
+                  className={`px-2 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer border text-center ${
+                    streamOption === 'proxied'
+                      ? 'bg-[#FF6D00] text-white border-transparent shadow-sm'
+                      : 'bg-white/50 dark:bg-black/25 text-gray-600 dark:text-gray-400 border-gray-200/50 dark:border-white/5 hover:bg-gray-100 dark:hover:bg-white/5'
+                  }`}
+                >
+                  📡 {lang === 'en' ? 'Proxy' : 'प्रॉक्सी'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStreamOption('direct');
+                    initAudioSource('direct');
+                  }}
+                  className={`px-2 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer border text-center ${
+                    streamOption === 'direct'
+                      ? 'bg-[#FF6D00] text-white border-transparent shadow-sm'
+                      : 'bg-white/50 dark:bg-black/25 text-gray-600 dark:text-gray-400 border-gray-200/50 dark:border-white/5 hover:bg-gray-100 dark:hover:bg-white/5'
+                  }`}
+                >
+                  🕋 {lang === 'en' ? 'Direct' : 'डायरेक्ट'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStreamOption('backup');
+                    initAudioSource('backup');
+                  }}
+                  className={`px-2 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer border text-center ${
+                    streamOption === 'backup'
+                      ? 'bg-[#FF6D00] text-white border-transparent shadow-sm'
+                      : 'bg-white/50 dark:bg-black/25 text-gray-600 dark:text-gray-400 border-gray-200/50 dark:border-white/5 hover:bg-gray-100 dark:hover:bg-white/5'
+                  }`}
+                >
+                  ⚙️ {lang === 'en' ? 'Backup' : 'बैकअप'}
+                </button>
               </div>
             </div>
           </div>
