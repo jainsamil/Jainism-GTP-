@@ -104,6 +104,17 @@ export default function MediaPage() {
       // Add to history
       addToHistory(currentTrack.id);
 
+      // Force update videoUrl and thumbnail for Bhagwan Mahavir Movie in currentTrack state
+      const titleEn = (typeof currentTrack.title === 'object' ? currentTrack.title.en : currentTrack.title || '').toLowerCase();
+      const titleHi = (typeof currentTrack.title === 'object' ? currentTrack.title.hi : currentTrack.title || '').toLowerCase();
+       if (currentTrack.id === 'movie_1' || (currentTrack.type === 'movies' && (titleEn.includes('mahavir') || titleHi.includes('महावीर')))) {
+        if (currentTrack.videoUrl !== "https://www.youtube.com/embed/3apHlQW5M2g") {
+          currentTrack.videoUrl = "https://www.youtube.com/embed/3apHlQW5M2g";
+          currentTrack.thumbnail = "https://img.youtube.com/vi/3apHlQW5M2g/hqdefault.jpg";
+        }
+        currentTrack.embedDisabled = true;
+      }
+
       const isVideo = ['movies', 'webseries', 'digital_stories', 'devotional_videos'].includes(currentTrack.type);
       if (isVideo) {
         // Stop audio engine if video is opened
@@ -152,46 +163,102 @@ export default function MediaPage() {
       setCurrentTrack(fallbackMediaData.movies[0]);
     }
 
+    const cleanAndFilterItems = (items: any[]) => {
+      return items
+        .filter((item: any) => {
+          if (item.deleted === true) return false;
+          
+          const titleEn = (typeof item.title === 'object' ? item.title.en : item.title || '').toLowerCase();
+          const titleHi = (typeof item.title === 'object' ? item.title.hi : item.title || '').toLowerCase();
+          
+          // Remove "राजा श्रेणिक और अनाथी मुनि की प्रेरक कहानी"
+          if ((titleEn.includes('shrenik') && titleEn.includes('anathi')) ||
+              (titleHi.includes('श्रेणिक') && titleHi.includes('अनाथी'))) {
+            return false;
+          }
+          return true;
+        })
+        .map((item: any) => {
+          const copy = { ...item };
+          const titleEn = typeof copy.title === 'object' ? copy.title.en : copy.title || '';
+          const titleHi = typeof copy.title === 'object' ? copy.title.hi : copy.title || '';
+          
+          // Fix playlist thumbnails
+          if (copy.id === 'pravachan_1' || titleEn.includes('Collection 1') || titleHi.includes('११६ प्रवचन')) {
+            copy.thumbnail = 'https://img.youtube.com/vi/mG0w9p9Y6lY/hqdefault.jpg';
+          } else if (copy.id === 'pravachan_2' || titleEn.includes('Collection 2') || titleHi.includes('१५७ प्रवचन')) {
+            copy.thumbnail = 'https://img.youtube.com/vi/Y0rQ1I7lC0w/hqdefault.jpg';
+          } else if (copy.id === 'pravachan_3' || titleEn.includes('Universal Jain') || titleHi.includes('२७९ प्रवचन')) {
+            copy.thumbnail = 'https://img.youtube.com/vi/1B16N8X6i2w/hqdefault.jpg';
+          }
+
+          // Override Bhagwan Mahavir Movie link and thumbnail to ensure it always uses the correct working embed URL
+          const lowerTitleEn = titleEn.toLowerCase();
+          const lowerTitleHi = titleHi.toLowerCase();
+          if (copy.id === 'movie_1' || (copy.type === 'movies' && (lowerTitleEn.includes('mahavir') || lowerTitleHi.includes('महावीर')))) {
+            copy.videoUrl = "https://www.youtube.com/embed/3apHlQW5M2g";
+            copy.thumbnail = "https://img.youtube.com/vi/3apHlQW5M2g/hqdefault.jpg";
+          }
+          
+          // General extract thumbnail from youtube URL
+          if (!copy.thumbnail || copy.thumbnail.trim() === '' || copy.thumbnail.includes('videoseries') || copy.thumbnail.includes('list=')) {
+            if (copy.videoUrl) {
+              const ytMatch = copy.videoUrl.match(/(?:embed\/|v=|vi\/|youtu\.be\/|\/v\/|shorts\/)([^#\&\?]*)/);
+              if (ytMatch && ytMatch[1] && ytMatch[1].length === 11) {
+                copy.thumbnail = `https://img.youtube.com/vi/${ytMatch[1]}/hqdefault.jpg`;
+              }
+            }
+          }
+          
+          return copy;
+        });
+    };
+
     const unsubscribe = onSnapshot(collection(db, 'media'), (snapshot) => {
-      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as any));
+      const rawData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as any));
+      const deletedIds = new Set(rawData.filter((item: any) => item.deleted === true).map(item => item.id));
+      const activeData = rawData.filter((item: any) => item.deleted !== true);
       
-      const movies = data.filter((item: any) => item.type === 'movies');
-      const webseries = data.filter((item: any) => item.type === 'webseries');
-      const digitalStories = data.filter((item: any) => item.type === 'digital_stories' || item.type === 'digital-stories');
-      const devotionalVideos = data.filter((item: any) => item.type === 'devotional_videos' || item.type === 'devotional-videos');
-      const stories = data.filter((item: any) => item.type === 'stories');
-      const bhajans = data.filter((item: any) => item.type === 'bhajans');
-      const audiobooks = data.filter((item: any) => item.type === 'audiobooks');
+      const movies = activeData.filter((item: any) => item.type === 'movies');
+      const webseries = activeData.filter((item: any) => item.type === 'webseries');
+      const digitalStories = activeData.filter((item: any) => item.type === 'digital_stories' || item.type === 'digital-stories');
+      const devotionalVideos = activeData.filter((item: any) => item.type === 'devotional_videos' || item.type === 'devotional-videos');
+      const stories = activeData.filter((item: any) => item.type === 'stories');
+      const bhajans = activeData.filter((item: any) => item.type === 'bhajans');
+      const audiobooks = activeData.filter((item: any) => item.type === 'audiobooks');
       
-      const updMovies = movies.length > 0 ? movies : fallbackMediaData.movies;
-      const updWebseries = webseries.length > 0 ? webseries : fallbackMediaData.webseries;
-      const updDigitalStories = digitalStories.length > 0 ? digitalStories : fallbackMediaData.digital_stories;
-      const updDevotionalVideos = devotionalVideos.length > 0 ? devotionalVideos : fallbackMediaData.devotional_videos;
-      const updStories = stories.length > 0 ? stories : fallbackMediaData.stories;
-      const updBhajans = bhajans.length > 0 ? bhajans : fallbackMediaData.bhajans;
-      const updAudiobooks = audiobooks.length > 0 ? audiobooks : fallbackMediaData.audiobooks;
+      const mergeItems = (firebaseItems: any[], fallbackItems: any[]) => {
+        const merged = [...firebaseItems];
+        const firebaseIds = new Set(firebaseItems.map(item => item.id));
+        fallbackItems.forEach(item => {
+          if (!firebaseIds.has(item.id) && !deletedIds.has(item.id)) {
+            merged.push(item);
+          }
+        });
+        return cleanAndFilterItems(merged);
+      };
 
       setMediaData({
-        movies: updMovies,
-        webseries: updWebseries,
-        digital_stories: updDigitalStories,
-        devotional_videos: updDevotionalVideos,
-        stories: updStories,
-        bhajans: updBhajans,
-        audiobooks: updAudiobooks,
+        movies: mergeItems(movies, fallbackMediaData.movies),
+        webseries: mergeItems(webseries, fallbackMediaData.webseries),
+        digital_stories: mergeItems(digitalStories, fallbackMediaData.digital_stories),
+        devotional_videos: mergeItems(devotionalVideos, fallbackMediaData.devotional_videos),
+        stories: mergeItems(stories, fallbackMediaData.stories),
+        bhajans: mergeItems(bhajans, fallbackMediaData.bhajans),
+        audiobooks: mergeItems(audiobooks, fallbackMediaData.audiobooks),
       });
 
       setLoading(false);
     }, (error) => {
       console.error('Error fetching media, loading fallback data:', error);
       setMediaData({
-        movies: fallbackMediaData.movies,
-        webseries: fallbackMediaData.webseries,
-        digital_stories: fallbackMediaData.digital_stories,
-        devotional_videos: fallbackMediaData.devotional_videos,
-        stories: fallbackMediaData.stories,
-        bhajans: fallbackMediaData.bhajans,
-        audiobooks: fallbackMediaData.audiobooks,
+        movies: cleanAndFilterItems(fallbackMediaData.movies),
+        webseries: cleanAndFilterItems(fallbackMediaData.webseries),
+        digital_stories: cleanAndFilterItems(fallbackMediaData.digital_stories),
+        devotional_videos: cleanAndFilterItems(fallbackMediaData.devotional_videos),
+        stories: cleanAndFilterItems(fallbackMediaData.stories),
+        bhajans: cleanAndFilterItems(fallbackMediaData.bhajans),
+        audiobooks: cleanAndFilterItems(fallbackMediaData.audiobooks),
       });
       setLoading(false);
     });
@@ -497,7 +564,7 @@ export default function MediaPage() {
 
   return (
     <div className={cn(
-      "min-h-full p-4 md:p-8 pb-24 text-gray-900 dark:text-gray-100 transition-colors duration-300 bg-[#FAF9F5] dark:bg-[#070707]",
+      "min-h-full p-4 md:p-8 pb-24 text-gray-900 dark:text-gray-100 transition-colors duration-300 bg-transparent",
       theaterMode && "dark:bg-[#000000] bg-zinc-950 text-white"
     )}>
       
@@ -511,7 +578,7 @@ export default function MediaPage() {
         "sticky top-0 z-40 backdrop-blur-md -mx-4 md:-mx-8 px-4 md:px-8 pt-4 pb-4 mb-6 border-b flex items-center justify-between gap-4 transition-colors duration-300",
         theaterMode 
           ? "bg-black/80 border-white/5 text-white" 
-          : "bg-white/95 dark:bg-[#0A0A0A]/95 border-gray-200/50 dark:border-white/5"
+          : "bg-[#FCF8F2]/90 dark:bg-[#0A0503]/90 border-gray-200/50 dark:border-white/5"
       )}>
         <div className="flex items-center gap-3 min-w-0">
           <button 
@@ -694,16 +761,73 @@ export default function MediaPage() {
               {['movies', 'webseries', 'digital_stories', 'devotional_videos'].includes(currentTrack.type) ? (
                 /* HIGH END VIDEO STREAM BOX */
                 <div className="w-full aspect-video bg-black rounded-3xl overflow-hidden border border-white/5 shadow-2xl relative">
-                  <iframe
-                    src={selectedEpisode ? selectedEpisode.videoUrl : currentTrack.videoUrl}
-                    title={language === 'en' ? currentTrack.title.en : currentTrack.title.hi}
-                    className="w-full h-full"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                    allowFullScreen
-                  />
-                  <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-md px-3.5 py-1.5 rounded-xl border border-white/10 text-[10px] font-bold text-white tracking-wide uppercase pointer-events-none">
-                    ⭐ 1080p Pure Stream
-                  </div>
+                  {currentTrack.embedDisabled ? (
+                    /* COHESIVE ULTRA-PREMIUM CINEMATIC BANNER FOR EMBED-RESTRICTED VIDEOS */
+                    <div className="absolute inset-0 flex flex-col justify-between p-6 sm:p-8 text-white relative z-10">
+                      {/* Blurred backdrop image of the movie poster */}
+                      <div className="absolute inset-0 -z-10 overflow-hidden">
+                        <img 
+                          src={currentTrack.thumbnail} 
+                          alt="Backdrop" 
+                          className="w-full h-full object-cover scale-105 blur-md brightness-[0.35]" 
+                          referrerPolicy="no-referrer"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-black/85 to-black/50" />
+                      </div>
+
+                      {/* Header Badge */}
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-black tracking-widest uppercase text-[#FF4E00] font-mono bg-[#FF4E00]/10 px-3 py-1 rounded-full border border-[#FF4E00]/25 backdrop-blur-md">
+                          🍿 {language === 'en' ? 'HIGH-DEFINITION CINEMA' : 'हाई-डेफिनिशन सिनेमा'}
+                        </span>
+                        <div className="bg-black/60 backdrop-blur-md px-3.5 py-1.5 rounded-xl border border-white/10 text-[10px] font-bold tracking-wide uppercase">
+                          ⭐ {language === 'en' ? 'PURE STREAM' : 'शुद्ध प्रसारण'}
+                        </div>
+                      </div>
+
+                      {/* Middle: Call to Action (Play Button & Watch link) */}
+                      <div className="flex flex-col items-center justify-center text-center py-4 space-y-4">
+                        <a 
+                          href={selectedEpisode ? selectedEpisode.videoUrl.replace('embed/', 'watch?v=') : currentTrack.videoUrl.replace('embed/', 'watch?v=')} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="group/btn flex flex-col items-center justify-center cursor-pointer"
+                        >
+                          {/* Pulsing Play Button */}
+                          <div className="w-16 h-16 sm:w-20 sm:h-20 bg-[#FF4E00] hover:bg-[#FF6A00] rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(255,78,0,0.6)] group-hover/btn:scale-110 transition-all duration-300 relative mb-4">
+                            <span className="absolute inset-0 rounded-full bg-[#FF4E00]/40 animate-ping" />
+                            <Play size={28} className="fill-white text-white ml-1.5" />
+                          </div>
+                          
+                          <div className="px-6 py-3.5 bg-gradient-to-r from-[#FF4E00] to-[#FF9F00] hover:from-orange-600 hover:to-orange-700 text-white font-black rounded-2xl text-xs sm:text-sm uppercase tracking-wider shadow-lg shadow-orange-500/20 active:scale-95 transition-all">
+                            {language === 'en' ? 'Watch Directly on YouTube 🍿' : 'सीधे यूट्यूब पर देखें 🍿'}
+                          </div>
+                        </a>
+                      </div>
+
+                      {/* Footer/Notice text */}
+                      <div className="text-center bg-black/40 backdrop-blur-sm p-3 rounded-2xl border border-white/5">
+                        <p className="text-[11px] sm:text-xs text-gray-300 font-medium max-w-xl mx-auto leading-relaxed">
+                          ⚠️ {language === 'en' 
+                            ? "This spiritual movie's playback is restricted for embedding by its creator. Click the button above to watch it instantly in Full HD directly on YouTube!" 
+                            : "इस पावन फिल्म का सीधा प्रसारण यूट्यूब क्रिएटर द्वारा प्रतिबंधित किया गया है। यूट्यूब पर पूर्ण HD में तुरंत देखने के लिए ऊपर दिए बटन पर क्लिक करें!"}
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <iframe
+                        src={selectedEpisode ? selectedEpisode.videoUrl : currentTrack.videoUrl}
+                        title={language === 'en' ? currentTrack.title.en : currentTrack.title.hi}
+                        className="w-full h-full"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowFullScreen
+                      />
+                      <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-md px-3.5 py-1.5 rounded-xl border border-white/10 text-[10px] font-bold text-white tracking-wide uppercase pointer-events-none">
+                        ⭐ 1080p Pure Stream
+                      </div>
+                    </>
+                  )}
                 </div>
               ) : (
                 /* DELUXE AUDIO PLAYBACK VISUALIZER */
@@ -1077,58 +1201,72 @@ export default function MediaPage() {
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-red-600 animate-pulse" />
               <h3 className="text-xs font-black text-red-600 dark:text-red-400 uppercase tracking-widest font-mono">
-                {language === 'en' ? 'LIVE VIRTUAL CHANNELS' : 'लाइव धार्मिक प्रसारण केन्द्र'}
+                {language === 'en' ? 'LIVE JAIN CHANNELS' : 'लाइव जैन प्रसारण केन्द्र'}
               </h3>
             </div>
             <span className="text-[9px] font-black uppercase bg-red-600 text-white px-2.5 py-0.5 rounded-lg animate-pulse font-mono tracking-widest">
-              {language === 'en' ? 'ONLINE' : 'सक्रिय'}
+              {language === 'en' ? 'LIVE NOW' : 'सक्रिय'}
             </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {[
               {
-                id: "live_chan_1",
-                title: { en: "24/7 Jinvaani Pravachan Pravah", hi: "२४/७ जिनवाणी प्रवचन प्रवाह" },
-                desc: { en: "Non-stop sacred historical sermons from revered Acharyas.", hi: "पूज्य आचार्यों के मंगल ऐतिहासिक प्रवचनों का निरंतर पावन प्रवाह।" },
-                viewers: "1.2K watching"
+                id: "live_chan_jinvani",
+                title: { en: "Jinvani Channel Live", hi: "जिनवाणी लाइव टीवी" },
+                desc: { en: "Live discourses, divine aarti, and daily continuous spiritual stream.", hi: "मंगल प्रवचन, अभिषेक, शांतिधारा और भक्ति भजनों का निरंतर लाइव प्रसारण।" },
+                videoUrl: "https://www.youtube.com/embed/Ol9daUrzQwE",
+                thumbnail: "https://images.unsplash.com/photo-1609137144813-f66fcc430f80?q=80&w=600&auto=format&fit=crop",
+                viewers: "1.5K watching"
               },
               {
-                id: "live_chan_2",
-                title: { en: "Continuous Namokar Cosmos Chant", hi: "अनादि णमोकार मंत्र ध्यान योग" },
-                desc: { en: "Cosmic meditative chanting with high-frequency healing frequencies.", hi: "प्राण रक्षक णमोकार मंत्र की हीलिंग तरंगों पर आधारित ध्यान।" },
-                viewers: "850 watching"
+                id: "live_chan_aadinath",
+                title: { en: "Aadinath Channel Live", hi: "आदिनाथ लाइव टीवी" },
+                desc: { en: "Continuous spiritual path, Panch Kalyanaka katha, and interactive stotras.", hi: "अनादि कल्याणी आदिनाथ टीवी पर सतत भक्ति और प्राचीन शास्त्रों की पावन अमृतधारा।" },
+                videoUrl: "https://www.youtube.com/embed/L-6fsrFneq4",
+                thumbnail: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=600&auto=format&fit=crop",
+                viewers: "980 watching"
               },
               {
-                id: "live_chan_3",
-                title: { en: "Virtual Tirth Darshan Live Broadcast", hi: "श्री सम्मेद शिखरजी वंदना लाइव" },
-                desc: { en: "Sacred live visuals from golden peaks and daily morning aarti.", hi: "स्वर्ण शिखरों के प्रातःकालीन मंगल अभिषेक और दिव्य आरती दर्शन।" },
-                viewers: "2.4K watching"
+                id: "live_chan_agamvani",
+                title: { en: "Agamvani Channel Live", hi: "अगमवाणी लाइव टीवी" },
+                desc: { en: "Swadhyay of sacred Jain Agams directly from learned munis and scholars.", hi: "प्राचीन जैन आगमों का गंभीर स्वाध्याय, मुनिवाणी और पूज्य संतों के प्रवचनों का सीधा प्रसारण।" },
+                videoUrl: "https://www.youtube.com/embed/PMYs6SMaaOY",
+                thumbnail: "https://images.unsplash.com/photo-1507842217343-583bb7270b66?q=80&w=600&auto=format&fit=crop",
+                viewers: "1.1K watching"
+              },
+              {
+                id: "live_chan_paras",
+                title: { en: "Paras Channel Live", hi: "पारस टीवी लाइव" },
+                desc: { en: "Popular devotional channels with stotras, bhajans, and live tirth yatra.", hi: "भक्ति स्तोत्र, तीर्थ वंदना, गुरु वाणी और देश-विदेश के पावन महोत्सवों का निरंतर सीधा प्रसारण।" },
+                videoUrl: "https://www.youtube.com/embed/r8T4fHvLM14",
+                thumbnail: "https://images.unsplash.com/photo-1465847899084-d164df4dedc6?q=80&w=600&auto=format&fit=crop",
+                viewers: "2.1K watching"
               }
             ].map(chan => (
               <div 
                 key={chan.id}
                 onClick={() => {
-                  // Simulate live play using default video streaming sample
                   playTrack({
                     id: chan.id,
                     type: "devotional_videos",
                     title: chan.title,
                     description: chan.desc,
                     category: "LIVE TV",
-                    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-                    thumbnail: "https://images.unsplash.com/photo-1465847899084-d164df4dedc6?q=80&w=600&auto=format&fit=crop",
+                    videoUrl: chan.videoUrl,
+                    thumbnail: chan.thumbnail,
                     rating: 5.0,
                     year: "LIVE",
-                    tags: ["Live", "Chanting"]
+                    tags: ["Live", "TV"]
                   });
                 }}
                 className="bg-white dark:bg-[#121212] border border-gray-200/60 dark:border-white/5 p-4 rounded-2xl flex flex-col justify-between hover:border-red-500/40 transition-all duration-300 hover:-translate-y-0.5 cursor-pointer shadow-sm text-left group"
               >
                 <div>
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-[9px] px-2 py-0.5 bg-red-50 dark:bg-red-500/10 text-red-600 rounded-md font-mono font-black uppercase">
-                      📺 {language === 'en' ? 'TUNE IN' : 'प्रसारण'}
+                    <span className="text-[9px] px-2 py-0.5 bg-red-50 dark:bg-red-500/10 text-red-600 rounded-md font-mono font-black uppercase flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse" />
+                      {language === 'en' ? 'LIVE STREAM' : 'सीधा प्रसारण'}
                     </span>
                     <span className="text-[9.5px] font-bold text-gray-400 font-mono">
                       {chan.viewers}
@@ -1143,7 +1281,7 @@ export default function MediaPage() {
                 </div>
 
                 <div className="pt-3 border-t border-gray-100 dark:border-white/5 mt-3 flex items-center justify-between text-[9px] font-black text-[#FF4E00] uppercase tracking-wider">
-                  <span>{language === 'en' ? 'Watch Now' : 'चैनल चालू करें'}</span>
+                  <span>{language === 'en' ? 'Tune In Now' : 'चैनल चालू करें'}</span>
                   <ExternalLink size={10} />
                 </div>
               </div>

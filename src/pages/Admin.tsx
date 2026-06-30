@@ -32,6 +32,14 @@ import { historyData } from '../data/historyData';
 import { festivalsData } from '../data/festivalsData';
 import { fallbackMediaData } from '../data/mediaData';
 
+const renderFieldVal = (val: any): string => {
+  if (!val) return '';
+  if (typeof val === 'object') {
+    return val.hi || val.en || Object.values(val)[0] || '';
+  }
+  return String(val);
+};
+
 export default function AdminPage() {
   const { user, role, loading, login } = useAuth();
   const navigate = useNavigate();
@@ -86,10 +94,12 @@ export default function AdminPage() {
         setFetchLoading(true);
         const q = query(collection(db, activeCollection));
         const unsubscribe = onSnapshot(q, (snapshot) => {
-          const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          const rawData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() as any }));
+          const deletedIds = new Set(rawData.filter(item => item.deleted === true).map(item => item.id));
+          const data = rawData.filter(item => item.deleted !== true);
           
           // Merge logic: ensure user sees all website data by default
-          const fallback = getFallbackCollectionData(activeCollection);
+          const fallback = getFallbackCollectionData(activeCollection).filter(fbItem => !deletedIds.has(fbItem.id));
           const dataMap = new Map(data.map(item => [item.id, item]));
           
           const mergedList = fallback.map(fbItem => {
@@ -259,7 +269,14 @@ export default function AdminPage() {
   const handleDelete = async (id: string) => {
     if (!window.confirm('Are you sure you want to delete this item?')) return;
     try {
-      await deleteDoc(doc(db, activeCollection, id));
+      const fallback = getFallbackCollectionData(activeCollection);
+      const isFallback = id.startsWith('fb_') || id.startsWith('mov') || id.startsWith('web') || id.startsWith('story') || id.startsWith('bhajan') || id.startsWith('book') || id.startsWith('seed_') || fallback.some(item => item.id === id);
+      
+      if (isFallback) {
+        await setDoc(doc(db, activeCollection, id), { deleted: true });
+      } else {
+        await deleteDoc(doc(db, activeCollection, id));
+      }
     } catch (error) {
       console.error('Error deleting item:', error);
     }
@@ -387,9 +404,13 @@ export default function AdminPage() {
         ];
       case 'media':
         return [
-          ...fallbackMediaData.stories.map((s: any, idx: number) => ({ id: 'fb_med_story_' + idx, ...s })),
-          ...fallbackMediaData.bhajans.map((b: any, idx: number) => ({ id: 'fb_med_bhajan_' + idx, ...b })),
-          ...fallbackMediaData.audiobooks.map((a: any, idx: number) => ({ id: 'fb_med_book_' + idx, ...a }))
+          ...fallbackMediaData.movies.map((m: any) => ({ ...m })),
+          ...fallbackMediaData.webseries.map((w: any) => ({ ...w })),
+          ...fallbackMediaData.digital_stories.map((ds: any) => ({ ...ds })),
+          ...fallbackMediaData.devotional_videos.map((dv: any) => ({ ...dv })),
+          ...fallbackMediaData.stories.map((s: any) => ({ ...s })),
+          ...fallbackMediaData.bhajans.map((b: any) => ({ ...b })),
+          ...fallbackMediaData.audiobooks.map((a: any) => ({ ...a }))
         ];
       case 'quiz':
         return [
@@ -422,14 +443,14 @@ export default function AdminPage() {
 
     if (!hasAdminAccess && role !== 'admin') {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-[#050505] flex items-center justify-center p-6 relative transition-colors duration-300">
+      <div className="min-h-screen bg-transparent flex items-center justify-center p-6 relative transition-colors duration-300">
         <button 
           onClick={() => navigate('/')}
           className="absolute top-6 left-6 p-3 bg-gray-200 dark:bg-white/5 hover:bg-gray-300 dark:hover:bg-white/10 rounded-full text-gray-800 dark:text-white transition-colors"
         >
           <ArrowLeft size={24} />
         </button>
-        <div className="bg-white dark:bg-[#121212] p-10 rounded-[2.5rem] border border-gray-200 dark:border-white/10 w-full max-w-md text-center shadow-xl">
+        <div className="bg-white/80 dark:bg-[#121212]/80 backdrop-blur-md p-10 rounded-[2.5rem] border border-gray-200 dark:border-white/10 w-full max-w-md text-center shadow-xl">
           <div className="w-20 h-20 bg-gradient-to-br from-[#FF6D00] to-[#FFD54F] rounded-full flex items-center justify-center text-black mx-auto mb-8 shadow-lg">
             <Lock size={40} />
           </div>
@@ -481,7 +502,7 @@ export default function AdminPage() {
   ] as { id: CollectionType; label: string; icon: any }[];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#050505] p-4 md:p-6 pb-24 text-gray-800 dark:text-gray-200 transition-colors duration-300">
+    <div className="min-h-screen bg-transparent p-4 md:p-6 pb-24 text-gray-800 dark:text-gray-200 transition-colors duration-300">
       <header className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 md:mb-10 pt-4 gap-4">
         <h1 className="text-2xl md:text-3xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] flex items-center gap-3">
           <LayoutDashboard className="text-[#FF6D00]" size={28} />
@@ -544,7 +565,7 @@ export default function AdminPage() {
                 "shrink-0 lg:w-full flex items-center gap-2 lg:gap-3 px-4 lg:px-6 py-3 lg:py-4 rounded-xl lg:rounded-2xl font-bold transition-all duration-300 group snap-start",
                 activeCollection === col.id 
                   ? "bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] text-black shadow-lg scale-[1.02]" 
-                  : "bg-white dark:bg-[#121212] text-gray-700 dark:text-gray-400 hover:bg-gray-200/60 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-white border border-gray-200 dark:border-white/5"
+                  : "bg-white/80 dark:bg-[#121212]/80 backdrop-blur-md text-gray-700 dark:text-gray-400 hover:bg-gray-200/60 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-white border border-gray-200 dark:border-white/5"
               )}
             >
               <col.icon size={18} className={cn(activeCollection === col.id ? "text-black" : "text-[#FF6D00]")} />
@@ -570,7 +591,7 @@ export default function AdminPage() {
                 <button
                   key={col.id}
                   onClick={() => setActiveCollection(col.id)}
-                  className="bg-white dark:bg-[#121212] p-8 rounded-[2rem] border border-gray-200 dark:border-white/10 hover:border-[#FF6D00]/50 transition-all group text-left relative overflow-hidden shadow-sm dark:shadow-none"
+                  className="bg-white/80 dark:bg-[#121212]/80 backdrop-blur-md p-8 rounded-[2rem] border border-gray-200 dark:border-white/10 hover:border-[#FF6D00]/50 transition-all group text-left relative overflow-hidden shadow-sm dark:shadow-none"
                 >
                   <div className="absolute top-0 right-0 w-32 h-32 bg-[#FF6D00]/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 group-hover:bg-[#FF6D00]/10 transition-all" />
                   <div className="w-14 h-14 rounded-2xl bg-[#FF6D00]/10 flex items-center justify-center text-[#FF6D00] mb-6 group-hover:scale-110 transition-transform">
@@ -584,7 +605,7 @@ export default function AdminPage() {
           ) : activeCollection === 'analytics' ? (
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-white dark:bg-[#121212] p-6 rounded-[2rem] border border-gray-200 dark:border-white/10 shadow-lg dark:shadow-2xl relative overflow-hidden">
+                <div className="bg-white/80 dark:bg-[#121212]/80 backdrop-blur-md p-6 rounded-[2rem] border border-gray-200 dark:border-white/10 shadow-lg dark:shadow-2xl relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-32 h-32 bg-[#FF6D00]/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
                   <div className="relative z-10">
                     <div className="w-12 h-12 rounded-2xl bg-[#FF6D00]/10 flex items-center justify-center text-[#FF6D00] mb-4">
@@ -594,7 +615,7 @@ export default function AdminPage() {
                     <p className="text-xs text-gray-500 font-bold uppercase tracking-widest">Total Users</p>
                   </div>
                 </div>
-                <div className="bg-white dark:bg-[#121212] p-6 rounded-[2rem] border border-gray-200 dark:border-white/10 shadow-lg dark:shadow-2xl relative overflow-hidden">
+                <div className="bg-white/80 dark:bg-[#121212]/80 backdrop-blur-md p-6 rounded-[2rem] border border-gray-200 dark:border-white/10 shadow-lg dark:shadow-2xl relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-32 h-32 bg-[#FFD54F]/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
                   <div className="relative z-10">
                     <div className="w-12 h-12 rounded-2xl bg-[#FFD54F]/10 flex items-center justify-center text-[#FFD54F] mb-4">
@@ -604,7 +625,7 @@ export default function AdminPage() {
                     <p className="text-xs text-gray-500 font-bold uppercase tracking-widest">Active Students</p>
                   </div>
                 </div>
-                <div className="bg-white dark:bg-[#121212] p-6 rounded-[2rem] border border-gray-200 dark:border-white/10 shadow-lg dark:shadow-2xl relative overflow-hidden">
+                <div className="bg-white/80 dark:bg-[#121212]/80 backdrop-blur-md p-6 rounded-[2rem] border border-gray-200 dark:border-white/10 shadow-lg dark:shadow-2xl relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-32 h-32 bg-[#00E676]/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
                   <div className="relative z-10">
                     <div className="w-12 h-12 rounded-2xl bg-[#00E676]/10 flex items-center justify-center text-[#00E676] mb-4">
@@ -617,7 +638,7 @@ export default function AdminPage() {
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="bg-white dark:bg-[#121212] p-6 rounded-[2rem] border border-gray-200 dark:border-white/10 shadow-lg dark:shadow-2xl">
+                <div className="bg-white/80 dark:bg-[#121212]/80 backdrop-blur-md p-6 rounded-[2rem] border border-gray-200 dark:border-white/10 shadow-lg dark:shadow-2xl">
                   <h3 className="text-lg font-black text-gray-900 dark:text-white mb-6 uppercase tracking-widest">User Distribution</h3>
                   <div className="h-64">
                     <ResponsiveContainer width="100%" height="100%">
@@ -647,7 +668,7 @@ export default function AdminPage() {
                   </div>
                 </div>
 
-                <div className="bg-white dark:bg-[#121212] p-6 rounded-[2rem] border border-gray-200 dark:border-white/10 shadow-lg dark:shadow-2xl">
+                <div className="bg-white/80 dark:bg-[#121212]/80 backdrop-blur-md p-6 rounded-[2rem] border border-gray-200 dark:border-white/10 shadow-lg dark:shadow-2xl">
                   <h3 className="text-lg font-black text-gray-900 dark:text-white mb-6 uppercase tracking-widest">Recent Activity</h3>
                   <div className="h-64">
                     <ResponsiveContainer width="100%" height="100%">
@@ -677,7 +698,7 @@ export default function AdminPage() {
           ) : activeCollection === 'ai_agent' ? (
             <AdminAiAgent />
           ) : (
-            <div className="bg-white dark:bg-[#121212] rounded-[2rem] border border-gray-200 dark:border-white/10 overflow-hidden shadow-2xl">
+            <div className="bg-white/80 dark:bg-[#121212]/80 backdrop-blur-md rounded-[2rem] border border-gray-200 dark:border-white/10 overflow-hidden shadow-2xl">
             <div className="p-6 border-b border-gray-200 dark:border-white/5 bg-white/5 flex justify-between items-center">
               <div>
                 <h2 className="text-xl font-black text-gray-900 dark:text-white tracking-wide flex items-center gap-2">
@@ -706,33 +727,33 @@ export default function AdminPage() {
                     <div key={item.id} className="bg-white/5 p-4 rounded-2xl border border-white/5 flex items-center justify-between group hover:border-[#FF6D00]/30 transition-all">
                       <div className="flex-1 min-w-0">
                         <h3 className="font-bold text-gray-100 truncate">
-                          {activeCollection === 'aagams' ? item.title : 
+                          {activeCollection === 'aagams' ? renderFieldVal(item.title) : 
                            activeCollection === 'settings' ? 'Global App Settings' :
-                           activeCollection === 'classes' ? item.title :
-                           activeCollection === 'exams' ? item.title :
-                           activeCollection === 'media' ? item.title :
-                           activeCollection === 'vichaar' ? item.hi :
-                           activeCollection === 'quiz' ? item.q?.hi :
-                           activeCollection === 'panchang' ? item.date :
+                           activeCollection === 'classes' ? renderFieldVal(item.title) :
+                           activeCollection === 'exams' ? renderFieldVal(item.title) :
+                           activeCollection === 'media' ? renderFieldVal(item.title) :
+                           activeCollection === 'vichaar' ? renderFieldVal(item.hi) :
+                           activeCollection === 'quiz' ? renderFieldVal(item.q?.hi) :
+                           activeCollection === 'panchang' ? renderFieldVal(item.date) :
                            activeCollection === 'dharamshala_bookings' ? `${item.pilgrimName} (Rooms: ${item.guestsCount || 1})` :
-                           activeCollection === 'jain_stores' ? item.storeName :
-                           activeCollection === 'jain_products' ? item.title :
+                           activeCollection === 'jain_stores' ? renderFieldVal(item.storeName) :
+                           activeCollection === 'jain_products' ? renderFieldVal(item.title) :
                            activeCollection === 'jain_orders' ? `Order ${item.id} - ${item.customerName}` :
-                           (item.name?.hi || item.question?.hi || item.title?.hi || item.title || 'Untitled Item')}
+                           (renderFieldVal(item.name?.hi || item.name) || renderFieldVal(item.question?.hi || item.question) || renderFieldVal(item.title?.hi || item.title) || 'Untitled Item')}
                         </h3>
                         <p className="text-xs text-gray-500 font-medium mt-1 uppercase tracking-widest">
-                          {activeCollection === 'aagams' ? item.category : 
-                           activeCollection === 'classes' ? item.subject :
-                           activeCollection === 'exams' ? `${item.duration} Mins` :
-                           activeCollection === 'media' ? item.type :
-                           activeCollection === 'saints' ? item.type :
-                           activeCollection === 'vichaar' ? item.source :
-                           activeCollection === 'panchang' ? item.tithi :
-                           activeCollection === 'dharamshala_bookings' ? `CheckIn: ${item.checkInDate} • Paid: ₹${item.priceCollected} • [${item.status || 'pending'}]` :
-                           activeCollection === 'jain_stores' ? `Vendor: ${item.vendorName} • [${item.status || 'pending'}]` :
-                           activeCollection === 'jain_products' ? `Price: ₹${item.price} • Store: ${item.storeName || 'N/A'} • [${item.status || 'approved'}]` :
-                           activeCollection === 'jain_orders' ? `Total: ₹${item.totalAmount} • Phone: ${item.customerPhone} • [${item.status || 'pending'}]` :
-                           (item.category || item.kaal || 'General')}
+                          {activeCollection === 'aagams' ? renderFieldVal(item.category) : 
+                           activeCollection === 'classes' ? renderFieldVal(item.subject) :
+                           activeCollection === 'exams' ? `${renderFieldVal(item.duration)} Mins` :
+                           activeCollection === 'media' ? renderFieldVal(item.type) :
+                           activeCollection === 'saints' ? renderFieldVal(item.type) :
+                           activeCollection === 'vichaar' ? renderFieldVal(item.source) :
+                           activeCollection === 'panchang' ? renderFieldVal(item.tithi) :
+                           activeCollection === 'dharamshala_bookings' ? `CheckIn: ${renderFieldVal(item.checkInDate)} • Paid: ₹${renderFieldVal(item.priceCollected)} • [${renderFieldVal(item.status || 'pending')}]` :
+                           activeCollection === 'jain_stores' ? `Vendor: ${renderFieldVal(item.vendorName)} • [${renderFieldVal(item.status || 'pending')}]` :
+                           activeCollection === 'jain_products' ? `Price: ₹${renderFieldVal(item.price)} • Store: ${renderFieldVal(item.storeName || 'N/A')} • [${renderFieldVal(item.status || 'approved')}]` :
+                           activeCollection === 'jain_orders' ? `Total: ₹${renderFieldVal(item.totalAmount)} • Phone: ${renderFieldVal(item.customerPhone)} • [${renderFieldVal(item.status || 'pending')}]` :
+                           renderFieldVal(item.category || item.kaal || 'General')}
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
@@ -767,7 +788,7 @@ export default function AdminPage() {
       {/* Editor Modal */}
       {(isAdding || isEditing) && (
         <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300">
-          <div className="bg-white dark:bg-[#121212] rounded-[2.5rem] w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl border border-gray-200 dark:border-white/10 flex flex-col animate-in zoom-in-95 duration-300">
+          <div className="bg-white/80 dark:bg-[#121212]/80 backdrop-blur-md rounded-[2.5rem] w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl border border-gray-200 dark:border-white/10 flex flex-col animate-in zoom-in-95 duration-300">
             <div className="p-8 border-b border-gray-200 dark:border-white/5 bg-white/5 flex justify-between items-center shrink-0">
               <h2 className="text-2xl font-display font-black text-gray-900 dark:text-white flex items-center gap-3">
                 {isEditing ? <Edit2 className="text-[#FFD54F]" stroke="currentColor" /> : <PlusCircle className="text-[#00E676]" stroke="currentColor" />}

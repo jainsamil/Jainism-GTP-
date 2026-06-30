@@ -139,14 +139,20 @@ export default function FestivalsPage() {
   useEffect(() => {
     const q = query(collection(db, 'festivals'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      const preparedSeed = FALLBACK_FESTIVALS.map((seed, idx) => ({ id: `seed_${idx}`, ...seed }));
+      const rawData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() as any }));
+      const deletedIds = new Set(rawData.filter(d => d.deleted === true).map(d => d.id));
+      const deletedNamesEn = new Set(rawData.filter(d => d.deleted === true).map(d => d.name?.en));
+      const deletedNamesHi = new Set(rawData.filter(d => d.deleted === true).map(d => d.name?.hi));
       
-      const dataMap = new Map(data.map(item => [item.id, item]));
+      const activeData = rawData.filter(d => d.deleted !== true);
+      const preparedSeed = FALLBACK_FESTIVALS.map((seed, idx) => ({ id: `seed_${idx}`, ...seed }))
+        .filter(seed => !deletedIds.has(seed.id) && !deletedNamesEn.has(seed.name?.en) && !deletedNamesHi.has(seed.name?.hi));
+      
+      const dataMap = new Map(activeData.map(item => [item.id, item]));
       const merged = preparedSeed.map(seedItem => {
         let matchedItem = dataMap.get(seedItem.id);
         if (!matchedItem) {
-          const matchByName = data.find((d: any) => 
+          const matchByName = activeData.find((d: any) => 
             (d.name?.en && d.name.en === seedItem.name?.en) ||
             (d.name?.hi && d.name.hi === seedItem.name?.hi)
           );
@@ -224,10 +230,10 @@ export default function FestivalsPage() {
   }, [festivals, searchQuery, filterType, language]);
 
   return (
-    <div className="min-h-full p-6 pb-24 bg-gradient-to-b from-gray-50 to-gray-100 dark:from-[#050505] dark:to-[#0d0d0d] text-gray-905 dark:text-gray-200 relative transition-colors duration-300">
+    <div className="min-h-full p-6 pb-24 bg-transparent text-gray-905 dark:text-gray-200 relative transition-colors duration-300">
       
       {/* Unified Single Row Header */}
-      <header className="sticky top-0 z-40 bg-white/95 dark:bg-[#050505]/95 backdrop-blur-md -mx-6 px-6 py-4 mb-8 border-b border-gray-200 dark:border-white/5 flex items-center justify-between gap-2 md:gap-4 transition-colors duration-300">
+      <header className="sticky top-0 z-40 bg-[#FCF8F2]/90 dark:bg-[#0A0503]/90 backdrop-blur-md -mx-6 px-6 py-4 mb-8 border-b border-gray-200 dark:border-white/5 flex items-center justify-between gap-2 md:gap-4 transition-colors duration-300">
         <div className="flex items-center gap-2 sm:gap-4 min-w-0">
           <button onClick={() => navigate(-1)} className="p-1.5 sm:p-2 rounded-full bg-white dark:bg-white/5 border border-gray-150 dark:border-white/10 shadow-sm hover:bg-gray-100 dark:hover:bg-white/10 transition-colors cursor-pointer shrink-0 text-gray-700 dark:text-gray-300">
             <ArrowLeft size={18} className="sm:w-6 sm:h-6" />

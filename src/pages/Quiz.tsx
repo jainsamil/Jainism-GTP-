@@ -127,11 +127,19 @@ export default function QuizPage() {
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'quiz'), (snapshot) => {
-      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const rawData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() as any }));
+      const deletedQuestionsEn = new Set(rawData.filter(d => d.deleted === true).map(d => d.q?.en));
+      const deletedQuestionsHi = new Set(rawData.filter(d => d.deleted === true).map(d => d.q?.hi));
+      const deletedIds = new Set(rawData.filter(d => d.deleted === true).map(d => d.id));
       
-      const merged = [...data];
+      const activeData = rawData.filter(d => d.deleted !== true);
+      
+      const merged = [...activeData];
       FALLBACK_QUIZZES.forEach(seed => {
-        const isDuplicate = data.some((d: any) => 
+        if (deletedQuestionsEn.has(seed.q?.en) || deletedQuestionsHi.has(seed.q?.hi) || deletedIds.has(seed.id)) {
+          return;
+        }
+        const isDuplicate = activeData.some((d: any) => 
           (d.q?.en && d.q.en === seed.q?.en) || 
           (d.q?.hi && d.q.hi === seed.q?.hi)
         );
@@ -179,7 +187,7 @@ export default function QuizPage() {
 
   if (showResult) {
     return (
-      <div className="min-h-full p-6 pb-24 bg-gradient-to-b from-gray-50 to-gray-100 dark:from-[#050505] dark:to-[#0d0d0d] flex flex-col items-center justify-center text-center text-gray-910 transition-colors duration-300">
+      <div className="min-h-full p-6 pb-24 bg-transparent flex flex-col items-center justify-center text-center text-gray-910 transition-colors duration-300">
         <div className="relative mb-8 group">
           <div className="absolute -inset-2 bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] rounded-full blur-xl opacity-50 group-hover:opacity-75 transition duration-500 animate-pulse"></div>
           <div className="w-32 h-32 bg-gradient-to-br from-[#FF6D00] to-[#FFD54F] rounded-full flex items-center justify-center text-black shadow-[0_0_30px_rgba(255,109,0,0.8)] relative z-10 border-4 border-white dark:border-[#121212]">
@@ -234,7 +242,7 @@ export default function QuizPage() {
 
   if (loading) {
     return (
-      <div className="min-h-full p-6 pb-24 bg-gray-50 dark:bg-[#050505] text-gray-800 dark:text-gray-200 flex flex-col items-center justify-center transition-colors">
+      <div className="min-h-full p-6 pb-24 bg-transparent text-gray-800 dark:text-gray-200 flex flex-col items-center justify-center transition-colors">
         <Loader2 className="animate-spin mb-4 text-[#FF6D00]" size={40} />
         <p className="font-bold uppercase tracking-widest text-xs text-gray-400 dark:text-gray-500">Loading Quiz...</p>
       </div>
@@ -243,7 +251,7 @@ export default function QuizPage() {
 
   if (questions.length === 0) {
     return (
-      <div className="min-h-full p-6 pb-24 bg-gray-50 dark:bg-[#050505] text-gray-800 dark:text-gray-255 flex flex-col items-center justify-center transition-colors">
+      <div className="min-h-full p-6 pb-24 bg-transparent text-gray-800 dark:text-gray-255 flex flex-col items-center justify-center transition-colors">
         <p className="font-bold uppercase tracking-widest text-xs text-gray-400 dark:text-gray-500">No questions found.</p>
       </div>
     );
@@ -252,9 +260,9 @@ export default function QuizPage() {
   const q = questions[currentQ];
 
   return (
-    <div className="min-h-full p-6 pb-24 bg-gradient-to-b from-gray-50 to-gray-100 dark:from-[#050505] dark:to-[#0d0d0d] text-gray-900 dark:text-gray-200 transition-colors duration-300">
+    <div className="min-h-full p-6 pb-24 bg-transparent text-gray-900 dark:text-gray-200 transition-colors duration-300">
       
-      <header className="sticky top-0 z-40 bg-white/95 dark:bg-[#050505]/95 backdrop-blur-md -mx-6 px-6 py-4 mb-8 border-b border-gray-200/50 dark:border-white/5 flex items-center justify-between gap-2 md:gap-4 transition-colors duration-300">
+      <header className="sticky top-0 z-40 bg-[#FCF8F2]/90 dark:bg-[#0A0503]/90 backdrop-blur-md -mx-6 px-6 py-4 mb-8 border-b border-gray-200/50 dark:border-white/5 flex items-center justify-between gap-2 md:gap-4 transition-colors duration-300">
         <div className="flex items-center gap-2 sm:gap-4 min-w-0">
           <button onClick={() => navigate(-1)} className="p-1.5 sm:p-2 rounded-full bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 shadow-sm hover:bg-gray-100 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300 sm:w-10 sm:h-10 flex items-center justify-center transition-colors shrink-0">
             <ArrowLeft size={18} className="text-gray-750 dark:text-gray-300" />

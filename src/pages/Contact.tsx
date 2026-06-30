@@ -20,7 +20,7 @@ export default function Contact() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#050505] text-gray-900 dark:text-gray-100 p-6 pb-24 font-sans selection:bg-[#FF6D00]/20">
+    <div className="min-h-screen bg-transparent text-gray-900 dark:text-gray-100 p-6 pb-24 font-sans selection:bg-[#FF6D00]/20">
       <div className="max-w-2xl mx-auto">
         <button 
           onClick={() => navigate(-1)} 

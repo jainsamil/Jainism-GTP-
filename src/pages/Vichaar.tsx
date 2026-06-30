@@ -20,8 +20,29 @@ export default function VichaarPage() {
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'vichaar'), (snapshot) => {
-      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as any[];
-      const activeQuotes = data.length > 0 ? data : FALLBACK_VICHAARS;
+      const rawData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() as any }));
+      const deletedIds = new Set(rawData.filter(d => d.deleted === true).map(d => d.id));
+      const deletedHis = new Set(rawData.filter(d => d.deleted === true).map(d => d.hi));
+      
+      const activeData = rawData.filter(d => d.deleted !== true);
+      const dataMap = new Map(activeData.map(item => [item.id, item]));
+      
+      const merged = FALLBACK_VICHAARS.filter(seed => !deletedIds.has(seed.id) && !deletedHis.has(seed.hi)).map((seedItem, idx) => {
+        const seedId = seedItem.id || `fb_v_${idx + 1}`;
+        let matchedItem = dataMap.get(seedId);
+        if (!matchedItem) {
+          const matchByHi = activeData.find((d: any) => d.hi === seedItem.hi);
+          if (matchByHi) {
+            matchedItem = matchByHi;
+            dataMap.delete(matchByHi.id);
+          }
+        } else {
+          dataMap.delete(seedId);
+        }
+        return matchedItem ? { ...seedItem, ...matchedItem } : seedItem;
+      });
+      
+      const activeQuotes = [...merged, ...Array.from(dataMap.values())];
       setQuotes(activeQuotes);
       
       // Determine daily quote and find its index to start synchronously from that quote
@@ -80,7 +101,7 @@ export default function VichaarPage() {
 
   if (loading) {
     return (
-      <div className="min-h-full p-6 pb-24 bg-gray-50 dark:bg-[#050505] text-gray-800 dark:text-gray-200 flex flex-col items-center justify-center">
+      <div className="min-h-full p-6 pb-24 bg-transparent text-gray-800 dark:text-gray-200 flex flex-col items-center justify-center">
         <Loader2 className="animate-spin mb-4 text-[#FF6D00]" size={40} />
         <p className="font-bold uppercase tracking-widest text-xs text-gray-400 dark:text-gray-500">Loading Vichaar...</p>
       </div>
@@ -89,7 +110,7 @@ export default function VichaarPage() {
 
   if (quotes.length === 0) {
     return (
-      <div className="min-h-full p-6 pb-24 bg-gradient-to-b from-gray-50 to-gray-100 dark:from-[#050505] dark:to-[#0d0d0d] text-gray-900 dark:text-gray-100 flex flex-col items-center justify-center transition-colors duration-300">
+      <div className="min-h-full p-6 pb-24 bg-transparent text-gray-900 dark:text-gray-100 flex flex-col items-center justify-center transition-colors duration-300">
         <p className="font-bold uppercase tracking-widest text-xs text-gray-500 dark:text-gray-400">No Vichaar found.</p>
       </div>
     );
@@ -98,10 +119,10 @@ export default function VichaarPage() {
   const quote = quotes[currentIndex];
 
   return (
-    <div className="min-h-full p-6 pb-24 bg-gradient-to-b from-gray-50 to-gray-100 dark:from-[#050505] dark:to-[#0d0d0d] text-gray-900 dark:text-gray-100 transition-colors duration-300 flex flex-col">
+    <div className="min-h-full p-6 pb-24 bg-transparent text-gray-900 dark:text-gray-100 transition-colors duration-300 flex flex-col">
       
       {/* Sticky Header with inline controls */}
-      <header className="sticky top-0 z-40 bg-white/95 dark:bg-[#050505]/95 backdrop-blur-md -mx-6 px-6 pt-4 pb-4 mb-6 border-b border-gray-200/50 dark:border-white/5 flex items-center justify-between gap-2 md:gap-4 transition-colors duration-300">
+      <header className="sticky top-0 z-40 bg-[#FCF8F2]/90 dark:bg-[#0A0503]/90 backdrop-blur-md -mx-6 px-6 pt-4 pb-4 mb-6 border-b border-gray-200/50 dark:border-white/5 flex items-center justify-between gap-2 md:gap-4 transition-colors duration-300">
         <div className="flex items-center gap-2 sm:gap-4 min-w-0">
           <button onClick={() => navigate(-1)} className="p-1.5 sm:p-2 rounded-full bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 shadow-sm hover:bg-gray-100 dark:hover:bg-white/10 transition-colors shrink-0">
             <ArrowLeft size={18} className="text-gray-700 dark:text-gray-300 sm:w-[22px] sm:h-[22px]" />

@@ -769,15 +769,15 @@ Please feel free to explore our sacred Aagams, Panchang, and Swadhyay commentary
 
   if (!user) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center min-h-screen bg-[#050505] p-6 relative">
+      <div className="flex-1 flex flex-col items-center justify-center min-h-screen bg-transparent p-6 relative">
         <button 
           onClick={() => navigate('/')}
-          className="absolute top-6 left-6 p-3 bg-white/5 hover:bg-white/10 rounded-full text-white transition-colors"
+          className="absolute top-6 left-6 p-3 bg-gray-200/50 dark:bg-white/5 hover:bg-gray-300/50 dark:hover:bg-white/10 rounded-full text-gray-800 dark:text-white transition-colors"
         >
           <ArrowLeft size={24} />
         </button>
         
-        <div className="bg-[#121212] p-10 rounded-[2.5rem] border border-white/10 w-full max-w-lg text-center relative overflow-hidden shadow-2xl">
+        <div className="bg-white/80 dark:bg-[#121212]/80 backdrop-blur-md p-10 rounded-[2.5rem] border border-gray-200 dark:border-white/10 w-full max-w-lg text-center relative overflow-hidden shadow-2xl">
           <div className="absolute inset-0 bg-radial-gradient(circle_at_center,rgba(255,109,0,0.05)_0%,transparent_65%) pointer-events-none" />
           
           <div className="relative z-10">
@@ -786,13 +786,13 @@ Please feel free to explore our sacred Aagams, Panchang, and Swadhyay commentary
             </div>
             
             <h1 className="text-4xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] mb-4 uppercase tracking-tighter">JAINISM GPT CHAT</h1>
-            <p className="text-gray-400 max-w-sm mx-auto mb-10 text-sm leading-relaxed font-semibold">
+            <p className="text-gray-600 dark:text-gray-400 max-w-sm mx-auto mb-10 text-sm leading-relaxed font-semibold">
               Please authenticate via your Google Account to access secure spiritual guidance and save your private chat history.
             </p>
             
             <button
               onClick={login}
-              className="w-full py-4 bg-white text-black hover:bg-gray-100 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-3 shadow-lg hover:scale-105 active:scale-95 transition-all duration-300"
+              className="w-full py-4 bg-gray-100 dark:bg-white hover:bg-gray-200 dark:hover:bg-gray-100 text-gray-900 dark:text-black rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-3 shadow-lg hover:scale-105 active:scale-95 transition-all duration-300"
             >
               <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -809,7 +809,7 @@ Please feel free to explore our sacred Aagams, Panchang, and Swadhyay commentary
   }
 
   return (
-    <div className="flex flex-col h-full bg-gray-50 dark:bg-[#050505] relative text-gray-900 dark:text-gray-200 overflow-hidden">
+    <div className="flex flex-col h-full bg-transparent relative text-gray-900 dark:text-gray-200 overflow-hidden">
       {/* Sidebar Overlay */}
       {showSidebar && (
         <div 

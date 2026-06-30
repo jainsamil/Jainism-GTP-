@@ -42,6 +42,7 @@ import PrivacyPolicyPage from './pages/PrivacyPolicy';
 import TermsPage from './pages/Terms';
 import ContactPage from './pages/Contact';
 import Footer from './components/Footer';
+import BackgroundDesign from './components/BackgroundDesign';
 
 function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
@@ -60,10 +61,11 @@ function Layout({ children }: { children: React.ReactNode }) {
   ];
 
   return (
-    <div className="flex flex-col h-[100dvh] bg-gray-50 dark:bg-[#050505] text-gray-900 dark:text-gray-100 font-sans relative overflow-hidden selection:bg-[#FF6D00]/30 transition-colors duration-300">
-      {/* Ambient Neon Background */}
-      <div className="absolute top-[-20%] left-[-10%] w-[70%] h-[50%] bg-[#E65100] rounded-full mix-blend-screen filter blur-[150px] opacity-20 pointer-events-none dark:opacity-20 opacity-10" />
-      <div className="absolute bottom-[-20%] right-[-10%] w-[70%] h-[50%] bg-[#FFD54F] rounded-full mix-blend-screen filter blur-[150px] opacity-10 pointer-events-none dark:opacity-10 opacity-5" />
+    <div className="flex flex-col h-[100dvh] bg-[#FCF8F2] dark:bg-[#0A0503] text-gray-900 dark:text-[#FBEFE0] font-sans relative overflow-hidden selection:bg-[#FF6D00]/30 transition-colors duration-300">
+      {/* Ambient Cosmic Gold Background & Sacred Geometry Animations */}
+      <div className="absolute top-[-20%] left-[-10%] w-[70%] h-[50%] bg-[#E65100] rounded-full mix-blend-screen filter blur-[150px] opacity-[0.12] dark:opacity-[0.15] pointer-events-none" />
+      <div className="absolute bottom-[-20%] right-[-10%] w-[70%] h-[50%] bg-[#FFD54F] rounded-full mix-blend-screen filter blur-[150px] opacity-[0.08] dark:opacity-[0.10] pointer-events-none" />
+      <BackgroundDesign />
 
       {/* Global Toggles */}
       {!isAdmin && (

@@ -20,26 +20,33 @@ export default function HistoryPage() {
 
   // Firestore dynamic sync state
   const [firestoreHistory, setFirestoreHistory] = useState<HeritageItem[]>([]);
+  const [deletedHistoryIds, setDeletedHistoryIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     const q = collection(db, 'history');
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const docsData: HeritageItem[] = [];
+      const deletedIds = new Set<string>();
       snapshot.forEach(docSnap => {
         const data = docSnap.data();
-        docsData.push({
-          id: docSnap.id,
-          title: data.title || { en: '', hi: '' },
-          desc: data.desc || { en: '', hi: '' },
-          detailedText: data.detailedText || { en: '', hi: '' },
-          era: data.era || { en: '', hi: '' },
-          image: data.image || 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=600',
-          category: data.category || 'Temple',
-          state: data.state || 'Madhya Pradesh',
-          period: data.period || 'Ancient'
-        });
+        if (data.deleted === true) {
+          deletedIds.add(docSnap.id);
+        } else {
+          docsData.push({
+            id: docSnap.id,
+            title: data.title || { en: '', hi: '' },
+            desc: data.desc || { en: '', hi: '' },
+            detailedText: data.detailedText || { en: '', hi: '' },
+            era: data.era || { en: '', hi: '' },
+            image: data.image || 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=600',
+            category: data.category || 'Temple',
+            state: data.state || 'Madhya Pradesh',
+            period: data.period || 'Ancient'
+          });
+        }
       });
       setFirestoreHistory(docsData);
+      setDeletedHistoryIds(deletedIds);
     }, (error) => {
       console.error("Firestore history subscription error:", error);
     });
@@ -53,7 +60,7 @@ export default function HistoryPage() {
 
   // Separation of the 8 Main Epochs of Jinas vs the Generated Reference Library items
   const mainEpochs = useMemo(() => {
-    const staticEpochs = historyData.slice(0, 8);
+    const staticEpochs = historyData.slice(0, 8).filter(item => !deletedHistoryIds.has(item.id));
     const firestoreEpochs = firestoreHistory.filter(item => item.category === 'Event' || item.id?.startsWith('event'));
     
     const dataMap = new Map(firestoreEpochs.map(doc => [doc.id, doc]));
@@ -75,7 +82,7 @@ export default function HistoryPage() {
     });
     
     return [...merged, ...Array.from(dataMap.values())];
-  }, [firestoreHistory]);
+  }, [firestoreHistory, deletedHistoryIds]);
 
   const repositoryItems = useMemo(() => historyData.slice(8), []);
 
@@ -84,7 +91,7 @@ export default function HistoryPage() {
     const firestoreRepo = firestoreHistory.filter(item => item.category !== 'Event' && !item.id?.startsWith('event'));
     
     const dataMap = new Map(firestoreRepo.map(doc => [doc.id, doc]));
-    const merged = repositoryItems.map(fallbackItem => {
+    const merged = repositoryItems.filter(item => !deletedHistoryIds.has(item.id)).map(fallbackItem => {
       let matchedItem = dataMap.get(fallbackItem.id);
       if (!matchedItem) {
         const matchByTitle = firestoreRepo.find((d: any) => 
@@ -102,7 +109,7 @@ export default function HistoryPage() {
     });
     
     return [...merged, ...Array.from(dataMap.values())];
-  }, [repositoryItems, firestoreHistory]);
+  }, [repositoryItems, firestoreHistory, deletedHistoryIds]);
 
   const statesList = useMemo(() => {
     const states = new Set<string>();
@@ -133,9 +140,9 @@ export default function HistoryPage() {
   };
 
   return (
-    <div className="min-h-full p-6 pb-24 bg-gradient-to-b from-gray-50 to-gray-100 dark:from-[#050505] dark:to-[#0d0d0d] text-gray-900 dark:text-gray-200 transition-colors duration-300">
+    <div className="min-h-full p-6 pb-24 bg-transparent text-gray-900 dark:text-gray-200 transition-colors duration-300">
       
-      <header className="sticky top-0 z-40 bg-white/95 dark:bg-[#050505]/95 backdrop-blur-md -mx-6 px-6 py-4 mb-8 border-b border-gray-200/50 dark:border-white/5 flex items-center justify-between gap-2 md:gap-4 transition-colors duration-300">
+      <header className="sticky top-0 z-40 bg-[#FCF8F2]/90 dark:bg-[#0A0503]/90 backdrop-blur-md -mx-6 px-6 py-4 mb-8 border-b border-gray-200/50 dark:border-white/5 flex items-center justify-between gap-2 md:gap-4 transition-colors duration-300">
         <div className="flex items-center gap-2 sm:gap-4 min-w-0">
           <button onClick={() => navigate(-1)} className="p-1.5 sm:p-2 rounded-full bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 shadow-sm hover:bg-gray-100 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300 sm:w-10 sm:h-10 flex items-center justify-center transition-colors shrink-0">
             <ArrowLeft size={18} className="text-gray-750 dark:text-gray-300" />

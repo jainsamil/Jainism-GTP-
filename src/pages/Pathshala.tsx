@@ -560,7 +560,7 @@ export default function PathshalaPage() {
 
   if (authLoading && !pathshalaUser) {
     return (
-      <div className={cn("min-h-screen flex flex-col items-center justify-center p-6", isDark ? "bg-[#050505]" : "bg-gray-50")}>
+      <div className={cn("min-h-screen flex flex-col items-center justify-center p-6 bg-transparent")}>
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#FF6D00] mb-4 animate-pulse"></div>
         <p className="text-xs font-black uppercase tracking-widest text-[#FF6D00]">Initializing Pathshala...</p>
       </div>
@@ -570,7 +570,7 @@ export default function PathshalaPage() {
   if (!pathshalaUser) {
     if (showGoogleRoleSetup) {
       return (
-        <div className={cn("min-h-screen flex items-center justify-center p-6 relative", isDark ? "bg-[#050505]" : "bg-gray-50")}>
+        <div className={cn("min-h-screen flex items-center justify-center p-6 relative bg-transparent")}>
           <div className={cn("p-10 rounded-[2.5rem] border w-full max-w-md text-left", isDark ? "bg-[#121212] border-white/10" : "bg-white border-gray-200 shadow-xl")}>
             <div className="w-16 h-16 bg-[#FF6D00]/10 rounded-2xl flex items-center justify-center text-[#FF6D00] mb-6">
               <GraduationCap size={32} />
@@ -684,7 +684,7 @@ export default function PathshalaPage() {
     }
 
     return (
-      <div className={cn("min-h-screen flex items-center justify-center p-6 relative", isDark ? "bg-[#050505]" : "bg-gray-50")}>
+      <div className={cn("min-h-screen flex items-center justify-center p-6 relative bg-transparent")}>
         <button 
           onClick={() => navigate(-1)} 
           className="absolute top-6 left-6 p-3 rounded-full bg-white/10 hover:bg-white/20 transition-colors z-10"
@@ -987,7 +987,7 @@ export default function PathshalaPage() {
   };
 
   return (
-    <div className={cn("min-h-screen p-4 pb-24 font-sans relative transition-colors duration-300", isDark ? "bg-[#050505] text-gray-200" : "bg-gray-50 text-gray-900")}>
+    <div className={cn("min-h-screen p-4 pb-24 font-sans relative transition-colors duration-300 bg-transparent", isDark ? "text-gray-200" : "text-gray-900")}>
       <header className="flex items-center justify-between mb-6 pt-2">
         <div className="flex items-center gap-2">
           <button onClick={() => navigate(-1)} className="p-2 rounded-full bg-gray-200 dark:bg-white/5 hover:bg-gray-300 dark:hover:bg-white/10 transition-colors">

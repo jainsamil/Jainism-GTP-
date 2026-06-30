@@ -18,7 +18,7 @@ interface SectionAiAgentProps {
 export default function SectionAiAgent({ section, align = 'right' }: SectionAiAgentProps) {
   const { language } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
-  const [unlocked, setUnlocked] = useState(true);
+  const [unlocked, setUnlocked] = useState(false);
   const [passcode, setPasscode] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   
@@ -364,15 +364,15 @@ export default function SectionAiAgent({ section, align = 'right' }: SectionAiAg
   }
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
-      <div className="bg-[#0D0D0D] border-2 border-[#FF6D00]/30 rounded-[2.5rem] w-full max-w-4xl h-[90dvh] overflow-hidden flex flex-col shadow-[0_0_50px_rgba(255,109,0,0.25)]">
+    <div className="fixed inset-0 bg-black/20 dark:bg-black/40 backdrop-blur-[2px] z-[9999] flex items-center justify-center p-4">
+      <div className="bg-white/70 dark:bg-[#0D0D0D]/70 backdrop-blur-md border border-gray-200 dark:border-2 dark:border-[#FF6D00]/30 rounded-[2.5rem] w-full max-w-4xl h-[90dvh] overflow-hidden flex flex-col shadow-2xl relative">
         
         {/* Header bar */}
-        <header className="px-6 py-4 border-b border-white/5 bg-white/5 flex items-center justify-between">
+        <header className="px-6 py-4 border-b border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/5 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <Cpu size={18} className="text-[#FF6D00]" />
             <div>
-              <h3 className="text-xs font-black text-white uppercase tracking-wider">
+              <h3 className="text-xs font-black text-gray-900 dark:text-white uppercase tracking-wider">
                 {section.toUpperCase()} AI UPDATE COMPASS
               </h3>
               <p className="text-[9px] text-[#FF8A65] font-extrabold uppercase tracking-wide">
@@ -387,7 +387,7 @@ export default function SectionAiAgent({ section, align = 'right' }: SectionAiAg
               setPasscode('');
               setErrorMsg('');
             }} 
-            className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-white/10 text-gray-400 hover:text-[#FF6D00] transition-colors"
+            className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-black/5 dark:hover:bg-white/10 text-gray-400 hover:text-[#FF6D00] transition-colors"
           >
             <X size={18} />
           </button>
@@ -399,7 +399,7 @@ export default function SectionAiAgent({ section, align = 'right' }: SectionAiAg
             <div className="w-12 h-12 bg-gradient-to-tr from-[#FF6D00] to-amber-500 rounded-2xl flex items-center justify-center text-black mb-5 shadow-[0_0_15px_rgba(255,109,0,0.3)]">
               <Lock size={20} />
             </div>
-            <h4 className="text-sm font-black text-white uppercase tracking-wider mb-1">
+            <h4 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider mb-1">
               Protected Developer Portal
             </h4>
             <p className="text-[10px] text-gray-500 font-semibold uppercase tracking-wider mb-4">
@@ -412,7 +412,7 @@ export default function SectionAiAgent({ section, align = 'right' }: SectionAiAg
                 placeholder="Developer PIN"
                 value={passcode}
                 onChange={(e) => setPasscode(e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-center focus:border-[#FF6D00] outline-none tracking-widest font-bold font-mono"
+                className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-gray-800 dark:text-white text-center focus:border-[#FF6D00] outline-none tracking-widest font-bold font-mono"
               />
               {errorMsg && <p className="text-rose-500 text-[10px] font-bold uppercase">{errorMsg}</p>}
               

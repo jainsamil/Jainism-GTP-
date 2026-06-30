@@ -198,11 +198,14 @@ export default function AagamsPage() {
 
     const q = query(collection(db, 'aagams'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const firebaseDocs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const rawDocs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() as any }));
+      const deletedIds = new Set(rawDocs.filter(doc => doc.deleted === true).map(doc => doc.id));
+      const deletedTitles = new Set(rawDocs.filter(doc => doc.deleted === true).map(doc => typeof doc.title === 'object' ? doc.title.en : doc.title));
+      const firebaseDocs = rawDocs.filter(doc => doc.deleted !== true);
       
       // Merge logic: Merge firebaseDocs with FALLBACK_AAGAMS by matching ID or title
       const dataMap = new Map(firebaseDocs.map(doc => [doc.id, doc]));
-      const merged = FALLBACK_AAGAMS.map(fallbackItem => {
+      const merged = FALLBACK_AAGAMS.filter(item => !deletedIds.has(item.id) && !deletedTitles.has(item.title)).map(fallbackItem => {
         let matchedItem = dataMap.get(fallbackItem.id);
         if (!matchedItem) {
           const matchByTitle = firebaseDocs.find((d: any) => 
@@ -288,10 +291,10 @@ export default function AagamsPage() {
   };
 
   return (
-    <div className="min-h-full p-4 md:p-6 pb-28 bg-gray-50 dark:from-[#050505] dark:to-[#0d0d0d] text-gray-900 dark:text-gray-200 transition-colors duration-300">
+    <div className="min-h-full p-4 md:p-6 pb-28 bg-transparent text-gray-900 dark:text-gray-200 transition-colors duration-300">
       
       {/* Header with language switcher and help inline */}
-      <header className="sticky top-0 z-45 bg-gray-50/95 dark:bg-[#050505]/95 backdrop-blur-md -mx-4 -mt-4 px-4 py-4 md:-mx-6 md:-mt-6 md:px-6 md:py-4 border-b border-gray-200/50 dark:border-white/5 flex items-center justify-between gap-2 md:gap-4 mb-6 pt-4">
+      <header className="sticky top-0 z-45 bg-[#FCF8F2]/90 dark:bg-[#0A0503]/90 backdrop-blur-md -mx-4 -mt-4 px-4 py-4 md:-mx-6 md:-mt-6 md:px-6 md:py-4 border-b border-gray-200/50 dark:border-white/5 flex items-center justify-between gap-2 md:gap-4 mb-6 pt-4">
         <div className="flex items-center gap-2 sm:gap-4 min-w-0">
           <button onClick={() => navigate(-1)} className="p-1.5 sm:p-2 rounded-full bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 shadow-sm hover:bg-gray-100 dark:hover:bg-white/10 transition-colors shrink-0">
             <ArrowLeft size={18} className="text-gray-700 dark:text-gray-300 sm:w-[22px] sm:h-[22px]" />

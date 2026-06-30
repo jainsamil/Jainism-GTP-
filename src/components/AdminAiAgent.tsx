@@ -312,7 +312,7 @@ export default function AdminAiAgent() {
 
   if (!unlocked) {
     return (
-      <div className="bg-[#121212]/95 border border-white/10 p-10 rounded-[2.5rem] flex flex-col items-center justify-center min-h-[500px] text-center max-w-xl mx-auto">
+      <div className="bg-white/80 dark:bg-[#121212]/80 backdrop-blur-md border border-gray-200 dark:border-white/10 p-10 rounded-[2.5rem] flex flex-col items-center justify-center min-h-[500px] text-center max-w-xl mx-auto shadow-2xl">
         <div className="w-16 h-16 bg-gradient-to-tr from-red-500 to-[#FF6D00] rounded-2xl flex items-center justify-center text-white mb-6 animate-pulse">
           <Lock size={32} />
         </div>
@@ -388,8 +388,8 @@ export default function AdminAiAgent() {
           </div>
 
           {/* Core System parameters */}
-          <div className="bg-[#121212] border border-white/5 p-6 rounded-[2rem] space-y-4 shadow-xl">
-            <h4 className="text-xs font-black uppercase tracking-widest text-[#FF6D00] pb-2 border-b border-white/5 flex items-center gap-2">
+          <div className="bg-white/80 dark:bg-[#121212]/80 backdrop-blur-md border border-gray-200 dark:border-white/5 p-6 rounded-[2rem] space-y-4 shadow-xl">
+            <h4 className="text-xs font-black uppercase tracking-widest text-[#FF6D00] pb-2 border-b border-gray-100 dark:border-white/5 flex items-center gap-2">
               <Database size={14} /> Database Integration Metrics
             </h4>
             <div className="flex justify-between items-center text-sm">
@@ -411,8 +411,8 @@ export default function AdminAiAgent() {
           </div>
 
           {/* Quick instructions / Dialects list */}
-          <div className="bg-[#121212] border border-white/5 p-6 rounded-[2rem] space-y-3">
-            <h4 className="text-xs font-black uppercase tracking-widest text-[#FFD54F] pb-1 border-b border-white/5 flex items-center gap-2">
+          <div className="bg-white/80 dark:bg-[#121212]/80 backdrop-blur-md border border-gray-200 dark:border-white/5 p-6 rounded-[2rem] space-y-3">
+            <h4 className="text-xs font-black uppercase tracking-widest text-[#FFD54F] pb-1 border-b border-gray-100 dark:border-white/5 flex items-center gap-2">
               <Globe size={14} /> Supported Languages (20+)
             </h4>
             <div className="flex flex-wrap gap-1.5 pt-1">
@@ -432,8 +432,8 @@ export default function AdminAiAgent() {
         </div>
 
         {/* Right column (terminal + chat hub) */}
-        <div className="xl:col-span-2 bg-[#121212] border border-white/10 rounded-[2rem] flex flex-col h-[550px] overflow-hidden shadow-2xl">
-          <header className="px-6 py-4 border-b border-white/5 bg-white/5 flex items-center justify-between">
+        <div className="xl:col-span-2 bg-white/80 dark:bg-[#121212]/80 backdrop-blur-md border border-gray-200 dark:border-white/10 rounded-[2rem] flex flex-col h-[550px] overflow-hidden shadow-2xl">
+          <header className="px-6 py-4 border-b border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/5 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="w-3.5 h-3.5 rounded-full bg-[#FF6D00] animate-pulse" />
               <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
@@ -578,9 +578,9 @@ export default function AdminAiAgent() {
       </div>
 
       {/* Multilingual AI Content Generator Lab Box */}
-      <div className="bg-[#121212] border border-white/10 rounded-[2.5rem] overflow-hidden shadow-2xl relative">
+      <div className="bg-white/80 dark:bg-[#121212]/80 backdrop-blur-md border border-gray-200 dark:border-white/10 rounded-[2.5rem] overflow-hidden shadow-2xl relative">
         <div className="absolute top-0 right-0 w-64 h-64 bg-radial-gradient(circle_at_center,rgba(255,109,0,0.06)_0%,transparent_70%) pointer-events-none" />
-        <div className="p-8 border-b border-white/5 bg-white/5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div className="p-8 border-b border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <h3 className="text-lg font-black text-white tracking-wide uppercase flex items-center gap-2">
               <Sparkles size={20} className="text-[#FFD54F]" />
