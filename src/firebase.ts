@@ -6,10 +6,17 @@ import firebaseConfig from '../firebase-applet-config.json';
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 
-// Enable offline persistence
-export const db = initializeFirestore(app, {
-  localCache: persistentLocalCache({tabManager: persistentMultipleTabManager()})
-}, firebaseConfig.firestoreDatabaseId);
+// Enable offline persistence with fallback for environments where IndexedDB is blocked
+let firestoreInstance;
+try {
+  firestoreInstance = initializeFirestore(app, {
+    localCache: persistentLocalCache({tabManager: persistentMultipleTabManager()})
+  }, firebaseConfig.firestoreDatabaseId);
+} catch (e) {
+  console.warn("Offline persistence not supported in this browser environment, falling back to default.", e);
+  firestoreInstance = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+}
+export const db = firestoreInstance;
 
 export const googleProvider = new GoogleAuthProvider();
 

@@ -1144,7 +1144,7 @@ export default function MediaPage() {
         </div>
         <input
           type="text"
-          placeholder={language === 'en' ? "Search movies, episodes, stories, bhajans, books..." : "सच्ची फिल्में, अध्याय, भजन, ग्रंथ या धर्म कथा खोजें..."}
+          placeholder={language === 'en' ? "Search movies, episodes, stories..." : "सच्ची फिल्में, अध्याय, कहानियां खोजें..."}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="w-full bg-white dark:bg-[#111111] border border-gray-200 dark:border-white/10 rounded-2xl py-4.5 pl-12 pr-12 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FF4E00] transition-all shadow-md shadow-gray-100/50 dark:shadow-none"
@@ -1169,8 +1169,6 @@ export default function MediaPage() {
           { id: 'webseries', label: 'Web Series 🍿', labelHi: 'वेबसीरीज 🍿' },
           { id: 'digital_stories', label: 'Kids Stories 🧸', labelHi: 'बाल कथाएं 🧸' },
           { id: 'devotional_videos', label: 'Devotional 🌟', labelHi: 'भक्ति वीडियो 🌟' },
-          { id: 'audiobooks', label: 'Audio Books 📚', labelHi: 'ऑडियो ग्रंथ 📚' },
-          { id: 'bhajans', label: 'Bhajans 🎧', labelHi: 'संगीत भजन 🎧' },
         ].map(tab => {
           const isActive = activeTab === tab.id;
           return (

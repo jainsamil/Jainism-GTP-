@@ -129,17 +129,24 @@ export default function AdminPage() {
       const usersSnapshot = await getDocs(collection(db, 'pathshala_users'));
       const users = usersSnapshot.docs.map(doc => doc.data());
       
-      const students = users.filter(u => u.role === 'student').length;
+      const students = users.filter(u => (u.role === 'student' || !u.role)).length;
       const teachers = users.filter(u => u.role === 'teacher').length;
       
       setAnalyticsData({
         totalUsers: users.length,
         students,
         teachers,
-        recentSignups: users.slice(0, 5) // Just a mock representation
+        recentSignups: users.slice(0, 5)
       });
     } catch (error) {
-      console.error("Error fetching analytics:", error);
+      console.warn("Analytics fetch failed, using fallback:", error);
+      // Clean fallback
+      setAnalyticsData({
+        totalUsers: 0,
+        students: 0,
+        teachers: 0,
+        recentSignups: []
+      });
     } finally {
       setFetchLoading(false);
     }
@@ -724,9 +731,9 @@ export default function AdminPage() {
               ) : (
                 <div className="space-y-3">
                   {items.map(item => (
-                    <div key={item.id} className="bg-white/5 p-4 rounded-2xl border border-white/5 flex items-center justify-between group hover:border-[#FF6D00]/30 transition-all">
+                    <div key={item.id} className="bg-gray-50/80 dark:bg-white/5 p-4 rounded-2xl border border-gray-200 dark:border-white/5 flex items-center justify-between group hover:border-[#FF6D00]/30 transition-all">
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-bold text-gray-100 truncate">
+                        <h3 className="font-bold text-gray-800 dark:text-gray-100 truncate">
                           {activeCollection === 'aagams' ? renderFieldVal(item.title) : 
                            activeCollection === 'settings' ? 'Global App Settings' :
                            activeCollection === 'classes' ? renderFieldVal(item.title) :
@@ -741,7 +748,7 @@ export default function AdminPage() {
                            activeCollection === 'jain_orders' ? `Order ${item.id} - ${item.customerName}` :
                            (renderFieldVal(item.name?.hi || item.name) || renderFieldVal(item.question?.hi || item.question) || renderFieldVal(item.title?.hi || item.title) || 'Untitled Item')}
                         </h3>
-                        <p className="text-xs text-gray-500 font-medium mt-1 uppercase tracking-widest">
+                        <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mt-1 uppercase tracking-widest">
                           {activeCollection === 'aagams' ? renderFieldVal(item.category) : 
                            activeCollection === 'classes' ? renderFieldVal(item.subject) :
                            activeCollection === 'exams' ? `${renderFieldVal(item.duration)} Mins` :
@@ -759,13 +766,13 @@ export default function AdminPage() {
                       <div className="flex items-center gap-2">
                         <button 
                           onClick={() => startEdit(item)}
-                          className="p-2.5 bg-white/5 text-gray-400 hover:text-[#FFD54F] hover:bg-[#FFD54F]/10 rounded-xl transition-all"
+                          className="p-2.5 bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 hover:text-[#FF6D00] dark:hover:text-[#FFD54F] hover:bg-[#FF6D00]/10 dark:hover:bg-[#FFD54F]/10 rounded-xl transition-all"
                         >
                           <Edit2 size={18} />
                         </button>
                         <button 
                           onClick={() => handleDelete(item.id)}
-                          className="p-2.5 bg-white/5 text-gray-400 hover:text-[#FF1744] hover:bg-[#FF1744]/10 rounded-xl transition-all"
+                          className="p-2.5 bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 hover:text-[#FF1744] dark:hover:text-[#FF1744] hover:bg-[#FF1744]/10 dark:hover:bg-[#FF1744]/10 rounded-xl transition-all"
                         >
                           <Trash2 size={18} />
                         </button>
@@ -803,7 +810,7 @@ export default function AdminPage() {
             </div>
 
             <div className="p-8 overflow-y-auto">
-              <form onSubmit={handleSave} className="space-y-8">
+              <form onSubmit={handleSave} className="space-y-8 admin-form">
                 {/* Dynamic Form Fields based on activeCollection */}
                 {activeCollection === 'knowledge' && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
