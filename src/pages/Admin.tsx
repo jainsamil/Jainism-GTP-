@@ -795,7 +795,7 @@ export default function AdminPage() {
       {/* Editor Modal */}
       {(isAdding || isEditing) && (
         <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300">
-          <div className="bg-white/80 dark:bg-[#121212]/80 backdrop-blur-md rounded-[2.5rem] w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl border border-gray-200 dark:border-white/10 flex flex-col animate-in zoom-in-95 duration-300">
+          <div className="admin-modal bg-white/80 dark:bg-[#121212]/80 backdrop-blur-md rounded-[2.5rem] w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl border border-gray-200 dark:border-white/10 flex flex-col animate-in zoom-in-95 duration-300">
             <div className="p-8 border-b border-gray-200 dark:border-white/5 bg-white/5 flex justify-between items-center shrink-0">
               <h2 className="text-2xl font-display font-black text-gray-900 dark:text-white flex items-center gap-3">
                 {isEditing ? <Edit2 className="text-[#FFD54F]" stroke="currentColor" /> : <PlusCircle className="text-[#00E676]" stroke="currentColor" />}

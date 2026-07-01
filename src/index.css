@@ -52,40 +52,72 @@ html, body {
   overflow-x: hidden;
 }
 
-/* Admin Panel Forms Color Contrast Fix */
+/* Admin Panel Forms and Modals Color Contrast Fix */
 .admin-form input,
 .admin-form select,
-.admin-form textarea {
-  background-color: #f9fafb !important;
-  border-color: #e5e7eb !important;
+.admin-form textarea,
+.admin-modal input,
+.admin-modal select,
+.admin-modal textarea {
+  background-color: #f3f4f6 !important;
+  border-color: #d1d5db !important;
   color: #111827 !important;
 }
 
 html.dark .admin-form input,
 html.dark .admin-form select,
-html.dark .admin-form textarea {
+html.dark .admin-form textarea,
+html.dark .admin-modal input,
+html.dark .admin-modal select,
+html.dark .admin-modal textarea,
+.dark .admin-form input,
+.dark .admin-form select,
+.dark .admin-form textarea,
+.dark .admin-modal input,
+.dark .admin-modal select,
+.dark .admin-modal textarea {
   background-color: rgba(255, 255, 255, 0.05) !important;
   border-color: rgba(255, 255, 255, 0.1) !important;
   color: #ffffff !important;
 }
 
 .admin-form label,
-.admin-form h3 {
-  color: #d84315 !important; /* High contrast Deep Saffron for Light Mode */
+.admin-form h3,
+.admin-modal label,
+.admin-modal h3 {
+  color: #e65100 !important; /* High contrast Deep Saffron for Light Mode */
 }
 
 html.dark .admin-form label,
-html.dark .admin-form h3 {
+html.dark .admin-form h3,
+html.dark .admin-modal label,
+html.dark .admin-modal h3,
+.dark .admin-form label,
+.dark .admin-form h3,
+.dark .admin-modal label,
+.dark .dark-form h3,
+.dark .admin-modal h3 {
   color: #ffd54f !important; /* Standard Yellow for Dark Mode */
 }
 
-.admin-form select option {
+.admin-form select option,
+.admin-modal select option {
   background-color: #ffffff !important;
   color: #111827 !important;
 }
 
-html.dark .admin-form select option {
+html.dark .admin-form select option,
+html.dark .admin-modal select option,
+.dark .admin-form select option,
+.dark .admin-modal select option {
   background-color: #121212 !important;
   color: #ffffff !important;
+}
+
+/* Make central chakra lines extremely thin and elegant */
+.chakra-svg path,
+.chakra-svg circle,
+.chakra-svg line {
+  stroke-width: inherit !important;
 }
 

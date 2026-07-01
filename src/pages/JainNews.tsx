@@ -136,11 +136,11 @@ export default function JainNewsPage() {
     return article.title_en || article.title || '';
   };
 
-  const fetchNews = async () => {
+  const fetchNews = async (force = false) => {
     setLoading(true);
     try {
       // 1. Fetch AI verified news from backend (which grounded searches live)
-      const response = await fetch('/api/jain-news');
+      const response = await fetch(force ? '/api/jain-news?force=true' : '/api/jain-news');
       if (!response.ok) {
         throw new Error(`Server returned status ${response.status}`);
       }
@@ -286,6 +286,18 @@ export default function JainNewsPage() {
           >
             <Globe size={11} className="animate-spin-slow shrink-0" />
             <span>{lang === 'en' ? 'हिन्दी' : 'English'}</span>
+          </button>
+
+          {/* Refresh Button */}
+          <button
+            type="button"
+            onClick={() => fetchNews(true)}
+            disabled={loading}
+            className="px-2.5 py-1.5 h-9 rounded-xl bg-zinc-950 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 text-white flex items-center justify-center gap-1.5 font-black text-[10px] shadow-sm hover:scale-105 active:scale-95 transition-all cursor-pointer disabled:opacity-50 select-none shrink-0"
+            title={lang === 'en' ? 'Refresh Live News' : 'लाइव समाचार अपडेट करें'}
+          >
+            <Loader2 className={cn("w-3 h-3 shrink-0", loading && "animate-spin")} />
+            <span>{lang === 'en' ? 'Refresh' : 'अपडेट'}</span>
           </button>
         </div>
       </header>

@@ -571,23 +571,28 @@ app.post('/api/verify-passcode', (req, res) => {
 app.get('/api/jain-news', async (req, res) => {
   try {
     const currentDate = new Date().toISOString().split('T')[0];
+    const forceRefresh = req.query.force === 'true';
     
-    // 1. Try to fetch from Firestore first (for today's cache)
-    try {
-      const docRef = doc(firestoreDb, 'daily_jain_news', currentDate);
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        const cachedData = docSnap.data();
-        if (cachedData && cachedData.articles && cachedData.articles.length > 0) {
-          console.log(`[Firestore Cache Hit] Returning cached Jain news for ${currentDate}`);
-          return res.json(cachedData);
+    // 1. Try to fetch from Firestore first (for today's cache) unless forced
+    if (!forceRefresh) {
+      try {
+        const docRef = doc(firestoreDb, 'daily_jain_news', currentDate);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const cachedData = docSnap.data();
+          if (cachedData && cachedData.articles && cachedData.articles.length > 0) {
+            console.log(`[Firestore Cache Hit] Returning cached Jain news for ${currentDate}`);
+            return res.json(cachedData);
+          }
         }
+      } catch (dbError) {
+        console.log("Firestore Read Info: Checking news cache status:", dbError);
       }
-    } catch (dbError) {
-      console.log("Firestore Read Info: Checking news cache status:", dbError);
+    } else {
+      console.log(`[Force Refresh] Bypassing Firestore cache for Jain news on ${currentDate}`);
     }
 
-    // 2. If no cache exists for today, fetch fresh live news via Gemini API
+    // 2. If no cache exists or force is requested, fetch fresh live news via Gemini API
     if (!process.env.GEMINI_API_KEY) {
       throw new Error('Gemini API Key is not configured');
     }
@@ -644,9 +649,9 @@ app.get('/api/jain-news', async (req, res) => {
 
     console.log(`[Gemini API] Requesting live search grounding for Jain news on ${currentDate}...`);
     
-    // Use a 4-second timeout to prevent requests from hanging if the Gemini API or search grounding is slow or throttled
+    // Use a 25-second timeout to prevent requests from hanging if the Gemini API or search grounding is slow or throttled
     const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error("Gemini API call timed out")), 4000)
+      setTimeout(() => reject(new Error("Gemini API call timed out")), 25000)
     );
 
     const response = await Promise.race([

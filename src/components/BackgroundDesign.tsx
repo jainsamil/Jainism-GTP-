@@ -697,6 +697,15 @@ export default function BackgroundDesign() {
     };
   }, [theme, path, colors.shadow, colors.sparkDark, colors.sparkLight, isDark]);
 
+  const isHomePage = path === '/' || path === '' || path === '/home';
+  const fillColor = isHomePage 
+    ? (isDark ? '#ffffff' : 'url(#homeChakraGradient)') 
+    : (isDark ? colors.strokeDark : colors.stroke);
+
+  const strokeColor = isHomePage 
+    ? (isDark ? '#ffffff' : 'url(#homeChakraGradient)') 
+    : (isDark ? colors.strokeDark : colors.stroke);
+
   return (
     <div className="absolute inset-0 w-full h-full pointer-events-none overflow-hidden z-0 select-none">
       {/* Background paper texture overlay */}
@@ -721,18 +730,35 @@ export default function BackgroundDesign() {
           animation: 'spinClockwise 150s linear infinite',
           willChange: 'transform',
           filter: isDark 
-            ? `drop-shadow(0 0 3px ${colors.strokeDark})` 
-            : `drop-shadow(0 0 1.5px ${colors.stroke})`
+            ? `drop-shadow(0 0 ${isHomePage ? '0.5px' : '3px'} ${isHomePage ? 'rgba(255, 255, 255, 0.3)' : colors.strokeDark})` 
+            : `drop-shadow(0 0 ${isHomePage ? '0.3px' : '1.5px'} ${isHomePage ? 'rgba(255, 109, 0, 0.25)' : colors.stroke})`
         }}
       >
-        <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full stroke-[1.1] transition-colors duration-1000" style={{ stroke: isDark ? colors.strokeDark : colors.stroke }}>
+        <svg 
+          viewBox="0 0 100 100" 
+          fill="none" 
+          xmlns="http://www.w3.org/2000/svg" 
+          className={`chakra-svg w-full h-full transition-all duration-1000 ${isHomePage ? 'stroke-[0.11]' : 'stroke-[0.32]'}`} 
+          style={{ stroke: strokeColor }}
+        >
+          <defs>
+            <linearGradient id="homeChakraGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#FF6D00" /> {/* Saffron */}
+              <stop offset="20%" stopColor="#FFD54F" /> {/* Gold */}
+              <stop offset="40%" stopColor="#00E676" /> {/* Green */}
+              <stop offset="60%" stopColor="#00E5FF" /> {/* Cyan */}
+              <stop offset="80%" stopColor="#2979FF" /> {/* Blue */}
+              <stop offset="100%" stopColor="#AA00FF" /> {/* Purple */}
+            </linearGradient>
+          </defs>
+
           {/* 1. Center Point / Bindu */}
-          <circle cx="50" cy="50" r="1.5" fill={isDark ? colors.strokeDark : colors.stroke} />
+          <circle cx="50" cy="50" r="1.5" fill={fillColor} />
           
           {/* 2. Concentric Core Rings */}
-          <circle cx="50" cy="50" r="4.2" strokeWidth="1" />
-          <circle cx="50" cy="50" r="7.5" strokeDasharray="1 1" strokeWidth="0.8" />
-          <circle cx="50" cy="50" r="11" strokeWidth="1" />
+          <circle cx="50" cy="50" r="4.2" strokeWidth="0.25" />
+          <circle cx="50" cy="50" r="7.5" strokeDasharray="1 1" strokeWidth="0.20" />
+          <circle cx="50" cy="50" r="11" strokeWidth="0.25" />
 
           {/* 3. Innermost 12 core petals */}
           {[...Array(12)].map((_, i) => {
@@ -750,7 +776,7 @@ export default function BackgroundDesign() {
               <path
                 key={`core-petal-${i}`}
                 d={`M ${x1} ${y1} Q ${cp1x} ${cp1y} ${x2} ${y2} Q ${cp2x} ${cp2y} ${x1} ${y1}`}
-                strokeWidth="0.8"
+                strokeWidth="0.20"
               />
             );
           })}
@@ -772,12 +798,12 @@ export default function BackgroundDesign() {
                 {/* Outer stroke of petal */}
                 <path
                   d={`M ${x1} ${y1} Q ${cp1x} ${cp1y} ${x2} ${y2} Q ${cp2x} ${cp2y} ${x1} ${y1}`}
-                  strokeWidth="0.9"
+                  strokeWidth="0.22"
                 />
                 {/* Inner smaller detail stroke */}
                 <path
                   d={`M ${50 + 13 * Math.cos(rad)} ${50 + 13 * Math.sin(rad)} Q ${50 + 16 * Math.cos(rad - 0.1)} ${50 + 16 * Math.sin(rad - 0.1)} ${50 + 18 * Math.cos(rad)} ${50 + 18 * Math.sin(rad)} Q ${50 + 16 * Math.cos(rad + 0.1)} ${50 + 16 * Math.sin(rad + 0.1)} ${50 + 13 * Math.cos(rad)} ${50 + 13 * Math.sin(rad)}`}
-                  strokeWidth="0.5"
+                  strokeWidth="0.12"
                   strokeDasharray="1 0.5"
                 />
               </g>
@@ -785,9 +811,9 @@ export default function BackgroundDesign() {
           })}
 
           {/* 5. Lace ring bands */}
-          <circle cx="50" cy="50" r="20.5" strokeWidth="0.9" />
-          <circle cx="50" cy="50" r="23" strokeDasharray="1.5 1" strokeWidth="0.8" />
-          <circle cx="50" cy="50" r="25" strokeWidth="0.9" />
+          <circle cx="50" cy="50" r="20.5" strokeWidth="0.22" />
+          <circle cx="50" cy="50" r="23" strokeDasharray="1.5 1" strokeWidth="0.20" />
+          <circle cx="50" cy="50" r="25" strokeWidth="0.22" />
 
           {/* 6. Scalloped lace arches (32 delicate interlocking arches) */}
           {[...Array(32)].map((_, i) => {
@@ -806,12 +832,12 @@ export default function BackgroundDesign() {
               <path
                 key={`lace-${i}`}
                 d={`M ${x1} ${y1} Q ${mx} ${my} ${x2} ${y2}`}
-                strokeWidth="0.8"
+                strokeWidth="0.20"
               />
             );
           })}
 
-          <circle cx="50" cy="50" r="28.2" strokeWidth="1" />
+          <circle cx="50" cy="50" r="28.2" strokeWidth="0.25" />
 
           {/* 7. Large elegant radiating outer petals (24 pointed temple petals with double strokes) */}
           {[...Array(24)].map((_, i) => {
@@ -830,7 +856,7 @@ export default function BackgroundDesign() {
                 {/* Outer petal border */}
                 <path
                   d={`M ${x1} ${y1} Q ${cp1x} ${cp1y} ${x2} ${y2} Q ${cp2x} ${cp2y} ${x1} ${y1}`}
-                  strokeWidth="1"
+                  strokeWidth="0.25"
                 />
                 {/* Fine central vein line inside each petal */}
                 <line
@@ -838,20 +864,20 @@ export default function BackgroundDesign() {
                   y1={50 + 29.5 * Math.sin(rad)}
                   x2={50 + 37.2 * Math.cos(rad)}
                   y2={50 + 37.2 * Math.sin(rad)}
-                  strokeWidth="0.6"
+                  strokeWidth="0.15"
                   strokeDasharray="1.5 1"
                 />
                 {/* Micro dots on the sides of the petal tip */}
-                <circle cx={50 + 36 * Math.cos(rad - 0.06)} cy={50 + 36 * Math.sin(rad - 0.06)} r="0.4" fill={isDark ? colors.strokeDark : colors.stroke} />
-                <circle cx={50 + 36 * Math.cos(rad + 0.06)} cy={50 + 36 * Math.sin(rad + 0.06)} r="0.4" fill={isDark ? colors.strokeDark : colors.stroke} />
+                <circle cx={50 + 36 * Math.cos(rad - 0.06)} cy={50 + 36 * Math.sin(rad - 0.06)} r="0.4" fill={fillColor} />
+                <circle cx={50 + 36 * Math.cos(rad + 0.06)} cy={50 + 36 * Math.sin(rad + 0.06)} r="0.4" fill={fillColor} />
               </g>
             );
           })}
 
           {/* 8. Outer borders, rings & bead patterns */}
-          <circle cx="50" cy="50" r="41.5" strokeWidth="1.2" />
-          <circle cx="50" cy="50" r="44" strokeDasharray="2 1.5" strokeWidth="0.9" />
-          <circle cx="50" cy="50" r="46.2" strokeWidth="1.2" />
+          <circle cx="50" cy="50" r="41.5" strokeWidth="0.32" />
+          <circle cx="50" cy="50" r="44" strokeDasharray="2 1.5" strokeWidth="0.22" />
+          <circle cx="50" cy="50" r="46.2" strokeWidth="0.32" />
 
           {/* 9. Small outermost decorative scallops (48 mini flame points pointing outwards) */}
           {[...Array(48)].map((_, i) => {
@@ -871,7 +897,7 @@ export default function BackgroundDesign() {
               <path
                 key={`outer-scallop-${i}`}
                 d={`M ${x1} ${y1} L ${xTip} ${yTip} L ${x2} ${y2}`}
-                strokeWidth="0.8"
+                strokeWidth="0.20"
               />
             );
           })}
@@ -886,7 +912,7 @@ export default function BackgroundDesign() {
                 cx={50 + 45.1 * Math.cos(rad)} 
                 cy={50 + 45.1 * Math.sin(rad)} 
                 r="0.5"
-                fill={isDark ? colors.strokeDark : colors.stroke}
+                fill={fillColor}
               />
             );
           })}
