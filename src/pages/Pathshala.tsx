@@ -3,7 +3,7 @@ import {
   GraduationCap, Settings, User, BookOpen, LayoutGrid, 
   FileText, CheckCircle2, X, AlertTriangle, Clock, 
   Camera, Video, Users, Plus, Trash2, Send, Trophy,
-  ChevronRight, Award, Timer, ShieldAlert, Bell, ArrowLeft, ExternalLink
+  ChevronRight, Award, Timer, ShieldAlert, Bell, ArrowLeft
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useAuth } from '../contexts/AuthContext';
@@ -698,98 +698,17 @@ export default function PathshalaPage() {
           <h1 className={cn("text-3xl font-display font-black mb-4", isDark ? "text-white" : "text-gray-900")}>PATHSHALA {isLoginMode ? 'LOGIN' : 'SIGNUP'}</h1>
           <p className="text-gray-500 mb-8">{isLoginMode ? 'Please login to access the virtual academy.' : 'Create a new account to join.'}</p>
           
-          {authError && (
-            authError.startsWith('UNAUTHORIZED_DOMAIN:') ? (
-              <div className="mb-6 p-4 bg-rose-500/10 border border-rose-500/30 rounded-2xl text-xs text-left text-gray-900 dark:text-white relative overflow-hidden shadow-sm leading-normal">
-                <div className="absolute top-0 right-0 w-16 h-16 bg-rose-500/5 rounded-full blur-xl" />
-                <h4 className="font-extrabold text-rose-600 dark:text-rose-400 flex items-center gap-1.5 uppercase tracking-wider text-[11px] mb-2">
-                  <ShieldAlert size={14} />
-                  Domain Authorized Nahi Hai
-                </h4>
-                
-                <p className="text-[11px] font-bold text-gray-700 dark:text-gray-300 mb-3 leading-relaxed">
-                  Vercel ya custom domain par Google Login chalane ke liye, aapko is domain ko Firebase Console me add karna hoga:
-                </p>
-                
-                <div className="space-y-2.5 bg-white dark:bg-black/30 p-3 rounded-xl border border-gray-100 dark:border-white/5 font-medium text-gray-600 dark:text-gray-400 text-[11px] mb-3 leading-relaxed">
-                  <div className="flex items-start gap-2">
-                    <span className="flex items-center justify-center w-4 h-4 rounded-full bg-rose-500/10 text-rose-500 text-[10px] font-black shrink-0 mt-0.5">1</span>
-                    <div>
-                      <a href="https://console.firebase.google.com/" target="_blank" rel="noopener noreferrer" className="text-[#FF6D00] font-bold hover:underline inline-flex items-center gap-0.5">
-                        Firebase Console
-                        <ExternalLink size={10} />
-                      </a> par jayein.
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <span className="flex items-center justify-center w-4 h-4 rounded-full bg-rose-500/10 text-rose-500 text-[10px] font-black shrink-0 mt-0.5">2</span>
-                    <div>
-                      Apna project select karein: <code className="px-1.5 py-0.5 bg-gray-100 dark:bg-white/10 rounded font-mono text-[10px] text-gray-900 dark:text-white font-bold">gen-lang-client-0252694331</code>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <span className="flex items-center justify-center w-4 h-4 rounded-full bg-rose-500/10 text-rose-500 text-[10px] font-black shrink-0 mt-0.5">3</span>
-                    <div>
-                      <span className="font-bold">Authentication</span> &rarr; <span className="font-bold">Settings</span> &rarr; <span className="font-bold">Authorized Domains</span> me jayein.
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <span className="flex items-center justify-center w-4 h-4 rounded-full bg-rose-500/10 text-rose-500 text-[10px] font-black shrink-0 mt-0.5">4</span>
-                    <div className="w-full">
-                      <span className="font-bold">Add Domain</span> par click karke yeh domain enter karein:
-                      <div className="mt-1.5 flex items-center gap-1.5 w-full">
-                        <input 
-                          readOnly 
-                          value={authError.split(':')[1]} 
-                          className="px-2.5 py-1 bg-gray-100 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-lg text-rose-600 dark:text-rose-400 font-mono text-[10px] select-all w-full font-bold focus:outline-none"
-                        />
-                        <button 
-                          type="button"
-                          onClick={() => navigator.clipboard.writeText(authError.split(':')[1])}
-                          className="px-2.5 py-1 bg-[#FF6D00] hover:bg-[#FF8A00] text-white text-[9px] font-bold rounded-lg uppercase tracking-wider shrink-0 transition-colors"
-                        >
-                          Copy
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="flex justify-end gap-2 text-[10px] font-bold">
-                  <button 
-                    type="button" 
-                    onClick={() => setAuthError('')} 
-                    className="px-3 py-1.5 bg-gray-200 dark:bg-white/10 hover:bg-gray-300 dark:hover:bg-white/20 rounded-lg text-gray-700 dark:text-gray-300 uppercase tracking-wider transition-colors"
-                  >
-                    Dismiss
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <p className="text-red-500 text-sm mb-4">✕ {authError}</p>
-            )
-          )}
+          {authError && <p className="text-red-500 text-sm mb-4">{authError}</p>}
           
           {/* Primary Google auth */}
           <button
             type="button"
             onClick={async () => {
-              setAuthError('');
               try {
                 await signInWithPopup(auth, googleProvider);
-              } catch (e: any) {
+              } catch (e) {
                 console.error("Google login failed", e);
-                let errMsg = "Google authentication failed. Please try again.";
-                if (e && (e.code === 'auth/unauthorized-domain' || e.message?.includes('unauthorized-domain') || e.message?.includes('unauthorized domain'))) {
-                  errMsg = `UNAUTHORIZED_DOMAIN:${window.location.hostname}`;
-                } else if (e && e.code === 'auth/popup-blocked') {
-                  errMsg = "Google sign-in popup was blocked by your browser. Please allow popups for this site.";
-                } else if (e && e.code === 'auth/popup-closed-by-user') {
-                  errMsg = "The sign-in popup was closed before completion. Please try again.";
-                } else if (e && e.message) {
-                  errMsg = e.message;
-                }
-                setAuthError(errMsg);
+                setAuthError("Google authentication failed. Please try again.");
               }
             }}
             className="w-full py-4.5 bg-white text-black hover:bg-gray-100 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-3 shadow-lg hover:scale-105 active:scale-95 transition-all mb-6 border border-gray-200"

@@ -1,11 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
-import { User, Camera, Instagram, Award, Settings, LogOut, BookOpen, ShieldAlert, Info, Edit2, Check, X, Download, Compass, Code, Milestone, Sparkles, Database, ArrowLeft, Users, MessageCircle, ExternalLink } from 'lucide-react';
+import { User, Camera, Instagram, Award, Settings, LogOut, BookOpen, ShieldAlert, Info, Edit2, Check, X, Download, Compass, Code, Milestone, Sparkles, Database, ArrowLeft, Users, MessageCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { updateProfile } from 'firebase/auth';
-import { doc, updateDoc, collection, setDoc, getDoc, onSnapshot, query, orderBy, deleteDoc, where, getDocs } from 'firebase/firestore';
+import { doc, updateDoc, collection, setDoc, getDoc, onSnapshot, query, orderBy, deleteDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 
 export default function ProfilePage() {
@@ -159,30 +159,20 @@ export default function ProfilePage() {
     if (!user) return;
     
     const confirmDelete = window.confirm(
-      "Are you sure you want to permanently delete your account, saved chats, and remove your card from the Jain Community? This action cannot be undone."
+      "Are you sure you want to permanently delete your account and remove your card from the Jain Community? This action cannot be undone."
     );
     
     if (!confirmDelete) return;
     
     setIsUpdatingCommunity(true);
-    const userId = user.uid;
     try {
-      // 1. Delete from firebase auth first to guarantee deletion before cleanup
+      // 1. Delete from jain_community
+      await deleteDoc(doc(db, 'jain_community', user.uid));
+      // 2. Delete from users
+      await deleteDoc(doc(db, 'users', user.uid));
+      
+      // 3. Delete from firebase auth
       await user.delete();
-      
-      // 2. Since auth deletion succeeded, clean up Firestore collections
-      await deleteDoc(doc(db, 'jain_community', userId));
-      await deleteDoc(doc(db, 'users', userId));
-      
-      // Delete user_chats
-      try {
-        const q = query(collection(db, 'user_chats'), where('userId', '==', userId));
-        const snapshot = await getDocs(q);
-        const deletePromises = snapshot.docs.map(docSnap => deleteDoc(docSnap.ref));
-        await Promise.all(deletePromises);
-      } catch (chatErr) {
-        console.error("Error deleting user chats:", chatErr);
-      }
       
       alert("Your account and community card have been successfully deleted.");
       await logout();
@@ -1196,77 +1186,9 @@ export default function ProfilePage() {
 
                   {/* Error or Success Messages */}
                   {authError && (
-                    authError.startsWith('UNAUTHORIZED_DOMAIN:') ? (
-                      <div className="mb-4 p-4 bg-rose-500/10 border border-rose-500/30 rounded-2xl text-xs text-left text-gray-900 dark:text-white relative overflow-hidden shadow-sm leading-normal">
-                        <div className="absolute top-0 right-0 w-16 h-16 bg-rose-500/5 rounded-full blur-xl" />
-                        <h4 className="font-extrabold text-rose-600 dark:text-rose-400 flex items-center gap-1.5 uppercase tracking-wider text-[11px] mb-2">
-                          <ShieldAlert size={14} />
-                          Domain Authorized Nahi Hai
-                        </h4>
-                        
-                        <p className="text-[11px] font-bold text-gray-700 dark:text-gray-300 mb-3 leading-relaxed">
-                          Vercel ya custom domain par Google Login chalane ke liye, aapko is domain ko Firebase Console me add karna hoga:
-                        </p>
-                        
-                        <div className="space-y-2.5 bg-white dark:bg-black/30 p-3 rounded-xl border border-gray-100 dark:border-white/5 font-medium text-gray-600 dark:text-gray-400 text-[11px] mb-3 leading-relaxed">
-                          <div className="flex items-start gap-2">
-                            <span className="flex items-center justify-center w-4 h-4 rounded-full bg-rose-500/10 text-rose-500 text-[10px] font-black shrink-0 mt-0.5">1</span>
-                            <div>
-                              <a href="https://console.firebase.google.com/" target="_blank" rel="noopener noreferrer" className="text-[#FF6D00] font-bold hover:underline inline-flex items-center gap-0.5">
-                                Firebase Console
-                                <ExternalLink size={10} />
-                              </a> par jayein.
-                            </div>
-                          </div>
-                          <div className="flex items-start gap-2">
-                            <span className="flex items-center justify-center w-4 h-4 rounded-full bg-rose-500/10 text-rose-500 text-[10px] font-black shrink-0 mt-0.5">2</span>
-                            <div>
-                              Apna project select karein: <code className="px-1.5 py-0.5 bg-gray-100 dark:bg-white/10 rounded font-mono text-[10px] text-gray-900 dark:text-white font-bold">gen-lang-client-0252694331</code>
-                            </div>
-                          </div>
-                          <div className="flex items-start gap-2">
-                            <span className="flex items-center justify-center w-4 h-4 rounded-full bg-rose-500/10 text-rose-500 text-[10px] font-black shrink-0 mt-0.5">3</span>
-                            <div>
-                              <span className="font-bold">Authentication</span> &rarr; <span className="font-bold">Settings</span> &rarr; <span className="font-bold">Authorized Domains</span> me jayein.
-                            </div>
-                          </div>
-                          <div className="flex items-start gap-2">
-                            <span className="flex items-center justify-center w-4 h-4 rounded-full bg-rose-500/10 text-rose-500 text-[10px] font-black shrink-0 mt-0.5">4</span>
-                            <div className="w-full">
-                              <span className="font-bold">Add Domain</span> par click karke yeh domain enter karein:
-                              <div className="mt-1.5 flex items-center gap-1.5 w-full">
-                                <input 
-                                  readOnly 
-                                  value={authError.split(':')[1]} 
-                                  className="px-2.5 py-1 bg-gray-100 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-lg text-rose-600 dark:text-rose-400 font-mono text-[10px] select-all w-full font-bold focus:outline-none"
-                                />
-                                <button 
-                                  type="button"
-                                  onClick={() => navigator.clipboard.writeText(authError.split(':')[1])}
-                                  className="px-2.5 py-1 bg-[#FF6D00] hover:bg-[#FF8A00] text-white text-[9px] font-bold rounded-lg uppercase tracking-wider shrink-0 transition-colors"
-                                >
-                                  Copy
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        
-                        <div className="flex justify-end gap-2 text-[10px] font-bold">
-                          <button 
-                            type="button" 
-                            onClick={() => setAuthError('')} 
-                            className="px-3 py-1.5 bg-gray-200 dark:bg-white/10 hover:bg-gray-300 dark:hover:bg-white/20 rounded-lg text-gray-700 dark:text-gray-300 uppercase tracking-wider transition-colors"
-                          >
-                            Dismiss
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="mb-4 p-3 bg-rose-500/10 border border-rose-500/20 text-rose-500 rounded-xl text-xs font-bold leading-relaxed">
-                        ✕ {authError}
-                      </div>
-                    )
+                    <div className="mb-4 p-3 bg-rose-500/10 border border-rose-500/20 text-rose-500 rounded-xl text-xs font-bold leading-relaxed">
+                      ✕ {authError}
+                    </div>
                   )}
                   {authSuccessMsg && (
                     <div className="mb-4 p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 rounded-xl text-xs font-bold leading-relaxed">
@@ -1332,19 +1254,8 @@ export default function ProfilePage() {
                             try {
                               await login();
                               setShowSettings(false);
-                            } catch (err: any) {
-                              console.error("Google sign-in error:", err);
-                              let errMsg = "Google authentication failed. Please try again.";
-                              if (err && (err.code === 'auth/unauthorized-domain' || err.message?.includes('unauthorized-domain') || err.message?.includes('unauthorized domain'))) {
-                                errMsg = `UNAUTHORIZED_DOMAIN:${window.location.hostname}`;
-                              } else if (err && err.code === 'auth/popup-blocked') {
-                                errMsg = "Google sign-in popup was blocked by your browser. Please allow popups for this site.";
-                              } else if (err && err.code === 'auth/popup-closed-by-user') {
-                                errMsg = "The sign-in popup was closed before completion. Please try again.";
-                              } else if (err && err.message) {
-                                errMsg = err.message;
-                              }
-                              setAuthError(errMsg);
+                            } catch (err) {
+                              // Handled inside AuthContext
                             }
                           }}
                           className="text-[10px] font-bold text-[#FF6D00] hover:underline uppercase tracking-wider block mx-auto"
