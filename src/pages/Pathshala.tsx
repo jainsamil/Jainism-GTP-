@@ -12,13 +12,21 @@ import { db, auth, googleProvider, signInWithPopup } from '../firebase';
 import { 
   collection, query, onSnapshot, addDoc, 
   updateDoc, doc, deleteDoc, serverTimestamp,
-  getDocs, where, setDoc
+  getDocs, where, setDoc, getDoc
 } from 'firebase/firestore';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import SectionAiAgent from '../components/SectionAiAgent';
 import PathshalaFlashcardsDeck, { FLASHCARDS_DATA } from '../components/PathshalaFlashcardsDeck';
+
+const ensureAbsoluteUrl = (url: string) => {
+  if (!url) return '';
+  if (/^https?:\/\//i.test(url)) {
+    return url;
+  }
+  return `https://${url}`;
+};
 
 export default function PathshalaPage() {
   const { theme } = useTheme();
@@ -47,6 +55,7 @@ export default function PathshalaPage() {
   const [homeworks, setHomeworks] = useState<any[]>([]);
   const [exams, setExams] = useState<any[]>([]);
   const [submissions, setSubmissions] = useState<any[]>([]);
+  const [homeworkSubmissions, setHomeworkSubmissions] = useState<any[]>([]);
   const [allUsers, setAllUsers] = useState<any[]>([]);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [pushEnabled, setPushEnabled] = useState(false);
@@ -141,6 +150,11 @@ export default function PathshalaPage() {
       setSubmissions(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     });
 
+    const qHwSubmissions = query(collection(db, 'homework_submissions'));
+    const unsubscribeHwSubmissions = onSnapshot(qHwSubmissions, (snapshot) => {
+      setHomeworkSubmissions(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    });
+
     const qUsers = query(collection(db, 'pathshala_users'));
     const unsubscribeUsers = onSnapshot(qUsers, (snapshot) => {
       setAllUsers(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
@@ -169,6 +183,7 @@ export default function PathshalaPage() {
       unsubscribeExams();
       unsubscribeHomeworks();
       unsubscribeSubmissions();
+      unsubscribeHwSubmissions();
       unsubscribeUsers();
       unsubscribeNotifications();
     };
@@ -279,23 +294,34 @@ export default function PathshalaPage() {
   }, [showTakeExam, mediaStreams]);
 
   const startExam = async (exam: any) => {
+    let cameraStream: MediaStream | null = null;
+    let screenStream: MediaStream | null = null;
     try {
-      const cameraStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-      const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
-      setMediaStreams({ camera: cameraStream, screen: screenStream });
-      
-      setShowTakeExam(exam);
-      setExamState({
-        currentQuestionIndex: 0,
-        answers: new Array(exam.questions.length).fill(-1),
-        timeLeft: exam.duration * 60,
-        warnings: 0,
-        isFinished: false
-      });
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        cameraStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false }).catch((err) => {
+          console.warn("Camera hardware access denied or not available, using simulation.", err);
+          return null;
+        });
+      }
+      if (navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
+        screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false }).catch((err) => {
+          console.warn("Screen share capture denied or not available, using simulation.", err);
+          return null;
+        });
+      }
     } catch (err) {
-      alert('Camera and Screen sharing permissions are required to start the exam.');
-      console.error(err);
+      console.warn('Failed to initialize proctoring hardware, falling back to simulated monitoring:', err);
     }
+
+    setMediaStreams({ camera: cameraStream, screen: screenStream });
+    setShowTakeExam(exam);
+    setExamState({
+      currentQuestionIndex: 0,
+      answers: new Array(exam.questions.length).fill(-1),
+      timeLeft: exam.duration * 60,
+      warnings: 0,
+      isFinished: false
+    });
   };
 
   const finishExam = async () => {
@@ -340,9 +366,9 @@ export default function PathshalaPage() {
     if (authUser) {
       const fetchPathshalaUser = async () => {
         try {
-          const uDoc = await getDocs(query(collection(db, 'pathshala_users'), where('__name__', '==', authUser.uid)));
-          if (!uDoc.empty) {
-            const userData = { id: uDoc.docs[0].id, ...uDoc.docs[0].data() } as any;
+          const uDoc = await getDoc(doc(db, 'pathshala_users', authUser.uid));
+          if (uDoc.exists()) {
+            const userData = { id: uDoc.id, ...uDoc.data() } as any;
             setPathshalaUser(userData);
             setIsTeacher(userData.role === 'teacher' || userData.role === 'admin');
             setShowGoogleRoleSetup(false);
@@ -361,9 +387,9 @@ export default function PathshalaPage() {
       if (storedUserId) {
         const fetchUser = async () => {
           try {
-            const userDoc = await getDocs(query(collection(db, 'pathshala_users'), where('__name__', '==', storedUserId)));
-            if (!userDoc.empty) {
-              const userData = { id: userDoc.docs[0].id, ...userDoc.docs[0].data() } as any;
+            const uDoc = await getDoc(doc(db, 'pathshala_users', storedUserId));
+            if (uDoc.exists()) {
+              const userData = { id: uDoc.id, ...uDoc.data() } as any;
               setPathshalaUser(userData);
               setIsTeacher(userData.role === 'teacher' || userData.role === 'admin');
             } else {
@@ -1371,7 +1397,7 @@ export default function PathshalaPage() {
                   </div>
                 </div>
                 <a 
-                  href={cls.link} target="_blank" rel="noopener noreferrer"
+                  href={ensureAbsoluteUrl(cls.link)} target="_blank" rel="noopener noreferrer"
                   className={cn("w-full py-3 rounded-xl font-black text-xs tracking-widest flex items-center justify-center gap-2 transition-all border", isDark ? "bg-white/5 border-white/10 text-white hover:bg-white/10" : "bg-orange-50 border-orange-100 text-[#FF6D00] hover:bg-orange-100")}
                 >
                   <Video size={16} /> {t.joinClass}
@@ -1435,7 +1461,7 @@ export default function PathshalaPage() {
                           homeworkId: hw.id,
                           studentId: pathshalaUser.id,
                           studentName: pathshalaUser.name,
-                          link,
+                          link: ensureAbsoluteUrl(link),
                           submittedAt: new Date().toISOString()
                         });
                         alert('Homework submitted successfully!');
@@ -1445,6 +1471,29 @@ export default function PathshalaPage() {
                   >
                     <Send size={16} /> SUBMIT HOMEWORK
                   </button>
+                )}
+                {isTeacher && (
+                  <div className="mt-4 pt-4 border-t border-gray-200 dark:border-white/10 space-y-2">
+                    <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Student Submissions</h4>
+                    <div className="space-y-2">
+                      {homeworkSubmissions.filter(sub => sub.homeworkId === hw.id).map(sub => (
+                        <div key={sub.id} className="flex justify-between items-center text-xs p-3 bg-gray-500/5 rounded-xl border border-gray-500/10">
+                          <span className="font-bold">{sub.studentName}</span>
+                          <a 
+                            href={ensureAbsoluteUrl(sub.link)} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-[#00E676] hover:underline font-black uppercase tracking-widest text-[9px] flex items-center gap-1"
+                          >
+                            <BookOpen size={12} /> View Submission
+                          </a>
+                        </div>
+                      ))}
+                      {homeworkSubmissions.filter(sub => sub.homeworkId === hw.id).length === 0 && (
+                        <p className="text-[10px] text-gray-500 font-bold uppercase py-1">No submissions yet</p>
+                      )}
+                    </div>
+                  </div>
                 )}
               </div>
             ))}
@@ -1772,15 +1821,29 @@ export default function PathshalaPage() {
               </div>
               <div className="flex items-center gap-4">
                 <div className="flex gap-2">
-                  <div className="relative w-24 h-16 bg-black rounded-lg overflow-hidden border border-white/10">
-                    <video ref={cameraRef} autoPlay playsInline muted className="w-full h-full object-cover" />
-                    <div className="absolute bottom-1 left-1 bg-black/50 px-1 rounded text-[8px] text-white flex items-center gap-1">
+                  <div className="relative w-24 h-16 bg-zinc-900 rounded-lg overflow-hidden border border-white/10 flex items-center justify-center">
+                    {mediaStreams.camera ? (
+                      <video ref={cameraRef} autoPlay playsInline muted className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="flex flex-col items-center justify-center text-center p-1">
+                        <Camera size={14} className="text-[#FF6D00] animate-pulse" />
+                        <span className="text-[7px] text-gray-400 font-bold uppercase mt-1">SIMULATING</span>
+                      </div>
+                    )}
+                    <div className="absolute bottom-1 left-1 bg-black/60 px-1 rounded text-[8px] text-white flex items-center gap-1 font-bold">
                       <Camera size={8} /> Cam
                     </div>
                   </div>
-                  <div className="relative w-24 h-16 bg-black rounded-lg overflow-hidden border border-white/10">
-                    <video ref={screenRef} autoPlay playsInline muted className="w-full h-full object-cover" />
-                    <div className="absolute bottom-1 left-1 bg-black/50 px-1 rounded text-[8px] text-white flex items-center gap-1">
+                  <div className="relative w-24 h-16 bg-zinc-900 rounded-lg overflow-hidden border border-white/10 flex items-center justify-center">
+                    {mediaStreams.screen ? (
+                      <video ref={screenRef} autoPlay playsInline muted className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="flex flex-col items-center justify-center text-center p-1">
+                        <Video size={14} className="text-[#FFD54F] animate-pulse" />
+                        <span className="text-[7px] text-gray-400 font-bold uppercase mt-1">SIMULATING</span>
+                      </div>
+                    )}
+                    <div className="absolute bottom-1 left-1 bg-black/60 px-1 rounded text-[8px] text-white flex items-center gap-1 font-bold">
                       <Video size={8} /> Screen
                     </div>
                   </div>
