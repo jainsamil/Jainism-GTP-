@@ -49,6 +49,12 @@ export default function PathshalaPage() {
   const [studentTeacherName, setStudentTeacherName] = useState('');
   const [studentClassName, setStudentClassName] = useState('');
   const [authError, setAuthError] = useState('');
+  const [authErrorModal, setAuthErrorModal] = useState<{
+    show: boolean;
+    domain: string;
+    projectId: string;
+    rawError: string;
+  } | null>(null);
 
   const [activeTab, setActiveTab] = useState<'dashboard' | 'classes' | 'homework' | 'exams' | 'results' | 'discussions' | 'users' | 'flashcards'>('dashboard');
   const [classes, setClasses] = useState<any[]>([]);
@@ -732,9 +738,17 @@ export default function PathshalaPage() {
             onClick={async () => {
               try {
                 await signInWithPopup(auth, googleProvider);
-              } catch (e) {
+              } catch (e: any) {
                 console.error("Google login failed", e);
-                setAuthError("Google authentication failed. Please try again.");
+                const errMsg = e?.message || String(e);
+                const currentDomain = typeof window !== 'undefined' ? window.location.hostname : 'jainismgpt.vercel.app';
+                setAuthErrorModal({
+                  show: true,
+                  domain: currentDomain,
+                  projectId: "original-jainism-gpt",
+                  rawError: errMsg
+                });
+                setAuthError("Google authentication failed. Domain authorization may be required.");
               }
             }}
             className="w-full py-4.5 bg-white text-black hover:bg-gray-100 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-3 shadow-lg hover:scale-105 active:scale-95 transition-all mb-6 border border-gray-200"
@@ -747,6 +761,62 @@ export default function PathshalaPage() {
             </svg>
             Sign In with Google
           </button>
+
+          {authErrorModal?.show && (
+            <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
+              <div className="bg-white dark:bg-[#121212] border border-gray-200 dark:border-white/10 rounded-[2.5rem] p-6 w-full max-w-md shadow-2xl relative overflow-hidden text-left">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-[#FF6D00]/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+                
+                <div className="flex items-center gap-3 mb-4 border-b border-gray-100 dark:border-white/5 pb-3">
+                  <div className="p-2 bg-amber-500/10 text-amber-500 rounded-xl">
+                    <ShieldAlert size={22} />
+                  </div>
+                  <div>
+                    <h3 className="font-extrabold text-base text-gray-900 dark:text-white">
+                      Firebase Authentication Error
+                    </h3>
+                    <p className="text-[10px] text-gray-400 dark:text-gray-500 font-semibold uppercase tracking-wider">
+                      Domain Authorization Required
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-4 text-left text-xs max-h-[60vh] overflow-y-auto pr-1">
+                  <p className="text-gray-600 dark:text-gray-300 font-medium leading-relaxed">
+                    Your Vercel domain <code className="bg-gray-100 dark:bg-white/10 px-1.5 py-0.5 rounded font-mono text-[11px] font-black text-rose-500">{authErrorModal.domain}</code> is not authorized in your Firebase Project <code className="bg-gray-100 dark:bg-white/10 px-1.5 py-0.5 rounded font-mono text-[11px] font-black">{authErrorModal.projectId}</code>.
+                  </p>
+
+                  <div className="p-3 bg-amber-500/5 dark:bg-amber-500/10 border border-amber-500/20 rounded-2xl text-amber-600 dark:text-amber-400 font-bold leading-relaxed text-[11px]">
+                    💡 <strong>इसे ठीक करने के लिए (To Fix This):</strong>
+                    <ol className="list-decimal list-inside mt-2 space-y-1.5 font-semibold">
+                      <li>Open <a href="https://console.firebase.google.com/" target="_blank" rel="noopener noreferrer" className="underline text-[#FF6D00] font-black">Firebase Console</a></li>
+                      <li>Go to your project <strong>{authErrorModal.projectId}</strong></li>
+                      <li>Go to <strong>Authentication</strong> &gt; <strong>Settings</strong> tab</li>
+                      <li>Under <strong>Authorized domains</strong>, click <strong>Add domain</strong></li>
+                      <li>Enter <code className="bg-black/5 dark:bg-white/10 px-1.5 py-0.5 rounded font-mono text-xs text-rose-500">{authErrorModal.domain}</code></li>
+                      <li>Save, and then try signing in again!</li>
+                    </ol>
+                  </div>
+
+                  <div className="text-[10px] text-gray-400 dark:text-gray-500 font-semibold border-t border-gray-100 dark:border-white/5 pt-3">
+                    <span className="block mb-1 font-black uppercase tracking-wider">Technical Details:</span>
+                    <div className="bg-gray-50 dark:bg-black/40 p-2.5 rounded-xl font-mono overflow-x-auto text-[9px] max-h-20 scrollbar-none">
+                      {authErrorModal.rawError}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-5 pt-3 border-t border-gray-100 dark:border-white/5 flex gap-2">
+                  <button
+                    onClick={() => setAuthErrorModal(null)}
+                    className="w-full py-3 bg-[#FF6D00] hover:bg-[#FF6D00]/90 text-white font-black text-xs uppercase tracking-widest rounded-xl transition-all shadow-md active:scale-95"
+                  >
+                    Got It / समझ आ गया
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="flex items-center my-6">
             <div className="flex-1 border-t border-gray-200 dark:border-white/10"></div>
