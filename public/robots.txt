@@ -3,4 +3,4 @@ User-agent: *
 Allow: /
 
 # Link to the XML Sitemap for Google and other search engines
-Sitemap: https://ais-pre-anse6fjcf7vfuwhqs7mcvs-268874365730.asia-southeast1.run.app/sitemap.xml
+Sitemap: https://jainismgpt.vercel.app/sitemap.xml

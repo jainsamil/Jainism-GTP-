@@ -6,28 +6,83 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="theme-color" content="#050505" />
-    <link rel="manifest" href="/manifest.json" />
-    <link rel="apple-touch-icon" href="/logo-192.png" />
+    <!-- Favicon & Icon Configuration for Google & All Devices -->
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/logo-192.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/logo-512.png" />
     <link rel="icon" type="image/svg+xml" href="/logo.svg" />
-    <link rel="shortcut icon" href="/logo-192.png" type="image/png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.json" />
+    
+    <!-- Site Indexing & Domain Verification -->
+    <link rel="canonical" href="https://jainismgpt.vercel.app/" />
     <meta name="google-site-verification" content="xzMiQSHElsT9un7fgm0idDfC3AwRTgpBk1rNHAY8FVk" />
     
     <!-- Core SEO Meta Tags -->
     <meta name="description" content="Official Jainism GPT platform designed by Samil Jain. Connect with the ultimate Jain Religion AI assistant, learn Jainism online, explore 24 Tirthankars, read scriptures/Aagams, track Jain panchang, daily vichaars, and more." />
-    <meta name="keywords" content="Jainism GPT, Jain GPT, Jainism GPT by Samil, Samil Jain, Samil Jain web, Jainism Religion AI, Jainism AI chatbot, Learn Jainism Online, Jainism AI agent, Jain Chay Bot, Jain Ai, divine wisdom, Jainism questions and answers, Jainism philosophy, Jainism principles, Ahinsa in Jainism, Mahavira teachings, 24 Jain Tirthankaras, Navkar Mantra, Digambar Shvetambar, Jainism scriptures, Jain history, Jain festivals, Jain panchang" />
+    <meta name="keywords" content="Jainism GPT, Jain GPT, Jainism GPT by Samil, Samil Jain, Samil Jain web, Jainism Religion AI, Jainism AI chatbot, Learn Jainism Online, Jainism AI agent, Jain Chat Bot, Jain Ai, divine wisdom, Jainism questions and answers, Jainism philosophy, Jainism principles, Ahinsa in Jainism, Mahavira teachings, 24 Jain Tirthankaras, Navkar Mantra, Digambar Shvetambar, Jainism scriptures, Jain history, Jain festivals, Jain panchang, जैनिज्म जीपीटी, जैन जीपीटी, समिल जैन" />
     <meta name="author" content="Samil Jain" />
-    <meta name="robots" content="index, follow" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
     
-    <!-- Open Graph / SEO Social sharing preview side-image -->
+    <!-- Open Graph / SEO Social sharing preview (Absolute URLs for proper previews) -->
     <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://jainismgpt.vercel.app/" />
     <meta property="og:title" content="Jainism GPT - Divine Wisdom by Samil Jain" />
     <meta property="og:description" content="Explore Jainism GPT, the premier AI companion for Jain scripture, Aagams, daily thought/Vichaar, fasting, and Panchang. Built by Samil Jain." />
-    <meta property="og:image" content="/logo-512.png" />
+    <meta property="og:image" content="https://jainismgpt.vercel.app/logo-512.png" />
     <meta property="og:image:width" content="512" />
     <meta property="og:image:height" content="512" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:site_name" content="Jainism GPT" />
+    
+    <!-- Twitter Sharing Cards -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:image" content="/logo-512.png" />
-    <title>Jainism GPT - Learn Jainism Online | Divine Spiritual Assistant</title>
+    <meta name="twitter:title" content="Jainism GPT - Divine Wisdom by Samil Jain" />
+    <meta name="twitter:description" content="Explore Jainism GPT, the premier AI companion for Jain scripture, Aagams, daily thought/Vichaar, fasting, and Panchang. Built by Samil Jain." />
+    <meta name="twitter:image" content="https://jainismgpt.vercel.app/logo-512.png" />
+    <meta name="twitter:creator" content="@samil_jain" />
+    
+    <!-- JSON-LD Structured Data Schema for Rich Search Snippets & Brand Promotion -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Jainism GPT",
+      "url": "https://jainismgpt.vercel.app/",
+      "logo": "https://jainismgpt.vercel.app/logo-512.png",
+      "image": "https://jainismgpt.vercel.app/logo-512.png",
+      "description": "The official Jainism GPT platform designed by Samil Jain. An ultra-premium, AI-powered spiritual companion and knowledge hub for Jain scriptures, Aagams, Daily Panchang, fasting rules, Bhaktamar Stotra, and interactive Jain Pathshala.",
+      "applicationCategory": "EducationalApplication, SpiritualApplication",
+      "operatingSystem": "All",
+      "author": {
+        "@type": "Person",
+        "name": "Samil Jain",
+        "email": "samiljain0111@gmail.com",
+        "url": "https://jainismgpt.vercel.app/"
+      },
+      "creator": {
+        "@type": "Person",
+        "name": "Samil Jain"
+      },
+      "offers": {
+        "@type": "Offer",
+        "price": "0.00",
+        "priceCurrency": "INR"
+      },
+      "featureList": [
+        "Jain Religion AI Assistant Chat",
+        "Read 45 Jain Aagams & Scriptures online",
+        "Daily Vichaar (Spiritual Quotes)",
+        "Daily Fasting (Pachkhan) Rules & Panchang",
+        "Jain Dharamshala Finder & Vihar Tracker",
+        "Interactive Pathshala & Flashcards",
+        "Saints & Acharya Biographies"
+      ]
+    }
+    </script>
+    <title>Jainism GPT - Learn Jainism Online | Divine Spiritual Assistant by Samil Jain</title>
     <style>
       body {
         background-color: #050505;

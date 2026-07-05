@@ -5,25 +5,25 @@
   "description": "An AI assistant knowledgeable about Jainism, its principles, history, and practices.",
   "icons": [
     {
-      "src": "logo-192.png",
+      "src": "/logo-192.png",
       "type": "image/png",
       "sizes": "192x192",
       "purpose": "any"
     },
     {
-      "src": "logo-192.png",
+      "src": "/logo-192.png",
       "type": "image/png",
       "sizes": "192x192",
       "purpose": "maskable"
     },
     {
-      "src": "logo-512.png",
+      "src": "/logo-512.png",
       "type": "image/png",
       "sizes": "512x512",
       "purpose": "any"
     },
     {
-      "src": "logo-512.png",
+      "src": "/logo-512.png",
       "type": "image/png",
       "sizes": "512x512",
       "purpose": "maskable"
@@ -31,14 +31,14 @@
   ],
   "screenshots": [
     {
-      "src": "logo-512.png",
+      "src": "/logo-512.png",
       "type": "image/png",
       "sizes": "512x512",
       "form_factor": "narrow",
       "label": "Jainism GPT Mobile"
     },
     {
-      "src": "logo-512.png",
+      "src": "/logo-512.png",
       "type": "image/png",
       "sizes": "512x512",
       "form_factor": "wide",

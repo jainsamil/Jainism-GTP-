@@ -324,7 +324,17 @@ export default function ChatPage() {
       // Delete user settings doc if exists
       await deleteDoc(doc(db, 'users', user.uid));
 
-      addToast("Your Jainism GPT Chat Account and entire History has been permanently deleted.");
+      // Delete community card if exists
+      await deleteDoc(doc(db, 'jain_community', user.uid));
+
+      // Attempt to delete from firebase auth
+      try {
+        await user.delete();
+      } catch (authErr) {
+        console.warn("Auth user deletion skipped or failed (requires recent login):", authErr);
+      }
+
+      addToast("Your Jainism GPT Chat Account, Community Card, and entire History have been permanently deleted.");
       logout();
     } catch (err) {
       console.error("Error purging account:", err);

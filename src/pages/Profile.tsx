@@ -1,15 +1,15 @@
 import { useState, useRef, useEffect } from 'react';
-import { User, Camera, Instagram, Award, Settings, LogOut, BookOpen, ShieldAlert, Info, Edit2, Check, X, Download, Compass, Code, Milestone, Sparkles, Database, ArrowLeft } from 'lucide-react';
+import { User, Camera, Instagram, Award, Settings, LogOut, BookOpen, ShieldAlert, Info, Edit2, Check, X, Download, Compass, Code, Milestone, Sparkles, Database, ArrowLeft, Users, MessageCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { updateProfile } from 'firebase/auth';
-import { doc, updateDoc } from 'firebase/firestore';
+import { doc, updateDoc, collection, setDoc, getDoc, onSnapshot, query, orderBy, deleteDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 
 export default function ProfilePage() {
-  const { user, role, login, logout } = useAuth();
+  const { user, role, login, loginWithEmail, registerWithEmail, logout } = useAuth();
   const { language, setLanguage } = useLanguage();
   const [profilePic, setProfilePic] = useState<string | null>('https://i.ibb.co/Myg19RW6/1000539584.jpg');
   const [name, setName] = useState('Samil Jain');
@@ -25,6 +25,216 @@ export default function ProfilePage() {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
+
+  // Jain Community state definitions
+  const [communityMembers, setCommunityMembers] = useState<any[]>([]);
+  const [totalCount, setTotalCount] = useState<number>(0);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [currentUserCommunity, setCurrentUserCommunity] = useState<any>(null);
+  const [whatsappInput, setWhatsappInput] = useState('');
+  const [instaInput, setInstaInput] = useState('');
+  const [isUpdatingCommunity, setIsUpdatingCommunity] = useState(false);
+  const [communityStatusMsg, setCommunityStatusMsg] = useState('');
+
+  // Inline Secure Custom Auth states
+  const [authTab, setAuthTab] = useState<'signin' | 'signup'>('signin');
+  const [emailInput, setEmailInput] = useState('');
+  const [passwordInput, setPasswordInput] = useState('');
+  const [displayNameInput, setDisplayNameInput] = useState('');
+  const [authError, setAuthError] = useState('');
+  const [authLoading, setAuthLoading] = useState(false);
+  const [authSuccessMsg, setAuthSuccessMsg] = useState('');
+  const [showEditLinksModal, setShowEditLinksModal] = useState(false);
+
+  // Load and subscribe to community directory
+  useEffect(() => {
+    const q = query(collection(db, 'jain_community'), orderBy('updatedAt', 'desc'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const members: any[] = [];
+      snapshot.forEach((docSnap) => {
+        members.push({ id: docSnap.id, ...docSnap.data() });
+      });
+      
+      const samilEmail = 'samiljain0111@gmail.com';
+      const samilIndex = members.findIndex(m => m.email?.toLowerCase() === samilEmail);
+      let sortedMembers = [...members];
+      
+      let samilMember: any = null;
+      if (samilIndex > -1) {
+        samilMember = sortedMembers.splice(samilIndex, 1)[0];
+      } else {
+        samilMember = {
+          uid: 'samil_dev_id',
+          displayName: 'Samil Jain',
+          photoURL: 'https://i.ibb.co/Myg19RW6/1000539584.jpg',
+          email: samilEmail,
+          bio: 'Lead Developer & Spiritual Seeker',
+          whatsapp: '',
+          instagram: '_officialsamiljain_',
+          isDeveloper: true,
+          updatedAt: Date.now()
+        };
+      }
+      
+      sortedMembers.unshift(samilMember);
+      setCommunityMembers(sortedMembers);
+      setTotalCount(sortedMembers.length);
+    }, (error) => {
+      console.error("Error loading community:", error);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // Fetch current user community card details
+  useEffect(() => {
+    if (user) {
+      const getCommunityDoc = async () => {
+        try {
+          const docRef = doc(db, 'jain_community', user.uid);
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            setCurrentUserCommunity(data);
+            setWhatsappInput(data.whatsapp || '');
+            setInstaInput(data.instagram || '');
+          } else {
+            const isDev = user.email === 'samiljain0111@gmail.com';
+            const newDoc = {
+              uid: user.uid,
+              displayName: user.displayName || 'Jain Soul',
+              photoURL: user.photoURL || '',
+              email: user.email || '',
+              whatsapp: '',
+              instagram: '',
+              isDeveloper: isDev,
+              updatedAt: Date.now()
+            };
+            await setDoc(docRef, newDoc);
+            setCurrentUserCommunity(newDoc);
+          }
+        } catch (err) {
+          console.error("Error fetching community document:", err);
+        }
+      };
+      getCommunityDoc();
+    } else {
+      setCurrentUserCommunity(null);
+      setWhatsappInput('');
+      setInstaInput('');
+    }
+  }, [user]);
+
+  // Handle community link updates
+  const handleUpdateCommunityCard = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+    setIsUpdatingCommunity(true);
+    setCommunityStatusMsg('');
+    try {
+      const communityRef = doc(db, 'jain_community', user.uid);
+      await setDoc(communityRef, {
+        whatsapp: whatsappInput.trim(),
+        instagram: instaInput.trim(),
+        displayName: user.displayName || name,
+        photoURL: user.photoURL || profilePic || '',
+        updatedAt: Date.now()
+      }, { merge: true });
+      
+      setCommunityStatusMsg('success');
+      setTimeout(() => {
+        setCommunityStatusMsg('');
+        setShowEditLinksModal(false);
+      }, 1500);
+    } catch (error) {
+      console.error("Error updating community links:", error);
+      setCommunityStatusMsg('error');
+    } finally {
+      setIsUpdatingCommunity(false);
+    }
+  };
+
+  // Handle account and community card deletion
+  const handleDeleteAccount = async () => {
+    if (!user) return;
+    
+    const confirmDelete = window.confirm(
+      "Are you sure you want to permanently delete your account and remove your card from the Jain Community? This action cannot be undone."
+    );
+    
+    if (!confirmDelete) return;
+    
+    setIsUpdatingCommunity(true);
+    try {
+      // 1. Delete from jain_community
+      await deleteDoc(doc(db, 'jain_community', user.uid));
+      // 2. Delete from users
+      await deleteDoc(doc(db, 'users', user.uid));
+      
+      // 3. Delete from firebase auth
+      await user.delete();
+      
+      alert("Your account and community card have been successfully deleted.");
+      await logout();
+    } catch (error: any) {
+      console.error("Error deleting account:", error);
+      if (error?.code === 'auth/requires-recent-login') {
+        alert("For security reasons, this action requires you to sign in again before deleting your account.");
+      } else {
+        alert("Failed to delete account. Please try logging out and logging back in, then try again.");
+      }
+    } finally {
+      setIsUpdatingCommunity(false);
+    }
+  };
+
+  const handleCustomAuthSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthError('');
+    setAuthSuccessMsg('');
+    setAuthLoading(true);
+    
+    if (!emailInput || !passwordInput) {
+      setAuthError('Email and Password are required.');
+      setAuthLoading(false);
+      return;
+    }
+    
+    try {
+      if (authTab === 'signup') {
+        if (!displayNameInput) {
+          setAuthError('Display Name is required.');
+          setAuthLoading(false);
+          return;
+        }
+        await registerWithEmail(emailInput.trim(), passwordInput, displayNameInput.trim());
+        setAuthSuccessMsg('Account created successfully! Welcome to Jainism GPT.');
+      } else {
+        await loginWithEmail(emailInput.trim(), passwordInput);
+        setAuthSuccessMsg('Logged in successfully!');
+      }
+      
+      // Clear fields
+      setEmailInput('');
+      setPasswordInput('');
+      setDisplayNameInput('');
+    } catch (error: any) {
+      console.error("Auth error:", error);
+      let errorMsg = 'Authentication failed. Please try again.';
+      if (error?.code === 'auth/email-already-in-use') {
+        errorMsg = 'This email is already in use.';
+      } else if (error?.code === 'auth/wrong-password' || error?.code === 'auth/invalid-credential') {
+        errorMsg = 'Invalid email or password.';
+      } else if (error?.code === 'auth/invalid-email') {
+        errorMsg = 'Please enter a valid email address.';
+      } else if (error?.code === 'auth/weak-password') {
+        errorMsg = 'Password should be at least 6 characters.';
+      }
+      setAuthError(errorMsg);
+    } finally {
+      setAuthLoading(false);
+    }
+  };
 
   useEffect(() => {
     window.addEventListener('beforeinstallprompt', (e) => {
@@ -44,10 +254,43 @@ export default function ProfilePage() {
   };
 
   useEffect(() => {
-    // Permanently locks Samil Jain's developer profile info
-    setName('Samil Jain');
-    setProfilePic('https://i.ibb.co/Myg19RW6/1000539584.jpg');
-    setBio('Lead Developer & Spiritual Seeker');
+    if (user) {
+      const loadProfile = async () => {
+        try {
+          const userDoc = await getDoc(doc(db, 'users', user.uid));
+          if (userDoc.exists()) {
+            const data = userDoc.data();
+            setName(data.displayName || user.displayName || 'Jain Soul');
+            setProfilePic(data.photoURL || user.photoURL || '');
+            setBio(data.bio || 'Sadharmik Devotee');
+          } else {
+            setName(user.displayName || 'Jain Soul');
+            setProfilePic(user.photoURL || '');
+            setBio('Sadharmik Devotee');
+          }
+        } catch (error) {
+          console.error("Error loading user profile:", error);
+          setName(user.displayName || 'Jain Soul');
+          setProfilePic(user.photoURL || '');
+          setBio('Sadharmik Devotee');
+        }
+      };
+      
+      if (user.email === 'samiljain0111@gmail.com') {
+        setName('Samil Jain');
+        setProfilePic('https://i.ibb.co/Myg19RW6/1000539584.jpg');
+        setBio('Lead Developer & Spiritual Seeker');
+      } else {
+        loadProfile();
+      }
+    } else {
+      const localName = localStorage.getItem('profileName') || 'Guest Jain Soul';
+      const localBio = localStorage.getItem('profileBio') || 'Sadharmik Devotee';
+      const localPic = localStorage.getItem('profilePic') || '';
+      setName(localName);
+      setBio(localBio);
+      setProfilePic(localPic);
+    }
   }, [user]);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -61,6 +304,10 @@ export default function ProfilePage() {
           try {
             await updateProfile(user, { photoURL: base64String });
             await updateDoc(doc(db, 'users', user.uid), { photoURL: base64String });
+            await setDoc(doc(db, 'jain_community', user.uid), {
+              photoURL: base64String,
+              updatedAt: Date.now()
+            }, { merge: true });
           } catch (error) {
             console.error("Error updating profile picture:", error);
           }
@@ -78,6 +325,10 @@ export default function ProfilePage() {
       try {
         await updateProfile(user, { displayName: name });
         await updateDoc(doc(db, 'users', user.uid), { displayName: name, bio });
+        await setDoc(doc(db, 'jain_community', user.uid), {
+          displayName: name,
+          updatedAt: Date.now()
+        }, { merge: true });
       } catch (error) {
         console.error("Error updating profile:", error);
       }
@@ -119,21 +370,17 @@ export default function ProfilePage() {
         
         <div className="relative mb-6 mt-4">
           <div className="w-32 h-32 rounded-full bg-gradient-to-br from-[#FF6D00] to-[#FFD54F] p-1 shadow-[0_0_20px_rgba(255,109,0,0.3)] dark:shadow-[0_0_20px_rgba(255,109,0,0.5)] group-hover:shadow-[0_0_30px_rgba(255,109,0,0.5)] dark:group-hover:shadow-[0_0_30px_rgba(255,109,0,0.8)] transition-shadow duration-500">
-            <div className="w-full h-full rounded-full bg-white dark:bg-[#0A0A0A] overflow-hidden flex items-center justify-center text-gray-400 dark:text-gray-600 border-4 border-white dark:border-[#0A0A0A]">
-              {profilePic ? (
-                <img src={profilePic} alt="Profile" className="w-full h-full object-cover" />
-              ) : (
-                <User size={48} className="text-[#FF8A65]" />
-              )}
+            <div className="w-full h-full rounded-full bg-white dark:bg-[#0A0A0A] overflow-hidden flex items-center justify-center border-4 border-white dark:border-[#0A0A0A]">
+              <img src="https://i.ibb.co/Myg19RW6/1000539584.jpg" alt="Developer" className="w-full h-full object-cover" />
             </div>
           </div>
         </div>
 
         <div className="flex flex-col items-center relative z-10">
           <div className="flex items-center gap-2 mb-1">
-            <h2 className="text-3xl font-display font-black text-gray-900 dark:text-white tracking-wide drop-shadow-none dark:drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{name}</h2>
+            <h2 className="text-3xl font-display font-black text-gray-900 dark:text-white tracking-wide drop-shadow-none dark:drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">Samil Jain</h2>
           </div>
-          <p className="text-[#FF8A65] font-bold tracking-widest text-[10px] uppercase mb-6 drop-shadow-none dark:drop-shadow-[0_0_5px_rgba(255,138,101,0.5)]">{bio}</p>
+          <p className="text-[#FF8A65] font-bold tracking-widest text-[10px] uppercase mb-6 drop-shadow-none dark:drop-shadow-[0_0_5px_rgba(255,138,101,0.5)]">Lead Developer & Spiritual Seeker</p>
         </div>
 
         <a 
@@ -186,6 +433,151 @@ export default function ProfilePage() {
           </div>
           <span className="text-gray-400 dark:text-gray-500 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">›</span>
         </button>
+      </div>
+
+      {/* Our Jain Community Section */}
+      <div id="jain-community-section" className="mt-8 bg-white/80 dark:bg-[#121212]/80 backdrop-blur-xl rounded-[2.5rem] p-6 sm:p-8 shadow-sm dark:shadow-[0_0_30px_rgba(255,109,0,0.05)] border border-gray-200 dark:border-white/10 overflow-hidden">
+        {/* Section title, subtitle & total count */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-100 dark:border-white/5 pb-6 mb-6">
+          <div>
+            <h2 className="text-xl sm:text-2xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] tracking-wide flex items-center gap-2 drop-shadow-none dark:drop-shadow-[0_0_10px_rgba(255,109,0,0.4)]">
+              <Users size={24} className="text-[#FF6D00]" />
+              OUR JAIN COMMUNITY
+            </h2>
+            <p className="text-xs text-gray-400 dark:text-gray-500 font-semibold mt-1">Connecting Sadharmik Devotees Worldwide • जैन समाज डायरेक्टरी</p>
+          </div>
+          <div className="bg-[#FF6D00]/10 border border-[#FF6D00]/20 rounded-2xl px-4 py-2 text-center sm:text-right shrink-0">
+            <span className="text-[10px] font-black uppercase tracking-wider text-[#FF6D00] block">Connected Souls</span>
+            <span className="text-lg font-black text-gray-900 dark:text-white">{totalCount} Devotees</span>
+          </div>
+        </div>
+        
+        {/* Search Box */}
+        <div className="mb-6 relative">
+          <input 
+            type="text" 
+            placeholder="Search community members by name..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-4 pr-10 py-3 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl text-xs font-bold text-gray-900 dark:text-white focus:outline-none focus:border-[#FF6D00]/50 transition-colors placeholder-gray-400"
+          />
+          {searchQuery && (
+            <button 
+              onClick={() => setSearchQuery('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-white text-xs font-bold"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+        
+        {/* Grid of members */}
+        <div className="space-y-4 max-h-[500px] overflow-y-auto pr-1 scrollbar-none">
+          {communityMembers
+            .filter(m => m.displayName?.toLowerCase().includes(searchQuery.toLowerCase()))
+            .map((member) => {
+              const isDev = member.isDeveloper || member.email?.toLowerCase() === 'samiljain0111@gmail.com';
+              return (
+                <div 
+                  key={member.uid || member.id}
+                  className={cn(
+                    "p-4 rounded-3xl border flex items-center justify-between gap-4 transition-all relative overflow-hidden group",
+                    isDev 
+                      ? "bg-gradient-to-r from-amber-50/95 to-amber-100/95 dark:from-amber-950/20 dark:to-transparent border-amber-300 dark:border-amber-500/30 shadow-[0_0_15px_rgba(245,158,11,0.1)]" 
+                      : "bg-white dark:bg-[#181818] border-gray-200 dark:border-white/10 hover:border-gray-300 dark:hover:border-white/20"
+                  )}
+                >
+                  {isDev && (
+                    <div className="absolute top-0 right-0 bg-amber-500 text-white text-[8px] font-black tracking-widest px-2.5 py-1 rounded-bl-xl uppercase select-none">
+                      Developer
+                    </div>
+                  )}
+                  
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    <div className={cn(
+                      "w-12 h-12 rounded-2xl overflow-hidden flex items-center justify-center bg-gray-100 dark:bg-white/5 shrink-0 border-2",
+                      isDev ? "border-amber-400 dark:border-amber-500" : "border-gray-200 dark:border-white/10"
+                    )}>
+                      {member.photoURL ? (
+                        <img referrerPolicy="no-referrer" src={member.photoURL} alt={member.displayName} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-amber-500/10 text-[#FF6D00] font-black text-base select-none">
+                          {(member.displayName || 'J')[0].toUpperCase()}
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-extrabold text-sm text-gray-900 dark:text-white truncate">
+                          {member.displayName}
+                        </span>
+                        {isDev && (
+                          <span className="w-4 h-4 rounded-full bg-amber-500 text-white flex items-center justify-center text-[9px] shrink-0 font-bold select-none" title="Developer & Founder">👑</span>
+                        )}
+                      </div>
+                      <p className="text-[10px] text-gray-400 dark:text-gray-500 font-semibold truncate mt-0.5">
+                        {isDev ? 'Lead Developer & Creator' : 'Sadharmik Companion'}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  {/* Connection links */}
+                  <div className="flex items-center gap-2 shrink-0">
+                    {(() => {
+                      const isMe = user && (member.uid === user.uid || member.id === user.uid);
+                      return (
+                        <>
+                          {isMe && (
+                            <button 
+                              onClick={() => {
+                                setWhatsappInput(member.whatsapp || '');
+                                setInstaInput(member.instagram || '');
+                                setShowEditLinksModal(true);
+                              }}
+                              className="px-3 py-1.5 bg-[#FF6D00]/10 hover:bg-[#FF6D00]/20 text-[#FF6D00] dark:text-[#FFD54F] border border-[#FF6D00]/20 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all flex items-center gap-1 shrink-0"
+                              title="Edit WhatsApp & Instagram Links"
+                            >
+                              <Edit2 size={12} />
+                              Edit Links
+                            </button>
+                          )}
+                          
+                          {member.whatsapp && (
+                            <a 
+                              href={`https://wa.me/${member.whatsapp}`} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="p-2 bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-xl border border-emerald-500/20 hover:scale-110 transition-transform flex items-center justify-center"
+                              title="Connect on WhatsApp"
+                            >
+                              <MessageCircle size={16} />
+                            </a>
+                          )}
+                          {member.instagram && (
+                            <a 
+                              href={`https://instagram.com/${member.instagram}`} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="p-2 bg-pink-500/10 dark:bg-pink-500/20 text-pink-600 dark:text-pink-400 rounded-xl border border-pink-500/20 hover:scale-110 transition-transform flex items-center justify-center"
+                              title="Connect on Instagram"
+                            >
+                              <Instagram size={16} />
+                            </a>
+                          )}
+                          {!isMe && !member.whatsapp && !member.instagram && (
+                            <span className="text-[9px] font-bold text-gray-300 dark:text-gray-600 italic select-none">
+                              No links
+                            </span>
+                          )}
+                        </>
+                      );
+                    })()}
+                  </div>
+                </div>
+              );
+            })}
+        </div>
       </div>
 
       {/* About Us Modal */}
@@ -599,16 +991,109 @@ export default function ProfilePage() {
         </div>
       )}
 
+      {/* Edit Community Card Links Modal */}
+      {showEditLinksModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
+          <div className="bg-white dark:bg-[#121212] border border-gray-200 dark:border-white/10 rounded-[2.5rem] p-6 w-full max-w-md shadow-xl dark:shadow-[0_0_50px_rgba(255,109,0,0.25)] relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-[#FF6D00]/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+            
+            <div className="flex justify-between items-center mb-5 relative z-10 border-b border-gray-100 dark:border-white/5 pb-3">
+              <div>
+                <h3 className="font-extrabold text-base text-gray-900 dark:text-white flex items-center gap-2">
+                  <Sparkles size={18} className="text-[#FF6D00]" />
+                  Edit My Connection Links
+                </h3>
+                <p className="text-[10px] text-gray-400 dark:text-gray-500 font-semibold mt-1">
+                  Configure WhatsApp or Instagram links on your card
+                </p>
+              </div>
+              <button 
+                onClick={() => setShowEditLinksModal(false)}
+                className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-white/10 transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleUpdateCommunityCard} className="space-y-4 relative z-10">
+              <div>
+                <label className="block text-[10px] font-black uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1.5">WhatsApp Number</label>
+                <div className="relative">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400">+</span>
+                  <input 
+                    type="tel" 
+                    placeholder="919876543210" 
+                    value={whatsappInput}
+                    onChange={(e) => setWhatsappInput(e.target.value.replace(/[^0-9]/g, ''))}
+                    className="w-full pl-6 pr-4 py-2.5 bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl text-xs font-bold text-gray-900 dark:text-white focus:outline-none focus:border-[#FF6D00] transition-colors"
+                  />
+                </div>
+                <p className="text-[9px] text-gray-400 dark:text-gray-500 mt-1">Include country code (e.g. 91 for India) without '+' or spaces</p>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-black uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1.5">Instagram Username</label>
+                <div className="relative">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400">@</span>
+                  <input 
+                    type="text" 
+                    placeholder="username" 
+                    value={instaInput}
+                    onChange={(e) => setInstaInput(e.target.value.replace(/[^a-zA-Z0-9_.]/g, ''))}
+                    className="w-full pl-7 pr-4 py-2.5 bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl text-xs font-bold text-gray-900 dark:text-white focus:outline-none focus:border-[#FF6D00] transition-colors"
+                  />
+                </div>
+              </div>
+
+              <div className="pt-3 border-t border-gray-100 dark:border-white/5 flex flex-col gap-2">
+                <div className="flex items-center justify-between gap-3">
+                  <button 
+                    type="submit" 
+                    disabled={isUpdatingCommunity}
+                    className="flex-1 py-2.5 bg-[#FF6D00] text-white rounded-xl text-xs font-black tracking-wider hover:bg-[#FF8A00] transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-sm uppercase"
+                  >
+                    {isUpdatingCommunity ? 'Saving...' : 'Save Changes'}
+                    <Check size={14} />
+                  </button>
+                  
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      setShowEditLinksModal(false);
+                      handleDeleteAccount();
+                    }}
+                    className="px-4 py-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 rounded-xl text-[11px] font-extrabold tracking-wider transition-colors uppercase border border-rose-500/20"
+                  >
+                    Delete Card
+                  </button>
+                </div>
+
+                {communityStatusMsg === 'success' && (
+                  <span className="text-xs font-bold text-emerald-500 text-center animate-pulse mt-1">
+                    ✓ Saved successfully!
+                  </span>
+                )}
+                {communityStatusMsg === 'error' && (
+                  <span className="text-xs font-bold text-rose-500 text-center mt-1">
+                    ✕ Failed to save links
+                  </span>
+                )}
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* Settings Modal */}
       {showSettings && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
-          <div className="bg-white dark:bg-[#121212] border border-gray-200 dark:border-white/10 rounded-[2rem] p-6 w-full max-w-md shadow-xl dark:shadow-[0_0_40px_rgba(255,109,0,0.2)] relative overflow-hidden">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-300 overflow-y-auto">
+          <div className="bg-white dark:bg-[#121212] border border-gray-200 dark:border-white/10 rounded-[2rem] p-6 w-full max-w-md shadow-xl dark:shadow-[0_0_40px_rgba(255,109,0,0.2)] relative overflow-hidden my-8">
             <div className="absolute top-0 right-0 w-32 h-32 bg-[#FF6D00]/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
             
-            <div className="flex justify-between items-center mb-6 relative z-10">
-              <h2 className="text-2xl font-display font-black text-gray-900 dark:text-white flex items-center gap-2">
+            <div className="flex justify-between items-center mb-6 relative z-10 border-b border-gray-100 dark:border-white/5 pb-3">
+              <h2 className="text-xl font-display font-black text-gray-900 dark:text-white flex items-center gap-2 uppercase tracking-wide">
                 <Settings className="text-[#FF6D00]" />
-                SETTINGS
+                {user ? 'Account & Settings' : 'Settings & Login'}
               </h2>
               <button 
                 onClick={() => setShowSettings(false)}
@@ -621,8 +1106,8 @@ export default function ProfilePage() {
             <div className="space-y-4 text-gray-600 dark:text-gray-300 relative z-10">
               <div className="p-4 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5 flex items-center justify-between">
                 <div>
-                  <h3 className="text-gray-900 dark:text-white font-bold">Push Notifications</h3>
-                  <p className="text-xs text-gray-500">Receive daily vichaar and updates</p>
+                  <h3 className="text-gray-900 dark:text-white font-bold text-xs uppercase tracking-wider">Push Notifications</h3>
+                  <p className="text-[10px] text-gray-500">Receive daily vichaar and updates</p>
                 </div>
                 <div 
                   onClick={() => setPushEnabled(!pushEnabled)}
@@ -634,8 +1119,8 @@ export default function ProfilePage() {
 
               <div className="p-4 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5 flex items-center justify-between">
                 <div>
-                  <h3 className="text-gray-900 dark:text-white font-bold">Offline Mode</h3>
-                  <p className="text-xs text-gray-500">Download content for offline use</p>
+                  <h3 className="text-gray-900 dark:text-white font-bold text-xs uppercase tracking-wider">Offline Mode</h3>
+                  <p className="text-[10px] text-gray-500">Download content for offline use</p>
                 </div>
                 <div 
                   onClick={() => setOfflineEnabled(!offlineEnabled)}
@@ -646,7 +1131,7 @@ export default function ProfilePage() {
               </div>
               
               <div className="p-4 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5">
-                <h3 className="text-gray-900 dark:text-white font-bold mb-2">Language Preference</h3>
+                <h3 className="text-gray-900 dark:text-white font-bold text-xs uppercase tracking-wider mb-2">Language Preference</h3>
                 <div className="flex gap-2">
                   <button 
                     onClick={() => setLanguage('en')}
@@ -662,6 +1147,165 @@ export default function ProfilePage() {
                   </button>
                 </div>
               </div>
+
+              {/* Secure Login & Account Creation when NOT Logged In */}
+              {!user ? (
+                <div className="p-5 bg-gradient-to-br from-[#FF6D00]/5 to-[#FFD54F]/5 dark:from-[#FF6D00]/10 dark:to-transparent rounded-[2rem] border border-[#FF6D00]/20 text-left relative overflow-hidden">
+                  <h3 className="font-extrabold text-sm text-gray-900 dark:text-white flex items-center gap-2 mb-4">
+                    <Sparkles size={16} className="text-[#FF6D00]" />
+                    Join Jain Community
+                  </h3>
+                  
+                  {/* Auth Method Tabs */}
+                  <div className="flex gap-2 mb-6 border-b border-gray-100 dark:border-white/5 pb-3">
+                    <button
+                      type="button"
+                      onClick={() => { setAuthTab('signin'); setAuthError(''); setAuthSuccessMsg(''); }}
+                      className={cn(
+                        "px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all",
+                        authTab === 'signin'
+                          ? "bg-[#FF6D00] text-white shadow-sm"
+                          : "text-gray-400 dark:text-gray-500 hover:text-gray-700 bg-transparent"
+                      )}
+                    >
+                      Sign In
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setAuthTab('signup'); setAuthError(''); setAuthSuccessMsg(''); }}
+                      className={cn(
+                        "px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all",
+                        authTab === 'signup'
+                          ? "bg-[#FF6D00] text-white shadow-sm"
+                          : "text-gray-400 dark:text-gray-500 hover:text-gray-700 bg-transparent"
+                      )}
+                    >
+                      Create Account
+                    </button>
+                  </div>
+
+                  {/* Error or Success Messages */}
+                  {authError && (
+                    <div className="mb-4 p-3 bg-rose-500/10 border border-rose-500/20 text-rose-500 rounded-xl text-xs font-bold leading-relaxed">
+                      ✕ {authError}
+                    </div>
+                  )}
+                  {authSuccessMsg && (
+                    <div className="mb-4 p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 rounded-xl text-xs font-bold leading-relaxed">
+                      ✓ {authSuccessMsg}
+                    </div>
+                  )}
+
+                  <form onSubmit={handleCustomAuthSubmit} className="space-y-4">
+                    {authTab === 'signup' && (
+                      <div>
+                        <label className="block text-[10px] font-black uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1.5">Your Full Name (नाम)</label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="Enter your name"
+                          value={displayNameInput}
+                          onChange={(e) => setDisplayNameInput(e.target.value)}
+                          className="w-full px-4 py-2.5 bg-white dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl text-xs font-bold text-gray-900 dark:text-white focus:outline-none focus:border-[#FF6D00] transition-colors"
+                        />
+                      </div>
+                    )}
+                    
+                    <div>
+                      <label className="block text-[10px] font-black uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1.5">Email Address (ईमेल)</label>
+                      <input
+                        type="email"
+                        required
+                        placeholder="name@example.com"
+                        value={emailInput}
+                        onChange={(e) => setEmailInput(e.target.value)}
+                        className="w-full px-4 py-2.5 bg-white dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl text-xs font-bold text-gray-900 dark:text-white focus:outline-none focus:border-[#FF6D00] transition-colors"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-black uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1.5">Password (पासवर्ड)</label>
+                      <input
+                        type="password"
+                        required
+                        placeholder="••••••••"
+                        value={passwordInput}
+                        onChange={(e) => setPasswordInput(e.target.value)}
+                        className="w-full px-4 py-2.5 bg-white dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl text-xs font-bold text-gray-900 dark:text-white focus:outline-none focus:border-[#FF6D00] transition-colors"
+                      />
+                    </div>
+
+                    <div className="pt-2 flex flex-col items-stretch justify-between gap-4">
+                      <button
+                        type="submit"
+                        disabled={authLoading}
+                        className="w-full py-2.5 bg-[#FF6D00] hover:bg-[#FF8A00] text-white rounded-xl text-xs font-black tracking-wider uppercase shadow-md transition-all disabled:opacity-50 text-center"
+                      >
+                        {authLoading ? 'Please Wait...' : authTab === 'signup' ? 'Create & Join' : 'Sign In Now'}
+                      </button>
+                      
+                      {/* Google Sign-in Alternative */}
+                      <div className="text-center">
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            setAuthError('');
+                            setAuthSuccessMsg('');
+                            try {
+                              await login();
+                              setShowSettings(false);
+                            } catch (err) {
+                              // Handled inside AuthContext
+                            }
+                          }}
+                          className="text-[10px] font-bold text-[#FF6D00] hover:underline uppercase tracking-wider block mx-auto"
+                        >
+                          Or Login with Google (Popup)
+                        </button>
+                        <span className="text-[9px] text-gray-400 dark:text-gray-500 block mt-1 leading-tight">
+                          *Google uses secure auth proxy. Use Email above to keep address-bar completely private.
+                        </span>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {/* Logout Row */}
+                  <div className="p-4 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5 flex items-center justify-between">
+                    <div>
+                      <h3 className="text-gray-900 dark:text-white font-extrabold text-sm">Logout</h3>
+                      <p className="text-[10px] text-gray-500">Sign out of your session</p>
+                    </div>
+                    <button 
+                      onClick={() => {
+                        setShowSettings(false);
+                        logout();
+                      }}
+                      className="px-3.5 py-1.5 bg-gray-200 dark:bg-white/10 hover:bg-gray-300 dark:hover:bg-white/20 text-gray-800 dark:text-white font-bold rounded-xl text-[10px] uppercase tracking-wider transition-colors shrink-0"
+                    >
+                      Logout
+                    </button>
+                  </div>
+
+                  {/* Delete Account Row */}
+                  <div className="p-4 bg-rose-50/50 dark:bg-rose-950/10 rounded-2xl border border-rose-100 dark:border-rose-950/20 flex items-center justify-between">
+                    <div>
+                      <h3 className="text-rose-600 dark:text-rose-400 font-extrabold text-sm">Delete Account</h3>
+                      <p className="text-[10px] text-gray-500">Erase profile & remove from directory</p>
+                    </div>
+                    <button 
+                      onClick={() => {
+                        setShowSettings(false);
+                        handleDeleteAccount();
+                      }}
+                      className="px-3.5 py-1.5 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-xl text-[10px] uppercase tracking-wider transition-colors shrink-0"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
