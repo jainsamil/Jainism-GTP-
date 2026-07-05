@@ -46,6 +46,11 @@ export default function ProfilePage() {
   const [authSuccessMsg, setAuthSuccessMsg] = useState('');
   const [showEditLinksModal, setShowEditLinksModal] = useState(false);
 
+  // Jain Community Card Editing states
+  const [communityNameInput, setCommunityNameInput] = useState('');
+  const [communityBioInput, setCommunityBioInput] = useState('');
+  const [communityPhotoInput, setCommunityPhotoInput] = useState('');
+
   // Load and subscribe to community directory
   useEffect(() => {
     const q = query(collection(db, 'jain_community'), orderBy('updatedAt', 'desc'));
@@ -98,6 +103,9 @@ export default function ProfilePage() {
             setCurrentUserCommunity(data);
             setWhatsappInput(data.whatsapp || '');
             setInstaInput(data.instagram || '');
+            setCommunityNameInput(data.displayName || user.displayName || 'Jain Soul');
+            setCommunityBioInput(data.bio || 'Sadharmik Companion');
+            setCommunityPhotoInput(data.photoURL || user.photoURL || '');
           } else {
             const isDev = user.email === 'samiljain0111@gmail.com';
             const newDoc = {
@@ -107,11 +115,17 @@ export default function ProfilePage() {
               email: user.email || '',
               whatsapp: '',
               instagram: '',
+              bio: 'Sadharmik Companion',
               isDeveloper: isDev,
               updatedAt: Date.now()
             };
             await setDoc(docRef, newDoc);
             setCurrentUserCommunity(newDoc);
+            setWhatsappInput('');
+            setInstaInput('');
+            setCommunityNameInput(newDoc.displayName);
+            setCommunityBioInput(newDoc.bio);
+            setCommunityPhotoInput(newDoc.photoURL);
           }
         } catch (err) {
           console.error("Error fetching community document:", err);
@@ -122,6 +136,9 @@ export default function ProfilePage() {
       setCurrentUserCommunity(null);
       setWhatsappInput('');
       setInstaInput('');
+      setCommunityNameInput('');
+      setCommunityBioInput('');
+      setCommunityPhotoInput('');
     }
   }, [user]);
 
@@ -133,13 +150,33 @@ export default function ProfilePage() {
     setCommunityStatusMsg('');
     try {
       const communityRef = doc(db, 'jain_community', user.uid);
-      await setDoc(communityRef, {
+      const updateData = {
         whatsapp: whatsappInput.trim(),
         instagram: instaInput.trim(),
-        displayName: user.displayName || name,
-        photoURL: user.photoURL || profilePic || '',
+        displayName: communityNameInput.trim(),
+        bio: communityBioInput.trim(),
+        photoURL: communityPhotoInput,
         updatedAt: Date.now()
-      }, { merge: true });
+      };
+      await setDoc(communityRef, updateData, { merge: true });
+      
+      // Also update the local state
+      setCurrentUserCommunity(prev => prev ? { ...prev, ...updateData } : updateData);
+      
+      // Also update firebase Auth user profile and user doc
+      try {
+        await updateProfile(user, { 
+          displayName: communityNameInput.trim(),
+          photoURL: communityPhotoInput 
+        });
+        await updateDoc(doc(db, 'users', user.uid), { 
+          displayName: communityNameInput.trim(),
+          photoURL: communityPhotoInput,
+          bio: communityBioInput.trim()
+        });
+      } catch (err) {
+        console.warn("Auth/User doc update warning:", err);
+      }
       
       setCommunityStatusMsg('success');
       setTimeout(() => {
@@ -293,51 +330,16 @@ export default function ProfilePage() {
     }
   }, [user]);
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCommunityPhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onloadend = async () => {
+      reader.onloadend = () => {
         const base64String = reader.result as string;
-        setProfilePic(base64String);
-        if (user) {
-          try {
-            await updateProfile(user, { photoURL: base64String });
-            await updateDoc(doc(db, 'users', user.uid), { photoURL: base64String });
-            await setDoc(doc(db, 'jain_community', user.uid), {
-              photoURL: base64String,
-              updatedAt: Date.now()
-            }, { merge: true });
-          } catch (error) {
-            console.error("Error updating profile picture:", error);
-          }
-        } else {
-          localStorage.setItem('profilePic', base64String);
-        }
+        setCommunityPhotoInput(base64String);
       };
       reader.readAsDataURL(file);
     }
-  };
-
-  const handleSaveProfile = async () => {
-    setIsSaving(true);
-    if (user) {
-      try {
-        await updateProfile(user, { displayName: name });
-        await updateDoc(doc(db, 'users', user.uid), { displayName: name, bio });
-        await setDoc(doc(db, 'jain_community', user.uid), {
-          displayName: name,
-          updatedAt: Date.now()
-        }, { merge: true });
-      } catch (error) {
-        console.error("Error updating profile:", error);
-      }
-    } else {
-      localStorage.setItem('profileName', name);
-      localStorage.setItem('profileBio', bio);
-    }
-    setIsEditing(false);
-    setIsSaving(false);
   };
 
   return (
@@ -370,19 +372,24 @@ export default function ProfilePage() {
         
         <div className="relative mb-6 mt-4">
           <div className="w-32 h-32 rounded-full bg-gradient-to-br from-[#FF6D00] to-[#FFD54F] p-1 shadow-[0_0_20px_rgba(255,109,0,0.3)] dark:shadow-[0_0_20px_rgba(255,109,0,0.5)] group-hover:shadow-[0_0_30px_rgba(255,109,0,0.5)] dark:group-hover:shadow-[0_0_30px_rgba(255,109,0,0.8)] transition-shadow duration-500">
-            <div className="w-full h-full rounded-full bg-white dark:bg-[#0A0A0A] overflow-hidden flex items-center justify-center border-4 border-white dark:border-[#0A0A0A]">
-              <img src="https://i.ibb.co/Myg19RW6/1000539584.jpg" alt="Developer" className="w-full h-full object-cover" />
+            <div className="w-full h-full rounded-full bg-white dark:bg-[#0A0A0A] overflow-hidden flex items-center justify-center border-4 border-white dark:border-[#0A0A0A] relative">
+              <img referrerPolicy="no-referrer" src="https://i.ibb.co/Myg19RW6/1000539584.jpg" alt="Samil Jain" className="w-full h-full object-cover" />
             </div>
           </div>
         </div>
 
-        <div className="flex flex-col items-center relative z-10">
-          <div className="flex items-center gap-2 mb-1">
-            <h2 className="text-3xl font-display font-black text-gray-900 dark:text-white tracking-wide drop-shadow-none dark:drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">Samil Jain</h2>
+        <div className="flex flex-col items-center relative z-10 w-full max-w-sm text-center">
+          <div className="flex items-center gap-2 mb-1 justify-center">
+            <h2 className="text-3xl font-display font-black text-gray-900 dark:text-white tracking-wide drop-shadow-none dark:drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+              Samil Jain
+            </h2>
           </div>
-          <p className="text-[#FF8A65] font-bold tracking-widest text-[10px] uppercase mb-6 drop-shadow-none dark:drop-shadow-[0_0_5px_rgba(255,138,101,0.5)]">Lead Developer & Spiritual Seeker</p>
+          <p className="text-[#FF8A65] font-bold tracking-widest text-[10px] uppercase mb-6 drop-shadow-none dark:drop-shadow-[0_0_5px_rgba(255,138,101,0.5)]">
+            Lead Developer & Spiritual Seeker
+          </p>
         </div>
 
+        {/* Connect Link */}
         <a 
           href="https://instagram.com/_officialsamiljain_" 
           target="_blank" 
@@ -517,7 +524,7 @@ export default function ProfilePage() {
                         )}
                       </div>
                       <p className="text-[10px] text-gray-400 dark:text-gray-500 font-semibold truncate mt-0.5">
-                        {isDev ? 'Lead Developer & Creator' : 'Sadharmik Companion'}
+                        {isDev ? 'Lead Developer & Creator' : (member.bio || 'Sadharmik Companion')}
                       </p>
                     </div>
                   </div>
@@ -533,13 +540,16 @@ export default function ProfilePage() {
                               onClick={() => {
                                 setWhatsappInput(member.whatsapp || '');
                                 setInstaInput(member.instagram || '');
+                                setCommunityNameInput(member.displayName || user.displayName || 'Jain Soul');
+                                setCommunityBioInput(member.bio || 'Sadharmik Companion');
+                                setCommunityPhotoInput(member.photoURL || user.photoURL || '');
                                 setShowEditLinksModal(true);
                               }}
                               className="px-3 py-1.5 bg-[#FF6D00]/10 hover:bg-[#FF6D00]/20 text-[#FF6D00] dark:text-[#FFD54F] border border-[#FF6D00]/20 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all flex items-center gap-1 shrink-0"
-                              title="Edit WhatsApp & Instagram Links"
+                              title="Edit Community Card / Profile Details"
                             >
                               <Edit2 size={12} />
-                              Edit Links
+                              Edit Card
                             </button>
                           )}
                           
@@ -994,17 +1004,17 @@ export default function ProfilePage() {
       {/* Edit Community Card Links Modal */}
       {showEditLinksModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
-          <div className="bg-white dark:bg-[#121212] border border-gray-200 dark:border-white/10 rounded-[2.5rem] p-6 w-full max-w-md shadow-xl dark:shadow-[0_0_50px_rgba(255,109,0,0.25)] relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-[#FF6D00]/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+          <div className="bg-white dark:bg-[#121212] border border-gray-200 dark:border-white/10 rounded-[2.5rem] p-6 w-full max-w-md shadow-xl dark:shadow-[0_0_50px_rgba(255,109,0,0.25)] relative overflow-hidden max-h-[90vh] flex flex-col">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-[#FF6D00]/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
             
-            <div className="flex justify-between items-center mb-5 relative z-10 border-b border-gray-100 dark:border-white/5 pb-3">
+            <div className="flex justify-between items-center mb-5 relative z-10 border-b border-gray-100 dark:border-white/5 pb-3 shrink-0">
               <div>
                 <h3 className="font-extrabold text-base text-gray-900 dark:text-white flex items-center gap-2">
                   <Sparkles size={18} className="text-[#FF6D00]" />
-                  Edit My Connection Links
+                  Edit My Community Card
                 </h3>
                 <p className="text-[10px] text-gray-400 dark:text-gray-500 font-semibold mt-1">
-                  Configure WhatsApp or Instagram links on your card
+                  Configure your display name, photo, bio, and links
                 </p>
               </div>
               <button 
@@ -1015,7 +1025,61 @@ export default function ProfilePage() {
               </button>
             </div>
 
-            <form onSubmit={handleUpdateCommunityCard} className="space-y-4 relative z-10">
+            <form onSubmit={handleUpdateCommunityCard} className="space-y-4 relative z-10 overflow-y-auto pr-1 flex-1 scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-white/10">
+              {/* Profile Photo Upload */}
+              <div className="flex flex-col items-center mb-4 shrink-0">
+                <label className="block text-[10px] font-black uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1.5 self-start">Profile Photo</label>
+                <div className="relative group/photo cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+                  <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#FF6D00] to-[#FFD54F] p-0.5 shadow-md overflow-hidden relative">
+                    <div className="w-full h-full rounded-2xl bg-white dark:bg-black overflow-hidden flex items-center justify-center relative">
+                      {communityPhotoInput ? (
+                        <img referrerPolicy="no-referrer" src={communityPhotoInput} alt="Profile Preview" className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-white/5 text-gray-400 font-bold text-2xl select-none">
+                          {(communityNameInput || 'J')[0].toUpperCase()}
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/photo:opacity-100 flex items-center justify-center text-white transition-opacity duration-200">
+                        <Camera size={18} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <input 
+                  type="file" 
+                  ref={fileInputRef} 
+                  onChange={handleCommunityPhotoUpload} 
+                  accept="image/*"
+                  className="hidden" 
+                />
+                <p className="text-[9px] text-gray-400 dark:text-gray-500 mt-1">Click photo to upload custom image</p>
+              </div>
+
+              {/* Display Name */}
+              <div>
+                <label className="block text-[10px] font-black uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1.5">Your Full Name (नाम)</label>
+                <input 
+                  type="text" 
+                  required
+                  placeholder="Enter your name" 
+                  value={communityNameInput}
+                  onChange={(e) => setCommunityNameInput(e.target.value)}
+                  className="w-full px-4 py-2.5 bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl text-xs font-bold text-gray-900 dark:text-white focus:outline-none focus:border-[#FF6D00] transition-colors"
+                />
+              </div>
+
+              {/* Bio / Spiritual Role */}
+              <div>
+                <label className="block text-[10px] font-black uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1.5">Bio / Spiritual Status (परिचय)</label>
+                <input 
+                  type="text" 
+                  placeholder="e.g. Sadharmik Companion, Devoted Soul" 
+                  value={communityBioInput}
+                  onChange={(e) => setCommunityBioInput(e.target.value)}
+                  className="w-full px-4 py-2.5 bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl text-xs font-bold text-gray-900 dark:text-white focus:outline-none focus:border-[#FF6D00] transition-colors"
+                />
+              </div>
+
               <div>
                 <label className="block text-[10px] font-black uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1.5">WhatsApp Number</label>
                 <div className="relative">
@@ -1045,7 +1109,7 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-gray-100 dark:border-white/5 flex flex-col gap-2">
+              <div className="pt-3 border-t border-gray-100 dark:border-white/5 flex flex-col gap-2 shrink-0">
                 <div className="flex items-center justify-between gap-3">
                   <button 
                     type="submit" 
