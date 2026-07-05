@@ -5,7 +5,7 @@ import { cn } from '../lib/utils';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { updateProfile } from 'firebase/auth';
-import { doc, updateDoc, collection, setDoc, getDoc, onSnapshot, query, orderBy, deleteDoc } from 'firebase/firestore';
+import { doc, updateDoc, collection, setDoc, getDoc, onSnapshot, query, orderBy, deleteDoc, where, getDocs } from 'firebase/firestore';
 import { db } from '../firebase';
 
 export default function ProfilePage() {
@@ -159,20 +159,30 @@ export default function ProfilePage() {
     if (!user) return;
     
     const confirmDelete = window.confirm(
-      "Are you sure you want to permanently delete your account and remove your card from the Jain Community? This action cannot be undone."
+      "Are you sure you want to permanently delete your account, saved chats, and remove your card from the Jain Community? This action cannot be undone."
     );
     
     if (!confirmDelete) return;
     
     setIsUpdatingCommunity(true);
+    const userId = user.uid;
     try {
-      // 1. Delete from jain_community
-      await deleteDoc(doc(db, 'jain_community', user.uid));
-      // 2. Delete from users
-      await deleteDoc(doc(db, 'users', user.uid));
-      
-      // 3. Delete from firebase auth
+      // 1. Delete from firebase auth first to guarantee deletion before cleanup
       await user.delete();
+      
+      // 2. Since auth deletion succeeded, clean up Firestore collections
+      await deleteDoc(doc(db, 'jain_community', userId));
+      await deleteDoc(doc(db, 'users', userId));
+      
+      // Delete user_chats
+      try {
+        const q = query(collection(db, 'user_chats'), where('userId', '==', userId));
+        const snapshot = await getDocs(q);
+        const deletePromises = snapshot.docs.map(docSnap => deleteDoc(docSnap.ref));
+        await Promise.all(deletePromises);
+      } catch (chatErr) {
+        console.error("Error deleting user chats:", chatErr);
+      }
       
       alert("Your account and community card have been successfully deleted.");
       await logout();
