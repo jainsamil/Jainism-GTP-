@@ -111,7 +111,7 @@ function Layout({ children }: { children: React.ReactNode }) {
         </div>
       )}
 
-      <main className={cn("flex-1 overflow-y-auto relative", (!isAdmin && !isChat) ? "pb-20" : "")}>
+      <main className={cn("flex-1 relative", isChat ? "overflow-hidden h-full" : "overflow-y-auto", (!isAdmin && !isChat) ? "pb-20" : "")}>
         {children}
         {!isAdmin && !isChat && <Footer />}
       </main>

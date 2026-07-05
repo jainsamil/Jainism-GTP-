@@ -890,7 +890,7 @@ Please feel free to explore our sacred Aagams, Panchang, and Swadhyay commentary
         </div>
 
         {/* User Account Section inside sidebar */}
-        <div className="p-4 border-t border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-black/40 space-y-3">
+        <div className="p-4 pb-safe pb-8 md:pb-4 border-t border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-black/40 space-y-3 shrink-0">
           <div className="flex items-center gap-2.5">
             {user?.photoURL ? (
               <img src={user.photoURL} alt="User" referrerPolicy="no-referrer" className="w-9 h-9 rounded-full border-2 border-[#FF6D00]" />
