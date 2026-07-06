@@ -65,9 +65,16 @@
       "description": "User profile and roles",
       "type": "object",
       "properties": {
+        "uid": { "type": "string" },
+        "name": { "type": "string" },
         "displayName": { "type": "string" },
         "email": { "type": "string" },
-        "role": { "type": "string", "enum": ["admin", "user", "teacher", "student"] }
+        "photoURL": { "type": "string" },
+        "role": { "type": "string", "enum": ["admin", "user", "teacher", "student", "developer"] },
+        "isPublic": { "type": "boolean" },
+        "instagram": { "type": "string" },
+        "whatsapp": { "type": "string" },
+        "createdAt": { "type": "object" }
       },
       "required": ["email", "role"]
     },

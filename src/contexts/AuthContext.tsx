@@ -1,11 +1,11 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { onAuthStateChanged, signInWithPopup, signOut, googleProvider, auth, db } from '../firebase';
 import { User } from 'firebase/auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 interface AuthContextType {
   user: User | null;
-  role: 'admin' | 'teacher' | 'user' | null;
+  role: 'admin' | 'teacher' | 'user' | 'developer' | null;
   loading: boolean;
   login: () => Promise<void>;
   logout: () => Promise<void>;
@@ -15,7 +15,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [role, setRole] = useState<'admin' | 'teacher' | 'user' | null>(null);
+  const [role, setRole] = useState<'admin' | 'teacher' | 'user' | 'developer' | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -28,11 +28,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setRole(userDoc.data().role);
         } else {
           // Create user doc if not exists
-          const defaultRole = (currentUser.email === 'samiljain0111@gmail.com' || currentUser.email === 'admin@jainism.com') ? 'admin' : 'user';
+          const defaultRole = currentUser.email === 'samiljain0111@gmail.com' ? 'developer' : (currentUser.email === 'admin@jainism.com' ? 'admin' : 'user');
           await setDoc(doc(db, 'users', currentUser.uid), {
-            email: currentUser.email,
-            displayName: currentUser.displayName,
-            role: defaultRole
+            uid: currentUser.uid,
+            name: currentUser.displayName || '',
+            email: currentUser.email || '',
+            photoURL: currentUser.photoURL || '',
+            role: defaultRole,
+            isPublic: true,
+            instagram: '',
+            whatsapp: '',
+            createdAt: serverTimestamp()
           });
           setRole(defaultRole);
         }
