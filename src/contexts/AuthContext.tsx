@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { onAuthStateChanged, signInWithPopup, signOut, googleProvider, auth, db } from '../firebase';
-import { User, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { User } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 interface AuthContextType {
@@ -8,8 +8,6 @@ interface AuthContextType {
   role: 'admin' | 'teacher' | 'user' | null;
   loading: boolean;
   login: () => Promise<void>;
-  loginWithEmail: (email: string, password: string) => Promise<void>;
-  registerWithEmail: (email: string, password: string, displayName: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -26,12 +24,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (currentUser) {
         // Check role in Firestore
         const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
-        let userDisplayName = currentUser.displayName;
         if (userDoc.exists()) {
           setRole(userDoc.data().role);
-          if (!userDisplayName) {
-            userDisplayName = userDoc.data().displayName;
-          }
         } else {
           // Create user doc if not exists
           const defaultRole = (currentUser.email === 'samiljain0111@gmail.com' || currentUser.email === 'admin@jainism.com') ? 'admin' : 'user';
@@ -41,38 +35,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             role: defaultRole
           });
           setRole(defaultRole);
-        }
-
-        // Also record/sync the user to the jain_community directory
-        try {
-          const communityRef = doc(db, 'jain_community', currentUser.uid);
-          const communityDoc = await getDoc(communityRef);
-          const isDev = currentUser.email === 'samiljain0111@gmail.com';
-          const finalDisplayName = userDisplayName || currentUser.displayName || 'Jain Soul';
-          
-          if (communityDoc.exists()) {
-            await setDoc(communityRef, {
-              uid: currentUser.uid,
-              displayName: finalDisplayName,
-              photoURL: currentUser.photoURL || communityDoc.data().photoURL || '',
-              email: currentUser.email || '',
-              isDeveloper: isDev,
-              updatedAt: Date.now()
-            }, { merge: true });
-          } else {
-            await setDoc(communityRef, {
-              uid: currentUser.uid,
-              displayName: finalDisplayName,
-              photoURL: currentUser.photoURL || '',
-              email: currentUser.email || '',
-              whatsapp: '',
-              instagram: '',
-              isDeveloper: isDev,
-              updatedAt: Date.now()
-            });
-          }
-        } catch (err) {
-          console.error("Error updating jain_community:", err);
         }
       } else {
         setRole(null);
@@ -88,50 +50,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await signInWithPopup(auth, googleProvider);
     } catch (error) {
       console.error('Login error:', error);
-      throw error;
-    }
-  };
-
-  const loginWithEmail = async (email: string, password: string) => {
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-    } catch (error) {
-      console.error('Email login error:', error);
-      throw error;
-    }
-  };
-
-  const registerWithEmail = async (email: string, password: string, displayName: string) => {
-    try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      if (userCredential.user) {
-        await updateProfile(userCredential.user, { displayName });
-        
-        const defaultRole = (email === 'samiljain0111@gmail.com' || email === 'admin@jainism.com') ? 'admin' : 'user';
-        
-        // Create user document in firestore
-        await setDoc(doc(db, 'users', userCredential.user.uid), {
-          email,
-          displayName,
-          role: defaultRole
-        });
-
-        // Explicitly create/update jain_community document with correct displayName
-        const isDev = email === 'samiljain0111@gmail.com';
-        await setDoc(doc(db, 'jain_community', userCredential.user.uid), {
-          uid: userCredential.user.uid,
-          displayName: displayName,
-          photoURL: '',
-          email: email,
-          whatsapp: '',
-          instagram: '',
-          isDeveloper: isDev,
-          updatedAt: Date.now()
-        });
-      }
-    } catch (error) {
-      console.error('Email registration error:', error);
-      throw error;
     }
   };
 
@@ -144,7 +62,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, role, loading, login, loginWithEmail, registerWithEmail, logout }}>
+    <AuthContext.Provider value={{ user, role, loading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

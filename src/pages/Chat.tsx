@@ -74,29 +74,6 @@ export default function ChatPage() {
   const [breathPhase, setBreathPhase] = useState<'in' | 'hold' | 'out' | null>(null);
   const [breathTimer, setBreathTimer] = useState<number>(0);
   const [latencyStatus, setLatencyStatus] = useState<string>('Connected');
-  const [authErrorModal, setAuthErrorModal] = useState<{
-    show: boolean;
-    domain: string;
-    projectId: string;
-    rawError: string;
-  } | null>(null);
-
-  const handleGoogleLogin = async () => {
-    try {
-      await login();
-    } catch (err: any) {
-      console.error("Login trigger error:", err);
-      const errMsg = err?.message || String(err);
-      const currentDomain = typeof window !== 'undefined' ? window.location.hostname : 'jainismgpt.vercel.app';
-      
-      setAuthErrorModal({
-        show: true,
-        domain: currentDomain,
-        projectId: "original-jainism-gpt",
-        rawError: errMsg
-      });
-    }
-  };
 
   // Breathing loop effect for dynamic Pranayama (Breath Timer)
   useEffect(() => {
@@ -347,17 +324,7 @@ export default function ChatPage() {
       // Delete user settings doc if exists
       await deleteDoc(doc(db, 'users', user.uid));
 
-      // Delete community card if exists
-      await deleteDoc(doc(db, 'jain_community', user.uid));
-
-      // Attempt to delete from firebase auth
-      try {
-        await user.delete();
-      } catch (authErr) {
-        console.warn("Auth user deletion skipped or failed (requires recent login):", authErr);
-      }
-
-      addToast("Your Jainism GPT Chat Account, Community Card, and entire History have been permanently deleted.");
+      addToast("Your Jainism GPT Chat Account and entire History has been permanently deleted.");
       logout();
     } catch (err) {
       console.error("Error purging account:", err);
@@ -824,7 +791,7 @@ Please feel free to explore our sacred Aagams, Panchang, and Swadhyay commentary
             </p>
             
             <button
-              onClick={handleGoogleLogin}
+              onClick={login}
               className="w-full py-4 bg-gray-100 dark:bg-white hover:bg-gray-200 dark:hover:bg-gray-100 text-gray-900 dark:text-black rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-3 shadow-lg hover:scale-105 active:scale-95 transition-all duration-300"
             >
               <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
@@ -837,62 +804,6 @@ Please feel free to explore our sacred Aagams, Panchang, and Swadhyay commentary
             </button>
           </div>
         </div>
-
-        {authErrorModal?.show && (
-          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
-            <div className="bg-white dark:bg-[#121212] border border-gray-200 dark:border-white/10 rounded-[2.5rem] p-6 w-full max-w-md shadow-2xl relative overflow-hidden text-left">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-[#FF6D00]/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
-              
-              <div className="flex items-center gap-3 mb-4 border-b border-gray-100 dark:border-white/5 pb-3">
-                <div className="p-2 bg-amber-500/10 text-amber-500 rounded-xl">
-                  <ShieldAlert size={22} />
-                </div>
-                <div>
-                  <h3 className="font-extrabold text-base text-gray-900 dark:text-white">
-                    Firebase Authentication Error
-                  </h3>
-                  <p className="text-[10px] text-gray-400 dark:text-gray-500 font-semibold uppercase tracking-wider">
-                    Domain Authorization Required
-                  </p>
-                </div>
-              </div>
-
-              <div className="space-y-4 text-left text-xs max-h-[60vh] overflow-y-auto pr-1">
-                <p className="text-gray-600 dark:text-gray-300 font-medium leading-relaxed">
-                  Your Vercel domain <code className="bg-gray-100 dark:bg-white/10 px-1.5 py-0.5 rounded font-mono text-[11px] font-black text-rose-500">{authErrorModal.domain}</code> is not authorized in your Firebase Project <code className="bg-gray-100 dark:bg-white/10 px-1.5 py-0.5 rounded font-mono text-[11px] font-black">{authErrorModal.projectId}</code>.
-                </p>
-
-                <div className="p-3 bg-amber-500/5 dark:bg-amber-500/10 border border-amber-500/20 rounded-2xl text-amber-600 dark:text-amber-400 font-bold leading-relaxed text-[11px]">
-                  💡 <strong>इसे ठीक करने के लिए (To Fix This):</strong>
-                  <ol className="list-decimal list-inside mt-2 space-y-1.5 font-semibold">
-                    <li>Open <a href="https://console.firebase.google.com/" target="_blank" rel="noopener noreferrer" className="underline text-[#FF6D00] font-black">Firebase Console</a></li>
-                    <li>Go to your project <strong>{authErrorModal.projectId}</strong></li>
-                    <li>Go to <strong>Authentication</strong> &gt; <strong>Settings</strong> tab</li>
-                    <li>Under <strong>Authorized domains</strong>, click <strong>Add domain</strong></li>
-                    <li>Enter <code className="bg-black/5 dark:bg-white/10 px-1.5 py-0.5 rounded font-mono text-xs text-rose-500">{authErrorModal.domain}</code></li>
-                    <li>Save, and then try signing in again!</li>
-                  </ol>
-                </div>
-
-                <div className="text-[10px] text-gray-400 dark:text-gray-500 font-semibold border-t border-gray-100 dark:border-white/5 pt-3">
-                  <span className="block mb-1 font-black uppercase tracking-wider">Technical Details:</span>
-                  <div className="bg-gray-50 dark:bg-black/40 p-2.5 rounded-xl font-mono overflow-x-auto text-[9px] max-h-20 scrollbar-none">
-                    {authErrorModal.rawError}
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-5 pt-3 border-t border-gray-100 dark:border-white/5 flex gap-2">
-                <button
-                  onClick={() => setAuthErrorModal(null)}
-                  className="w-full py-3 bg-[#FF6D00] hover:bg-[#FF6D00]/90 text-white font-black text-xs uppercase tracking-widest rounded-xl transition-all shadow-md active:scale-95"
-                >
-                  Got It / समझ आ गया
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     );
   }
@@ -969,7 +880,7 @@ Please feel free to explore our sacred Aagams, Panchang, and Swadhyay commentary
         </div>
 
         {/* User Account Section inside sidebar */}
-        <div className="p-4 pb-safe pb-8 md:pb-4 border-t border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-black/40 space-y-3 shrink-0">
+        <div className="p-4 border-t border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-black/40 space-y-3">
           <div className="flex items-center gap-2.5">
             {user?.photoURL ? (
               <img src={user.photoURL} alt="User" referrerPolicy="no-referrer" className="w-9 h-9 rounded-full border-2 border-[#FF6D00]" />

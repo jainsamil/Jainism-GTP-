@@ -12,21 +12,13 @@ import { db, auth, googleProvider, signInWithPopup } from '../firebase';
 import { 
   collection, query, onSnapshot, addDoc, 
   updateDoc, doc, deleteDoc, serverTimestamp,
-  getDocs, where, setDoc, getDoc
+  getDocs, where, setDoc
 } from 'firebase/firestore';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import SectionAiAgent from '../components/SectionAiAgent';
 import PathshalaFlashcardsDeck, { FLASHCARDS_DATA } from '../components/PathshalaFlashcardsDeck';
-
-const ensureAbsoluteUrl = (url: string) => {
-  if (!url) return '';
-  if (/^https?:\/\//i.test(url)) {
-    return url;
-  }
-  return `https://${url}`;
-};
 
 export default function PathshalaPage() {
   const { theme } = useTheme();
@@ -49,19 +41,12 @@ export default function PathshalaPage() {
   const [studentTeacherName, setStudentTeacherName] = useState('');
   const [studentClassName, setStudentClassName] = useState('');
   const [authError, setAuthError] = useState('');
-  const [authErrorModal, setAuthErrorModal] = useState<{
-    show: boolean;
-    domain: string;
-    projectId: string;
-    rawError: string;
-  } | null>(null);
 
   const [activeTab, setActiveTab] = useState<'dashboard' | 'classes' | 'homework' | 'exams' | 'results' | 'discussions' | 'users' | 'flashcards'>('dashboard');
   const [classes, setClasses] = useState<any[]>([]);
   const [homeworks, setHomeworks] = useState<any[]>([]);
   const [exams, setExams] = useState<any[]>([]);
   const [submissions, setSubmissions] = useState<any[]>([]);
-  const [homeworkSubmissions, setHomeworkSubmissions] = useState<any[]>([]);
   const [allUsers, setAllUsers] = useState<any[]>([]);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [pushEnabled, setPushEnabled] = useState(false);
@@ -156,11 +141,6 @@ export default function PathshalaPage() {
       setSubmissions(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     });
 
-    const qHwSubmissions = query(collection(db, 'homework_submissions'));
-    const unsubscribeHwSubmissions = onSnapshot(qHwSubmissions, (snapshot) => {
-      setHomeworkSubmissions(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-    });
-
     const qUsers = query(collection(db, 'pathshala_users'));
     const unsubscribeUsers = onSnapshot(qUsers, (snapshot) => {
       setAllUsers(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
@@ -189,7 +169,6 @@ export default function PathshalaPage() {
       unsubscribeExams();
       unsubscribeHomeworks();
       unsubscribeSubmissions();
-      unsubscribeHwSubmissions();
       unsubscribeUsers();
       unsubscribeNotifications();
     };
@@ -300,34 +279,23 @@ export default function PathshalaPage() {
   }, [showTakeExam, mediaStreams]);
 
   const startExam = async (exam: any) => {
-    let cameraStream: MediaStream | null = null;
-    let screenStream: MediaStream | null = null;
     try {
-      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        cameraStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false }).catch((err) => {
-          console.warn("Camera hardware access denied or not available, using simulation.", err);
-          return null;
-        });
-      }
-      if (navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
-        screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false }).catch((err) => {
-          console.warn("Screen share capture denied or not available, using simulation.", err);
-          return null;
-        });
-      }
+      const cameraStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+      const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
+      setMediaStreams({ camera: cameraStream, screen: screenStream });
+      
+      setShowTakeExam(exam);
+      setExamState({
+        currentQuestionIndex: 0,
+        answers: new Array(exam.questions.length).fill(-1),
+        timeLeft: exam.duration * 60,
+        warnings: 0,
+        isFinished: false
+      });
     } catch (err) {
-      console.warn('Failed to initialize proctoring hardware, falling back to simulated monitoring:', err);
+      alert('Camera and Screen sharing permissions are required to start the exam.');
+      console.error(err);
     }
-
-    setMediaStreams({ camera: cameraStream, screen: screenStream });
-    setShowTakeExam(exam);
-    setExamState({
-      currentQuestionIndex: 0,
-      answers: new Array(exam.questions.length).fill(-1),
-      timeLeft: exam.duration * 60,
-      warnings: 0,
-      isFinished: false
-    });
   };
 
   const finishExam = async () => {
@@ -372,9 +340,9 @@ export default function PathshalaPage() {
     if (authUser) {
       const fetchPathshalaUser = async () => {
         try {
-          const uDoc = await getDoc(doc(db, 'pathshala_users', authUser.uid));
-          if (uDoc.exists()) {
-            const userData = { id: uDoc.id, ...uDoc.data() } as any;
+          const uDoc = await getDocs(query(collection(db, 'pathshala_users'), where('__name__', '==', authUser.uid)));
+          if (!uDoc.empty) {
+            const userData = { id: uDoc.docs[0].id, ...uDoc.docs[0].data() } as any;
             setPathshalaUser(userData);
             setIsTeacher(userData.role === 'teacher' || userData.role === 'admin');
             setShowGoogleRoleSetup(false);
@@ -393,9 +361,9 @@ export default function PathshalaPage() {
       if (storedUserId) {
         const fetchUser = async () => {
           try {
-            const uDoc = await getDoc(doc(db, 'pathshala_users', storedUserId));
-            if (uDoc.exists()) {
-              const userData = { id: uDoc.id, ...uDoc.data() } as any;
+            const userDoc = await getDocs(query(collection(db, 'pathshala_users'), where('__name__', '==', storedUserId)));
+            if (!userDoc.empty) {
+              const userData = { id: userDoc.docs[0].id, ...userDoc.docs[0].data() } as any;
               setPathshalaUser(userData);
               setIsTeacher(userData.role === 'teacher' || userData.role === 'admin');
             } else {
@@ -738,17 +706,9 @@ export default function PathshalaPage() {
             onClick={async () => {
               try {
                 await signInWithPopup(auth, googleProvider);
-              } catch (e: any) {
+              } catch (e) {
                 console.error("Google login failed", e);
-                const errMsg = e?.message || String(e);
-                const currentDomain = typeof window !== 'undefined' ? window.location.hostname : 'jainismgpt.vercel.app';
-                setAuthErrorModal({
-                  show: true,
-                  domain: currentDomain,
-                  projectId: "original-jainism-gpt",
-                  rawError: errMsg
-                });
-                setAuthError("Google authentication failed. Domain authorization may be required.");
+                setAuthError("Google authentication failed. Please try again.");
               }
             }}
             className="w-full py-4.5 bg-white text-black hover:bg-gray-100 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-3 shadow-lg hover:scale-105 active:scale-95 transition-all mb-6 border border-gray-200"
@@ -761,62 +721,6 @@ export default function PathshalaPage() {
             </svg>
             Sign In with Google
           </button>
-
-          {authErrorModal?.show && (
-            <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
-              <div className="bg-white dark:bg-[#121212] border border-gray-200 dark:border-white/10 rounded-[2.5rem] p-6 w-full max-w-md shadow-2xl relative overflow-hidden text-left">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-[#FF6D00]/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
-                
-                <div className="flex items-center gap-3 mb-4 border-b border-gray-100 dark:border-white/5 pb-3">
-                  <div className="p-2 bg-amber-500/10 text-amber-500 rounded-xl">
-                    <ShieldAlert size={22} />
-                  </div>
-                  <div>
-                    <h3 className="font-extrabold text-base text-gray-900 dark:text-white">
-                      Firebase Authentication Error
-                    </h3>
-                    <p className="text-[10px] text-gray-400 dark:text-gray-500 font-semibold uppercase tracking-wider">
-                      Domain Authorization Required
-                    </p>
-                  </div>
-                </div>
-
-                <div className="space-y-4 text-left text-xs max-h-[60vh] overflow-y-auto pr-1">
-                  <p className="text-gray-600 dark:text-gray-300 font-medium leading-relaxed">
-                    Your Vercel domain <code className="bg-gray-100 dark:bg-white/10 px-1.5 py-0.5 rounded font-mono text-[11px] font-black text-rose-500">{authErrorModal.domain}</code> is not authorized in your Firebase Project <code className="bg-gray-100 dark:bg-white/10 px-1.5 py-0.5 rounded font-mono text-[11px] font-black">{authErrorModal.projectId}</code>.
-                  </p>
-
-                  <div className="p-3 bg-amber-500/5 dark:bg-amber-500/10 border border-amber-500/20 rounded-2xl text-amber-600 dark:text-amber-400 font-bold leading-relaxed text-[11px]">
-                    💡 <strong>इसे ठीक करने के लिए (To Fix This):</strong>
-                    <ol className="list-decimal list-inside mt-2 space-y-1.5 font-semibold">
-                      <li>Open <a href="https://console.firebase.google.com/" target="_blank" rel="noopener noreferrer" className="underline text-[#FF6D00] font-black">Firebase Console</a></li>
-                      <li>Go to your project <strong>{authErrorModal.projectId}</strong></li>
-                      <li>Go to <strong>Authentication</strong> &gt; <strong>Settings</strong> tab</li>
-                      <li>Under <strong>Authorized domains</strong>, click <strong>Add domain</strong></li>
-                      <li>Enter <code className="bg-black/5 dark:bg-white/10 px-1.5 py-0.5 rounded font-mono text-xs text-rose-500">{authErrorModal.domain}</code></li>
-                      <li>Save, and then try signing in again!</li>
-                    </ol>
-                  </div>
-
-                  <div className="text-[10px] text-gray-400 dark:text-gray-500 font-semibold border-t border-gray-100 dark:border-white/5 pt-3">
-                    <span className="block mb-1 font-black uppercase tracking-wider">Technical Details:</span>
-                    <div className="bg-gray-50 dark:bg-black/40 p-2.5 rounded-xl font-mono overflow-x-auto text-[9px] max-h-20 scrollbar-none">
-                      {authErrorModal.rawError}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-5 pt-3 border-t border-gray-100 dark:border-white/5 flex gap-2">
-                  <button
-                    onClick={() => setAuthErrorModal(null)}
-                    className="w-full py-3 bg-[#FF6D00] hover:bg-[#FF6D00]/90 text-white font-black text-xs uppercase tracking-widest rounded-xl transition-all shadow-md active:scale-95"
-                  >
-                    Got It / समझ आ गया
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
 
           <div className="flex items-center my-6">
             <div className="flex-1 border-t border-gray-200 dark:border-white/10"></div>
@@ -1467,7 +1371,7 @@ export default function PathshalaPage() {
                   </div>
                 </div>
                 <a 
-                  href={ensureAbsoluteUrl(cls.link)} target="_blank" rel="noopener noreferrer"
+                  href={cls.link} target="_blank" rel="noopener noreferrer"
                   className={cn("w-full py-3 rounded-xl font-black text-xs tracking-widest flex items-center justify-center gap-2 transition-all border", isDark ? "bg-white/5 border-white/10 text-white hover:bg-white/10" : "bg-orange-50 border-orange-100 text-[#FF6D00] hover:bg-orange-100")}
                 >
                   <Video size={16} /> {t.joinClass}
@@ -1531,7 +1435,7 @@ export default function PathshalaPage() {
                           homeworkId: hw.id,
                           studentId: pathshalaUser.id,
                           studentName: pathshalaUser.name,
-                          link: ensureAbsoluteUrl(link),
+                          link,
                           submittedAt: new Date().toISOString()
                         });
                         alert('Homework submitted successfully!');
@@ -1541,29 +1445,6 @@ export default function PathshalaPage() {
                   >
                     <Send size={16} /> SUBMIT HOMEWORK
                   </button>
-                )}
-                {isTeacher && (
-                  <div className="mt-4 pt-4 border-t border-gray-200 dark:border-white/10 space-y-2">
-                    <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Student Submissions</h4>
-                    <div className="space-y-2">
-                      {homeworkSubmissions.filter(sub => sub.homeworkId === hw.id).map(sub => (
-                        <div key={sub.id} className="flex justify-between items-center text-xs p-3 bg-gray-500/5 rounded-xl border border-gray-500/10">
-                          <span className="font-bold">{sub.studentName}</span>
-                          <a 
-                            href={ensureAbsoluteUrl(sub.link)} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="text-[#00E676] hover:underline font-black uppercase tracking-widest text-[9px] flex items-center gap-1"
-                          >
-                            <BookOpen size={12} /> View Submission
-                          </a>
-                        </div>
-                      ))}
-                      {homeworkSubmissions.filter(sub => sub.homeworkId === hw.id).length === 0 && (
-                        <p className="text-[10px] text-gray-500 font-bold uppercase py-1">No submissions yet</p>
-                      )}
-                    </div>
-                  </div>
                 )}
               </div>
             ))}
@@ -1891,29 +1772,15 @@ export default function PathshalaPage() {
               </div>
               <div className="flex items-center gap-4">
                 <div className="flex gap-2">
-                  <div className="relative w-24 h-16 bg-zinc-900 rounded-lg overflow-hidden border border-white/10 flex items-center justify-center">
-                    {mediaStreams.camera ? (
-                      <video ref={cameraRef} autoPlay playsInline muted className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="flex flex-col items-center justify-center text-center p-1">
-                        <Camera size={14} className="text-[#FF6D00] animate-pulse" />
-                        <span className="text-[7px] text-gray-400 font-bold uppercase mt-1">SIMULATING</span>
-                      </div>
-                    )}
-                    <div className="absolute bottom-1 left-1 bg-black/60 px-1 rounded text-[8px] text-white flex items-center gap-1 font-bold">
+                  <div className="relative w-24 h-16 bg-black rounded-lg overflow-hidden border border-white/10">
+                    <video ref={cameraRef} autoPlay playsInline muted className="w-full h-full object-cover" />
+                    <div className="absolute bottom-1 left-1 bg-black/50 px-1 rounded text-[8px] text-white flex items-center gap-1">
                       <Camera size={8} /> Cam
                     </div>
                   </div>
-                  <div className="relative w-24 h-16 bg-zinc-900 rounded-lg overflow-hidden border border-white/10 flex items-center justify-center">
-                    {mediaStreams.screen ? (
-                      <video ref={screenRef} autoPlay playsInline muted className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="flex flex-col items-center justify-center text-center p-1">
-                        <Video size={14} className="text-[#FFD54F] animate-pulse" />
-                        <span className="text-[7px] text-gray-400 font-bold uppercase mt-1">SIMULATING</span>
-                      </div>
-                    )}
-                    <div className="absolute bottom-1 left-1 bg-black/60 px-1 rounded text-[8px] text-white flex items-center gap-1 font-bold">
+                  <div className="relative w-24 h-16 bg-black rounded-lg overflow-hidden border border-white/10">
+                    <video ref={screenRef} autoPlay playsInline muted className="w-full h-full object-cover" />
+                    <div className="absolute bottom-1 left-1 bg-black/50 px-1 rounded text-[8px] text-white flex items-center gap-1">
                       <Video size={8} /> Screen
                     </div>
                   </div>

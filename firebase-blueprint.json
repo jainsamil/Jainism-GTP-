@@ -299,22 +299,6 @@
         "createdAt": { "type": "string" }
       },
       "required": ["id", "storeId", "storeName", "title", "price", "category", "status"]
-    },
-    "jain_community": {
-      "title": "Jain Community Member",
-      "description": "Information about a member of the Jain community using the app",
-      "type": "object",
-      "properties": {
-        "uid": { "type": "string" },
-        "displayName": { "type": "string" },
-        "photoURL": { "type": "string" },
-        "email": { "type": "string" },
-        "whatsapp": { "type": "string" },
-        "instagram": { "type": "string" },
-        "isDeveloper": { "type": "boolean" },
-        "updatedAt": { "type": "number" }
-      },
-      "required": ["uid", "displayName"]
     }
   },
   "firestore": {
@@ -336,7 +320,6 @@
     "/dharamshala_bookings/{id}": { "schema": "dharamshala_booking", "description": "Bookings table for notifications and approvals" },
     "/jain_news/{id}": { "schema": "jain_news", "description": "Verified news updates" },
     "/jain_stores/{id}": { "schema": "jain_store", "description": "Vendor stores" },
-    "/jain_products/{id}": { "schema": "jain_product", "description": "Vendor items" },
-    "/jain_community/{id}": { "schema": "jain_community", "description": "Jain community directory entries" }
+    "/jain_products/{id}": { "schema": "jain_product", "description": "Vendor items" }
   }
 }
