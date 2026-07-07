@@ -5,6 +5,7 @@ import { cn } from './lib/utils';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import { AuthProvider } from './contexts/AuthContext';
+import UnauthorizedDomainModal from './components/UnauthorizedDomainModal';
 
 // Pages
 import HomePage from './pages/Home';
@@ -204,6 +205,7 @@ export default function App() {
               </Routes>
             </Layout>
           </BrowserRouter>
+          <UnauthorizedDomainModal />
         </LanguageProvider>
       </AuthProvider>
     </ThemeProvider>

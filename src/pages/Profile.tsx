@@ -1,11 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
-import { User, Camera, Instagram, Award, Settings, LogOut, BookOpen, ShieldAlert, Info, Edit2, Check, X, Download, Compass, Code, Milestone, Sparkles, Database, ArrowLeft, MessageCircle } from 'lucide-react';
+import { User, Camera, Instagram, Award, Settings, LogOut, BookOpen, ShieldAlert, Info, Edit2, Check, X, Download, Compass, Code, Milestone, Sparkles, Database, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { updateProfile } from 'firebase/auth';
-import { doc, updateDoc, getDoc, collection, query, where, onSnapshot, deleteDoc } from 'firebase/firestore';
+import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 
 export default function ProfilePage() {
@@ -14,11 +14,6 @@ export default function ProfilePage() {
   const [profilePic, setProfilePic] = useState<string | null>('https://i.ibb.co/Myg19RW6/1000539584.jpg');
   const [name, setName] = useState('Samil Jain');
   const [bio, setBio] = useState('Lead Developer & Spiritual Seeker');
-  const [instagram, setInstagram] = useState('');
-  const [whatsapp, setWhatsapp] = useState('');
-  const [isPublic, setIsPublic] = useState(true);
-  const [members, setMembers] = useState<any[]>([]);
-  const [loadingMembers, setLoadingMembers] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [aboutTab, setAboutTab] = useState<'origin' | 'tech' | 'features'>('origin');
@@ -48,73 +43,12 @@ export default function ProfilePage() {
     }
   };
 
-  // Load user profile from firestore
   useEffect(() => {
-    if (user) {
-      const fetchUserProfile = async () => {
-        try {
-          const userDocRef = doc(db, 'users', user.uid);
-          const userDocSnap = await getDoc(userDocRef);
-          if (userDocSnap.exists()) {
-            const data = userDocSnap.data();
-            if (user.email === 'samiljain0111@gmail.com') {
-              setName('Samil Jain');
-              setProfilePic('https://i.ibb.co/Myg19RW6/1000539584.jpg');
-              setBio('Lead Developer & Spiritual Seeker');
-            } else {
-              setName(data.name || data.displayName || user.displayName || 'Spiritual Devotee');
-              setProfilePic(data.photoURL || user.photoURL || 'https://i.ibb.co/Myg19RW6/1000539584.jpg');
-              setBio(data.bio || 'Spiritual Seeker');
-            }
-            setInstagram(data.instagram || '');
-            setWhatsapp(data.whatsapp || '');
-            setIsPublic(data.isPublic !== false);
-          } else {
-            if (user.email === 'samiljain0111@gmail.com') {
-              setName('Samil Jain');
-              setProfilePic('https://i.ibb.co/Myg19RW6/1000539584.jpg');
-              setBio('Lead Developer & Spiritual Seeker');
-            } else {
-              setName(user.displayName || 'Spiritual Devotee');
-              setProfilePic(user.photoURL || 'https://i.ibb.co/Myg19RW6/1000539584.jpg');
-              setBio('Spiritual Seeker');
-            }
-            setInstagram('');
-            setWhatsapp('');
-            setIsPublic(true);
-          }
-        } catch (error) {
-          console.error("Error fetching user profile:", error);
-        }
-      };
-      fetchUserProfile();
-    } else {
-      setName('Samil Jain');
-      setProfilePic('https://i.ibb.co/Myg19RW6/1000539584.jpg');
-      setBio('Lead Developer & Spiritual Seeker');
-      setInstagram('');
-      setWhatsapp('');
-      setIsPublic(true);
-    }
+    // Permanently locks Samil Jain's developer profile info
+    setName('Samil Jain');
+    setProfilePic('https://i.ibb.co/Myg19RW6/1000539584.jpg');
+    setBio('Lead Developer & Spiritual Seeker');
   }, [user]);
-
-  // Subscribe to public community members
-  useEffect(() => {
-    const q = query(collection(db, 'users'), where('isPublic', '==', true));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const fetchedMembers: any[] = [];
-      snapshot.forEach((doc) => {
-        fetchedMembers.push({ id: doc.id, ...doc.data() });
-      });
-      setMembers(fetchedMembers);
-      setLoadingMembers(false);
-    }, (error) => {
-      console.error("Error fetching community members:", error);
-      setLoadingMembers(false);
-    });
-
-    return () => unsubscribe();
-  }, []);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -143,55 +77,17 @@ export default function ProfilePage() {
     if (user) {
       try {
         await updateProfile(user, { displayName: name });
-        await updateDoc(doc(db, 'users', user.uid), { 
-          name: name,
-          displayName: name, 
-          bio,
-          instagram: instagram,
-          whatsapp: whatsapp,
-          isPublic: isPublic
-        });
+        await updateDoc(doc(db, 'users', user.uid), { displayName: name, bio });
       } catch (error) {
         console.error("Error updating profile:", error);
       }
     } else {
       localStorage.setItem('profileName', name);
       localStorage.setItem('profileBio', bio);
-      localStorage.setItem('profileInstagram', instagram);
-      localStorage.setItem('profileWhatsapp', whatsapp);
     }
     setIsEditing(false);
     setIsSaving(false);
   };
-
-  const handleDeleteAccount = async () => {
-    if (!user) return;
-    const confirmDelete = window.confirm("क्या आप वाकई अपना खाता हटाना चाहते हैं? यह आपके सभी डेटा को पूरी तरह से हटा देगा। / Are you sure you want to permanently delete your account? This will wipe all your data.");
-    if (confirmDelete) {
-      try {
-        setIsSaving(true);
-        await deleteDoc(doc(db, 'users', user.uid));
-        await user.delete();
-        await logout();
-        alert("Account successfully deleted / खाता सफलतापूर्वक हटा दिया गया है।");
-        navigate('/');
-      } catch (error: any) {
-        console.error("Error deleting account:", error);
-        if (error.code === 'auth/requires-recent-login') {
-          alert("For security reasons, please log out and log in again before deleting your account. / सुरक्षा कारणों से, कृपया खाता हटाने से पहले एक बार लॉग आउट करके फिर से लॉग इन करें।");
-        } else {
-          alert("An error occurred. Please try again. / एक त्रुटि हुई। कृपया पुनः प्रयास करें।");
-        }
-      } finally {
-        setIsSaving(false);
-      }
-    }
-  };
-
-  const developerMember = members.find(m => m.role === 'developer' || m.email === 'samiljain0111@gmail.com');
-  const normalMembers = members.filter(m => m.role !== 'developer' && m.email !== 'samiljain0111@gmail.com');
-  const sortedMembers = developerMember ? [developerMember, ...normalMembers] : normalMembers;
-  const totalCommunityCount = normalMembers.length;
 
   return (
     <div className="min-h-full p-6 pb-24 bg-transparent text-gray-900 dark:text-gray-200 transition-colors duration-300">
@@ -290,276 +186,6 @@ export default function ProfilePage() {
           </div>
           <span className="text-gray-400 dark:text-gray-500 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">›</span>
         </button>
-      </div>
-
-      {/* PROFILE SETTINGS (Privacy & Social Inputs) */}
-      <div className="mt-6 bg-white/80 dark:bg-[#121212]/80 backdrop-blur-xl rounded-[2rem] p-6 shadow-sm border border-gray-200 dark:border-white/10">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm sm:text-base font-display font-black text-gray-900 dark:text-white flex items-center gap-2">
-            <Settings className="text-[#FF6D00] w-4 h-4 sm:w-5 sm:h-5" />
-            PROFILE SETTINGS (प्रोफाइल सेटिंग्स)
-          </h3>
-          {user ? (
-            <button
-              onClick={() => setIsEditing(!isEditing)}
-              className="flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#FF6D00]/10 text-[#FF6D00] hover:bg-[#FF6D00]/20 transition-all"
-            >
-              {isEditing ? <X size={12} /> : <Edit2 size={12} />}
-              {isEditing ? 'Cancel' : 'Edit Profile'}
-            </button>
-          ) : (
-            <button
-              onClick={login}
-              className="px-3 py-1 bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] text-white rounded-full text-[10px] font-black uppercase tracking-wider shadow-sm hover:shadow-md transition-all flex items-center gap-1"
-            >
-              <User size={12} />
-              Login with Google
-            </button>
-          )}
-        </div>
-
-        {!user ? (
-          <div className="text-center py-4">
-            <p className="text-xs text-gray-500 dark:text-gray-400 font-semibold mb-2 leading-relaxed">
-              Login with Google to join the Jain Community Directory and update your social profiles!
-            </p>
-          </div>
-        ) : !isEditing ? (
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="p-3 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5">
-                <span className="text-[9px] text-gray-400 font-bold block uppercase tracking-wider mb-1">Name (नाम)</span>
-                <span className="text-xs font-bold text-gray-800 dark:text-white">{name}</span>
-              </div>
-              <div className="p-3 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5">
-                <span className="text-[9px] text-gray-400 font-bold block uppercase tracking-wider mb-1">Bio (विवरण)</span>
-                <span className="text-xs font-bold text-gray-800 dark:text-white">{bio}</span>
-              </div>
-              <div className="p-3 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5">
-                <span className="text-[9px] text-gray-400 font-bold block uppercase tracking-wider mb-1">Instagram</span>
-                <span className="text-xs font-bold text-gray-800 dark:text-white">
-                  {instagram ? `@${instagram}` : <span className="text-gray-400 italic font-medium">Not added</span>}
-                </span>
-              </div>
-              <div className="p-3 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5">
-                <span className="text-[9px] text-gray-400 font-bold block uppercase tracking-wider mb-1">WhatsApp</span>
-                <span className="text-xs font-bold text-gray-800 dark:text-white">
-                  {whatsapp ? whatsapp : <span className="text-gray-400 italic font-medium">Not added</span>}
-                </span>
-              </div>
-            </div>
-            
-            <div className="flex items-center justify-between p-3 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5">
-              <div>
-                <span className="text-xs font-bold text-gray-800 dark:text-white">Directory Visibility (विजिबिलिटी)</span>
-                <span className="text-[9px] text-gray-400 font-medium block">Show profile in Jain Community Directory</span>
-              </div>
-              <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${
-                isPublic 
-                  ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' 
-                  : 'bg-gray-500/10 text-gray-500 border border-gray-500/20'
-              }`}>
-                {isPublic ? 'Public' : 'Private'}
-              </span>
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            <div>
-              <label className="text-[9px] text-gray-400 font-bold uppercase tracking-wider block mb-1">Full Name (पूरा नाम)</label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Your Name"
-                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 bg-transparent text-xs focus:outline-none focus:border-[#FF6D00] focus:ring-1 focus:ring-[#FF6D00]"
-              />
-            </div>
-
-            <div>
-              <label className="text-[9px] text-gray-400 font-bold uppercase tracking-wider block mb-1">Bio / Status (विवरण)</label>
-              <input
-                type="text"
-                value={bio}
-                onChange={(e) => setBio(e.target.value)}
-                placeholder="e.g. Lead Developer & Spiritual Seeker"
-                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 bg-transparent text-xs focus:outline-none focus:border-[#FF6D00] focus:ring-1 focus:ring-[#FF6D00]"
-              />
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="text-[9px] text-gray-400 font-bold uppercase tracking-wider block mb-1">Add Instagram Username</label>
-                <div className="relative">
-                  <span className="absolute left-3 top-3 text-gray-400 text-xs font-bold">@</span>
-                  <input
-                    type="text"
-                    value={instagram}
-                    onChange={(e) => setInstagram(e.target.value)}
-                    placeholder="username"
-                    className="w-full pl-7 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 bg-transparent text-xs focus:outline-none focus:border-[#FF6D00] focus:ring-1 focus:ring-[#FF6D00]"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="text-[9px] text-gray-400 font-bold uppercase tracking-wider block mb-1">Add WhatsApp Number</label>
-                <input
-                  type="text"
-                  value={whatsapp}
-                  onChange={(e) => setWhatsapp(e.target.value)}
-                  placeholder="e.g. +919876543210"
-                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 bg-transparent text-xs focus:outline-none focus:border-[#FF6D00] focus:ring-1 focus:ring-[#FF6D00]"
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5">
-              <div>
-                <span className="text-xs font-bold text-gray-800 dark:text-white">Public Profile</span>
-                <span className="text-[9px] text-gray-400 font-medium block">Show me in the public directory list</span>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsPublic(!isPublic)}
-                className={`w-10 h-5 rounded-full relative transition-colors ${isPublic ? 'bg-emerald-500' : 'bg-gray-300 dark:bg-white/10'}`}
-              >
-                <span className={`w-3.5 h-3.5 bg-white rounded-full absolute top-0.5 shadow-sm transition-all ${isPublic ? 'right-0.5' : 'left-0.5'}`} />
-              </button>
-            </div>
-
-            <div className="flex gap-2 pt-2">
-              <button
-                onClick={handleSaveProfile}
-                disabled={isSaving}
-                className="flex-1 py-2.5 bg-[#FF6D00] hover:bg-[#FF8F00] text-white rounded-xl text-[10px] font-black tracking-wider uppercase shadow-md transition-all flex items-center justify-center gap-1.5"
-              >
-                {isSaving ? 'Saving...' : 'Save Profile'}
-              </button>
-              <button
-                onClick={() => setIsEditing(false)}
-                className="px-4 py-2.5 bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-gray-300 rounded-xl text-[10px] font-bold tracking-wider uppercase hover:bg-gray-200 dark:hover:bg-white/10 transition-all"
-              >
-                Cancel
-              </button>
-            </div>
-
-            <div className="border-t border-red-500/10 pt-4 mt-4">
-              <div className="flex items-center justify-between p-3 rounded-xl bg-red-500/5 border border-red-500/10">
-                <div>
-                  <span className="text-xs font-bold text-red-600 dark:text-red-400">Delete Account Permanently</span>
-                  <span className="text-[9px] text-gray-400 font-medium block">Irreversible account wipe</span>
-                </div>
-                <button
-                  onClick={handleDeleteAccount}
-                  className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-[9px] font-black tracking-wider uppercase transition-all shadow-md"
-                >
-                  Delete Account
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* JAIN COMMUNITY DIRECTORY */}
-      <div className="mt-6 bg-white/80 dark:bg-[#121212]/80 backdrop-blur-xl rounded-[2rem] p-6 shadow-sm border border-gray-200 dark:border-white/10 relative overflow-hidden">
-        <div className="flex items-center justify-between mb-6 border-b border-gray-100 dark:border-white/5 pb-4">
-          <div>
-            <h3 className="text-sm sm:text-base font-display font-black text-gray-900 dark:text-white flex items-center gap-2">
-              <Award className="text-[#FF6D00] w-4 h-4 sm:w-5 sm:h-5" />
-              JAIN COMMUNITY DIRECTORY (जैन कम्युनिटी डायरेक्टरी)
-            </h3>
-            <p className="text-[9px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider mt-1">
-              Connect with Sadharmik Devotees Around the World
-            </p>
-          </div>
-          <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#FF6D00]/10 text-[#FF6D00] border border-[#FF6D00]/20">
-            Members: {totalCommunityCount}
-          </span>
-        </div>
-
-        {loadingMembers ? (
-          <div className="flex flex-col items-center justify-center py-12 gap-3">
-            <div className="w-8 h-8 rounded-full border-4 border-t-[#FF6D00] border-gray-200 dark:border-white/10 animate-spin" />
-            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest animate-pulse">Loading Devotees...</span>
-          </div>
-        ) : sortedMembers.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">No Public Members Found</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-            {sortedMembers.map((member) => {
-              const isDev = member.role === 'developer' || member.email === 'samiljain0111@gmail.com';
-              return (
-                <div 
-                  key={member.id} 
-                  className={cn(
-                    "relative rounded-3xl p-4 flex flex-col items-center bg-white dark:bg-[#1c1c1e] border shadow-sm transition-all hover:scale-[1.03] duration-300 text-center overflow-hidden",
-                    isDev 
-                      ? "border-[#FF6D00]/50 dark:border-[#FF6D00]/80 shadow-[0_0_15px_rgba(255,109,0,0.15)] bg-gradient-to-b from-white to-[#FF6D00]/5 dark:from-[#1c1c1e] dark:to-[#FF6D00]/10" 
-                      : "border-gray-100 dark:border-white/5"
-                  )}
-                >
-                  {/* Developer Badge */}
-                  {isDev && (
-                    <span className="absolute top-2 right-2 px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] text-white">
-                      Developer
-                    </span>
-                  )}
-
-                  {/* Profile Pic */}
-                  <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-gray-100 dark:border-white/10 mb-3 bg-gray-50 flex items-center justify-center shrink-0">
-                    {member.photoURL ? (
-                      <img src={member.photoURL} alt={member.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                    ) : (
-                      <User size={24} className="text-gray-400" />
-                    )}
-                  </div>
-
-                  {/* Name */}
-                  <h4 className="text-xs font-bold text-gray-900 dark:text-white truncate w-full px-1 mb-1">
-                    {member.name || member.displayName || 'Spiritual Devotee'}
-                  </h4>
-
-                  {/* Bio */}
-                  {member.bio && (
-                    <p className="text-[10px] text-gray-400 dark:text-gray-500 font-medium line-clamp-1 w-full px-1 mb-2">
-                      {member.bio}
-                    </p>
-                  )}
-
-                  {/* Social Icons */}
-                  <div className="flex items-center justify-center gap-2 mt-auto">
-                    {member.instagram && (
-                      <a 
-                        href={`https://instagram.com/${member.instagram.replace('@', '')}`}
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="w-7 h-7 rounded-full bg-pink-500/10 text-pink-500 hover:bg-pink-500 hover:text-white transition-all flex items-center justify-center shadow-sm"
-                        title={`Instagram: @${member.instagram}`}
-                      >
-                        <Instagram size={14} />
-                      </a>
-                    )}
-                    {member.whatsapp && (
-                      <a 
-                        href={`https://wa.me/${member.whatsapp.replace('+', '').replace(/\s+/g, '')}`}
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="w-7 h-7 rounded-full bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white transition-all flex items-center justify-center shadow-sm"
-                        title={`WhatsApp: ${member.whatsapp}`}
-                      >
-                        <MessageCircle size={14} />
-                      </a>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
       </div>
 
       {/* About Us Modal */}
