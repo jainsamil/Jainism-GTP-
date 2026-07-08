@@ -3,7 +3,7 @@ import {
   GraduationCap, Settings, User, BookOpen, LayoutGrid, 
   FileText, CheckCircle2, X, AlertTriangle, Clock, 
   Camera, Video, Users, Plus, Trash2, Send, Trophy,
-  ChevronRight, Award, Timer, ShieldAlert, Bell, ArrowLeft
+  ChevronRight, Award, Timer, ShieldAlert, Bell, ArrowLeft, ShieldCheck
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useAuth } from '../contexts/AuthContext';
@@ -25,7 +25,7 @@ export default function PathshalaPage() {
   const { language, toggleLanguage } = useLanguage();
   const isDark = theme === 'dark';
   const navigate = useNavigate();
-  const { user: authUser, loading: authLoading, login: authLogin } = useAuth();
+  const { user: authUser, loading: authLoading, login: authLogin, loginAsDemo: authLoginAsDemo } = useAuth();
 
   const [pathshalaUser, setPathshalaUser] = useState<any>(null);
   const [isTeacher, setIsTeacher] = useState(false);
@@ -730,17 +730,34 @@ export default function PathshalaPage() {
           <h1 className={cn("text-3xl font-display font-black mb-4", isDark ? "text-white" : "text-gray-900")}>PATHSHALA {isLoginMode ? 'LOGIN' : 'SIGNUP'}</h1>
           <p className="text-gray-500 mb-8">{isLoginMode ? 'Please login to access the virtual academy.' : 'Create a new account to join.'}</p>
           
-          {authError && <p className="text-red-500 text-sm mb-4">{authError}</p>}
+          {authError && (
+            <div className="mb-6 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-800 dark:text-amber-300 text-xs font-semibold text-left space-y-1.5">
+              <p className="font-black flex items-center gap-1.5 uppercase tracking-wider text-amber-700 dark:text-amber-400">
+                <ShieldAlert size={14} className="shrink-0" />
+                <span>Authentication Notice</span>
+              </p>
+              <p className="leading-relaxed font-semibold text-gray-600 dark:text-gray-300">
+                {authError.includes('unauthorized-domain') 
+                  ? `This domain (${window.location.hostname}) is not whitelisted in your Firebase project. To use Google Sign-In, add it under Authentication > Settings > Authorized Domains in the Firebase console. Or, register/login using custom Username & Password below.`
+                  : authError}
+              </p>
+            </div>
+          )}
           
           {/* Primary Google auth */}
           <button
             type="button"
             onClick={async () => {
+              setAuthError('');
               try {
                 await signInWithPopup(auth, googleProvider);
-              } catch (e) {
+              } catch (e: any) {
                 console.error("Google login failed", e);
-                setAuthError("Google authentication failed. Please try again.");
+                if (e?.code === 'auth/unauthorized-domain' || (e?.message && e.message.includes('unauthorized-domain'))) {
+                  setAuthError(`unauthorized-domain: The domain '${window.location.hostname}' is not authorized.`);
+                } else {
+                  setAuthError("Google authentication failed. Please try again.");
+                }
               }
             }}
             className="w-full py-4.5 bg-white text-black hover:bg-gray-100 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-3 shadow-lg hover:scale-105 active:scale-95 transition-all mb-6 border border-gray-200"

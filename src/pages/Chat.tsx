@@ -36,7 +36,7 @@ type ChatSession = {
 };
 
 export default function ChatPage() {
-  const { user, login, logout } = useAuth();
+  const { user, login, loginAsDemo, logout, error: authError, setError: setAuthError } = useAuth();
   const { language } = useLanguage();
   const location = useLocation();
   const navigate = useNavigate();
@@ -786,9 +786,32 @@ Please feel free to explore our sacred Aagams, Panchang, and Swadhyay commentary
             </div>
             
             <h1 className="text-4xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] mb-4 uppercase tracking-tighter">JAINISM GPT CHAT</h1>
-            <p className="text-gray-600 dark:text-gray-400 max-w-sm mx-auto mb-10 text-sm leading-relaxed font-semibold">
+            <p className="text-gray-600 dark:text-gray-400 max-w-sm mx-auto mb-6 text-sm leading-relaxed font-semibold">
               Please authenticate via your Google Account to access secure spiritual guidance and save your private chat history.
             </p>
+
+            {authError && (
+              <div className="mb-6 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-800 dark:text-amber-300 text-xs font-semibold text-left space-y-2">
+                <p className="font-black flex items-center gap-1.5 uppercase tracking-wider text-amber-700 dark:text-amber-400">
+                  <ShieldAlert size={14} className="shrink-0" />
+                  <span>Authentication Notice</span>
+                </p>
+                <p className="leading-relaxed font-semibold text-gray-600 dark:text-gray-300">
+                  {authError.includes('unauthorized-domain') 
+                    ? `This domain (${window.location.hostname}) is not whitelisted in your Firebase console. To log in with Google, add this domain under Authentication > Settings > Authorized Domains. Alternately, use the Pathshala module's custom Username/Password registration.`
+                    : authError}
+                </p>
+                <button
+                  onClick={() => {
+                    setAuthError(null);
+                    navigate('/pathshala');
+                  }}
+                  className="w-full mt-1.5 py-2 px-3 bg-amber-500/20 hover:bg-amber-500/30 text-amber-900 dark:text-amber-200 rounded-xl font-bold text-[10px] uppercase tracking-widest transition-all cursor-pointer text-center"
+                >
+                  Go to Pathshala & Custom Auth
+                </button>
+              </div>
+            )}
             
             <button
               onClick={login}
@@ -820,59 +843,68 @@ Please feel free to explore our sacred Aagams, Panchang, and Swadhyay commentary
 
       {/* Sidebar */}
       <div className={cn(
-        "absolute top-0 left-0 h-full w-72 bg-white dark:bg-[#121212] border-r border-gray-200 dark:border-white/10 z-50 transform transition-transform duration-300 flex flex-col shadow-[0_0_30px_rgba(0,0,0,0.1)] dark:shadow-[0_0_30px_rgba(0,0,0,0.8)]",
+        "absolute top-0 left-0 h-full w-72 bg-gradient-to-b from-white to-gray-50 dark:from-[#0d0a07] dark:to-[#17110d] border-r border-gray-200 dark:border-orange-950/20 z-50 transform transition-transform duration-300 flex flex-col shadow-[5px_0_30px_rgba(0,0,0,0.08)] dark:shadow-[10px_0_40px_rgba(0,0,0,0.9)]",
         showSidebar ? "translate-x-0" : "-translate-x-full"
       )}>
-        <div className="p-4 border-b border-gray-200 dark:border-white/10 flex items-center justify-between">
-          <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-            <MessageSquare size={18} className="text-[#FF6D00]" />
-            Chat History
+        <div className="p-5 border-b border-gray-150/80 dark:border-orange-950/20 flex items-center justify-between">
+          <h2 className="text-lg font-black text-gray-900 dark:text-white flex items-center gap-2.5 uppercase tracking-wider">
+            <MessageSquare size={20} className="text-[#FF5722] animate-pulse" />
+            <span>Chat History</span>
           </h2>
-          <button onClick={() => setShowSidebar(false)} className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
-            <X size={20} />
+          <button 
+            onClick={() => setShowSidebar(false)} 
+            className="w-8 h-8 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:scale-105 active:scale-95 transition-all cursor-pointer"
+          >
+            <X size={16} />
           </button>
         </div>
         
         <div className="p-4">
           <button 
             onClick={createNewChat}
-            className="w-full flex items-center gap-2 px-4 py-3 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 border border-gray-200 dark:border-white/10 rounded-xl text-gray-900 dark:text-white font-medium transition-colors"
+            className="w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-gradient-to-r from-[#FF5722] via-[#FF3D00] to-[#FF8A65] text-white hover:brightness-110 hover:shadow-[0_4px_20px_rgba(255,87,34,0.3)] active:scale-[0.98] transition-all shadow-md rounded-2xl font-black text-[11px] uppercase tracking-widest cursor-pointer border border-[#FF9100]/30 h-12"
           >
-            <PlusCircle size={18} className="text-[#FF6D00]" />
+            <Plus size={16} className="stroke-[3px]" />
             New Chat
           </button>
         </div>
 
         {/* Sessions list */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-2">
+        <div className="flex-1 overflow-y-auto p-4 space-y-2.5">
           {sessions.length === 0 ? (
-            <p className="text-gray-500 text-sm text-center mt-4">No saved chats.</p>
+            <div className="flex flex-col items-center justify-center py-12 text-center text-gray-400 dark:text-gray-500 space-y-2">
+              <MessageSquare size={32} className="opacity-20 animate-bounce" />
+              <p className="text-xs font-bold uppercase tracking-wider">No saved chats</p>
+            </div>
           ) : (
             sessions.map(session => (
               <div 
                 key={session.id}
                 onClick={() => loadSession(session)}
                 className={cn(
-                  "flex items-center justify-between p-3 rounded-xl cursor-pointer transition-colors group",
-                  currentSessionId === session.id ? "bg-[#FF6D00]/10 dark:bg-[#FF6D00]/20 border border-[#FF6D00]/30" : "hover:bg-gray-100 dark:hover:bg-white/5 border border-transparent"
+                  "flex items-center justify-between p-3.5 rounded-2xl cursor-pointer transition-all group border",
+                  currentSessionId === session.id 
+                    ? "bg-[#FF5722]/10 dark:bg-[#FF5722]/15 border-[#FF5722]/30 shadow-sm" 
+                    : "bg-white/45 dark:bg-[#1A1310]/30 hover:bg-white/85 dark:hover:bg-[#1A1310]/80 border-gray-150/40 dark:border-white/5"
                 )}
               >
                 <div className="flex-1 min-w-0 pr-2">
                   <p className={cn(
-                    "text-sm truncate font-medium",
-                    currentSessionId === session.id ? "text-[#FF8A65]" : "text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white"
+                    "text-xs truncate font-black",
+                    currentSessionId === session.id ? "text-[#FF5722] dark:text-[#FF8A65]" : "text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white"
                   )}>
                     {session.title}
                   </p>
-                  <p className="text-[10px] text-gray-400 mt-1 uppercase tracking-wider font-mono">
+                  <p className="text-[9px] text-gray-400 mt-1 uppercase tracking-wider font-mono font-bold flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-orange-500/40" />
                     {new Date(session.updatedAt).toLocaleDateString()}
                   </p>
                 </div>
                 <button 
                   onClick={(e) => deleteSession(e, session.id)}
-                  className="text-gray-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity p-1"
+                  className="text-gray-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-white/5"
                 >
-                  <Trash2 size={14} />
+                  <Trash2 size={13} />
                 </button>
               </div>
             ))
@@ -880,33 +912,34 @@ Please feel free to explore our sacred Aagams, Panchang, and Swadhyay commentary
         </div>
 
         {/* User Account Section inside sidebar */}
-        <div className="p-4 border-t border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-black/40 space-y-3">
-          <div className="flex items-center gap-2.5">
+        <div className="p-4 border-t border-gray-150 dark:border-orange-950/20 bg-gray-50/80 dark:bg-[#100b08]/80 space-y-4">
+          <div className="flex items-center gap-3 p-2 bg-white dark:bg-white/5 rounded-2xl border border-gray-150/40 dark:border-white/5">
             {user?.photoURL ? (
-              <img src={user.photoURL} alt="User" referrerPolicy="no-referrer" className="w-9 h-9 rounded-full border-2 border-[#FF6D00]" />
+              <img src={user.photoURL} alt="User" referrerPolicy="no-referrer" className="w-10 h-10 rounded-full border-2 border-[#FF5722] shadow-sm shrink-0" />
             ) : (
-              <img src="https://i.ibb.co/Myg19RW6/1000539584.jpg" alt="Samil Jain" className="w-9 h-9 rounded-full border-2 border-[#FF6D00] object-cover" />
+              <img src="https://i.ibb.co/Myg19RW6/1000539584.jpg" alt="Samil Jain" className="w-10 h-10 rounded-full border-2 border-[#FF5722] object-cover shadow-sm shrink-0" />
             )}
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-bold text-gray-900 dark:text-white truncate">{user?.displayName || 'Samil Jain'}</p>
-              <p className="text-[9px] text-[#00E676] font-bold flex items-center gap-0.5 uppercase tracking-widest">
-                <ShieldCheck size={10} /> {user ? 'Private ID' : 'Guest Mode'}
-              </p>
+              <p className="text-xs font-black text-gray-900 dark:text-white truncate">{user?.displayName || 'Samil Jain'}</p>
+              <div className="inline-flex items-center gap-1 mt-0.5 px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[8px] font-black uppercase tracking-widest border border-emerald-500/20">
+                <ShieldCheck size={9} /> 
+                <span>{user ? 'Private ID' : 'Guest Mode'}</span>
+              </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-2.5">
             {user ? (
               <>
                 <button 
                   onClick={logout}
-                  className="flex items-center justify-center gap-1.5 py-2 hover:bg-rose-500/10 hover:text-red-500 text-gray-500 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all"
+                  className="flex items-center justify-center gap-1.5 py-2.5 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border border-gray-200/50 dark:border-white/5 cursor-pointer active:scale-95 shrink-0"
                 >
                   <LogOut size={12} /> Logout
                 </button>
                 <button 
                   onClick={() => setShowDeleteConfirm(true)}
-                  className="flex items-center justify-center gap-1.5 py-2 hover:bg-rose-500/10 text-rose-500 bg-rose-500/5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all"
+                  className="flex items-center justify-center gap-1.5 py-2.5 bg-red-500/5 hover:bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer active:scale-95 shrink-0"
                 >
                   <Trash2 size={12} /> Clear Account
                 </button>
@@ -919,7 +952,7 @@ Please feel free to explore our sacred Aagams, Panchang, and Swadhyay commentary
                   setMessages([]);
                   setCurrentSessionId(null);
                 }}
-                className="col-span-2 flex items-center justify-center gap-1.5 py-2 hover:bg-rose-500/10 hover:text-rose-500 text-gray-500 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all"
+                className="col-span-2 flex items-center justify-center gap-1.5 py-2.5 bg-red-500/5 hover:bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer active:scale-95 shrink-0"
               >
                 <Trash2 size={12} /> Clear Guest History
               </button>
@@ -954,20 +987,67 @@ Please feel free to explore our sacred Aagams, Panchang, and Swadhyay commentary
       </header>
 
       {messages.length === 0 ? (
-        <div className="flex-1 flex flex-col items-center justify-center p-6 text-center relative">
+        <div className="flex-1 flex flex-col items-center justify-center p-6 text-center relative overflow-y-auto">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,109,0,0.05)_0%,transparent_60%)] pointer-events-none" />
-          <div className="w-40 h-40 bg-white dark:bg-[#121212] rounded-full flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(255,109,0,0.1)] dark:shadow-[0_0_30px_rgba(255,109,0,0.2)] border border-[#FF6D00]/20 relative group">
+          <div className="w-28 h-28 sm:w-36 sm:h-36 bg-white dark:bg-[#121212] rounded-full flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(255,109,0,0.1)] dark:shadow-[0_0_30px_rgba(255,109,0,0.2)] border border-[#FF6D00]/20 relative group shrink-0">
             <div className="absolute inset-0 bg-[#FF6D00] rounded-full blur-xl opacity-10 dark:opacity-20 group-hover:opacity-30 dark:group-hover:opacity-40 transition-opacity duration-700" />
-            <div className="relative z-10 w-24 h-24 bg-gradient-to-br from-[#FF6D00] to-[#FFD54F] rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(255,109,0,0.4)] dark:shadow-[0_0_30px_rgba(255,109,0,0.8)] border-2 border-white/50 dark:border-white/20 group-hover:scale-110 transition-transform duration-500">
-              <Sparkles size={48} className="text-white dark:text-black drop-shadow-[0_0_10px_rgba(255,255,255,0.8)]" />
+            <div className="relative z-10 w-16 h-16 sm:w-24 sm:h-24 bg-gradient-to-br from-[#FF6D00] to-[#FFD54F] rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(255,109,0,0.4)] dark:shadow-[0_0_30px_rgba(255,109,0,0.8)] border-2 border-white/50 dark:border-white/20 group-hover:scale-110 transition-transform duration-500">
+              <Sparkles size={36} className="text-white dark:text-black drop-shadow-[0_0_10px_rgba(255,255,255,0.8)]" />
             </div>
           </div>
-          <h2 className="text-4xl font-black text-gray-900 dark:text-white mb-3 drop-shadow-[0_0_10px_rgba(0,0,0,0.1)] dark:drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">
+          <h2 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white mb-2 drop-shadow-[0_0_10px_rgba(0,0,0,0.1)] dark:drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">
             Jainism <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] drop-shadow-[0_0_15px_rgba(255,109,0,0.4)] dark:drop-shadow-[0_0_15px_rgba(255,109,0,0.8)]">GPT</span>
           </h2>
-          <p className="text-gray-500 dark:text-gray-400 text-sm font-medium tracking-wide prose prose-invert">
+          <p className="text-gray-500 dark:text-gray-400 text-xs sm:text-sm font-bold tracking-wide uppercase mb-8">
             Speak to the Autonomous Wisdom Guide
           </p>
+
+          {/* Quick Prompts Bento Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-xl w-full px-2">
+            <button
+              onClick={() => handleSend("What is the philosophy of Ahimsa (अहिंसा) in Jainism?")}
+              className="group p-4 bg-white/40 dark:bg-[#121212]/40 hover:bg-[#FF6D00]/5 hover:border-[#FF5722]/30 border border-gray-200 dark:border-white/5 rounded-2xl text-left transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer shadow-sm duration-300 backdrop-blur-sm"
+            >
+              <div className="w-9 h-9 rounded-xl bg-[#FF6D00]/10 flex items-center justify-center text-[#FF6D00] mb-3 group-hover:bg-[#FF6D00]/20 transition-colors">
+                <BookOpen size={16} className="stroke-[2.5]" />
+              </div>
+              <h3 className="text-xs sm:text-sm font-black text-gray-900 dark:text-white mb-1 group-hover:text-[#FF5722] transition-colors uppercase tracking-wider">Ahimsa (अहिंसा) Philosophy</h3>
+              <p className="text-[11px] text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed">Learn about the supreme vow of complete non-violence in mind, speech, and action.</p>
+            </button>
+
+            <button
+              onClick={() => handleSend("Explain the Navkar Mantra word-by-word meaning and significance.")}
+              className="group p-4 bg-white/40 dark:bg-[#121212]/40 hover:bg-[#FF6D00]/5 hover:border-[#FF5722]/30 border border-gray-200 dark:border-white/5 rounded-2xl text-left transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer shadow-sm duration-300 backdrop-blur-sm"
+            >
+              <div className="w-9 h-9 rounded-xl bg-[#FFD54F]/10 flex items-center justify-center text-[#FFA000] mb-3 group-hover:bg-[#FFD54F]/20 transition-colors">
+                <Compass size={16} className="stroke-[2.5]" />
+              </div>
+              <h3 className="text-xs sm:text-sm font-black text-gray-900 dark:text-white mb-1 group-hover:text-[#FF5722] transition-colors uppercase tracking-wider">Decode Navkar Mantra</h3>
+              <p className="text-[11px] text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed">Understand the universal salutation to the five supreme spiritual energies (Panch Parmesthi).</p>
+            </button>
+
+            <button
+              onClick={() => handleSend("What is the concept of Karma (कर्म) according to Jain scriptures?")}
+              className="group p-4 bg-white/40 dark:bg-[#121212]/40 hover:bg-[#FF6D00]/5 hover:border-[#FF5722]/30 border border-gray-200 dark:border-white/5 rounded-2xl text-left transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer shadow-sm duration-300 backdrop-blur-sm"
+            >
+              <div className="w-9 h-9 rounded-xl bg-[#FF8A65]/10 flex items-center justify-center text-[#FF5722] mb-3 group-hover:bg-[#FF8A65]/20 transition-colors">
+                <Zap size={16} className="stroke-[2.5]" />
+              </div>
+              <h3 className="text-xs sm:text-sm font-black text-gray-900 dark:text-white mb-1 group-hover:text-[#FF5722] transition-colors uppercase tracking-wider">Karma (कर्म) Science</h3>
+              <p className="text-[11px] text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed">Explore how karmic particles attract to the soul and how to purge them (Nirjara).</p>
+            </button>
+
+            <button
+              onClick={() => handleSend("Explain Anekantavada (अनेकांतवाद) and Syadvada with real life examples.")}
+              className="group p-4 bg-white/40 dark:bg-[#121212]/40 hover:bg-[#FF6D00]/5 hover:border-[#FF5722]/30 border border-gray-200 dark:border-white/5 rounded-2xl text-left transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer shadow-sm duration-300 backdrop-blur-sm"
+            >
+              <div className="w-9 h-9 rounded-xl bg-teal-500/10 flex items-center justify-center text-teal-600 dark:text-teal-400 mb-3 group-hover:bg-teal-500/20 transition-colors">
+                <Brain size={16} className="stroke-[2.5]" />
+              </div>
+              <h3 className="text-xs sm:text-sm font-black text-gray-900 dark:text-white mb-1 group-hover:text-[#FF5722] transition-colors uppercase tracking-wider">Anekantavada Theory</h3>
+              <p className="text-[11px] text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed">Dive into the deep doctrine of non-one-sidedness and multi-dimensional reality.</p>
+            </button>
+          </div>
         </div>
       ) : (
         <main className="flex-1 overflow-y-auto p-4 space-y-6">
