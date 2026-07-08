@@ -571,6 +571,21 @@ export default function PathshalaPage() {
     if (showGoogleRoleSetup) {
       return (
         <div className={cn("min-h-screen flex items-center justify-center p-6 relative bg-transparent")}>
+          <button 
+            type="button"
+            onClick={async () => {
+              try {
+                await auth.signOut();
+              } catch (e) {
+                console.error("Error signing out on cancel:", e);
+              }
+              setShowGoogleRoleSetup(false);
+              setAuthError("");
+            }} 
+            className="absolute top-6 left-6 p-3 rounded-full bg-white/10 hover:bg-white/20 transition-colors z-10 cursor-pointer"
+          >
+            <ArrowLeft size={24} className={isDark ? "text-white" : "text-gray-900"} />
+          </button>
           <div className={cn("p-10 rounded-[2.5rem] border w-full max-w-md text-left", isDark ? "bg-[#121212] border-white/10" : "bg-white border-gray-200 shadow-xl")}>
             <div className="w-16 h-16 bg-[#FF6D00]/10 rounded-2xl flex items-center justify-center text-[#FF6D00] mb-6">
               <GraduationCap size={32} />
@@ -676,6 +691,23 @@ export default function PathshalaPage() {
                 className="w-full py-4 bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] text-black rounded-2xl font-black text-sm shadow-md hover:scale-[1.02] active:scale-95 transition-all uppercase tracking-wider"
               >
                 Complete Account Sign Up
+              </button>
+
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    await auth.signOut();
+                  } catch (e) {
+                    console.error("Error signing out on cancel:", e);
+                  }
+                  setShowGoogleRoleSetup(false);
+                  setAuthError("");
+                }}
+                className={cn("w-full py-4 border rounded-2xl font-bold text-xs hover:scale-[1.02] active:scale-95 transition-all uppercase tracking-widest cursor-pointer text-center block mt-3", 
+                  isDark ? "bg-white/5 border-white/10 text-gray-400 hover:text-white hover:bg-white/10" : "bg-gray-50 border-gray-200 text-gray-500 hover:text-gray-800 hover:bg-gray-100")}
+              >
+                ← Back to Login
               </button>
             </form>
           </div>
