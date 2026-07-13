@@ -31,16 +31,16 @@
   ],
   "screenshots": [
     {
-      "src": "/logo-512.png",
+      "src": "/screenshot-narrow.png",
       "type": "image/png",
       "sizes": "512x512",
       "form_factor": "narrow",
       "label": "Jainism GPT Mobile"
     },
     {
-      "src": "/logo-512.png",
+      "src": "/screenshot-wide.png",
       "type": "image/png",
-      "sizes": "512x512",
+      "sizes": "1280x698",
       "form_factor": "wide",
       "label": "Jainism GPT Desktop"
     }
