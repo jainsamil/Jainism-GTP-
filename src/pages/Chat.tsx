@@ -43,6 +43,10 @@ export default function ChatPage() {
   const initialPrompt = location.state?.initialPrompt;
 
   const [messages, setMessages] = useState<Message[]>([]);
+  
+  useEffect(() => {
+    setAuthError(null);
+  }, [setAuthError]);
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState<string>('');
   const [sessions, setSessions] = useState<ChatSession[]>([]);
@@ -791,8 +795,15 @@ Please feel free to explore our sacred Aagams, Panchang, and Swadhyay commentary
             </p>
 
             {authError && (
-              <div className="mb-6 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-800 dark:text-amber-300 text-xs font-semibold text-left space-y-2">
-                <p className="font-black flex items-center gap-1.5 uppercase tracking-wider text-amber-700 dark:text-amber-400">
+              <div className="mb-6 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-800 dark:text-amber-300 text-xs font-semibold text-left space-y-2 relative">
+                <button
+                  onClick={() => setAuthError(null)}
+                  className="absolute top-3 right-3 text-amber-800/60 dark:text-amber-300/60 hover:text-amber-800 dark:hover:text-amber-300 p-1 rounded-full hover:bg-amber-500/10 transition-colors"
+                  aria-label="Dismiss Alert"
+                >
+                  <X size={14} />
+                </button>
+                <p className="font-black flex items-center gap-1.5 uppercase tracking-wider text-amber-700 dark:text-amber-400 pr-6">
                   <ShieldAlert size={14} className="shrink-0" />
                   <span>Authentication Notice</span>
                 </p>

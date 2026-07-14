@@ -76,8 +76,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await signInWithPopup(auth, googleProvider);
     } catch (err: any) {
       console.error('Login error:', err);
+      const isWebView = /wv|WebView|Android.*Version\/[0-9.]+/i.test(navigator.userAgent);
+      const isMissingState = err?.message && (err.message.includes('initial state') || err.message.includes('storage') || err.message.includes('popup') || err.message.includes('closed') || err.message.includes('cancelled'));
+      
       if (err?.code === 'auth/unauthorized-domain' || (err?.message && err.message.includes('unauthorized-domain'))) {
         setError(`unauthorized-domain: The domain '${window.location.hostname}' is not authorized in your Firebase project. Please add it in your Firebase Console (Authentication > Settings > Authorized Domains), or use the Pathshala username/password login below.`);
+      } else if (isWebView || isMissingState || err?.code === 'auth/web-storage-unsupported' || err?.code === 'auth/operation-not-supported-in-this-environment') {
+        setError(`PWA/WebView App Alert: आप APK (app24creator) या इन-ऐप WebView का उपयोग कर रहे हैं। Google Sign-In सुरक्षा कारणों से APK/WebView के अंदर सीधे काम नहीं करता है।
+👉 समाधान: कृपया Pathshala में जाकर अपना अकाउंट (Email/Password) रजिस्टर/लॉगिन करें, या फिर ऐप को सामान्य मोबाइल ब्राउज़र (जैसे Google Chrome) में खोलकर Google Sign-In का उपयोग करें।
+(You are in an APK/WebView. Google Auth is blocked here. Please use Pathshala Email/Password login instead, or open in Chrome/Safari browser.)`);
       } else {
         setError(err?.message || 'Authentication failed. Please try again.');
       }
