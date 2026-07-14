@@ -766,7 +766,7 @@ export default function PathshalaPage() {
                 if (e?.code === 'auth/unauthorized-domain' || (e?.message && e.message.includes('unauthorized-domain'))) {
                   setAuthError(`unauthorized-domain: The domain '${window.location.hostname}' is not authorized.`);
                 } else if (isWebView || isMissingState || e?.code === 'auth/web-storage-unsupported' || e?.code === 'auth/operation-not-supported-in-this-environment') {
-                  setAuthError(`आप APK (app24creator) या इन-ऐप WebView का उपयोग कर रहे हैं। Google Sign-In सुरक्षा कारणों से APK/WebView के अंदर सीधे काम नहीं करता है। कृपया नीचे 'Email & Password Register' विकल्प का उपयोग करें जो APK में 100% काम करता है, या फिर इस ऐप को सामान्य मोबाइल ब्राउज़र (जैसे Google Chrome) में खोलें।`);
+                  setAuthError(`आप APK (app24creator) या इन-ऐप WebView का उपयोग कर रहे हैं। Google Sign-In सुरक्षा कारणों से APK/WebView के अंदर सीधे काम नहीं करता है। कृपया नीचे 'Username & Password Register' विकल्प का उपयोग करें जो APK में 100% काम करता है, या फिर इस ऐप को सामान्य मोबाइल ब्राउज़र (जैसे Google Chrome) में खोलें।`);
                 } else {
                   setAuthError(e?.message || "Google authentication failed. Please try again.");
                 }

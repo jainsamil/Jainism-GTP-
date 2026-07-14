@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { onAuthStateChanged, signInWithPopup, signOut, googleProvider, auth, db } from '../firebase';
-import { User } from 'firebase/auth';
+import { User, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 interface AuthContextType {
@@ -8,6 +8,8 @@ interface AuthContextType {
   role: 'admin' | 'teacher' | 'user' | null;
   loading: boolean;
   login: () => Promise<void>;
+  loginWithEmail: (email: string, password: string) => Promise<void>;
+  registerWithEmail: (email: string, password: string, displayName: string) => Promise<void>;
   loginAsDemo: () => Promise<void>;
   logout: () => Promise<void>;
   error: string | null;
@@ -91,6 +93,50 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const loginWithEmail = async (email: string, password: string) => {
+    setError(null);
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+    } catch (err: any) {
+      console.error('Email login error:', err);
+      if (err?.code === 'auth/wrong-password' || err?.code === 'auth/user-not-found' || err?.code === 'auth/invalid-credential') {
+        setError('Incorrect email or password. Please try again.');
+      } else {
+        setError(err?.message || 'Invalid email or password.');
+      }
+      throw err;
+    }
+  };
+
+  const registerWithEmail = async (email: string, password: string, displayName: string) => {
+    setError(null);
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      if (userCredential.user) {
+        await updateProfile(userCredential.user, { displayName });
+        // Create user doc in firestore
+        const defaultRole = (email === 'samiljain0111@gmail.com' || email === 'admin@jainism.com') ? 'admin' : 'user';
+        await setDoc(doc(db, 'users', userCredential.user.uid), {
+          email,
+          displayName,
+          role: defaultRole
+        });
+        setRole(defaultRole);
+        setUser({ ...userCredential.user, displayName });
+      }
+    } catch (err: any) {
+      console.error('Email registration error:', err);
+      if (err?.code === 'auth/email-already-in-use') {
+        setError('This email address is already registered. Please sign in instead.');
+      } else if (err?.code === 'auth/weak-password') {
+        setError('The password is too weak. Please choose a password with at least 6 characters.');
+      } else {
+        setError(err?.message || 'Registration failed. Please try again.');
+      }
+      throw err;
+    }
+  };
+
   const loginAsDemo = async () => {
     setError(null);
     const mockUser = {
@@ -117,7 +163,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, role, loading, login, loginAsDemo, logout, error, setError }}>
+    <AuthContext.Provider value={{ user, role, loading, login, loginWithEmail, registerWithEmail, loginAsDemo, logout, error, setError }}>
       {children}
     </AuthContext.Provider>
   );
