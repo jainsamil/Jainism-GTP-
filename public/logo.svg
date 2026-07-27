@@ -1,97 +1,159 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <defs>
-    <!-- Deep space background -->
-    <radialGradient id="bg-grad" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="#140a00" />
-      <stop offset="100%" stop-color="#050505" />
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a0806" />
+      <stop offset="50%" stop-color="#030202" />
+      <stop offset="100%" stop-color="#0d0905" />
+    </linearGradient>
+
+    <!-- Outer Golden Border Gradient -->
+    <linearGradient id="borderGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffb700" />
+      <stop offset="35%" stop-color="#ff8c00" />
+      <stop offset="70%" stop-color="#ff5500" />
+      <stop offset="100%" stop-color="#ffa000" />
+    </linearGradient>
+
+    <!-- Inner Border Gradient -->
+    <linearGradient id="innerBorderGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffd54f" />
+      <stop offset="100%" stop-color="#ff6f00" />
+    </linearGradient>
+
+    <!-- Sun Disk Gradient -->
+    <radialGradient id="sunGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffe082" />
+      <stop offset="40%" stop-color="#ffb300" />
+      <stop offset="80%" stop-color="#ff6f00" />
+      <stop offset="100%" stop-color="#e65100" />
     </radialGradient>
-    
-    <!-- Outer gold glow -->
-    <radialGradient id="ring-glow" cx="50%" cy="50%" r="48%">
-      <stop offset="70%" stop-color="#FF6D00" stop-opacity="0.1" />
-      <stop offset="90%" stop-color="#FFD54F" stop-opacity="0.4" />
-      <stop offset="100%" stop-color="#FF6D00" stop-opacity="0" />
+
+    <!-- Sun Glow -->
+    <radialGradient id="sunGlow" cx="50%" cy="50%" r="65%">
+      <stop offset="0%" stop-color="#ff9800" stop-opacity="0.6" />
+      <stop offset="50%" stop-color="#ff5722" stop-opacity="0.25" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="0" />
     </radialGradient>
 
-    <!-- Metallic gold border -->
-    <linearGradient id="gold-metallic" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#FFE082" />
-      <stop offset="30%" stop-color="#FFB300" />
-      <stop offset="50%" stop-color="#FF6D00" />
-      <stop offset="70%" stop-color="#FFD54F" />
-      <stop offset="100%" stop-color="#E65100" />
+    <!-- Book Gradient -->
+    <linearGradient id="bookGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffe082" />
+      <stop offset="30%" stop-color="#ffca28" />
+      <stop offset="70%" stop-color="#ffa000" />
+      <stop offset="100%" stop-color="#e65100" />
     </linearGradient>
 
-    <!-- Inner coin/shield fluid shine -->
-    <linearGradient id="coin-body" x1="100%" y1="100%" x2="0%" y2="0%">
-      <stop offset="0%" stop-color="#E65100" />
-      <stop offset="20%" stop-color="#FF6D00" />
-      <stop offset="50%" stop-color="#FFB300" />
-      <stop offset="80%" stop-color="#FFD54F" />
-      <stop offset="100%" stop-color="#FFF8E1" />
+    <!-- Book Inner Shadows/Details -->
+    <linearGradient id="pageDetail" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#fff8e1" stop-opacity="0.9" />
+      <stop offset="50%" stop-color="#ffe082" stop-opacity="0.8" />
+      <stop offset="100%" stop-color="#ffb300" stop-opacity="0.7" />
     </linearGradient>
 
-    <!-- Central star metallic accent -->
-    <linearGradient id="star-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#FFFFFF" />
-      <stop offset="30%" stop-color="#FFD54F" />
-      <stop offset="70%" stop-color="#FF6D00" />
-      <stop offset="100%" stop-color="#000000" />
+    <!-- Text GPT Gradient -->
+    <linearGradient id="gptGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffe082" />
+      <stop offset="50%" stop-color="#ffb300" />
+      <stop offset="100%" stop-color="#ff6f00" />
     </linearGradient>
-    
-    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="15" result="blur" />
-      <feComposite in="SourceGraphic" in2="blur" operator="over" />
-    </filter>
+
+    <!-- Gold Text Accent -->
+    <linearGradient id="subtextGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ffca28" />
+      <stop offset="50%" stop-color="#ffe082" />
+      <stop offset="100%" stop-color="#ffb300" />
+    </linearGradient>
   </defs>
 
-  <!-- Ground context -->
-  <rect width="512" height="512" fill="url(#bg-grad)"/>
+  <!-- Canvas Background -->
+  <rect width="512" height="512" rx="90" fill="url(#bgGrad)" />
 
-  <!-- Halo glow outer ring -->
-  <circle cx="256" cy="256" r="236" fill="url(#ring-glow)" />
+  <!-- Outer Rounded Border (Double Line Effect) -->
+  <rect x="14" y="14" width="484" height="484" rx="76" fill="none" stroke="url(#borderGrad)" stroke-width="6" />
+  <rect x="22" y="22" width="468" height="468" rx="68" fill="none" stroke="url(#innerBorderGrad)" stroke-width="2.5" opacity="0.85" />
 
-  <!-- Outer metallic gold rim -->
-  <circle cx="256" cy="256" r="200" fill="none" stroke="url(#gold-metallic)" stroke-width="12" filter="url(#glow)" />
-  <circle cx="256" cy="256" r="192" fill="none" stroke="#212121" stroke-width="2" />
-
-  <!-- The core golden coin body -->
-  <circle cx="256" cy="256" r="185" fill="url(#coin-body)" stroke="url(#gold-metallic)" stroke-width="4" />
+  <!-- SUN & GLOW -->
+  <!-- Sun Outer Glow -->
+  <circle cx="256" cy="180" r="120" fill="url(#sunGlow)" />
   
-  <!-- Subtle circular sun rays on coin -->
-  <circle cx="256" cy="256" r="160" fill="none" stroke="#FF6D00" stroke-width="1" stroke-dasharray="10 15" opacity="0.4" />
-  <circle cx="256" cy="256" r="140" fill="none" stroke="#FFD54F" stroke-width="2" stroke-dasharray="2 6" opacity="0.6" />
-  <circle cx="256" cy="256" r="120" fill="none" stroke="#E65100" stroke-width="1.5" opacity="0.5" />
+  <!-- Sun Disk -->
+  <circle cx="256" cy="180" r="82" fill="url(#sunGrad)" stroke="#ffd54f" stroke-width="2" />
 
-  <!-- Glowing core aura behind the Star -->
-  <circle cx="256" cy="256" r="60" fill="#FFE082" filter="url(#glow)" opacity="0.8" />
+  <!-- 4-Pointed Star Inside Sun -->
+  <path d="M 256 128 
+           Q 256 180 204 180 
+           Q 256 180 256 232 
+           Q 256 180 308 180 
+           Q 256 180 256 128 Z" 
+        fill="#080503" />
 
-  <!-- 4-Pointed Jainism Star -->
-  <!-- Coordinates mapping beautiful symmetric curve from center outward -->
-  <!-- Path of star: Center (256, 256), Top point (256, 140), Right point (372, 256), Bottom point (256, 372), Left point (140, 256) -->
-  <path d="M 256 130 
-           Q 256 256 382 256 
-           Q 256 256 256 382 
-           Q 256 256 130 256 
-           Q 256 256 256 130 Z" 
-        fill="#050505" 
-        stroke="url(#gold-metallic)" 
-        stroke-width="10" 
-        stroke-linejoin="round"
-        filter="url(#glow)" />
+  <!-- OPEN BOOK (GOLDEN PAGES FANNING UPWARDS) -->
+  <g transform="translate(0, -10)">
+    <!-- Back Page Glow / Layer 3 -->
+    <path d="M 256 295 
+             C 210 240, 140 240, 95 258 
+             C 140 252, 210 252, 256 300 
+             C 302 252, 372 252, 417 258 
+             C 372 240, 302 240, 256 295 Z" 
+          fill="url(#bookGrad)" opacity="0.75" />
 
-  <!-- Star Inner layer for 3D bevel reflection look -->
-  <path d="M 256 142 
-           Q 256 256 370 256 
-           Q 256 256 256 370 
-           Q 256 256 142 256 
-           Q 256 256 256 142 Z" 
-        fill="url(#coin-body)" 
-        stroke="#FFFFFF" 
-        stroke-width="2" 
-        stroke-linejoin="round" />
+    <!-- Page Layer 2 -->
+    <path d="M 256 302 
+             C 210 255, 135 250, 85 272 
+             C 135 264, 210 264, 256 308 
+             C 302 264, 377 264, 427 272 
+             C 377 250, 302 255, 256 302 Z" 
+          fill="url(#bookGrad)" opacity="0.9" />
 
-  <!-- Diamond Sparkle in the very center -->
-  <polygon points="256,236 261,251 276,256 261,261 256,276 251,261 236,256 251,251" fill="#FFFFFF" filter="url(#glow)" />
-  <circle cx="256" cy="256" r="4" fill="#FFFFFF" />
+    <!-- Main Front Pages (Layer 1) -->
+    <!-- Left Wing -->
+    <path d="M 256 312 
+             C 205 270, 130 260, 75 285 
+             C 85 315, 170 318, 256 332 Z" 
+          fill="url(#bookGrad)" />
+    <path d="M 256 312 
+             C 205 270, 130 260, 75 285 
+             C 120 280, 200 288, 256 322 Z" 
+          fill="url(#pageDetail)" opacity="0.6" />
+
+    <!-- Right Wing -->
+    <path d="M 256 312 
+             C 307 270, 382 260, 437 285 
+             C 427 315, 342 318, 256 332 Z" 
+          fill="url(#bookGrad)" />
+    <path d="M 256 312 
+             C 307 270, 382 260, 437 285 
+             C 392 280, 312 288, 256 322 Z" 
+          fill="url(#pageDetail)" opacity="0.6" />
+
+    <!-- Book Center Spine -->
+    <path d="M 256 302 L 256 333" stroke="#e65100" stroke-width="3" stroke-linecap="round" />
+  </g>
+
+  <!-- MAIN TITLE: JAINISM GPT -->
+  <g text-anchor="middle" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif">
+    <!-- "JAINISM" in Bold Crisp White -->
+    <text x="210" y="382" font-size="46" font-weight="900" fill="#ffffff" letter-spacing="1">JAINISM</text>
+    
+    <!-- "GPT" in Bright Golden Orange -->
+    <text x="382" y="382" font-size="46" font-weight="900" fill="url(#gptGrad)" letter-spacing="1">GPT</text>
+  </g>
+
+  <!-- DIVIDER LINE WITH STAR -->
+  <g opacity="0.9">
+    <line x1="105" y1="404" x2="238" y2="404" stroke="url(#subtextGrad)" stroke-width="1.8" />
+    <!-- Center Diamond -->
+    <polygon points="256,399 261,404 256,409 251,404" fill="#ffca28" />
+    <line x1="274" y1="404" x2="407" y2="404" stroke="url(#subtextGrad)" stroke-width="1.8" />
+  </g>
+
+  <!-- SUBTITLE: DIVINE WISDOM • SAMIL JAIN -->
+  <text x="256" y="438" 
+        text-anchor="middle" 
+        font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" 
+        font-size="16" 
+        font-weight="700" 
+        fill="url(#subtextGrad)" 
+        letter-spacing="3.5">DIVINE WISDOM • SAMIL JAIN</text>
 </svg>

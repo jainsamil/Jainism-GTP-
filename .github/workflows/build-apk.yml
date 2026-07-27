@@ -25,13 +25,40 @@ jobs:
       - name: Initialize Web Directory and Build Android
         run: |
           mkdir -p out
-          echo '<html><body><script>window.location.href="https://vercel.app";</script></body></html>' > out/index.html
+          echo '<html><body><h1>Loading Jainism GPT...</h1></body></html>' > out/index.html
           
+          # Install dependencies including capacitor assets generator
           npm install @capacitor/core @capacitor/cli @capacitor/android
+          npm install -D @capacitor/assets
           
           npx cap init "JainismGPT" "com.jainismgpt.app" --web-dir=out
           
+          # Force the live URL to open inside the app shell and allow its sub-routes
+          echo '{"appId":"com.jainismgpt.app","appName":"Jainism GPT","webDir":"out","server":{"url":"https://jainismgpt.vercel.app/","allowNavigation":["jainismgpt.vercel.app","*.vercel.app"]}}' > capacitor.config.json
+          
+          # Locate custom logo in repository for generating launcher icons
+          mkdir -p assets
+          if [ -f "public/logo-512.png" ]; then
+            cp public/logo-512.png assets/icon.png
+          elif [ -f "public/logo.png" ]; then
+            cp public/logo.png assets/icon.png
+          elif [ -f "public/icon.png" ]; then
+            cp public/icon.png assets/icon.png
+          elif [ -f "public/favicon.png" ]; then
+            cp public/favicon.png assets/icon.png
+          elif [ -f "src/assets/logo.png" ]; then
+            cp src/assets/logo.png assets/icon.png
+          else
+            echo "No custom logo found"
+          fi
+          
           npx cap add android
+          
+          # Automatically generate launcher icons using the logo
+          if [ -f "assets/icon.png" ]; then
+            npx capacitor-assets generate --android
+          fi
+          
           npx cap sync
           
           cd android
