@@ -11,56 +11,150 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 24
-
-      - name: Set up JDK 21
+      - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '21'
+          java-version: '17'
 
-      - name: Initialize Web Directory and Build Android
+      - name: Setup Android Project Files
         run: |
-          mkdir -p out
-          echo '<html><head><meta http-equiv="refresh" content="0;url=https://jainismgpt.vercel.app/"></head><body><h1>Loading Jainism GPT...</h1></body></html>' > out/index.html
-          
-          npm install @capacitor/core @capacitor/cli @capacitor/android
-          npm install -D @capacitor/assets
-          
-          npx cap init "Jainism GPT" "com.jainismgpt.app" --web-dir=out
-          
-          # Force internal rendering and navigation for vercel domain
-          echo '{"appId":"com.jainismgpt.app","appName":"Jainism GPT","webDir":"out","server":{"url":"https://jainismgpt.vercel.app/","allowNavigation":["jainismgpt.vercel.app","*.vercel.app","*"]}}' > capacitor.config.json
-          
-          # Create asset folder and check for any custom logo images in the repository
-          mkdir -p assets
-          find . -name "*logo*" -o -name "*icon*" -o -name "*favicon*" | grep -E '\.(png|jpg|jpeg)$' | head -n 1 | xargs -I {} cp {} assets/icon.png
-          
-          # Fallback check if the above generic finder missed it
-          if [ ! -f "assets/icon.png" ] && [ -f "public/logo.png" ]; then
-            cp public/logo.png assets/icon.png
+          mkdir -p android-app/app/src/main/java/com/jainismgpt/app
+          mkdir -p android-app/app/src/main/res/layout
+          mkdir -p android-app/app/src/main/res/values
+          mkdir -p android-app/app/src/main/res/mipmap-xxhdpi
+
+          # 1. settings.gradle
+          echo "include ':app'" > android-app/settings.gradle
+
+          # 2. Root build.gradle
+          cat << 'EOF' > android-app/build.gradle
+          buildscript {
+              repositories { google(); mavenCentral() }
+              dependencies { classpath 'com.android.tools.build:gradle:8.2.2' }
+          }
+          allprojects {
+              repositories { google(); mavenCentral() }
+          }
+          EOF
+
+          # 3. App build.gradle
+          cat << 'EOF' > android-app/app/build.gradle
+          plugins { id 'com.android.application' }
+          android {
+              namespace 'com.jainismgpt.app'
+              compileSdk 34
+              defaultConfig {
+                  applicationId "com.jainismgpt.app"
+                  minSdk 21
+                  targetSdk 34
+                  versionCode 1
+                  versionName "1.0"
+              }
+          }
+          dependencies { implementation 'androidx.appcompat:appcompat:1.6.1' }
+          EOF
+
+          # 4. styles.xml (Forcing Absolute FullScreen and Hiding Status Bar)
+          cat << 'EOF' > android-app/app/src/main/res/values/styles.xml
+          <resources>
+              <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
+                  <item name="android:windowNoTitle">true</item>
+                  <item name="android:windowFullscreen">true</item>
+                  <item name="android:windowActionBar">false</item>
+              </style>
+          </resources>
+          EOF
+
+          # 5. AndroidManifest.xml
+          cat << 'EOF' > android-app/app/src/main/AndroidManifest.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+              <uses-permission android:name="android.permission.INTERNET" />
+              <application
+                  android:allowBackup="true"
+                  android:icon="@mipmap/ic_launcher"
+                  android:label="Jainism GPT"
+                  android:theme="@style/AppTheme"
+                  android:hardwareAccelerated="true"
+                  android:usesCleartextTraffic="true">
+                  <activity android:name=".MainActivity" android:exported="true" android:configChanges="orientation|screenSize">
+                      <intent-filter>
+                          <action android:name="android.intent.action.MAIN" />
+                          <category android:name="android.intent.category.LAUNCHER" />
+                      </intent-filter>
+                  </activity>
+              </application>
+          </manifest>
+          EOF
+
+          # 6. activity_main.xml
+          cat << 'EOF' > android-app/app/src/main/res/layout/activity_main.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+              <WebView android:id="@+id/webview" android:layout_width="match_parent" android:layout_height="match_parent" />
+          </RelativeLayout>
+          EOF
+
+          # 7. MainActivity.java (Immersive Redirection Lock)
+          cat << 'EOF' > android-app/app/src/main/java/com/jainismgpt/app/MainActivity.java
+          package com.jainismgpt.app;
+          import android.os.Bundle;
+          import android.webkit.WebSettings;
+          import android.webkit.WebView;
+          import android.webkit.WebViewClient;
+          import android.webkit.WebChromeClient;
+          import androidx.appcompat.app.AppCompatActivity;
+
+          public class MainActivity extends AppCompatActivity {
+              private WebView myWebView;
+              @Override
+              protected void onCreate(Bundle savedInstanceState) {
+                  super.onCreate(savedInstanceState);
+                  setContentView(R.layout.activity_main);
+                  
+                  myWebView = findViewById(R.id.webview);
+                  WebSettings settings = myWebView.getSettings();
+                  settings.setJavaScriptEnabled(true);
+                  settings.setDomStorageEnabled(true);
+                  settings.setDatabaseEnabled(true);
+                  settings.setLoadsImagesAutomatically(true);
+                  
+                  // Strict internal routing lock
+                  myWebView.setWebViewClient(new WebViewClient() {
+                      @Override
+                      public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                          view.loadUrl(url);
+                          return true;
+                      }
+                  });
+                  myWebView.setWebChromeClient(new WebChromeClient());
+                  myWebView.loadUrl("https://jainismgpt.vercel.app/");
+              }
+              @Override
+              public void onBackPressed() {
+                  if (myWebView.canGoBack()) { myWebView.goBack(); } else { super.onBackPressed(); }
+              }
+          }
+          EOF
+
+          # 8. Logo Insector
+          FOUND_IMAGE=$(find . -name "*logo*" -o -name "*icon*" | grep -E '\.(png|jpg|jpeg)$' | head -n 1)
+          if [ ! -z "$FOUND_IMAGE" ]; then
+              cp "$FOUND_IMAGE" android-app/app/src/main/res/mipmap-xxhdpi/ic_launcher.png
+              echo "Custom icon replaced successfully using $FOUND_IMAGE"
           fi
-          
-          npx cap add android
-          
-          # Enable Cleartext Traffic for native internal webview access
-          sed -i 's/<application/<application android:usesCleartextTraffic="true"/g' android/app/src/main/AndroidManifest.xml
-          
-          # Generate icons if source asset was successfully copied
-          if [ -f "assets/icon.png" ]; then
-            npx capacitor-assets generate --android
-          fi
-          
-          npx cap sync
-          
-          cd android
+
+      - name: Build Native Android APK
+        run: |
+          cd android-app
+          gradle wrapper --gradle-version 8.5
           ./gradlew assembleDebug
 
-      - name: Upload APK Artifact
+      - name: Upload Native APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Jainism-GPT-APK
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: android-app/app/build/outputs/apk/debug/app-debug.apk
