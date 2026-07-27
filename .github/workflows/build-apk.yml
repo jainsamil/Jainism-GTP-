@@ -16,29 +16,24 @@ jobs:
         with:
           node-version: 20
 
-      - name: Set up JDK 17
+      - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '21'
 
       - name: Initialize Web Directory and Build Android
         run: |
-          # Create a dummy or minimal web dir if it doesn't exist to satisfy Capacitor
           mkdir -p out
           echo '<html><body><script>window.location.href="https://vercel.app";</script></body></html>' > out/index.html
           
-          # Install Capacitor and Android platform
           npm install @capacitor/core @capacitor/cli @capacitor/android
           
-          # Initialize Capacitor configuration dynamically
-          npx cap init "Jainism GPT" "com.jainismgpt.app" --web-dir=out
+          npx cap init "JainismGPT" "com.jainismgpt.app" --web-dir=out
           
-          # Add and build Android project
           npx cap add android
           npx cap sync
           
-          # Build the APK using Gradle wrapper inside android folder
           cd android
           ./gradlew assembleDebug
 
