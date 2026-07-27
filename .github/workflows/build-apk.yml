@@ -140,11 +140,29 @@ jobs:
           }
           EOF
 
-          # 8. Logo Insector
-          FOUND_IMAGE=$(find . -name "*logo*" -o -name "*icon*" | grep -E '\.(png|jpg|jpeg)$' | head -n 1)
-          if [ ! -z "$FOUND_IMAGE" ]; then
-              cp "$FOUND_IMAGE" android-app/app/src/main/res/mipmap-xxhdpi/ic_launcher.png
-              echo "Custom icon replaced successfully using $FOUND_IMAGE"
+          # 8. Custom Logo Setup for Android Launcher Icon
+          mkdir -p android-app/app/src/main/res/mipmap-mdpi
+          mkdir -p android-app/app/src/main/res/mipmap-hdpi
+          mkdir -p android-app/app/src/main/res/mipmap-xhdpi
+          mkdir -p android-app/app/src/main/res/mipmap-xxhdpi
+          mkdir -p android-app/app/src/main/res/mipmap-xxxhdpi
+
+          LOGO_SRC=""
+          if [ -f "public/logo-512.png" ]; then
+              LOGO_SRC="public/logo-512.png"
+          elif [ -f "public/logo.png" ]; then
+              LOGO_SRC="public/logo.png"
+          elif [ -f "public/icon.png" ]; then
+              LOGO_SRC="public/icon.png"
+          fi
+
+          if [ ! -z "$LOGO_SRC" ]; then
+              cp "$LOGO_SRC" android-app/app/src/main/res/mipmap-mdpi/ic_launcher.png
+              cp "$LOGO_SRC" android-app/app/src/main/res/mipmap-hdpi/ic_launcher.png
+              cp "$LOGO_SRC" android-app/app/src/main/res/mipmap-xhdpi/ic_launcher.png
+              cp "$LOGO_SRC" android-app/app/src/main/res/mipmap-xxhdpi/ic_launcher.png
+              cp "$LOGO_SRC" android-app/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
+              echo "Custom Jainism GPT logo copied to all mipmap folders from $LOGO_SRC"
           fi
 
       - name: Build Native Android APK
