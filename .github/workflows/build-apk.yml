@@ -25,36 +25,31 @@ jobs:
       - name: Initialize Web Directory and Build Android
         run: |
           mkdir -p out
-          echo '<html><body><h1>Loading Jainism GPT...</h1></body></html>' > out/index.html
+          echo '<html><head><meta http-equiv="refresh" content="0;url=https://jainismgpt.vercel.app/"></head><body><h1>Loading Jainism GPT...</h1></body></html>' > out/index.html
           
-          # Install dependencies including capacitor assets generator
           npm install @capacitor/core @capacitor/cli @capacitor/android
           npm install -D @capacitor/assets
           
-          npx cap init "JainismGPT" "com.jainismgpt.app" --web-dir=out
+          npx cap init "Jainism GPT" "com.jainismgpt.app" --web-dir=out
           
-          # Force the live URL to open inside the app shell and allow its sub-routes
-          echo '{"appId":"com.jainismgpt.app","appName":"Jainism GPT","webDir":"out","server":{"url":"https://jainismgpt.vercel.app/","allowNavigation":["jainismgpt.vercel.app","*.vercel.app"]}}' > capacitor.config.json
+          # Force internal rendering and navigation for vercel domain
+          echo '{"appId":"com.jainismgpt.app","appName":"Jainism GPT","webDir":"out","server":{"url":"https://jainismgpt.vercel.app/","allowNavigation":["jainismgpt.vercel.app","*.vercel.app","*"]}}' > capacitor.config.json
           
-          # Locate custom logo in repository for generating launcher icons
+          # Create asset folder and check for any custom logo images in the repository
           mkdir -p assets
-          if [ -f "public/logo-512.png" ]; then
-            cp public/logo-512.png assets/icon.png
-          elif [ -f "public/logo.png" ]; then
+          find . -name "*logo*" -o -name "*icon*" -o -name "*favicon*" | grep -E '\.(png|jpg|jpeg)$' | head -n 1 | xargs -I {} cp {} assets/icon.png
+          
+          # Fallback check if the above generic finder missed it
+          if [ ! -f "assets/icon.png" ] && [ -f "public/logo.png" ]; then
             cp public/logo.png assets/icon.png
-          elif [ -f "public/icon.png" ]; then
-            cp public/icon.png assets/icon.png
-          elif [ -f "public/favicon.png" ]; then
-            cp public/favicon.png assets/icon.png
-          elif [ -f "src/assets/logo.png" ]; then
-            cp src/assets/logo.png assets/icon.png
-          else
-            echo "No custom logo found"
           fi
           
           npx cap add android
           
-          # Automatically generate launcher icons using the logo
+          # Enable Cleartext Traffic for native internal webview access
+          sed -i 's/<application/<application android:usesCleartextTraffic="true"/g' android/app/src/main/AndroidManifest.xml
+          
+          # Generate icons if source asset was successfully copied
           if [ -f "assets/icon.png" ]; then
             npx capacitor-assets generate --android
           fi
