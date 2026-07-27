@@ -22,10 +22,7 @@ export default function UnauthorizedDomainModal() {
     }
 
     const handleUnauthorizedDomain = () => {
-      const isSuppressed = localStorage.getItem('jainism_suppress_auth_notice');
-      if (!isSuppressed) {
-        setIsOpen(true);
-      }
+      setIsOpen(true);
     };
 
     window.addEventListener('firebase-auth-unauthorized-domain', handleUnauthorizedDomain);
@@ -127,24 +124,6 @@ export default function UnauthorizedDomainModal() {
             Click <strong className="text-gray-800 dark:text-white">Save</strong> and refresh this page.
           </li>
         </ol>
-
-        <div className="flex items-center gap-2 mb-6 text-xs text-gray-500 dark:text-gray-400 bg-amber-500/5 dark:bg-amber-500/5 p-3 rounded-xl border border-amber-500/10">
-          <input
-            type="checkbox"
-            id="suppressNotice"
-            onChange={(e) => {
-              if (e.target.checked) {
-                localStorage.setItem('jainism_suppress_auth_notice', 'true');
-              } else {
-                localStorage.removeItem('jainism_suppress_auth_notice');
-              }
-            }}
-            className="rounded border-gray-300 dark:border-zinc-700 text-orange-600 focus:ring-orange-500 bg-transparent cursor-pointer"
-          />
-          <label htmlFor="suppressNotice" className="cursor-pointer select-none">
-            Don't show this Firebase notice again / भविष्य में यह नोटिस न दिखाएं
-          </label>
-        </div>
 
         <div className="flex flex-col sm:flex-row gap-3">
           <a

@@ -731,15 +731,8 @@ export default function PathshalaPage() {
           <p className="text-gray-500 mb-8">{isLoginMode ? 'Please login to access the virtual academy.' : 'Create a new account to join.'}</p>
           
           {authError && (
-            <div className="mb-6 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-800 dark:text-amber-300 text-xs font-semibold text-left space-y-1.5 relative">
-              <button
-                onClick={() => setAuthError('')}
-                className="absolute top-3 right-3 text-amber-800/60 dark:text-amber-300/60 hover:text-amber-800 dark:hover:text-amber-300 p-1 rounded-full hover:bg-amber-500/10 transition-colors"
-                aria-label="Dismiss Alert"
-              >
-                <X size={14} />
-              </button>
-              <p className="font-black flex items-center gap-1.5 uppercase tracking-wider text-amber-700 dark:text-amber-400 pr-6">
+            <div className="mb-6 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-800 dark:text-amber-300 text-xs font-semibold text-left space-y-1.5">
+              <p className="font-black flex items-center gap-1.5 uppercase tracking-wider text-amber-700 dark:text-amber-400">
                 <ShieldAlert size={14} className="shrink-0" />
                 <span>Authentication Notice</span>
               </p>
@@ -760,15 +753,10 @@ export default function PathshalaPage() {
                 await signInWithPopup(auth, googleProvider);
               } catch (e: any) {
                 console.error("Google login failed", e);
-                const isWebView = /wv|WebView|Android.*Version\/[0-9.]+/i.test(navigator.userAgent);
-                const isMissingState = e?.message && (e.message.includes('initial state') || e.message.includes('storage') || e.message.includes('popup') || e.message.includes('closed') || e.message.includes('cancelled'));
-
                 if (e?.code === 'auth/unauthorized-domain' || (e?.message && e.message.includes('unauthorized-domain'))) {
                   setAuthError(`unauthorized-domain: The domain '${window.location.hostname}' is not authorized.`);
-                } else if (isWebView || isMissingState || e?.code === 'auth/web-storage-unsupported' || e?.code === 'auth/operation-not-supported-in-this-environment') {
-                  setAuthError(`आप APK (app24creator) या इन-ऐप WebView का उपयोग कर रहे हैं। Google Sign-In सुरक्षा कारणों से APK/WebView के अंदर सीधे काम नहीं करता है। कृपया नीचे 'Username & Password Register' विकल्प का उपयोग करें जो APK में 100% काम करता है, या फिर इस ऐप को सामान्य मोबाइल ब्राउज़र (जैसे Google Chrome) में खोलें।`);
                 } else {
-                  setAuthError(e?.message || "Google authentication failed. Please try again.");
+                  setAuthError("Google authentication failed. Please try again.");
                 }
               }
             }}
