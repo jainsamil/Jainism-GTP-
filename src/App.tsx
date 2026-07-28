@@ -53,6 +53,40 @@ function Layout({ children }: { children: React.ReactNode }) {
   const isChat = location.pathname === '/chat';
   const isAdmin = location.pathname === '/admin';
 
+  // Mobile Android keyboard viewport reset to prevent layout sticking/shifting
+  useEffect(() => {
+    const handleFocusOut = (e: FocusEvent) => {
+      if (
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement
+      ) {
+        window.scrollTo(0, 0);
+        document.body.scrollTop = 0;
+        document.documentElement.scrollTop = 0;
+      }
+    };
+
+    const handleVisualViewportResize = () => {
+      if (window.scrollY !== 0) {
+        window.scrollTo(0, 0);
+      }
+    };
+
+    window.addEventListener('focusout', handleFocusOut);
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', handleVisualViewportResize);
+      window.visualViewport.addEventListener('scroll', handleVisualViewportResize);
+    }
+
+    return () => {
+      window.removeEventListener('focusout', handleFocusOut);
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener('resize', handleVisualViewportResize);
+        window.visualViewport.removeEventListener('scroll', handleVisualViewportResize);
+      }
+    };
+  }, []);
+
   const navItems = [
     { icon: Home, label: 'Home', path: '/' },
     { icon: MessageSquare, label: 'Chat', path: '/chat' },

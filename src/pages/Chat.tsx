@@ -6,7 +6,7 @@ import {
   Globe, ArrowLeft, FileText, Menu, Trash2, MessageSquare, PlusCircle, 
   LogOut, ShieldAlert, User, ShieldCheck, Languages, Compass, Music,
   Cpu, RefreshCw, Zap, CheckCircle2, Sliders, Activity, Eye, ClipboardCheck, Radio, Wifi,
-  Edit, Check
+  Edit, Check, Copy
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import Markdown from 'react-markdown';
@@ -57,6 +57,31 @@ export default function ChatPage() {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [speechError, setSpeechError] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
+
+  const handleCopyMessage = (msgId: string, text: string) => {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).catch(() => {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+      });
+    } else {
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textArea);
+    }
+    setCopiedMessageId(msgId);
+    setTimeout(() => {
+      setCopiedMessageId(null);
+    }, 2000);
+  };
 
   // New Jainism GPT Live Mode Voice-to-Voice States
   const [isLiveMode, setIsLiveMode] = useState(false);
@@ -1138,23 +1163,24 @@ Please feel free to explore our sacred Aagams, Panchang, and Swadhyay commentary
                           className="text-[10px] uppercase tracking-wider font-extrabold text-gray-400 hover:text-[#FF8A65] flex items-center gap-1.5 transition-colors cursor-pointer"
                         >
                           {isSpeaking ? <VolumeX size={12} className="text-[#FF1744] animate-pulse" /> : <Volume2 size={12} />} 
-                          {isSpeaking ? 'Stop' : 'Listen'}
+                          {isSpeaking ? (language === 'hi' ? 'रोकें' : 'Stop') : (language === 'hi' ? 'सुनें' : 'Listen')}
                         </button>
                         <button
-                          onClick={() => handleStartEdit(msg)}
-                          className="text-[10px] uppercase tracking-wider font-extrabold text-gray-400 hover:text-[#FF8A65] flex items-center gap-1 transition-colors cursor-pointer"
-                          title={language === 'hi' ? 'संदेश सुधारें' : 'Edit message'}
+                          onClick={() => handleCopyMessage(msg.id, msg.text)}
+                          className="text-[10px] uppercase tracking-wider font-extrabold text-gray-400 hover:text-[#FF8A65] flex items-center gap-1.5 transition-colors cursor-pointer"
+                          title={language === 'hi' ? 'उत्तर कॉपी करें' : 'Copy response'}
                         >
-                          <Edit size={11} />
-                          {language === 'hi' ? 'सुधारें' : 'Edit'}
-                        </button>
-                        <button
-                          onClick={() => handleDeleteMessage(msg.id)}
-                          className="text-[10px] uppercase tracking-wider font-extrabold text-gray-400 hover:text-[#FF1744] flex items-center gap-1 transition-colors cursor-pointer"
-                          title={language === 'hi' ? 'संदेश हटाएं' : 'Delete message'}
-                        >
-                          <Trash2 size={11} />
-                          {language === 'hi' ? 'हटाएं' : 'Delete'}
+                          {copiedMessageId === msg.id ? (
+                            <>
+                              <Check size={12} className="text-emerald-500" />
+                              <span className="text-emerald-500 font-bold">{language === 'hi' ? 'कॉपी हो गया' : 'Copied!'}</span>
+                            </>
+                          ) : (
+                            <>
+                              <Copy size={12} />
+                              <span>{language === 'hi' ? 'कॉपी करें' : 'Copy'}</span>
+                            </>
+                          )}
                         </button>
                       </div>
                     )
@@ -1525,13 +1551,25 @@ Please feel free to explore our sacred Aagams, Panchang, and Swadhyay commentary
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
+            onFocus={() => {
+              setTimeout(() => {
+                messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+              }, 300);
+            }}
+            onBlur={() => {
+              setTimeout(() => {
+                window.scrollTo(0, 0);
+                document.body.scrollTop = 0;
+                document.documentElement.scrollTop = 0;
+              }, 100);
+            }}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
                 handleSend();
               }
             }}
-            placeholder="Ask anything about Jainism..."
+            placeholder={language === 'hi' ? 'जैन धर्म के बारे में कुछ भी पूछें...' : 'Ask anything about Jainism...'}
             className="flex-1 bg-transparent border-none focus:ring-0 resize-none max-h-32 min-h-[44px] py-3 px-2 text-base text-gray-900 dark:text-gray-200 placeholder:text-gray-500 focus:outline-none"
             rows={1}
             disabled={isLoading}
