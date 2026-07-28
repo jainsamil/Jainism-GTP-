@@ -1,5 +1,13 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider, signInWithPopup as fbSignInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
+import { 
+  getAuth, 
+  GoogleAuthProvider, 
+  signInWithPopup as fbSignInWithPopup, 
+  signInWithRedirect, 
+  getRedirectResult, 
+  signOut, 
+  onAuthStateChanged 
+} from 'firebase/auth';
 import { getFirestore, doc, getDocFromServer, initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from 'firebase/firestore';
 import firebaseConfig from '../firebase-applet-config.json';
 
@@ -10,7 +18,7 @@ export const auth = getAuth(app);
 let firestoreInstance;
 try {
   firestoreInstance = initializeFirestore(app, {
-    localCache: persistentLocalCache({tabManager: persistentMultipleTabManager()})
+    localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
   }, firebaseConfig.firestoreDatabaseId);
 } catch (e) {
   console.warn("Offline persistence not supported in this browser environment, falling back to default.", e);
@@ -19,6 +27,20 @@ try {
 export const db = firestoreInstance;
 
 export const googleProvider = new GoogleAuthProvider();
+googleProvider.setCustomParameters({
+  prompt: 'select_account'
+});
+
+// Automatic detection for Android WebView or embedded browser contexts
+export const isWebView = (): boolean => {
+  if (typeof window === 'undefined') return false;
+  const ua = navigator.userAgent || '';
+  const isAndroid = /Android/i.test(ua);
+  const isWv = /wv/i.test(ua) || /Version\/[0-9]\.[0-9]/i.test(ua);
+  const isCapacitor = !!(window as any).Capacitor || !!(window as any).Android;
+  const isEmbedded = isAndroid && (isWv || /fbav|instagram|line|microMessenger|twitter|snapchat/i.test(ua));
+  return isCapacitor || isEmbedded;
+};
 
 // Test connection
 async function testConnection() {
@@ -33,6 +55,9 @@ async function testConnection() {
 testConnection();
 
 export const signInWithPopup = async (...args: Parameters<typeof fbSignInWithPopup>) => {
+  if (isWebView()) {
+    return await signInWithRedirect(auth, googleProvider);
+  }
   try {
     return await fbSignInWithPopup(...args);
   } catch (error: any) {
@@ -48,4 +73,5 @@ export const signInWithPopup = async (...args: Parameters<typeof fbSignInWithPop
   }
 };
 
-export { signOut, onAuthStateChanged };
+export { signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged };
+

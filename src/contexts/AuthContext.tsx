@@ -1,6 +1,15 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { onAuthStateChanged, signInWithPopup, signOut, googleProvider, auth, db } from '../firebase';
-import { User } from 'firebase/auth';
+import { 
+  onAuthStateChanged, 
+  signInWithPopup, 
+  signInWithRedirect, 
+  getRedirectResult, 
+  signOut, 
+  googleProvider, 
+  auth, 
+  db, 
+  isWebView 
+} from '../firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 interface AuthContextType {
@@ -22,6 +31,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Sync user profile with Firestore database
+  const syncUserProfile = async (currentUser: any) => {
+    try {
+      const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+      if (userDoc.exists()) {
+        setRole(userDoc.data().role);
+      } else {
+        const defaultRole = (currentUser.email === 'samiljain0111@gmail.com' || currentUser.email === 'admin@jainism.com') ? 'admin' : 'user';
+        await setDoc(doc(db, 'users', currentUser.uid), {
+          email: currentUser.email,
+          displayName: currentUser.displayName,
+          role: defaultRole
+        });
+        setRole(defaultRole);
+      }
+    } catch (e) {
+      console.error('Error fetching/creating user profile:', e);
+    }
+  };
+
   useEffect(() => {
     // Check if demo user was active
     const savedDemo = localStorage.getItem('jainism_demo_user');
@@ -37,6 +66,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     }
 
+    // Process redirect result if coming back from OAuth redirect (e.g., inside Android WebView)
+    getRedirectResult(auth)
+      .then(async (result) => {
+        if (result?.user) {
+          setUser(result.user);
+          await syncUserProfile(result.user);
+        }
+      })
+      .catch((err) => {
+        console.error('Redirect auth result error:', err);
+        if (err?.code === 'auth/unauthorized-domain' || (err?.message && err.message.includes('unauthorized-domain'))) {
+          setError(`unauthorized-domain: The domain '${window.location.hostname}' is not authorized in your Firebase project. Please add it in your Firebase Console (Authentication > Settings > Authorized Domains).`);
+        } else if (err?.code !== 'auth/popup-closed-by-user') {
+          setError(err?.message || 'Authentication failed. Please try again.');
+        }
+      });
+
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       // If a demo user is already set, do not override it with a null auth state on reload
       const isDemoActive = localStorage.getItem('jainism_demo_user');
@@ -47,20 +93,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       setUser(currentUser);
       if (currentUser) {
-        // Check role in Firestore
-        const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
-        if (userDoc.exists()) {
-          setRole(userDoc.data().role);
-        } else {
-          // Create user doc if not exists
-          const defaultRole = (currentUser.email === 'samiljain0111@gmail.com' || currentUser.email === 'admin@jainism.com') ? 'admin' : 'user';
-          await setDoc(doc(db, 'users', currentUser.uid), {
-            email: currentUser.email,
-            displayName: currentUser.displayName,
-            role: defaultRole
-          });
-          setRole(defaultRole);
-        }
+        await syncUserProfile(currentUser);
       } else {
         setRole(null);
       }
@@ -73,11 +106,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async () => {
     setError(null);
     try {
-      await signInWithPopup(auth, googleProvider);
+      if (isWebView()) {
+        // WebView mode: Use redirect flow to avoid popup window sessionStorage isolation
+        await signInWithRedirect(auth, googleProvider);
+      } else {
+        // Standard browser mode: Use popup flow
+        await signInWithPopup(auth, googleProvider);
+      }
     } catch (err: any) {
       console.error('Login error:', err);
       if (err?.code === 'auth/unauthorized-domain' || (err?.message && err.message.includes('unauthorized-domain'))) {
-        setError(`unauthorized-domain: The domain '${window.location.hostname}' is not authorized in your Firebase project. Please add it in your Firebase Console (Authentication > Settings > Authorized Domains), or use the Pathshala username/password login below.`);
+        setError(`unauthorized-domain: The domain '${window.location.hostname}' is not authorized in your Firebase project. Please add it in your Firebase Console (Authentication > Settings > Authorized Domains).`);
       } else {
         setError(err?.message || 'Authentication failed. Please try again.');
       }
