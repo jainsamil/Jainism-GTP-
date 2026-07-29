@@ -6,7 +6,7 @@ import {
   Globe, ArrowLeft, FileText, Menu, Trash2, MessageSquare, PlusCircle, 
   LogOut, ShieldAlert, User, ShieldCheck, Languages, Compass, Music,
   Cpu, RefreshCw, Zap, CheckCircle2, Sliders, Activity, Eye, ClipboardCheck, Radio, Wifi,
-  Edit, Check, Copy
+  Edit, Check, Copy, CheckSquare, Square
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import Markdown from 'react-markdown';
@@ -58,6 +58,57 @@ export default function ChatPage() {
   const [speechError, setSpeechError] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
+
+  // Multi-select and chat deletion states
+  const [isSelectMode, setIsSelectMode] = useState(false);
+  const [selectedMessageIds, setSelectedMessageIds] = useState<Set<string>>(new Set());
+  const [showClearChatModal, setShowClearChatModal] = useState(false);
+
+  const toggleSelectMode = () => {
+    setIsSelectMode((prev) => !prev);
+    setSelectedMessageIds(new Set());
+  };
+
+  const toggleMessageSelection = (msgId: string) => {
+    setSelectedMessageIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(msgId)) {
+        next.delete(msgId);
+      } else {
+        next.add(msgId);
+      }
+      return next;
+    });
+  };
+
+  const handleSelectAllMessages = () => {
+    if (selectedMessageIds.size === messages.length) {
+      setSelectedMessageIds(new Set());
+    } else {
+      setSelectedMessageIds(new Set(messages.map(m => m.id)));
+    }
+  };
+
+  const handleDeleteSelectedMessages = async () => {
+    if (selectedMessageIds.size === 0) return;
+    const updated = messages.filter(msg => !selectedMessageIds.has(msg.id));
+    setMessages(updated);
+    setSelectedMessageIds(new Set());
+    setIsSelectMode(false);
+    if (currentSessionId) {
+      await saveSessionToFirestore(currentSessionId, updated);
+    }
+  };
+
+  const handleClearCurrentChat = async () => {
+    setMessages([]);
+    setIsSelectMode(false);
+    setSelectedMessageIds(new Set());
+    setShowClearChatModal(false);
+    if (currentSessionId) {
+      await saveSessionToFirestore(currentSessionId, []);
+    }
+  };
 
   const handleCopyMessage = (msgId: string, text: string) => {
     if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -986,15 +1037,42 @@ Please feel free to explore our sacred Aagams, Panchang, and Swadhyay commentary
         </div>
       </div>
 
-      <header className="flex items-center justify-between px-6 py-4 bg-white/80 dark:bg-[#0A0A0A]/80 backdrop-blur-2xl border-b border-gray-200 dark:border-white/10 sticky top-0 z-10 shadow-[0_4px_30px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
-        <div className="flex items-center gap-4">
-          <button onClick={() => window.history.back()} className="text-gray-500 hover:text-[#FF6D00] dark:text-gray-400 dark:hover:text-[#FF6D00] transition-colors drop-shadow-[0_0_5px_rgba(255,109,0,0.5)]">
-            <ArrowLeft size={24} />
+      <header className="shrink-0 flex items-center justify-between px-4 sm:px-6 py-3.5 bg-white/80 dark:bg-[#0A0A0A]/80 backdrop-blur-2xl border-b border-gray-200 dark:border-white/10 z-20 shadow-[0_4px_30px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
+        <div className="flex items-center gap-3">
+          <button onClick={() => window.history.back()} className="text-gray-500 hover:text-[#FF6D00] dark:text-gray-400 dark:hover:text-[#FF6D00] transition-colors drop-shadow-[0_0_5px_rgba(255,109,0,0.5)] cursor-pointer">
+            <ArrowLeft size={22} />
           </button>
-          <h1 className="text-xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] drop-shadow-[0_0_10px_rgba(255,109,0,0.5)]">JAINISM GPT</h1>
+          <h1 className="text-lg sm:text-xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] drop-shadow-[0_0_10px_rgba(255,109,0,0.5)]">JAINISM GPT</h1>
         </div>
         
         <div className="flex items-center gap-2">
+          {messages.length > 0 && (
+            <>
+              <button
+                onClick={toggleSelectMode}
+                className={cn(
+                  "flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer border",
+                  isSelectMode 
+                    ? "bg-[#FF6D00] text-white border-[#FF6D00] shadow-sm" 
+                    : "bg-gray-100 dark:bg-white/5 border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-300 hover:text-[#FF6D00]"
+                )}
+                title={language === 'hi' ? 'संदेश चुनें' : 'Select messages'}
+              >
+                <CheckSquare size={14} />
+                <span className="hidden sm:inline">{isSelectMode ? (language === 'hi' ? 'रद्द' : 'Cancel') : (language === 'hi' ? 'चुनें' : 'Select')}</span>
+              </button>
+
+              <button
+                onClick={() => setShowClearChatModal(true)}
+                className="flex items-center gap-1 px-2.5 py-1.5 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-600 dark:text-red-400 rounded-xl text-xs font-black transition-all cursor-pointer"
+                title={language === 'hi' ? 'पूरी बातचीत साफ़ करें' : 'Clear Chat History'}
+              >
+                <Trash2 size={14} />
+                <span className="hidden sm:inline">{language === 'hi' ? 'साफ़ करें' : 'Clear'}</span>
+              </button>
+            </>
+          )}
+
           {/* Glowing Live Convo Trigger */}
           <button
             onClick={() => setIsLiveMode(true)}
@@ -1002,14 +1080,53 @@ Please feel free to explore our sacred Aagams, Panchang, and Swadhyay commentary
             title="Start Live Voice Interaction"
           >
             <Radio size={14} className="text-white animate-bounce" />
-            Live Convo
+            <span className="hidden xs:inline">Live</span>
           </button>
 
-          <button onClick={() => setShowSidebar(true)} className="text-gray-550 hover:text-[#FF6D00] dark:text-gray-400 dark:hover:text-[#FF6D00] transition-colors p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-white/5">
-            <Menu size={24} />
+          <button onClick={() => setShowSidebar(true)} className="text-gray-550 hover:text-[#FF6D00] dark:text-gray-400 dark:hover:text-[#FF6D00] transition-colors p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-white/5 cursor-pointer">
+            <Menu size={22} />
           </button>
         </div>
       </header>
+
+      {/* Multi-Select Action Banner */}
+      {isSelectMode && messages.length > 0 && (
+        <div className="shrink-0 bg-gradient-to-r from-[#FF6D00]/15 via-orange-500/10 to-[#FF8A65]/15 border-b border-[#FF6D00]/30 px-4 py-2.5 flex items-center justify-between backdrop-blur-md z-10 animate-in fade-in duration-200">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleSelectAllMessages}
+              className="flex items-center gap-1.5 text-xs font-black text-[#FF6D00] dark:text-[#FF8A65] hover:underline cursor-pointer"
+            >
+              <CheckSquare size={16} />
+              <span>
+                {selectedMessageIds.size === messages.length 
+                  ? (language === 'hi' ? 'सभी अन-चुनें' : 'Deselect All') 
+                  : (language === 'hi' ? 'सब चुनें' : 'Select All')}
+              </span>
+            </button>
+            <span className="text-xs font-extrabold text-gray-700 dark:text-gray-300">
+              ({selectedMessageIds.size} {language === 'hi' ? 'चुने गए' : 'selected'})
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleDeleteSelectedMessages}
+              disabled={selectedMessageIds.size === 0}
+              className="px-3.5 py-1.5 bg-red-600 hover:bg-red-700 disabled:opacity-40 text-white text-xs font-black rounded-xl transition-all flex items-center gap-1.5 shadow-md cursor-pointer"
+            >
+              <Trash2 size={13} />
+              <span>{language === 'hi' ? `हटाएं (${selectedMessageIds.size})` : `Delete (${selectedMessageIds.size})`}</span>
+            </button>
+            <button
+              onClick={toggleSelectMode}
+              className="px-3 py-1.5 bg-gray-200 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-xs font-black rounded-xl hover:bg-gray-300 dark:hover:bg-white/20 transition-all cursor-pointer"
+            >
+              {language === 'hi' ? 'रद्द' : 'Cancel'}
+            </button>
+          </div>
+        </div>
+      )}
 
       {messages.length === 0 ? (
         <div className="flex-1 flex flex-col items-center justify-center p-6 text-center relative overflow-y-auto">
@@ -1075,118 +1192,158 @@ Please feel free to explore our sacred Aagams, Panchang, and Swadhyay commentary
           </div>
         </div>
       ) : (
-        <main className="flex-1 overflow-y-auto p-4 space-y-6">
+        <main className="flex-1 overflow-y-auto p-4 space-y-6 overscroll-contain">
           {messages.map((msg) => (
             <div
               key={msg.id}
+              onClick={() => {
+                if (isSelectMode) toggleMessageSelection(msg.id);
+              }}
               className={cn(
-                "flex flex-col max-w-[85%]",
-                msg.role === 'user' ? "ml-auto items-end" : "mr-auto items-start"
+                "flex items-start gap-2.5 max-w-[92%] sm:max-w-[85%] transition-all",
+                msg.role === 'user' ? "ml-auto flex-row-reverse" : "mr-auto flex-row",
+                isSelectMode && "cursor-pointer hover:opacity-90"
               )}
             >
-              {editingMessageId === msg.id ? (
-                <div className="w-full min-w-[280px] sm:min-w-[400px] bg-white dark:bg-[#121212]/90 border border-[#FF8A65] rounded-3xl p-3.5 shadow-lg flex flex-col gap-2 backdrop-blur-md">
-                  <textarea
-                    value={editValue}
-                    onChange={(e) => setEditValue(e.target.value)}
-                    className="w-full min-h-[85px] bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-2xl p-3 text-sm text-gray-905 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#FF8A65]/50 resize-y font-semibold"
-                    placeholder={language === 'hi' ? "संदेश सुधारें..." : "Edit message..."}
-                    autoFocus
-                  />
-                  <div className="flex justify-end gap-2">
-                    <button
-                      onClick={() => setEditingMessageId(null)}
-                      className="px-3 py-1.5 bg-gray-100 dark:bg-white/5 text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white text-xs font-black rounded-xl transition-all"
-                    >
-                      {language === 'hi' ? 'रद्द करें' : 'Cancel'}
-                    </button>
-                    <button
-                      onClick={() => handleSaveEdit(msg.id)}
-                      className="px-3.5 py-1.5 bg-gradient-to-r from-[#FF6D00] to-[#FF8A65] text-white text-xs font-black rounded-xl transition-all flex items-center gap-1 shadow-sm hover:opacity-90 cursor-pointer"
-                    >
-                      <Check size={12} />
-                      {language === 'hi' ? 'सुरक्षित करें' : 'Save'}
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <>
-                  <div
-                    className={cn(
-                       "px-5 py-3.5 rounded-3xl shadow-sm backdrop-blur-md",
-                       msg.role === 'user'
-                         ? "bg-gradient-to-br from-[#E65100] to-[#FF8A65] text-white rounded-tr-sm shadow-[0_0_20px_rgba(230,81,0,0.4)] border border-[#FF8A65]/50"
-                         : "bg-white dark:bg-[#121212]/80 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-200 rounded-tl-sm shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.3)]"
-                    )}
-                  >
-                    {msg.role === 'user' ? (
-                      <p className="whitespace-pre-wrap leading-relaxed font-semibold">{msg.text}</p>
-                    ) : (
-                      <div className="prose prose-sm dark:prose-invert max-w-none prose-p:leading-relaxed prose-a:text-[#FF8A65] prose-strong:text-gray-900 dark:prose-strong:text-white">
-                        {msg.text ? (
-                          <Markdown>{msg.text}</Markdown>
-                        ) : (
-                          <div className="flex items-center gap-1 h-5">
-                            <span className="w-1.5 h-1.5 bg-[#FF8A65] rounded-full animate-bounce [animation-delay:-0.3s] shadow-[0_0_5px_rgba(255,138,101,0.8)]"></span>
-                            <span className="w-1.5 h-1.5 bg-[#FF8A65] rounded-full animate-bounce [animation-delay:-0.15s] shadow-[0_0_5px_rgba(255,138,101,0.8)]"></span>
-                            <span className="w-1.5 h-1.5 bg-[#FF8A65] rounded-full animate-bounce shadow-[0_0_5px_rgba(255,138,101,0.8)]"></span>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
+              {/* Checkbox in select mode */}
+              {isSelectMode && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleMessageSelection(msg.id);
+                  }}
+                  className="mt-2.5 p-1 rounded-full text-gray-400 hover:text-[#FF6D00] transition-colors cursor-pointer shrink-0"
+                >
+                  {selectedMessageIds.has(msg.id) ? (
+                    <CheckCircle2 size={22} className="text-[#FF6D00] fill-[#FF6D00]/20" />
+                  ) : (
+                    <div className="w-5.5 h-5.5 rounded-full border-2 border-gray-400 dark:border-gray-500 hover:border-[#FF6D00]" />
+                  )}
+                </button>
+              )}
 
-                  {msg.role === 'user' ? (
-                    <div className="flex items-center gap-3 mt-1.5 px-2">
+              <div
+                className={cn(
+                  "flex flex-col flex-1 min-w-0",
+                  msg.role === 'user' ? "items-end" : "items-start"
+                )}
+              >
+                {editingMessageId === msg.id ? (
+                  <div className="w-full min-w-[280px] sm:min-w-[400px] bg-white dark:bg-[#121212]/90 border border-[#FF8A65] rounded-3xl p-3.5 shadow-lg flex flex-col gap-2 backdrop-blur-md">
+                    <textarea
+                      value={editValue}
+                      onChange={(e) => setEditValue(e.target.value)}
+                      className="w-full min-h-[85px] bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-2xl p-3 text-sm text-gray-905 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#FF8A65]/50 resize-y font-semibold"
+                      placeholder={language === 'hi' ? "संदेश सुधारें..." : "Edit message..."}
+                      autoFocus
+                    />
+                    <div className="flex justify-end gap-2">
                       <button
-                        onClick={() => handleStartEdit(msg)}
-                        className="text-[10px] uppercase tracking-wider font-extrabold text-gray-400 hover:text-[#FF8A65] flex items-center gap-1 transition-colors cursor-pointer"
-                        title={language === 'hi' ? 'संदेश सुधारें' : 'Edit message'}
+                        onClick={() => setEditingMessageId(null)}
+                        className="px-3 py-1.5 bg-gray-100 dark:bg-white/5 text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white text-xs font-black rounded-xl transition-all"
                       >
-                        <Edit size={11} />
-                        {language === 'hi' ? 'सुधारें' : 'Edit'}
+                        {language === 'hi' ? 'रद्द करें' : 'Cancel'}
                       </button>
                       <button
-                        onClick={() => handleDeleteMessage(msg.id)}
-                        className="text-[10px] uppercase tracking-wider font-extrabold text-gray-400 hover:text-[#FF1744] flex items-center gap-1 transition-colors cursor-pointer"
-                        title={language === 'hi' ? 'संदेश हटाएं' : 'Delete message'}
+                        onClick={() => handleSaveEdit(msg.id)}
+                        className="px-3.5 py-1.5 bg-gradient-to-r from-[#FF6D00] to-[#FF8A65] text-white text-xs font-black rounded-xl transition-all flex items-center gap-1 shadow-sm hover:opacity-90 cursor-pointer"
                       >
-                        <Trash2 size={11} />
-                        {language === 'hi' ? 'हटाएं' : 'Delete'}
+                        <Check size={12} />
+                        {language === 'hi' ? 'सुरक्षित करें' : 'Save'}
                       </button>
                     </div>
-                  ) : (
-                    msg.text && (
-                      <div className="flex flex-wrap items-center gap-3.5 mt-1.5 px-2">
-                        <button 
-                          onClick={() => handleListen(msg.text)}
-                          className="text-[10px] uppercase tracking-wider font-extrabold text-gray-400 hover:text-[#FF8A65] flex items-center gap-1.5 transition-colors cursor-pointer"
-                        >
-                          {isSpeaking ? <VolumeX size={12} className="text-[#FF1744] animate-pulse" /> : <Volume2 size={12} />} 
-                          {isSpeaking ? (language === 'hi' ? 'रोकें' : 'Stop') : (language === 'hi' ? 'सुनें' : 'Listen')}
-                        </button>
-                        <button
-                          onClick={() => handleCopyMessage(msg.id, msg.text)}
-                          className="text-[10px] uppercase tracking-wider font-extrabold text-gray-400 hover:text-[#FF8A65] flex items-center gap-1.5 transition-colors cursor-pointer"
-                          title={language === 'hi' ? 'उत्तर कॉपी करें' : 'Copy response'}
-                        >
-                          {copiedMessageId === msg.id ? (
-                            <>
-                              <Check size={12} className="text-emerald-500" />
-                              <span className="text-emerald-500 font-bold">{language === 'hi' ? 'कॉपी हो गया' : 'Copied!'}</span>
-                            </>
+                  </div>
+                ) : (
+                  <>
+                    <div
+                      className={cn(
+                         "px-5 py-3.5 rounded-3xl shadow-sm backdrop-blur-md",
+                         msg.role === 'user'
+                           ? "bg-gradient-to-br from-[#E65100] to-[#FF8A65] text-white rounded-tr-sm shadow-[0_0_20px_rgba(230,81,0,0.4)] border border-[#FF8A65]/50"
+                           : "bg-white dark:bg-[#121212]/80 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-200 rounded-tl-sm shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.3)]",
+                         isSelectMode && selectedMessageIds.has(msg.id) && "ring-2 ring-[#FF6D00] ring-offset-2 ring-offset-black"
+                      )}
+                    >
+                      {msg.role === 'user' ? (
+                        <p className="whitespace-pre-wrap leading-relaxed font-semibold">{msg.text}</p>
+                      ) : (
+                        <div className="prose prose-sm dark:prose-invert max-w-none prose-p:leading-relaxed prose-a:text-[#FF8A65] prose-strong:text-gray-900 dark:prose-strong:text-white">
+                          {msg.text ? (
+                            <Markdown>{msg.text}</Markdown>
                           ) : (
-                            <>
-                              <Copy size={12} />
-                              <span>{language === 'hi' ? 'कॉपी करें' : 'Copy'}</span>
-                            </>
+                            <div className="flex items-center gap-1 h-5">
+                              <span className="w-1.5 h-1.5 bg-[#FF8A65] rounded-full animate-bounce [animation-delay:-0.3s] shadow-[0_0_5px_rgba(255,138,101,0.8)]"></span>
+                              <span className="w-1.5 h-1.5 bg-[#FF8A65] rounded-full animate-bounce [animation-delay:-0.15s] shadow-[0_0_5px_rgba(255,138,101,0.8)]"></span>
+                              <span className="w-1.5 h-1.5 bg-[#FF8A65] rounded-full animate-bounce shadow-[0_0_5px_rgba(255,138,101,0.8)]"></span>
+                            </div>
                           )}
-                        </button>
-                      </div>
-                    )
-                  )}
-                </>
-              )}
+                        </div>
+                      )}
+                    </div>
+
+                    {!isSelectMode && (
+                      msg.role === 'user' ? (
+                        <div className="flex items-center gap-3 mt-1.5 px-2">
+                          <button
+                            onClick={() => handleStartEdit(msg)}
+                            className="text-[10px] uppercase tracking-wider font-extrabold text-gray-400 hover:text-[#FF8A65] flex items-center gap-1 transition-colors cursor-pointer"
+                            title={language === 'hi' ? 'संदेश सुधारें' : 'Edit message'}
+                          >
+                            <Edit size={11} />
+                            {language === 'hi' ? 'सुधारें' : 'Edit'}
+                          </button>
+                          <button
+                            onClick={() => handleDeleteMessage(msg.id)}
+                            className="text-[10px] uppercase tracking-wider font-extrabold text-gray-400 hover:text-[#FF1744] flex items-center gap-1 transition-colors cursor-pointer"
+                            title={language === 'hi' ? 'संदेश हटाएं' : 'Delete message'}
+                          >
+                            <Trash2 size={11} />
+                            {language === 'hi' ? 'हटाएं' : 'Delete'}
+                          </button>
+                        </div>
+                      ) : (
+                        msg.text && (
+                          <div className="flex flex-wrap items-center gap-3.5 mt-1.5 px-2">
+                            <button 
+                              onClick={() => handleListen(msg.text)}
+                              className="text-[10px] uppercase tracking-wider font-extrabold text-gray-400 hover:text-[#FF8A65] flex items-center gap-1.5 transition-colors cursor-pointer"
+                            >
+                              {isSpeaking ? <VolumeX size={12} className="text-[#FF1744] animate-pulse" /> : <Volume2 size={12} />} 
+                              {isSpeaking ? (language === 'hi' ? 'रोकें' : 'Stop') : (language === 'hi' ? 'सुनें' : 'Listen')}
+                            </button>
+                            <button
+                              onClick={() => handleCopyMessage(msg.id, msg.text)}
+                              className="text-[10px] uppercase tracking-wider font-extrabold text-gray-400 hover:text-[#FF8A65] flex items-center gap-1.5 transition-colors cursor-pointer"
+                              title={language === 'hi' ? 'उत्तर कॉपी करें' : 'Copy response'}
+                            >
+                              {copiedMessageId === msg.id ? (
+                                <>
+                                  <Check size={12} className="text-emerald-500" />
+                                  <span className="text-emerald-500 font-bold">{language === 'hi' ? 'कॉपी हो गया' : 'Copied!'}</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Copy size={12} />
+                                  <span>{language === 'hi' ? 'कॉपी करें' : 'Copy'}</span>
+                                </>
+                              )}
+                            </button>
+                            <button
+                              onClick={() => handleDeleteMessage(msg.id)}
+                              className="text-[10px] uppercase tracking-wider font-extrabold text-gray-400 hover:text-[#FF1744] flex items-center gap-1 transition-colors cursor-pointer"
+                              title={language === 'hi' ? 'उत्तर हटाएं' : 'Delete response'}
+                            >
+                              <Trash2 size={11} />
+                              <span>{language === 'hi' ? 'हटाएं' : 'Delete'}</span>
+                            </button>
+                          </div>
+                        )
+                      )
+                    )}
+                  </>
+                )}
+              </div>
             </div>
           ))}
           <div ref={messagesEndRef} />
@@ -1811,6 +1968,38 @@ Please feel free to explore our sacred Aagams, Panchang, and Swadhyay commentary
           </motion.div>
         )}
       </AnimatePresence>
+      {/* Clear Chat Confirmation Modal */}
+      {showClearChatModal && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-[#121212] border border-[#FF6D00]/30 rounded-3xl p-6 max-w-sm w-full shadow-2xl text-center space-y-4">
+            <div className="w-12 h-12 rounded-2xl bg-red-500/10 text-red-500 flex items-center justify-center mx-auto">
+              <Trash2 size={24} />
+            </div>
+            <div>
+              <h3 className="text-lg font-black text-gray-900 dark:text-white mb-1">
+                {language === 'hi' ? 'क्या आप पूरी चैट साफ़ करना चाहते हैं?' : 'Clear entire conversation?'}
+              </h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                {language === 'hi' ? 'इस बातचीत के सभी संदेश हटा दिए जाएंगे।' : 'All messages in this session will be permanently removed.'}
+              </p>
+            </div>
+            <div className="flex items-center gap-3 pt-2">
+              <button
+                onClick={() => setShowClearChatModal(false)}
+                className="flex-1 py-2.5 rounded-xl bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-xs font-black hover:bg-gray-200 dark:hover:bg-white/20 transition-all cursor-pointer"
+              >
+                {language === 'hi' ? 'रद्द करें' : 'Cancel'}
+              </button>
+              <button
+                onClick={handleClearCurrentChat}
+                className="flex-1 py-2.5 rounded-xl bg-red-600 text-white text-xs font-black shadow-md hover:bg-red-700 transition-all cursor-pointer"
+              >
+                {language === 'hi' ? 'हाँ, साफ़ करें' : 'Yes, Clear All'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
