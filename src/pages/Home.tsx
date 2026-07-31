@@ -94,7 +94,7 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="min-h-full p-6 pt-16 pb-24">
+    <div className="min-h-full p-4 sm:p-6 pt-4 sm:pt-6 pb-24">
       <header className="text-center mb-6 relative flex justify-center items-center">
         <div>
           <h1 className="text-4xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] tracking-tight drop-shadow-[0_0_15px_rgba(255,109,0,0.3)]">

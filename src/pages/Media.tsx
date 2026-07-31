@@ -564,7 +564,7 @@ export default function MediaPage() {
 
   return (
     <div className={cn(
-      "min-h-full p-4 md:p-8 pb-24 text-gray-900 dark:text-gray-100 transition-colors duration-300 bg-transparent",
+      "min-h-full pb-24 px-4 md:px-8 text-gray-900 dark:text-gray-100 transition-colors duration-300 bg-transparent",
       theaterMode && "dark:bg-[#000000] bg-zinc-950 text-white"
     )}>
       
@@ -575,7 +575,7 @@ export default function MediaPage() {
 
       {/* STICKY MAIN OTT CONTROL BAR */}
       <header className={cn(
-        "sticky top-0 z-40 backdrop-blur-md -mx-4 md:-mx-8 px-4 md:px-8 pt-4 pb-4 mb-6 border-b flex items-center justify-between gap-4 transition-colors duration-300",
+        "sticky top-0 z-40 backdrop-blur-md -mx-4 md:-mx-8 px-4 md:px-8 py-3.5 mb-6 border-b flex items-center justify-between gap-4 transition-colors duration-300",
         theaterMode 
           ? "bg-black/80 border-white/5 text-white" 
           : "bg-[#FCF8F2]/90 dark:bg-[#0A0503]/90 border-gray-200/50 dark:border-white/5"

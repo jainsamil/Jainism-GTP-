@@ -119,10 +119,10 @@ export default function VichaarPage() {
   const quote = quotes[currentIndex];
 
   return (
-    <div className="min-h-full p-6 pb-24 bg-transparent text-gray-900 dark:text-gray-100 transition-colors duration-300 flex flex-col">
+    <div className="min-h-full pb-24 bg-transparent text-gray-900 dark:text-gray-100 transition-colors duration-300 flex flex-col">
       
       {/* Sticky Header with inline controls */}
-      <header className="sticky top-0 z-40 bg-[#FCF8F2]/90 dark:bg-[#0A0503]/90 backdrop-blur-md -mx-6 px-6 pt-4 pb-4 mb-6 border-b border-gray-200/50 dark:border-white/5 flex items-center justify-between gap-2 md:gap-4 transition-colors duration-300">
+      <header className="sticky top-0 z-40 bg-[#FCF8F2]/95 dark:bg-[#0A0503]/95 backdrop-blur-md px-4 sm:px-6 py-3.5 mb-6 border-b border-gray-200/50 dark:border-white/5 flex items-center justify-between gap-2 md:gap-4 transition-colors duration-300">
         <div className="flex items-center gap-2 sm:gap-4 min-w-0">
           <button onClick={() => navigate(-1)} className="p-1.5 sm:p-2 rounded-full bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 shadow-sm hover:bg-gray-100 dark:hover:bg-white/10 transition-colors shrink-0">
             <ArrowLeft size={18} className="text-gray-700 dark:text-gray-300 sm:w-[22px] sm:h-[22px]" />
@@ -157,7 +157,7 @@ export default function VichaarPage() {
         </div>
       </header>
 
-      <div className="flex-1 flex items-center justify-center relative w-full">
+      <div className="flex-1 flex items-center justify-center relative w-full px-4 sm:px-6">
         <div className="absolute inset-0 bg-gradient-to-br from-[#FF6D00]/10 to-transparent blur-3xl opacity-50 pointer-events-none" />
         
         <div className="relative group w-full max-w-md aspect-square">

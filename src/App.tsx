@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { BrowserRouter, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
 import { Home, MessageSquare, BookOpen, PlaySquare, User, Sparkles, Languages, Moon, Sun } from 'lucide-react';
 import { cn } from './lib/utils';
@@ -173,7 +173,7 @@ function Layout({ children }: { children: React.ReactNode }) {
       {location.pathname === '/' && (
         <button
           onClick={() => navigate('/chat')}
-          className="absolute bottom-24 right-6 w-14 h-14 bg-gradient-to-tr from-[#FF6D00] to-[#FFD54F] rounded-full shadow-[0_0_20px_rgba(255,109,0,0.6)] flex items-center justify-center text-black animate-pulse hover:scale-110 transition-all z-50 border border-white/20 hover:cursor-pointer"
+          className="fixed bottom-24 right-6 w-14 h-14 bg-gradient-to-tr from-[#FF6D00] to-[#FFD54F] rounded-full shadow-[0_0_20px_rgba(255,109,0,0.6)] flex items-center justify-center text-black animate-pulse hover:scale-110 transition-all z-50 border border-white/20 hover:cursor-pointer"
         >
           <Sparkles size={24} className="drop-shadow-[0_0_5px_rgba(255,255,255,0.8)]" />
         </button>
@@ -181,7 +181,7 @@ function Layout({ children }: { children: React.ReactNode }) {
 
       {/* Bottom Navigation */}
       {!isAdmin && !isChat && (
-        <nav className="absolute bottom-0 w-full bg-white/80 dark:bg-[#0A0A0A]/80 backdrop-blur-2xl border-t border-gray-200 dark:border-white/10 px-6 py-3 flex justify-between items-center z-50 pb-safe shadow-[0_-10px_30px_rgba(0,0,0,0.05)] dark:shadow-[0_-10px_30px_rgba(0,0,0,0.5)] transition-colors duration-300">
+        <nav className="fixed bottom-0 left-0 right-0 w-full bg-white/80 dark:bg-[#0A0A0A]/80 backdrop-blur-2xl border-t border-gray-200 dark:border-white/10 px-6 py-3 flex justify-between items-center z-50 pb-safe shadow-[0_-10px_30px_rgba(0,0,0,0.05)] dark:shadow-[0_-10px_30px_rgba(0,0,0,0.5)] transition-colors duration-300">
           {navItems.map((item) => {
             const isActive = location.pathname === item.path;
             const Icon = item.icon;

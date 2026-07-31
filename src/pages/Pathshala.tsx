@@ -1036,8 +1036,8 @@ export default function PathshalaPage() {
   };
 
   return (
-    <div className={cn("min-h-screen p-4 pb-24 font-sans relative transition-colors duration-300 bg-transparent", isDark ? "text-gray-200" : "text-gray-900")}>
-      <header className="flex items-center justify-between mb-6 pt-2">
+    <div className={cn("min-h-screen pb-24 px-4 sm:px-6 font-sans relative transition-colors duration-300 bg-transparent", isDark ? "text-gray-200" : "text-gray-900")}>
+      <header className="sticky top-0 z-40 bg-[#FCF8F2]/95 dark:bg-[#0A0503]/95 backdrop-blur-md -mx-4 sm:-mx-6 px-4 sm:px-6 py-3.5 mb-6 border-b border-gray-200/50 dark:border-white/5 flex items-center justify-between gap-4">
         <div className="flex items-center gap-2">
           <button onClick={() => navigate(-1)} className="p-2 rounded-full bg-gray-200 dark:bg-white/5 hover:bg-gray-300 dark:hover:bg-white/10 transition-colors">
             <ArrowLeft size={24} className="text-gray-700 dark:text-gray-300" />
