@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { User, Camera, Instagram, Award, Settings, LogOut, BookOpen, ShieldAlert, Info, Edit2, Check, X, Download, Compass, Code, Milestone, Sparkles, Database, ArrowLeft } from 'lucide-react';
+import { User, Camera, Instagram, Award, Settings, LogOut, BookOpen, ShieldAlert, Info, Edit2, Check, X, Download, Compass, Code, Milestone, Sparkles, Database, ArrowLeft, Globe, ExternalLink, Smartphone, CheckCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { useAuth } from '../contexts/AuthContext';
@@ -256,6 +256,30 @@ export default function ProfilePage() {
               {/* TAB 1: ORIGIN & GENESIS DETAILS */}
               {aboutTab === 'origin' && (
                 <div className="space-y-4 animate-in fade-in duration-200">
+                  {/* Official Website Banner */}
+                  <div className="p-4 bg-gradient-to-r from-orange-500/10 via-amber-500/10 to-yellow-500/10 dark:from-orange-500/20 dark:via-amber-500/20 dark:to-yellow-500/20 rounded-2xl border border-orange-500/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-[#FF6D00]/20 text-[#FF6D00] flex items-center justify-center shrink-0">
+                        <Globe size={20} />
+                      </div>
+                      <div>
+                        <h4 className="text-gray-900 dark:text-white font-black text-xs uppercase tracking-wider">Official Web Portal</h4>
+                        <a href="https://jainismgpt.vercel.app/" target="_blank" rel="noopener noreferrer" className="text-xs text-[#FF6D00] dark:text-[#FFD54F] font-bold hover:underline flex items-center gap-1">
+                          <span>https://jainismgpt.vercel.app/</span>
+                        </a>
+                      </div>
+                    </div>
+                    <a 
+                      href="https://jainismgpt.vercel.app/" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="px-4 py-2 bg-[#FF6D00] hover:bg-[#e66200] text-white rounded-xl text-xs font-black shadow-md transition-all flex items-center gap-1.5 shrink-0"
+                    >
+                      <span>Visit Web App</span>
+                      <ExternalLink size={14} />
+                    </a>
+                  </div>
+
                   <div className="p-4 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5">
                     <h4 className="text-gray-900 dark:text-white font-black text-xs uppercase tracking-wider mb-2 flex items-center gap-1.5">
                       <Compass size={14} className="text-[#FF6D00]" />
@@ -549,14 +573,19 @@ export default function ProfilePage() {
       {/* Install App Modal */}
       {showInstallModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
-          <div className="bg-white/80 dark:bg-[#121212]/80 backdrop-blur-md border border-gray-200 dark:border-white/10 rounded-[2rem] p-6 w-full max-w-md shadow-xl dark:shadow-[0_0_40px_rgba(0,176,255,0.2)] relative overflow-hidden">
+          <div className="bg-white dark:bg-[#121212] border border-gray-200 dark:border-white/10 rounded-[2rem] p-6 w-full max-w-lg shadow-xl dark:shadow-[0_0_40px_rgba(0,176,255,0.2)] relative overflow-hidden my-auto max-h-[90vh] overflow-y-auto">
             <div className="absolute top-0 right-0 w-32 h-32 bg-[#00B0FF]/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
             
-            <div className="flex justify-between items-center mb-6 relative z-10">
-              <h2 className="text-2xl font-display font-black text-gray-900 dark:text-white flex items-center gap-2">
-                <Download className="text-[#0091EA] dark:text-[#40C4FF]" />
-                INSTALL APP
-              </h2>
+            <div className="flex justify-between items-center mb-6 relative z-10 border-b border-gray-100 dark:border-white/5 pb-4">
+              <div>
+                <h2 className="text-xl sm:text-2xl font-display font-black text-gray-900 dark:text-white flex items-center gap-2">
+                  <Smartphone className="text-[#00B0FF]" />
+                  DOWNLOAD & INSTALL APP
+                </h2>
+                <p className="text-[11px] text-gray-500 dark:text-gray-400 font-bold mt-0.5">
+                  Available on APKPure & Uptodown Platforms
+                </p>
+              </div>
               <button 
                 onClick={() => setShowInstallModal(false)}
                 className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-white/10 transition-colors"
@@ -565,34 +594,106 @@ export default function ProfilePage() {
               </button>
             </div>
             
-            <div className="space-y-6 text-gray-600 dark:text-gray-300 relative z-10">
-              <p className="text-sm font-bold text-gray-500 dark:text-gray-400">
-                To install Jainism GPT on your device for the best native experience, follow these steps:
+            <div className="space-y-4 text-gray-600 dark:text-gray-300 relative z-10">
+              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 leading-relaxed">
+                Jainism GPT official Android APK App is available for free download on leading global app platforms <strong className="text-gray-800 dark:text-gray-200">APKPure</strong> and <strong className="text-gray-800 dark:text-gray-200">Uptodown</strong>. You can also access the full web application directly.
               </p>
               
-              <div className="space-y-4">
-                <div className="p-4 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5">
-                  <h3 className="text-[#00C853] dark:text-[#00E676] font-bold mb-2 flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-full bg-[#00C853]/10 dark:bg-[#00E676]/20 flex items-center justify-center text-xs">1</span>
-                    For Android (Chrome)
-                  </h3>
-                  <p className="text-sm">Tap the 3-dots menu (⋮) in your browser and select <strong className="text-gray-900 dark:text-white">"Add to Home screen"</strong> or <strong className="text-gray-900 dark:text-white">"Install app"</strong>.</p>
+              {/* APKPure Box */}
+              <div className="p-4 bg-emerald-500/5 dark:bg-emerald-500/10 rounded-2xl border border-emerald-500/20 space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-black text-xs shadow-sm">
+                      APK
+                    </div>
+                    <div>
+                      <h3 className="text-emerald-600 dark:text-emerald-400 font-black text-sm">APKPure Platform</h3>
+                      <p className="text-[10px] text-gray-400 font-bold">Verified Direct APK Download</p>
+                    </div>
+                  </div>
+                  <span className="px-2.5 py-1 bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[10px] font-black rounded-full uppercase">
+                    Available
+                  </span>
                 </div>
-                
-                <div className="p-4 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5">
-                  <h3 className="text-[#0091EA] dark:text-[#40C4FF] font-bold mb-2 flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-full bg-[#0091EA]/10 dark:bg-[#40C4FF]/20 flex items-center justify-center text-xs">2</span>
-                    For iOS (Safari)
-                  </h3>
-                  <p className="text-sm">Tap the Share button (square with arrow pointing up) at the bottom and select <strong className="text-gray-900 dark:text-white">"Add to Home Screen"</strong>.</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+                  Download the official Jainism GPT APK directly from APKPure store for your Android device.
+                </p>
+                <a 
+                  href="https://apkpure.com" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="w-full mt-2 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black tracking-wide flex items-center justify-center gap-2 transition-all shadow-sm"
+                >
+                  <span>Download on APKPure</span>
+                  <ExternalLink size={14} />
+                </a>
+              </div>
+
+              {/* Uptodown Box */}
+              <div className="p-4 bg-sky-500/5 dark:bg-sky-500/10 rounded-2xl border border-sky-500/20 space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-lg bg-[#00B0FF] text-white flex items-center justify-center font-black text-xs shadow-sm">
+                      UP
+                    </div>
+                    <div>
+                      <h3 className="text-[#0091EA] dark:text-[#40C4FF] font-black text-sm">Uptodown Platform</h3>
+                      <p className="text-[10px] text-gray-400 font-bold">Safe & Tested Android Package</p>
+                    </div>
+                  </div>
+                  <span className="px-2.5 py-1 bg-[#00B0FF]/20 text-[#0091EA] dark:text-[#40C4FF] text-[10px] font-black rounded-full uppercase">
+                    Available
+                  </span>
                 </div>
+                <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+                  Official tested version available on Uptodown for safe installation on all Android smartphones.
+                </p>
+                <a 
+                  href="https://en.uptodown.com" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="w-full mt-2 py-2.5 bg-[#0091EA] hover:bg-[#0081d6] text-white rounded-xl text-xs font-black tracking-wide flex items-center justify-center gap-2 transition-all shadow-sm"
+                >
+                  <span>Download on Uptodown</span>
+                  <ExternalLink size={14} />
+                </a>
+              </div>
+
+              {/* Official Web Application Box */}
+              <div className="p-4 bg-orange-500/5 dark:bg-orange-500/10 rounded-2xl border border-orange-500/20 space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-lg bg-[#FF6D00] text-white flex items-center justify-center font-black text-xs shadow-sm">
+                      WEB
+                    </div>
+                    <div>
+                      <h3 className="text-[#FF6D00] dark:text-[#FFD54F] font-black text-sm">Official Web Application</h3>
+                      <p className="text-[10px] text-gray-400 font-bold">https://jainismgpt.vercel.app/</p>
+                    </div>
+                  </div>
+                  <span className="px-2.5 py-1 bg-orange-500/20 text-[#FF6D00] dark:text-[#FFD54F] text-[10px] font-black rounded-full uppercase">
+                    Live Web
+                  </span>
+                </div>
+                <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+                  Use the Web App instantly on any mobile or desktop browser without downloading an APK.
+                </p>
+                <a 
+                  href="https://jainismgpt.vercel.app/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="w-full mt-2 py-2.5 bg-[#FF6D00] hover:bg-[#e66200] text-white rounded-xl text-xs font-black tracking-wide flex items-center justify-center gap-2 transition-all shadow-sm"
+                >
+                  <span>Open Web Portal</span>
+                  <ExternalLink size={14} />
+                </a>
               </div>
               
               <button 
                 onClick={() => setShowInstallModal(false)}
-                className="w-full py-4 bg-gray-100 dark:bg-white/10 text-gray-900 dark:text-white rounded-2xl font-black tracking-wide hover:bg-gray-200 dark:hover:bg-white/20 transition-colors uppercase text-sm"
+                className="w-full py-3 bg-gray-100 dark:bg-white/10 text-gray-900 dark:text-white rounded-2xl font-black tracking-wide hover:bg-gray-200 dark:hover:bg-white/20 transition-colors uppercase text-xs mt-2"
               >
-                Got it
+                Close
               </button>
             </div>
           </div>

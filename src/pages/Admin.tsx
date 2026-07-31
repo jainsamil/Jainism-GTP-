@@ -87,7 +87,7 @@ export default function AdminPage() {
   const [hasAdminAccess, setHasAdminAccess] = useState(localStorage.getItem('adminAccess') === 'true');
 
   useEffect(() => {
-    if (role === 'admin' || hasAdminAccess) {
+    if (hasAdminAccess) {
       if (activeCollection === 'analytics') {
         fetchAnalytics();
       } else if (activeCollection !== 'dashboard' && activeCollection !== 'ai_agent') {
@@ -448,7 +448,7 @@ export default function AdminPage() {
     }
   };
 
-    if (!hasAdminAccess && role !== 'admin') {
+    if (!hasAdminAccess) {
     return (
       <div className="min-h-screen bg-transparent flex items-center justify-center p-6 relative transition-colors duration-300">
         <button 
