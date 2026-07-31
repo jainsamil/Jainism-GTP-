@@ -1129,12 +1129,12 @@ Please feel free to explore our sacred Aagams, Panchang, and Swadhyay commentary
       )}
 
       {messages.length === 0 ? (
-        <div className="flex-1 flex flex-col items-center justify-center p-6 text-center relative overflow-y-auto">
+        <div className="flex-1 flex flex-col items-center justify-start sm:justify-center p-4 sm:p-6 text-center relative overflow-y-auto pt-6 sm:pt-8 pb-10">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,109,0,0.05)_0%,transparent_60%)] pointer-events-none" />
-          <div className="w-28 h-28 sm:w-36 sm:h-36 bg-white dark:bg-[#121212] rounded-full flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(255,109,0,0.1)] dark:shadow-[0_0_30px_rgba(255,109,0,0.2)] border border-[#FF6D00]/20 relative group shrink-0">
+          <div className="w-20 h-20 sm:w-28 sm:h-28 bg-white dark:bg-[#121212] rounded-full flex items-center justify-center mb-4 sm:mb-6 shadow-[0_0_30px_rgba(255,109,0,0.1)] dark:shadow-[0_0_30px_rgba(255,109,0,0.2)] border border-[#FF6D00]/20 relative group shrink-0">
             <div className="absolute inset-0 bg-[#FF6D00] rounded-full blur-xl opacity-10 dark:opacity-20 group-hover:opacity-30 dark:group-hover:opacity-40 transition-opacity duration-700" />
-            <div className="relative z-10 w-16 h-16 sm:w-24 sm:h-24 bg-gradient-to-br from-[#FF6D00] to-[#FFD54F] rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(255,109,0,0.4)] dark:shadow-[0_0_30px_rgba(255,109,0,0.8)] border-2 border-white/50 dark:border-white/20 group-hover:scale-110 transition-transform duration-500">
-              <Sparkles size={36} className="text-white dark:text-black drop-shadow-[0_0_10px_rgba(255,255,255,0.8)]" />
+            <div className="relative z-10 w-12 h-12 sm:w-18 sm:h-18 bg-gradient-to-br from-[#FF6D00] to-[#FFD54F] rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(255,109,0,0.4)] dark:shadow-[0_0_30px_rgba(255,109,0,0.8)] border-2 border-white/50 dark:border-white/20 group-hover:scale-110 transition-transform duration-500">
+              <Sparkles size={28} className="text-white dark:text-black drop-shadow-[0_0_10px_rgba(255,255,255,0.8)]" />
             </div>
           </div>
           <h2 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white mb-2 drop-shadow-[0_0_10px_rgba(0,0,0,0.1)] dark:drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">

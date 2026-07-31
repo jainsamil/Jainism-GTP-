@@ -707,7 +707,7 @@ export default function BackgroundDesign() {
     : (isDark ? colors.strokeDark : colors.stroke);
 
   return (
-    <div className="absolute inset-0 w-full h-full pointer-events-none overflow-hidden z-0 select-none">
+    <div className="fixed inset-0 w-full h-full pointer-events-none overflow-hidden z-0 select-none">
       {/* Background paper texture overlay */}
       <div 
         className="absolute inset-0 opacity-[0.05] dark:opacity-[0.035] mix-blend-overlay"

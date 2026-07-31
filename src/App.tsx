@@ -52,6 +52,17 @@ function Layout({ children }: { children: React.ReactNode }) {
   const { theme, toggleTheme } = useTheme();
   const isChat = location.pathname === '/chat';
   const isAdmin = location.pathname === '/admin';
+  const mainRef = useRef<HTMLElement>(null);
+
+  // Always reset scroll position to top whenever pathname changes or page opens
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    document.body.scrollTop = 0;
+    document.documentElement.scrollTop = 0;
+    if (mainRef.current) {
+      mainRef.current.scrollTop = 0;
+    }
+  }, [location.pathname]);
 
   // Mobile Android keyboard viewport reset to prevent layout sticking/shifting
   useEffect(() => {
@@ -63,6 +74,9 @@ function Layout({ children }: { children: React.ReactNode }) {
         window.scrollTo(0, 0);
         document.body.scrollTop = 0;
         document.documentElement.scrollTop = 0;
+        if (mainRef.current) {
+          mainRef.current.scrollTop = 0;
+        }
       }
     };
 
@@ -146,7 +160,7 @@ function Layout({ children }: { children: React.ReactNode }) {
         </div>
       )}
 
-      <main className={cn(
+      <main ref={mainRef} className={cn(
         "flex-1 relative", 
         isChat ? "h-full overflow-hidden flex flex-col" : "overflow-y-auto",
         (!isAdmin && !isChat) ? "pb-20" : ""
