@@ -6,7 +6,7 @@ import {
   PlaySquare, Landmark, HelpCircle, PartyPopper,
   Disc, Navigation, Flame, FileText, Heart, Utensils,
   Sparkles, Sun, Moon, MapPin, Shield, Hotel, Languages,
-  Newspaper, ShoppingBag
+  Newspaper, ShoppingBag, Compass, HeartHandshake
 } from 'lucide-react';
 import { db } from '../firebase';
 import { collection, query, limit, doc, onSnapshot } from 'firebase/firestore';
@@ -91,6 +91,8 @@ export default function HomePage() {
     { title: 'Manuscript Library', icon: Languages, path: '/manuscript-library', color: 'from-[#AA00FF] to-[#EA80FC]', shadow: 'shadow-[0_0_15px_rgba(170,0,255,0.3)]', enabled: true },
     { title: 'Jain News', icon: Newspaper, path: '/news', color: 'from-[#FF3D00] to-[#FF9100]', shadow: 'shadow-[0_0_15px_rgba(255,61,0,0.3)]', enabled: true },
     { title: 'Jain Store', icon: ShoppingBag, path: '/store', color: 'from-[#00C853] to-[#64FFDA]', shadow: 'shadow-[0_0_15px_rgba(0,200,83,0.3)]', enabled: true },
+    { title: 'Jain Vivah', icon: HeartHandshake, path: '/matrimonial', color: 'from-[#E91E63] to-[#FF4081]', shadow: 'shadow-[0_0_15px_rgba(233,30,99,0.3)]', enabled: true },
+    { title: 'Jain Yatra Sewa', icon: Compass, path: '/yatra', color: 'from-[#FF6D00] to-[#FFAB40]', shadow: 'shadow-[0_0_15px_rgba(255,109,0,0.3)]', enabled: true },
   ];
 
   return (

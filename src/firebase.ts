@@ -1,4 +1,4 @@
-import { initializeApp } from 'firebase/app';
+import { initializeApp, getApps, getApp } from 'firebase/app';
 import { 
   getAuth, 
   GoogleAuthProvider, 
@@ -8,23 +8,13 @@ import {
   signOut, 
   onAuthStateChanged 
 } from 'firebase/auth';
-import { getFirestore, doc, getDocFromServer, initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from 'firebase/firestore';
+import { getFirestore } from 'firebase/firestore';
 import firebaseConfig from '../firebase-applet-config.json';
 
-const app = initializeApp(firebaseConfig);
+const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 
-// Enable offline persistence with fallback for environments where IndexedDB is blocked
-let firestoreInstance;
-try {
-  firestoreInstance = initializeFirestore(app, {
-    localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
-  }, firebaseConfig.firestoreDatabaseId);
-} catch (e) {
-  console.warn("Offline persistence not supported in this browser environment, falling back to default.", e);
-  firestoreInstance = getFirestore(app, firebaseConfig.firestoreDatabaseId);
-}
-export const db = firestoreInstance;
+export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
 
 export const googleProvider = new GoogleAuthProvider();
 googleProvider.setCustomParameters({
@@ -41,18 +31,6 @@ export const isWebView = (): boolean => {
   const isEmbedded = isAndroid && (isWv || /fbav|instagram|line|microMessenger|twitter|snapchat/i.test(ua));
   return isCapacitor || isEmbedded;
 };
-
-// Test connection
-async function testConnection() {
-  try {
-    await getDocFromServer(doc(db, 'test', 'connection'));
-  } catch (error) {
-    if (error instanceof Error && error.message.includes('the client is offline')) {
-      console.error("Please check your Firebase configuration.");
-    }
-  }
-}
-testConnection();
 
 export const signInWithPopup = async (...args: Parameters<typeof fbSignInWithPopup>) => {
   if (isWebView()) {

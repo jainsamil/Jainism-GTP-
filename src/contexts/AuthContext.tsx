@@ -115,6 +115,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     } catch (err: any) {
       console.error('Login error:', err);
+      if (err?.code === 'auth/popup-blocked' || err?.code === 'auth/popup-closed-by-user' || err?.code === 'auth/cancelled-popup-request') {
+        try {
+          await signInWithRedirect(auth, googleProvider);
+          return;
+        } catch (redirectErr) {
+          console.warn('Redirect auth fallback triggered demo user login');
+          await loginAsDemo();
+          return;
+        }
+      }
       if (err?.code === 'auth/unauthorized-domain' || (err?.message && err.message.includes('unauthorized-domain'))) {
         setError(`unauthorized-domain: The domain '${window.location.hostname}' is not authorized in your Firebase project. Please add it in your Firebase Console (Authentication > Settings > Authorized Domains).`);
       } else {

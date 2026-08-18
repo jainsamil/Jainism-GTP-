@@ -11,6 +11,7 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import Markdown from 'react-markdown';
 import { cn } from '../lib/utils';
+import LiveCameraModal from '../components/LiveCameraModal';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -51,6 +52,7 @@ export default function ChatPage() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showSmartTools, setShowSmartTools] = useState(false);
+  const [isLiveCameraOpen, setIsLiveCameraOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState<{ data: string, mimeType: string, url?: string, name: string, isImage: boolean } | null>(null);
   const [activeContext, setActiveContext] = useState<'think' | 'research' | 'study' | 'web' | 'sutra' | 'muhurat' | 'chanting' | 'anekantavada' | 'verification' | null>(null);
   const [isListening, setIsListening] = useState(false);
@@ -63,6 +65,93 @@ export default function ChatPage() {
   const [isSelectMode, setIsSelectMode] = useState(false);
   const [selectedMessageIds, setSelectedMessageIds] = useState<Set<string>>(new Set());
   const [showClearChatModal, setShowClearChatModal] = useState(false);
+
+  // Chat History Sessions Multi-Select & Bulk Delete states
+  const [isSessionSelectMode, setIsSessionSelectMode] = useState(false);
+  const [selectedSessionIds, setSelectedSessionIds] = useState<Set<string>>(new Set());
+  const [showDeleteAllSessionsConfirm, setShowDeleteAllSessionsConfirm] = useState(false);
+
+  const toggleSessionSelectMode = () => {
+    setIsSessionSelectMode((prev) => !prev);
+    setSelectedSessionIds(new Set());
+  };
+
+  const toggleSessionSelection = (sessionId: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setSelectedSessionIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(sessionId)) {
+        next.delete(sessionId);
+      } else {
+        next.add(sessionId);
+      }
+      return next;
+    });
+  };
+
+  const handleSelectAllSessions = () => {
+    if (selectedSessionIds.size === sessions.length) {
+      setSelectedSessionIds(new Set());
+    } else {
+      setSelectedSessionIds(new Set(sessions.map(s => s.id)));
+    }
+  };
+
+  const handleDeleteSelectedSessions = async () => {
+    if (selectedSessionIds.size === 0) return;
+    const idsToDelete = Array.from(selectedSessionIds);
+
+    if (!user) {
+      try {
+        const stored = localStorage.getItem('guest_sessions');
+        if (stored) {
+          const parsed: ChatSession[] = JSON.parse(stored);
+          const filtered = parsed.filter(s => !selectedSessionIds.has(s.id));
+          localStorage.setItem('guest_sessions', JSON.stringify(filtered));
+          setSessions(filtered);
+          if (currentSessionId && selectedSessionIds.has(currentSessionId)) {
+            createNewChat();
+          }
+        }
+      } catch (err) {
+        console.error("Error deleting selected guest sessions:", err);
+      }
+    } else {
+      try {
+        const deletePromises = idsToDelete.map(id => deleteDoc(doc(db, 'user_chats', id)));
+        await Promise.all(deletePromises);
+        if (currentSessionId && selectedSessionIds.has(currentSessionId)) {
+          createNewChat();
+        }
+      } catch (err) {
+        console.error("Error deleting selected sessions:", err);
+      }
+    }
+
+    setSelectedSessionIds(new Set());
+    setIsSessionSelectMode(false);
+  };
+
+  const handleClearAllSessions = async () => {
+    if (sessions.length === 0) return;
+    const allIds = sessions.map(s => s.id);
+    if (!user) {
+      localStorage.removeItem('guest_sessions');
+      setSessions([]);
+      createNewChat();
+    } else {
+      try {
+        const deletePromises = allIds.map(id => deleteDoc(doc(db, 'user_chats', id)));
+        await Promise.all(deletePromises);
+        createNewChat();
+      } catch (err) {
+        console.error("Error deleting all sessions:", err);
+      }
+    }
+    setSelectedSessionIds(new Set());
+    setIsSessionSelectMode(false);
+    setShowDeleteAllSessionsConfirm(false);
+  };
 
   const toggleSelectMode = () => {
     setIsSelectMode((prev) => !prev);
@@ -935,14 +1024,63 @@ Please feel free to explore our sacred Aagams, Panchang, and Swadhyay commentary
           </button>
         </div>
         
-        <div className="p-4">
+        <div className="p-4 space-y-2">
           <button 
             onClick={createNewChat}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-gradient-to-r from-[#FF5722] via-[#FF3D00] to-[#FF8A65] text-white hover:brightness-110 hover:shadow-[0_4px_20px_rgba(255,87,34,0.3)] active:scale-[0.98] transition-all shadow-md rounded-2xl font-black text-[11px] uppercase tracking-widest cursor-pointer border border-[#FF9100]/30 h-12"
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-[#FF5722] via-[#FF3D00] to-[#FF8A65] text-white hover:brightness-110 hover:shadow-[0_4px_20px_rgba(255,87,34,0.3)] active:scale-[0.98] transition-all shadow-md rounded-2xl font-black text-[11px] uppercase tracking-widest cursor-pointer border border-[#FF9100]/30 h-11"
           >
             <Plus size={16} className="stroke-[3px]" />
             New Chat
           </button>
+
+          {sessions.length > 0 && (
+            <div className="flex items-center justify-between gap-1 pt-1 border-t border-gray-150/50 dark:border-white/5">
+              <button
+                type="button"
+                onClick={toggleSessionSelectMode}
+                className={cn(
+                  "flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer border",
+                  isSessionSelectMode
+                    ? "bg-[#FF5722] text-white border-[#FF5722]"
+                    : "bg-gray-100 dark:bg-white/5 border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-300 hover:text-[#FF5722]"
+                )}
+              >
+                <CheckSquare size={12} />
+                <span>{isSessionSelectMode ? 'Cancel' : 'Select'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowDeleteAllSessionsConfirm(true)}
+                className="flex items-center gap-1 px-2.5 py-1.5 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-600 dark:text-red-400 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer"
+              >
+                <Trash2 size={12} />
+                <span>Delete All</span>
+              </button>
+            </div>
+          )}
+
+          {isSessionSelectMode && sessions.length > 0 && (
+            <div className="p-2 bg-orange-500/10 border border-orange-500/20 rounded-xl flex items-center justify-between gap-2">
+              <button
+                type="button"
+                onClick={handleSelectAllSessions}
+                className="flex items-center gap-1 text-[10px] font-black text-[#FF5722] hover:underline cursor-pointer"
+              >
+                <CheckSquare size={13} />
+                <span>{selectedSessionIds.size === sessions.length ? 'Deselect All' : 'Select All'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleDeleteSelectedSessions}
+                disabled={selectedSessionIds.size === 0}
+                className="px-2.5 py-1 bg-red-600 disabled:opacity-40 text-white text-[10px] font-black rounded-lg transition-all cursor-pointer"
+              >
+                Delete ({selectedSessionIds.size})
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Sessions list */}
@@ -956,14 +1094,30 @@ Please feel free to explore our sacred Aagams, Panchang, and Swadhyay commentary
             sessions.map(session => (
               <div 
                 key={session.id}
-                onClick={() => loadSession(session)}
+                onClick={() => {
+                  if (isSessionSelectMode) {
+                    toggleSessionSelection(session.id);
+                  } else {
+                    loadSession(session);
+                  }
+                }}
                 className={cn(
                   "flex items-center justify-between p-3.5 rounded-2xl cursor-pointer transition-all group border",
-                  currentSessionId === session.id 
-                    ? "bg-[#FF5722]/10 dark:bg-[#FF5722]/15 border-[#FF5722]/30 shadow-sm" 
-                    : "bg-white/45 dark:bg-[#1A1310]/30 hover:bg-white/85 dark:hover:bg-[#1A1310]/80 border-gray-150/40 dark:border-white/5"
+                  selectedSessionIds.has(session.id)
+                    ? "bg-red-500/15 border-red-500/40"
+                    : currentSessionId === session.id 
+                      ? "bg-[#FF5722]/10 dark:bg-[#FF5722]/15 border-[#FF5722]/30 shadow-sm" 
+                      : "bg-white/45 dark:bg-[#1A1310]/30 hover:bg-white/85 dark:hover:bg-[#1A1310]/80 border-gray-150/40 dark:border-white/5"
                 )}
               >
+                {isSessionSelectMode && (
+                  <input
+                    type="checkbox"
+                    checked={selectedSessionIds.has(session.id)}
+                    onChange={(e) => toggleSessionSelection(session.id, e as any)}
+                    className="mr-2.5 w-4 h-4 accent-[#FF5722] rounded cursor-pointer shrink-0"
+                  />
+                )}
                 <div className="flex-1 min-w-0 pr-2">
                   <p className={cn(
                     "text-xs truncate font-black",
@@ -976,12 +1130,14 @@ Please feel free to explore our sacred Aagams, Panchang, and Swadhyay commentary
                     {new Date(session.updatedAt).toLocaleDateString()}
                   </p>
                 </div>
-                <button 
-                  onClick={(e) => deleteSession(e, session.id)}
-                  className="text-gray-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-white/5"
-                >
-                  <Trash2 size={13} />
-                </button>
+                {!isSessionSelectMode && (
+                  <button 
+                    onClick={(e) => deleteSession(e, session.id)}
+                    className="text-gray-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-white/5"
+                  >
+                    <Trash2 size={13} />
+                  </button>
+                )}
               </div>
             ))
           )}
@@ -1405,7 +1561,7 @@ Please feel free to explore our sacred Aagams, Panchang, and Swadhyay commentary
                   <span className="text-[9px] font-black uppercase text-[#FF6D00]/85 tracking-widest block mb-2">Multimedia Attachments</span>
                   <div className="grid grid-cols-3 gap-2">
                     <button 
-                      onClick={() => { cameraInputRef.current?.click(); setShowSmartTools(false); }}
+                      onClick={() => { setIsLiveCameraOpen(true); setShowSmartTools(false); }}
                       className="flex items-center justify-center gap-1.5 py-2 px-1 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 hover:border-[#FF6D00]/50 hover:bg-[#FF6D00]/10 hover:scale-[1.01] transition-all text-[11px] font-bold text-gray-700 dark:text-gray-300 shadow-sm"
                     >
                       <Camera size={13} className="text-[#FF8A65]" />
@@ -2000,6 +2156,56 @@ Please feel free to explore our sacred Aagams, Panchang, and Swadhyay commentary
           </div>
         </div>
       )}
+
+      {/* Delete All Saved Sessions Confirmation Modal */}
+      {showDeleteAllSessionsConfirm && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-[#121212] border border-red-500/30 rounded-3xl p-6 max-w-sm w-full shadow-2xl text-center space-y-4">
+            <div className="w-12 h-12 rounded-2xl bg-red-500/10 text-red-500 flex items-center justify-center mx-auto">
+              <Trash2 size={24} />
+            </div>
+            <div>
+              <h3 className="text-lg font-black text-gray-900 dark:text-white mb-1">
+                {language === 'hi' ? 'पूरा इतिहास हटाएं?' : 'Delete All Chat History?'}
+              </h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                {language === 'hi' ? `आपकी सभी ${sessions.length} सेव की गई बातचीत स्थायी रूप से हटा दी जाएंगी।` : `All ${sessions.length} saved chat sessions will be permanently deleted.`}
+              </p>
+            </div>
+            <div className="flex items-center gap-3 pt-2">
+              <button
+                onClick={() => setShowDeleteAllSessionsConfirm(false)}
+                className="flex-1 py-2.5 rounded-xl bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-xs font-black hover:bg-gray-200 dark:hover:bg-white/20 transition-all cursor-pointer"
+              >
+                {language === 'hi' ? 'रद्द करें' : 'Cancel'}
+              </button>
+              <button
+                onClick={handleClearAllSessions}
+                className="flex-1 py-2.5 rounded-xl bg-red-600 text-white text-xs font-black shadow-md hover:bg-red-700 transition-all cursor-pointer"
+              >
+                {language === 'hi' ? 'हाँ, सब हटाएं' : 'Yes, Delete All'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* In-App Live Camera Viewfinder Modal */}
+      <LiveCameraModal
+        isOpen={isLiveCameraOpen}
+        onClose={() => setIsLiveCameraOpen(false)}
+        onCapture={(img) => {
+          setSelectedFile({
+            data: img.base64,
+            mimeType: img.mimeType,
+            url: img.url,
+            name: img.name,
+            isImage: true,
+          });
+        }}
+        title={language === 'hi' ? 'जैनिज्म जीपीटी लाइव कैमरा' : 'Jainism GPT Live Camera'}
+        subtitle={language === 'hi' ? 'शास्त्र, आहार या प्रश्न हेतु फोटो खींचें' : 'Take a photo of scriptures, food or queries'}
+      />
     </div>
   );
 }

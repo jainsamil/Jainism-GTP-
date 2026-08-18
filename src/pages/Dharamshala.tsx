@@ -330,27 +330,27 @@ export default function DharamshalaPage() {
     <div className="min-h-full pb-26 px-4 sm:px-6 bg-transparent text-gray-900 dark:text-gray-100 transition-colors duration-300">
       
       {/* Absolute Header */}
-      <header className="sticky top-0 z-40 bg-[#FCF8F2]/95 dark:bg-[#0A0503]/95 backdrop-blur-md -mx-4 sm:-mx-6 px-4 sm:px-6 py-3.5 mb-6 border-b border-gray-200/50 dark:border-white/5 flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3 min-w-0">
-          <button onClick={() => navigate(-1)} className="p-1.5 rounded-full bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 shadow-sm hover:bg-gray-100 dark:hover:bg-white/10 transition-colors shrink-0">
-            <ArrowLeft size={18} className="text-gray-700 dark:text-gray-300" />
+      <header className="sticky top-0 z-40 bg-[#FCF8F2]/95 dark:bg-[#0A0503]/95 backdrop-blur-md -mx-4 sm:-mx-6 px-3 sm:px-6 py-3.5 mb-6 border-b border-gray-200/50 dark:border-white/5 flex items-center justify-between gap-2 sm:gap-4">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+          <button onClick={() => navigate(-1)} className="p-1.5 sm:p-2 rounded-full bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 shadow-sm hover:bg-gray-100 dark:hover:bg-white/10 transition-colors shrink-0">
+            <ArrowLeft size={18} className="text-gray-700 dark:text-gray-300 sm:w-[22px] sm:h-[22px]" />
           </button>
-          <div>
-            <h1 className="text-sm sm:text-base md:text-lg font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] tracking-tight truncate">
+          <div className="min-w-0 flex-1">
+            <h1 className="text-xs sm:text-base md:text-lg font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FF6D00] to-[#FFD54F] tracking-tight truncate leading-tight">
               {lang === 'en' ? 'JAIN DHARAMSHALA DIRECTORY' : 'जैन धर्मशाला एवं बुकिंग निर्देशिका'}
             </h1>
-            <span className="text-[9px] uppercase tracking-wider text-gray-500 font-bold block">
+            <span className="text-[9px] uppercase tracking-wider text-gray-500 font-bold block truncate">
               {lang === 'en' ? 'Verified Canonical Trusts & Meal Timings' : 'सत्यापित देव-स्थान ट्रस्ट एवं भोजनशाला मर्यादा'}
             </span>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           {/* Help Button */}
           <button
             type="button"
             onClick={() => setHelpOpen(true)}
-            className="w-10 h-10 rounded-2xl bg-zinc-950 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 flex items-center justify-center text-[#ff3d3d] hover:text-[#ff6e6e] font-black text-lg shadow-sm hover:scale-105 active:scale-95 transition-all cursor-pointer select-none shrink-0"
+            className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-zinc-950 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 flex items-center justify-center text-[#ff3d3d] hover:text-[#ff6e6e] font-black text-sm sm:text-lg shadow-sm hover:scale-105 active:scale-95 transition-all cursor-pointer select-none shrink-0"
             title={lang === 'en' ? 'About Dharamshalas' : 'धर्मशालाओं के बारे में'}
           >
             ?
@@ -360,10 +360,10 @@ export default function DharamshalaPage() {
           <button
             type="button"
             onClick={toggleLanguage}
-            className="px-5 py-2 h-10 rounded-2xl bg-[#FF3D00] hover:bg-[#D50000] text-white flex items-center gap-2 font-black text-xs md:text-sm shadow-sm hover:scale-105 active:scale-95 transition-all cursor-pointer border border-[#FF3D00]/20 shrink-0"
+            className="px-2.5 sm:px-5 py-1.5 sm:py-2 h-8 sm:h-10 rounded-xl sm:rounded-2xl bg-[#FF3D00] hover:bg-[#D50000] text-white flex items-center gap-1 sm:gap-2 font-black text-xs sm:text-sm shadow-sm hover:scale-105 active:scale-95 transition-all cursor-pointer border border-[#FF3D00]/20 shrink-0 whitespace-nowrap"
             title={lang === 'en' ? 'Change Language' : 'भाषा बदलें'}
           >
-            <Globe size={15} className="shrink-0" />
+            <Globe size={14} className="shrink-0" />
             <span>{lang === 'en' ? 'English' : 'हिन्दी'}</span>
           </button>
         </div>

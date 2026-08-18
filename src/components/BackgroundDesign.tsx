@@ -355,10 +355,11 @@ export default function BackgroundDesign() {
     let width = canvas.width = window.innerWidth;
     let height = canvas.height = window.innerHeight;
     let time = 0;
+    const isMobile = width < 768 || ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
 
-    // Create floating spiritual Sparks/dust particles
+    // Create floating spiritual Sparks/dust particles - lightweight on mobile
     const sparks: Spark[] = [];
-    const sparkCount = Math.min(65, Math.floor((width * height) / 18000));
+    const sparkCount = isMobile ? 14 : Math.min(65, Math.floor((width * height) / 18000));
 
     const createSpark = (isInitial = false): Spark => {
       const size = Math.random() * 3.5 + 1.2;
@@ -382,8 +383,8 @@ export default function BackgroundDesign() {
       sparks.push(createSpark(true));
     }
 
-    // Initialize 6 independent floating rotating wireframe globes ("jaal type balls") placed at clean, non-overlapping corner positions away from the center
-    const globes: Globe[] = [
+    // Initialize floating rotating wireframe globes ("jaal type balls")
+    const allGlobes: Globe[] = [
       {
         pctX: 0.08,
         pctY: 0.32,
@@ -470,6 +471,8 @@ export default function BackgroundDesign() {
       }
     ];
 
+    const globes: Globe[] = isMobile ? [allGlobes[0], allGlobes[1]] : allGlobes;
+
     const handleResize = () => {
       if (!canvas) return;
       width = canvas.width = window.innerWidth;
@@ -544,13 +547,15 @@ export default function BackgroundDesign() {
       ctx.clearRect(0, 0, width, height);
 
       // --- Draw 3D Floating Rotating Wireframe Geodesic Globes ---
-      // Apply beautiful subtle shadow glow on globes for high-quality neon style
-      ctx.shadowBlur = isDark ? 10 : 5;
+      // Apply subtle shadow glow on desktop, 0 on mobile for 60fps
+      ctx.shadowBlur = isMobile ? 0 : (isDark ? 8 : 4);
 
       globes.forEach((globe, index) => {
         const hsl = getShiftedHslValues(index);
         const globeShadowColor = `hsla(${hsl.h}, ${hsl.s}%, ${hsl.l}%, 0.6)`;
-        ctx.shadowColor = globeShadowColor;
+        if (!isMobile) {
+          ctx.shadowColor = globeShadowColor;
+        }
 
         // Calculate dynamic float positioning
         const gx = width * globe.pctX;
@@ -650,8 +655,10 @@ export default function BackgroundDesign() {
       });
 
       // --- Draw Rising Sparks ---
-      ctx.shadowBlur = isDark ? 10 : 6;
-      ctx.shadowColor = colors.shadow;
+      ctx.shadowBlur = isMobile ? 0 : (isDark ? 8 : 4);
+      if (!isMobile) {
+        ctx.shadowColor = colors.shadow;
+      }
 
       for (let i = 0; i < sparks.length; i++) {
         const spark = sparks[i];

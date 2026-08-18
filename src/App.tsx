@@ -38,6 +38,8 @@ import ViharTrackerPage from './pages/ViharTracker';
 import ManuscriptLibraryPage from './pages/ManuscriptLibrary';
 import JainNewsPage from './pages/JainNews';
 import JainStorePage from './pages/JainStore';
+import MatrimonialPage from './pages/Matrimonial';
+import YatraBookingPage from './pages/YatraBooking';
 
 import PrivacyPolicyPage from './pages/PrivacyPolicy';
 import TermsPage from './pages/Terms';
@@ -148,6 +150,8 @@ function Layout({ children }: { children: React.ReactNode }) {
            location.pathname !== '/contact' && 
            location.pathname !== '/store' && 
            location.pathname !== '/news' && 
+           location.pathname !== '/matrimonial' && 
+           location.pathname !== '/yatra' && 
            location.pathname !== '/dharamshalas' && (
             <button
               onClick={toggleLanguage}
@@ -251,6 +255,8 @@ export default function App() {
                 <Route path="/manuscript-library" element={<ManuscriptLibraryPage />} />
                 <Route path="/news" element={<JainNewsPage />} />
                 <Route path="/store" element={<JainStorePage />} />
+                <Route path="/matrimonial" element={<MatrimonialPage />} />
+                <Route path="/yatra" element={<YatraBookingPage />} />
                 <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
                 <Route path="/terms" element={<TermsPage />} />
                 <Route path="/contact" element={<ContactPage />} />
