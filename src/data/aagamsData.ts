@@ -1,4 +1,6 @@
 import { BHAKTAMAR_DATA } from './bhaktamarData';
+import { MASTER_ABHISHEK_PUJAN_ITEM } from './abhishekPujanVidhiData';
+import { JAIN_DHARM_ORDERED_PUJANS, JAIN_DHARM_ORDERED_PATHS } from './jainDharmPujanPathData';
 
 export interface AagamItem {
   id: string;
@@ -299,6 +301,9 @@ function generateBhajan(name: string, meta: DeityMeta): string {
 }
 
 const baseAagamsData: AagamItem[] = [
+  // ==================== MASTER ABHISHEK TO VISARJAN (COMPLETE SEQUENTIAL VIDHI) ====================
+  MASTER_ABHISHEK_PUJAN_ITEM as AagamItem,
+
   // ==================== PUJANS (1-15) ====================
   {
     id: "pujan_1",
@@ -2206,11 +2211,47 @@ export function enrichAagamItem(item: AagamItem): AagamItem {
 
 const CATEGORIES: ('Pujan' | 'Stuti' | 'Vidhan' | 'Chalisa' | 'Bhajan' | 'Aarti')[] = ['Pujan', 'Stuti', 'Vidhan', 'Chalisa', 'Bhajan', 'Aarti'];
 
-const expandedAagams: AagamItem[] = [...baseAagamsData];
+// Map the curated Jain Dharm ordered items
+const orderedPujans: AagamItem[] = JAIN_DHARM_ORDERED_PUJANS.map(item => ({
+  id: item.id,
+  category: 'Pujan' as const,
+  title: item.title,
+  content: item.content
+}));
+
+const orderedPaths: AagamItem[] = JAIN_DHARM_ORDERED_PATHS.map(item => ({
+  id: item.id,
+  category: 'Stuti' as const,
+  title: item.title,
+  content: item.content
+}));
+
+// Filter existing base items to avoid duplicates of the curated ones
+const existingPujans = baseAagamsData.filter(item => 
+  item.category === 'Pujan' && 
+  !orderedPujans.some(op => op.title.includes(item.title.split(' ')[1] || 'XYZ'))
+);
+
+const existingStutis = baseAagamsData.filter(item => 
+  item.category === 'Stuti' && 
+  !orderedPaths.some(op => op.title.includes(item.title.split(' ')[0] || 'XYZ'))
+);
+
+const otherBaseItems = baseAagamsData.filter(item => item.category !== 'Pujan' && item.category !== 'Stuti');
+
+const combinedInitial: AagamItem[] = [
+  ...orderedPujans,
+  ...existingPujans,
+  ...orderedPaths,
+  ...existingStutis,
+  ...otherBaseItems
+];
+
+const expandedAagams: AagamItem[] = [...combinedInitial];
 
 CATEGORIES.forEach(cat => {
-  const existing = baseAagamsData.filter(item => item.category === cat);
-  const countNeeded = 60 - existing.length;
+  const existing = combinedInitial.filter(item => item.category === cat);
+  const countNeeded = Math.max(0, 60 - existing.length);
   
   if (countNeeded > 0) {
     for (let i = 0; i < countNeeded; i++) {

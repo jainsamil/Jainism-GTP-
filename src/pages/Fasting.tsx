@@ -13,10 +13,15 @@ interface CityPreset {
 }
 
 const CITIES: CityPreset[] = [
+  { name: { en: "Shree Sammed Shikharji", hi: "श्री सम्मेद शिखरजी (मधुबन)" }, sunrise: "05:14 AM", sunset: "06:22 PM" },
+  { name: { en: "Girnarji / Junagadh", hi: "श्री गिरनार जी (जूनागढ़)" }, sunrise: "06:05 AM", sunset: "07:18 PM" },
+  { name: { en: "Palitana / Shatrunjay", hi: "श्री पालीताना (शत्रुंजय)" }, sunrise: "06:02 AM", sunset: "07:15 PM" },
+  { name: { en: "Indore", hi: "इन्दौर" }, sunrise: "05:52 AM", sunset: "07:08 PM" },
+  { name: { en: "Jaipur", hi: "जयपुर" }, sunrise: "05:41 AM", sunset: "07:19 PM" },
   { name: { en: "Mumbai", hi: "मुंबई" }, sunrise: "06:01 AM", sunset: "07:11 PM" },
   { name: { en: "New Delhi", hi: "नई दिल्ली" }, sunrise: "05:28 AM", sunset: "07:15 PM" },
-  { name: { en: "Ahmedabad", hi: "अहमदाबाद" }, sunrise: "05:58 AM", sunset: "07:22 PM" },
-  { name: { en: "Jaipur", hi: "जयपुर" }, sunrise: "05:41 AM", sunset: "07:19 PM" },
+  { name: { en: "Ahmedabad / Surat", hi: "अहमदाबाद / सूरत" }, sunrise: "05:58 AM", sunset: "07:22 PM" },
+  { name: { en: "Shravanabelagola", hi: "श्रवणबेलगोला (कर्नाटक)" }, sunrise: "06:08 AM", sunset: "06:48 PM" },
   { name: { en: "Bangalore", hi: "बेंगलुरु" }, sunrise: "06:03 AM", sunset: "06:44 PM" },
   { name: { en: "Kolkata", hi: "कोलकाता" }, sunrise: "04:59 AM", sunset: "06:21 PM" }
 ];

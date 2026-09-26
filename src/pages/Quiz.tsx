@@ -327,7 +327,7 @@ export default function QuizPage() {
         </h2>
 
         <div className="space-y-4 relative z-10">
-          {q.options[language as 'en' | 'hi'].map((opt, idx) => {
+          {(q.options?.[language as 'en' | 'hi'] || q.options?.hi || q.options?.en || []).map((opt: string, idx: number) => {
             const isSelected = selected === idx;
             const isCorrect = idx === q.answer;
             const showCorrect = hasAnswered && isCorrect;

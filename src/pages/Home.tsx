@@ -72,7 +72,7 @@ export default function HomePage() {
     { title: 'Saints', icon: Users, path: '/saints', color: 'from-[#00C853] to-[#69F0AE]', shadow: 'shadow-[0_0_15px_rgba(0,200,83,0.3)]', enabled: true },
     { title: 'Pathshala', icon: GraduationCap, path: '/pathshala', color: 'from-[#AA00FF] to-[#E040FB]', shadow: 'shadow-[0_0_15px_rgba(170,0,255,0.3)]', enabled: true },
     { title: 'Tirthankar', icon: Library, path: '/tirthankars', color: 'from-[#FFD600] to-[#FFFF00]', shadow: 'shadow-[0_0_15px_rgba(255,214,0,0.3)]', enabled: true },
-    { title: 'Aagams', icon: ScrollText, path: '/aagams', color: 'from-[#D50000] to-[#FF5252]', shadow: 'shadow-[0_0_15px_rgba(213,0,0,0.3)]', enabled: true },
+    { title: 'Pujan & Aagams', icon: ScrollText, path: '/aagams?cat=Pujan', color: 'from-[#D50000] to-[#FF5252]', shadow: 'shadow-[0_0_15px_rgba(213,0,0,0.3)]', enabled: true },
     { title: 'Panchang', icon: Calendar, path: '/panchang', color: 'from-[#304FFE] to-[#536DFE]', shadow: 'shadow-[0_0_15px_rgba(48,79,254,0.3)]', enabled: true },
     { title: 'Daily Vichaar', icon: Quote, path: '/vichaar', color: 'from-[#C51162] to-[#FF4081]', shadow: 'shadow-[0_0_15px_rgba(197,17,98,0.3)]', enabled: true },
     { title: 'Multimedia', icon: PlaySquare, path: '/media', color: 'from-[#00BFA5] to-[#64FFDA]', shadow: 'shadow-[0_0_15px_rgba(0,191,165,0.3)]', enabled: settings.mediaEnabled },

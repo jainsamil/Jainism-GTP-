@@ -47,6 +47,8 @@ import ContactPage from './pages/Contact';
 import Footer from './components/Footer';
 import BackgroundDesign from './components/BackgroundDesign';
 
+import ErrorBoundary from './components/ErrorBoundary';
+
 function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const navigate = useNavigate();
@@ -211,61 +213,60 @@ function Layout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   useEffect(() => {
-    const timer = setTimeout(() => {
-      const splash = document.getElementById('initial-splash');
-      if (splash) {
-        splash.style.opacity = '0';
-        setTimeout(() => splash.remove(), 1000);
-      }
-    }, 2500);
-    return () => clearTimeout(timer);
+    // Immediately remove any legacy splash screen element from DOM
+    const splash = document.getElementById('initial-splash');
+    if (splash && splash.parentNode) {
+      splash.parentNode.removeChild(splash);
+    }
   }, []);
 
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <LanguageProvider>
-          <BrowserRouter>
-            <Layout>
-              <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/chat" element={<ChatPage />} />
-                <Route path="/knowledge" element={<KnowledgePage />} />
-                <Route path="/media" element={<MediaPage />} />
-                <Route path="/profile" element={<ProfilePage />} />
-                <Route path="/panchang" element={<PanchangPage />} />
-                <Route path="/tirthankars" element={<TirthankarsPage />} />
-                <Route path="/aagams" element={<AagamsPage />} />
-                <Route path="/admin" element={<AdminPage />} />
-                <Route path="/saints" element={<SaintsPage />} />
-                <Route path="/pathshala" element={<PathshalaPage />} />
-                <Route path="/vichaar" element={<VichaarPage />} />
-                <Route path="/history" element={<HistoryPage />} />
-                <Route path="/quiz" element={<QuizPage />} />
-                <Route path="/festivals" element={<FestivalsPage />} />
-                <Route path="/jaap" element={<JaapPage />} />
-                <Route path="/tirth" element={<TirthPage />} />
-                <Route path="/fasting" element={<FastingPage />} />
-                <Route path="/swadhyay" element={<SwadhyayPage />} />
-                <Route path="/bhaktamar" element={<BhaktamarPage />} />
-                <Route path="/diet" element={<DietPage />} />
-                <Route path="/verified-food" element={<VerifiedFoodPage />} />
-                <Route path="/dharamshalas" element={<DharamshalaPage />} />
-                <Route path="/vihar-tracker" element={<ViharTrackerPage />} />
-                <Route path="/manuscript-library" element={<ManuscriptLibraryPage />} />
-                <Route path="/news" element={<JainNewsPage />} />
-                <Route path="/store" element={<JainStorePage />} />
-                <Route path="/matrimonial" element={<MatrimonialPage />} />
-                <Route path="/yatra" element={<YatraBookingPage />} />
-                <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
-                <Route path="/terms" element={<TermsPage />} />
-                <Route path="/contact" element={<ContactPage />} />
-              </Routes>
-            </Layout>
-          </BrowserRouter>
-          <UnauthorizedDomainModal />
-        </LanguageProvider>
-      </AuthProvider>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider>
+        <AuthProvider>
+          <LanguageProvider>
+            <BrowserRouter>
+              <Layout>
+                <Routes>
+                  <Route path="/" element={<HomePage />} />
+                  <Route path="/chat" element={<ChatPage />} />
+                  <Route path="/knowledge" element={<KnowledgePage />} />
+                  <Route path="/media" element={<MediaPage />} />
+                  <Route path="/profile" element={<ProfilePage />} />
+                  <Route path="/panchang" element={<PanchangPage />} />
+                  <Route path="/tirthankars" element={<TirthankarsPage />} />
+                  <Route path="/aagams" element={<AagamsPage />} />
+                  <Route path="/admin" element={<AdminPage />} />
+                  <Route path="/saints" element={<SaintsPage />} />
+                  <Route path="/pathshala" element={<PathshalaPage />} />
+                  <Route path="/vichaar" element={<VichaarPage />} />
+                  <Route path="/history" element={<HistoryPage />} />
+                  <Route path="/quiz" element={<QuizPage />} />
+                  <Route path="/festivals" element={<FestivalsPage />} />
+                  <Route path="/jaap" element={<JaapPage />} />
+                  <Route path="/tirth" element={<TirthPage />} />
+                  <Route path="/fasting" element={<FastingPage />} />
+                  <Route path="/swadhyay" element={<SwadhyayPage />} />
+                  <Route path="/bhaktamar" element={<BhaktamarPage />} />
+                  <Route path="/diet" element={<DietPage />} />
+                  <Route path="/verified-food" element={<VerifiedFoodPage />} />
+                  <Route path="/dharamshalas" element={<DharamshalaPage />} />
+                  <Route path="/vihar-tracker" element={<ViharTrackerPage />} />
+                  <Route path="/manuscript-library" element={<ManuscriptLibraryPage />} />
+                  <Route path="/news" element={<JainNewsPage />} />
+                  <Route path="/store" element={<JainStorePage />} />
+                  <Route path="/matrimonial" element={<MatrimonialPage />} />
+                  <Route path="/yatra" element={<YatraBookingPage />} />
+                  <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+                  <Route path="/terms" element={<TermsPage />} />
+                  <Route path="/contact" element={<ContactPage />} />
+                </Routes>
+              </Layout>
+            </BrowserRouter>
+            <UnauthorizedDomainModal />
+          </LanguageProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }

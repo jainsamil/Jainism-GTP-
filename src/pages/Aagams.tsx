@@ -23,26 +23,57 @@ import {
   Compass, 
   Settings, 
   Star,
-  Globe 
+  Globe,
+  Droplets,
+  Flame,
+  Flower2,
+  RotateCcw
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { db } from '../firebase';
 import { collection, onSnapshot, query, addDoc } from 'firebase/firestore';
 import { useLanguage } from '../contexts/LanguageContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import SectionAiAgent from '../components/SectionAiAgent';
 import UnifiedSearchBar from '../components/UnifiedSearchBar';
 
 import { aagamsData } from '../data/aagamsData';
+import { ABHISHEK_PUJAN_STEPS, MASTER_ABHISHEK_PUJAN_ITEM, AbhishekPujanStep } from '../data/abhishekPujanVidhiData';
 
-const categories = ['Pujan', 'Stuti', 'Vidhan', 'Chalisa', 'Bhajan', 'Aarti'];
+const categories = ['AbhishekVidhi', 'Pujan', 'Stuti', 'Vidhan', 'Chalisa', 'Bhajan', 'Aarti'];
 
-const FALLBACK_AAGAMS = aagamsData;
+export const ABHISHEK_AAGAM_ITEMS = ABHISHEK_PUJAN_STEPS.map(step => ({
+  id: step.id,
+  stepNumber: step.stepNumber,
+  category: 'AbhishekVidhi' as const,
+  title: `चरण ${step.stepNumber}: ${step.title}`,
+  titleEn: step.titleEn,
+  shortTitle: step.title,
+  subtitle: step.subtitle,
+  timeEstimate: step.timeEstimate,
+  vidhiInstruction: step.vidhiInstruction,
+  mantras: step.mantras,
+  hindiVerses: step.hindiVerses,
+  bhavarth: step.bhavarth,
+  stepCategory: step.category,
+  content: step.fullChantText
+}));
+
+const FALLBACK_AAGAMS = [...ABHISHEK_AAGAM_ITEMS, ...aagamsData];
 
 export default function AagamsPage() {
   const { language, toggleLanguage } = useLanguage();
   const navigate = useNavigate();
-  const [activeCat, setActiveCat] = useState('Pujan');
+  const location = useLocation();
+  const [activeCat, setActiveCat] = useState('AbhishekVidhi');
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const cat = params.get('cat');
+    if (cat && categories.includes(cat)) {
+      setActiveCat(cat);
+    }
+  }, [location.search]);
   const [search, setSearch] = useState('');
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [aagams, setAagams] = useState<any[]>(FALLBACK_AAGAMS);
@@ -50,6 +81,17 @@ export default function AagamsPage() {
   const [isListening, setIsListening] = useState(false);
   const [speechError, setSpeechError] = useState('');
   const recognitionRef = useRef<any>(null);
+
+  // New features & Ritual state
+  const [ritualFilter, setRitualFilter] = useState<'all' | 'Abhishek' | 'Pujan' | 'Visarjan'>('all');
+  const [completedSteps, setCompletedSteps] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem('jain_ritual_completed_steps');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
 
   // New features
   const [favorites, setFavorites] = useState<string[]>([]);
@@ -256,13 +298,54 @@ export default function AagamsPage() {
     }
   }, [selectedItem]);
 
-  const filtered = aagams.filter(item => 
-    item.category === activeCat && 
-    item.title.toLowerCase().includes(search.toLowerCase())
-  );
+  const handleToggleCompletedStep = (id: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    const updated = completedSteps.includes(id)
+      ? completedSteps.filter(s => s !== id)
+      : [...completedSteps, id];
+    setCompletedSteps(updated);
+    localStorage.setItem('jain_ritual_completed_steps', JSON.stringify(updated));
+  };
+
+  const handleResetDailyRitual = () => {
+    if (window.confirm(language === 'hi' ? 'क्या आप आज की अभिषेक-पूजन विधि को पुनः प्रारंभ (रीसेट) करना चाहते हैं?' : 'Reset today\'s ritual progress?')) {
+      setCompletedSteps([]);
+      localStorage.removeItem('jain_ritual_completed_steps');
+    }
+  };
+
+  const filtered = aagams.filter(item => {
+    if (activeCat === 'AbhishekVidhi') {
+      if (item.category !== 'AbhishekVidhi') return false;
+      if (ritualFilter !== 'all' && item.stepCategory !== ritualFilter) return false;
+      if (search) {
+        const q = search.toLowerCase();
+        return (
+          item.title.toLowerCase().includes(q) ||
+          (item.subtitle && item.subtitle.toLowerCase().includes(q)) ||
+          (item.vidhiInstruction && item.vidhiInstruction.toLowerCase().includes(q)) ||
+          (item.mantras && item.mantras.some((m: string) => m.toLowerCase().includes(q)))
+        );
+      }
+      return true;
+    }
+    return (
+      item.category === activeCat &&
+      item.title.toLowerCase().includes(search.toLowerCase())
+    );
+  }).sort((a, b) => {
+    if (activeCat === 'AbhishekVidhi') {
+      return (a.stepNumber || 0) - (b.stepNumber || 0);
+    }
+    return 0;
+  });
 
   // Helper variables and handlers for Next / Previous item navigation inside the Jinvani reader
-  const activeList = selectedItem ? aagams.filter(item => item.category === selectedItem.category) : [];
+  const activeList = selectedItem
+    ? aagams
+        .filter(item => item.category === selectedItem.category)
+        .sort((a, b) => (a.stepNumber || 0) - (b.stepNumber || 0))
+    : [];
 
   const currentIndex = selectedItem ? activeList.findIndex(item => item.id === selectedItem.id) : -1;
   const hasPrev = currentIndex > 0;
@@ -402,18 +485,104 @@ export default function AagamsPage() {
                 : "bg-white dark:bg-[#121212] text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-white/5 hover:border-saffron/30"
             )}
           >
-            {language === 'en' ? cat : (
-              cat === 'Pujan' ? 'देव देव पूजा' :
-              cat === 'Stuti' ? 'स्तुति पाठ' :
-              cat === 'Vidhan' ? 'विधान संग्रह' :
-              cat === 'Chalisa' ? 'चालीसा संग्रह' :
-              cat === 'Bhajan' ? 'मधुर भजन' : 'मंगल आरती'
-            )}
+            {cat === 'AbhishekVidhi' ? (language === 'en' ? '✨ Abhishek to Visarjan (15 Steps)' : '✨ अभिषेक से विसर्जन विधि (१५ चरण)') :
+             cat === 'Pujan' ? (language === 'en' ? 'Pujan Collection' : 'देव पूजा संग्रह') :
+             cat === 'Stuti' ? (language === 'en' ? 'Stuti & Path' : 'स्तुति एवं पाठ संग्रह') :
+             cat === 'Vidhan' ? (language === 'en' ? 'Vidhan' : 'विधान संग्रह') :
+             cat === 'Chalisa' ? (language === 'en' ? 'Chalisa' : 'चालीसा संग्रह') :
+             cat === 'Bhajan' ? (language === 'en' ? 'Bhajan' : 'मधुर भजन') : 
+             (language === 'en' ? 'Aarti' : 'मंगल आरती')
+            }
           </button>
         ))}
       </div>
 
-      {/* Aagams list */}
+      {/* Dedicated Abhishek-to-Visarjan Ritual Hub Header */}
+      {activeCat === 'AbhishekVidhi' && (
+        <div className="mb-6 space-y-4">
+          <div className="bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-transparent dark:from-amber-500/15 dark:to-transparent rounded-3xl p-5 sm:p-6 border-2 border-amber-500/30 shadow-lg relative overflow-hidden">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30">
+                    {language === 'en' ? 'Complete 15 Steps' : 'क्रमबद्ध १५ पावन चरण'}
+                  </span>
+                  <span className="text-[10px] font-black text-[#00E676] bg-[#00E676]/10 px-2 py-0.5 rounded-full border border-[#00E676]/20">
+                    {completedSteps.length} / 15 {language === 'en' ? 'Done' : 'संपन्न'}
+                  </span>
+                </div>
+                <h3 className="text-lg sm:text-xl font-display font-black text-gray-900 dark:text-white">
+                  {language === 'en' ? 'Shree Jinendra Nitya Abhishek & Pujan Vidhi' : 'श्री जिनेन्द्र नित्य अभिषेक एवं सम्पूर्ण पूजन विधि'}
+                </h3>
+                <p className="text-xs text-gray-600 dark:text-gray-300 font-medium">
+                  {language === 'en' 
+                    ? 'Step-by-step authentic morning ritual from Purification, 108 Kalash Abhishek, Shanti-dhara, Gandhodak to Ashta-dravya Pujan, Vrihat Shanti Path and Visarjan.' 
+                    : 'प्रातः काल शुद्धि, १०८ कलश अभिषेक, वृहत् शांतिधारा, गंधोदक ग्रहण से लेकर अष्टद्रव्य पूजन, जयमाला, शांतिपाठ एवं विसर्जन पर्यन्त क्रमबद्ध सम्पूर्ण विधि।'}
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+                <button
+                  onClick={() => setSelectedItem(MASTER_ABHISHEK_PUJAN_ITEM)}
+                  className="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-black text-xs shadow-md shadow-amber-600/20 hover:scale-102 active:scale-98 transition-all flex items-center gap-2 cursor-pointer"
+                >
+                  <ScrollText size={15} />
+                  <span>{language === 'en' ? 'Full Master Text' : 'सम्पूर्ण विधि (अखंड पाठ)'}</span>
+                </button>
+                {completedSteps.length > 0 && (
+                  <button
+                    onClick={handleResetDailyRitual}
+                    className="p-2.5 rounded-2xl bg-gray-150 dark:bg-white/10 text-gray-600 dark:text-gray-300 hover:text-red-500 font-bold text-xs transition-colors flex items-center gap-1.5 cursor-pointer"
+                    title={language === 'en' ? 'Reset Daily Ritual' : 'दैनिक क्रम रीसेट करें'}
+                  >
+                    <RotateCcw size={15} />
+                    <span className="hidden sm:inline">{language === 'en' ? 'Reset' : 'रीसेट'}</span>
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Ritual Progress bar */}
+            <div className="mt-4 pt-4 border-t border-amber-500/20">
+              <div className="flex justify-between items-center text-[10px] font-black uppercase text-amber-800 dark:text-amber-300 mb-1.5">
+                <span>{language === 'en' ? 'Daily Ritual Progress' : 'दैनिक अभिषेक-पूजन प्रगति'}</span>
+                <span>{Math.round((completedSteps.length / 15) * 100)}% ({completedSteps.length}/15 चरण)</span>
+              </div>
+              <div className="w-full h-2.5 bg-amber-500/10 dark:bg-white/10 rounded-full overflow-hidden p-0.5">
+                <div 
+                  className="h-full bg-gradient-to-r from-amber-500 to-[#00E676] rounded-full transition-all duration-500"
+                  style={{ width: `${(completedSteps.length / 15) * 100}%` }}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Sub-Filters for AbhishekVidhi */}
+          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+            {[
+              { id: 'all', hi: 'सभी १५ चरण', en: 'All 15 Steps' },
+              { id: 'Abhishek', hi: '१. अभिषेक विधि (चरण १-८)', en: '1. Abhishek (1-8)' },
+              { id: 'Pujan', hi: '२. अष्टद्रव्य पूजन (चरण ९-१२)', en: '2. Pujan (9-12)' },
+              { id: 'Visarjan', hi: '३. विसर्जन व आरती (चरण १३-१५)', en: '3. Visarjan (13-15)' },
+            ].map(f => (
+              <button
+                key={f.id}
+                onClick={() => setRitualFilter(f.id as any)}
+                className={cn(
+                  "px-3.5 py-1.5 rounded-xl text-xs font-black whitespace-nowrap transition-all cursor-pointer",
+                  ritualFilter === f.id
+                    ? "bg-amber-600 text-white shadow-sm"
+                    : "bg-white dark:bg-[#121212] text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-white/5 hover:border-amber-500/30"
+                )}
+              >
+                {language === 'en' ? f.en : f.hi}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Aagams / Steps list */}
       <div className="grid gap-3.5">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20 text-gray-500">
@@ -424,6 +593,122 @@ export default function AagamsPage() {
           filtered.map((item, idx) => {
             const isBookmarked = favorites.includes(item.id);
             const isRead = chantedLog.includes(item.id);
+            const isCompletedStep = completedSteps.includes(item.id);
+            const isAbhishekStep = item.category === 'AbhishekVidhi';
+
+            if (isAbhishekStep) {
+              return (
+                <div 
+                  key={item.id} 
+                  onClick={() => setSelectedItem(item)}
+                  className={cn(
+                    "bg-white dark:bg-[#121212] p-4.5 sm:p-5 rounded-2xl shadow-sm border transition-all duration-300 group cursor-pointer relative overflow-hidden",
+                    isCompletedStep
+                      ? "border-emerald-500/40 bg-emerald-50/20 dark:bg-emerald-950/10"
+                      : "border-gray-150 dark:border-white/10 hover:border-amber-500/50 hover:shadow-md"
+                  )}
+                >
+                  {/* Visual Step Marker */}
+                  <div className={cn(
+                    "absolute left-0 top-0 bottom-0 w-1.5 rounded-r-md transition-colors",
+                    isCompletedStep 
+                      ? "bg-emerald-500" 
+                      : item.stepCategory === 'Abhishek' ? "bg-blue-500" :
+                        item.stepCategory === 'Pujan' ? "bg-amber-500" : "bg-rose-500"
+                  )} />
+
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 relative z-10">
+                    <div className="flex items-start gap-3.5 min-w-0 flex-1">
+                      {/* Step Number Badge */}
+                      <div className={cn(
+                        "w-11 h-11 rounded-2xl flex flex-col items-center justify-center shrink-0 font-black shadow-sm border",
+                        isCompletedStep 
+                          ? "bg-emerald-500 text-white border-emerald-400" 
+                          : "bg-amber-500/10 text-amber-800 dark:text-amber-300 border-amber-500/20"
+                      )}>
+                        <span className="text-[8px] uppercase tracking-tighter">{language === 'en' ? 'Step' : 'चरण'}</span>
+                        <span className="text-sm leading-none font-display font-black">{item.stepNumber || idx + 1}</span>
+                      </div>
+
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2 mb-1">
+                          <span className={cn(
+                            "text-[9px] font-black uppercase px-2 py-0.5 rounded-md border flex items-center gap-1",
+                            item.stepCategory === 'Abhishek' ? "bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/20" :
+                            item.stepCategory === 'Pujan' ? "bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/20" :
+                            "bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-500/20"
+                          )}>
+                            {item.stepCategory === 'Abhishek' && <Droplets size={10} />}
+                            {item.stepCategory === 'Pujan' && <Flower2 size={10} />}
+                            {item.stepCategory === 'Visarjan' && <Flame size={10} />}
+                            <span>{item.stepCategory === 'Abhishek' ? (language === 'en' ? 'Abhishek' : 'अभिषेक विधि') :
+                                  item.stepCategory === 'Pujan' ? (language === 'en' ? 'Pujan' : 'अष्टद्रव्य पूजन') :
+                                  (language === 'en' ? 'Visarjan' : 'विसर्जन व आरती')}</span>
+                          </span>
+
+                          {item.timeEstimate && (
+                            <span className="text-[9px] font-bold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-white/5 px-2 py-0.5 rounded-md">
+                              ⏱️ {item.timeEstimate}
+                            </span>
+                          )}
+
+                          {isCompletedStep && (
+                            <span className="text-[9px] font-black text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md flex items-center gap-1">
+                              <CheckCircle2 size={10} />
+                              <span>{language === 'en' ? 'Completed' : 'संपन्न'}</span>
+                            </span>
+                          )}
+                        </div>
+
+                        <h3 className="font-display font-black text-gray-900 dark:text-gray-100 text-base sm:text-lg leading-snug group-hover:text-amber-700 dark:group-hover:text-amber-400 transition-colors">
+                          {item.title}
+                        </h3>
+
+                        {item.subtitle && (
+                          <p className="text-xs text-gray-500 dark:text-gray-400 font-medium line-clamp-1 mt-0.5">
+                            {item.subtitle}
+                          </p>
+                        )}
+
+                        {item.vidhiInstruction && (
+                          <p className="text-[11px] text-gray-600 dark:text-gray-300 line-clamp-2 mt-1.5 font-sans bg-gray-50 dark:bg-white/5 p-2 rounded-xl border border-gray-150 dark:border-white/5">
+                            <strong className="text-amber-700 dark:text-amber-400">विधि: </strong>
+                            {item.vidhiInstruction}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 self-end sm:self-center shrink-0 mt-2 sm:mt-0">
+                      <button
+                        onClick={(e) => handleToggleCompletedStep(item.id, e)}
+                        className={cn(
+                          "px-3 py-1.5 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer border",
+                          isCompletedStep
+                            ? "bg-emerald-500 text-white border-emerald-400 shadow-sm"
+                            : "bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-white/10 hover:bg-emerald-50 dark:hover:bg-emerald-950/20 hover:text-emerald-600"
+                        )}
+                      >
+                        <CheckCircle2 size={14} className={isCompletedStep ? "text-white" : "text-gray-400"} />
+                        <span>{isCompletedStep ? (language === 'en' ? 'Done' : 'संपन्न') : (language === 'en' ? 'Mark' : 'पूर्ण')}</span>
+                      </button>
+
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedItem(item);
+                        }}
+                        className="px-3.5 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/20 text-xs font-black flex items-center gap-1 cursor-pointer transition-colors"
+                      >
+                        <Play size={12} className="fill-current" />
+                        <span>{language === 'en' ? 'Chant' : 'पाठ करें'}</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            }
+
             return (
               <div 
                 key={item.id} 
@@ -521,9 +806,21 @@ export default function AagamsPage() {
                   <ArrowLeft size={16} />
                 </button>
                 <div className="min-w-0 truncate">
-                  <span className="text-[9px] font-black uppercase tracking-widest border border-current/20 px-1.5 py-0.5 rounded">
-                    {selectedItem.category}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[9px] font-black uppercase tracking-widest border border-current/20 px-1.5 py-0.5 rounded">
+                      {selectedItem.category === 'AbhishekVidhi' ? (language === 'en' ? 'Abhishek Vidhi' : 'अभिषेक विधि') : selectedItem.category}
+                    </span>
+                    {selectedItem.stepNumber && (
+                      <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30">
+                        {language === 'en' ? `Step ${selectedItem.stepNumber}/15` : `चरण ${selectedItem.stepNumber}/१५`}
+                      </span>
+                    )}
+                    {selectedItem.timeEstimate && (
+                      <span className="text-[9px] font-bold opacity-75 hidden sm:inline">
+                        ⏱️ {selectedItem.timeEstimate}
+                      </span>
+                    )}
+                  </div>
                   <h2 className="text-sm md:text-base lg:text-lg font-display font-black truncate mt-1" title={selectedItem.title}>
                     {selectedItem.title}
                   </h2>
@@ -532,6 +829,21 @@ export default function AagamsPage() {
 
               {/* Bookmark & Chanted Indicators */}
               <div className="flex items-center gap-1.5 md:gap-2 shrink-0">
+                {selectedItem.stepNumber && (
+                  <button 
+                    onClick={() => handleToggleCompletedStep(selectedItem.id)}
+                    className={cn(
+                      "px-3 py-1.5 rounded-full border text-[10px] md:text-xs font-black uppercase flex items-center gap-1.5 cursor-pointer transition-all shrink-0 shadow-sm",
+                      completedSteps.includes(selectedItem.id) 
+                        ? "bg-emerald-600 border-transparent text-white hover:bg-emerald-700 scale-[1.03]" 
+                        : "bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/20"
+                    )}
+                  >
+                    <CheckCircle2 size={12} className={completedSteps.includes(selectedItem.id) ? "text-white" : "text-emerald-500 shrink-0"} />
+                    <span>{completedSteps.includes(selectedItem.id) ? (language === 'en' ? 'Done' : 'चरण संपन्न') : (language === 'en' ? 'Mark Done' : 'चरण पूर्ण')}</span>
+                  </button>
+                )}
+
                 <button 
                   onClick={() => handleToggleBookmark(selectedItem.id)}
                   className="p-1.5 md:p-2 rounded-full border border-current/10 hover:bg-current/5 transition-colors cursor-pointer shrink-0"
@@ -657,6 +969,47 @@ export default function AagamsPage() {
                 className="max-w-xl mx-auto space-y-6 relative z-10 transition-all text-center"
                 style={{ fontSize: `${fontSize}px` }}
               >
+                {/* Ritual Step Guidance Cards (if available) */}
+                {selectedItem.vidhiInstruction && (
+                  <div className="text-left bg-amber-500/10 border-2 border-amber-500/30 rounded-2xl p-4 sm:p-5 text-sm not-italic shadow-sm">
+                    <div className="flex items-center gap-2 mb-2 text-amber-800 dark:text-amber-300 font-black text-xs uppercase tracking-wider">
+                      <ScrollText size={16} />
+                      <span>{language === 'en' ? 'Ritual Guidelines (विधि निर्देश)' : '📋 विधि निर्देश एवं नियम'}</span>
+                    </div>
+                    <p className="leading-relaxed font-sans text-gray-800 dark:text-gray-200 font-medium">
+                      {selectedItem.vidhiInstruction}
+                    </p>
+                  </div>
+                )}
+
+                {selectedItem.mantras && selectedItem.mantras.length > 0 && (
+                  <div className="text-left bg-orange-500/10 border-2 border-orange-500/30 rounded-2xl p-4 sm:p-5 text-sm not-italic shadow-sm">
+                    <div className="flex items-center gap-2 mb-2 text-orange-800 dark:text-orange-300 font-black text-xs uppercase tracking-wider">
+                      <Sparkles size={16} />
+                      <span>{language === 'en' ? 'Sacred Mantras (मूल मन्त्र)' : '🕉️ मूल मन्त्र पाठ'}</span>
+                    </div>
+                    <div className="space-y-2 font-sans font-bold text-gray-900 dark:text-white">
+                      {selectedItem.mantras.map((m: string, i: number) => (
+                        <div key={i} className="p-3 rounded-xl bg-white/70 dark:bg-black/40 border border-orange-500/20">
+                          {m}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {selectedItem.bhavarth && (
+                  <div className="text-left bg-emerald-500/10 border-2 border-emerald-500/30 rounded-2xl p-4 sm:p-5 text-sm not-italic shadow-sm">
+                    <div className="flex items-center gap-2 mb-2 text-emerald-800 dark:text-emerald-300 font-black text-xs uppercase tracking-wider">
+                      <Info size={16} />
+                      <span>{language === 'en' ? 'Spiritual Meaning (भावार्थ)' : '✨ आध्यात्मिक भावार्थ'}</span>
+                    </div>
+                    <p className="leading-relaxed font-sans text-gray-800 dark:text-gray-200 font-medium">
+                      {selectedItem.bhavarth}
+                    </p>
+                  </div>
+                )}
+
                 {selectedItem.content.split('\n').map((line: string, index: number) => {
                   const cleaned = line.trim();
                   if (!cleaned) return <div key={`empty-${index}`} className="h-4" />;

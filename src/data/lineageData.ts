@@ -10,7 +10,7 @@ export interface LineageNode {
 export const lineageData: LineageNode[] = [
   {
     id: 'mahavira',
-    name: { en: "Tirthankar Bhagwan Mahavira", hi: "चर्म तीर्थंकर भगवान महावीर" },
+    name: { en: "Tirthankar Bhagwan Mahavira", hi: "चरम तीर्थंकर भगवान महावीर" },
     period: { en: "599 - 527 BCE", hi: "ईसा पूर्व ५९९ - ५२७" },
     role: { en: "The 24th sovereign spiritual teacher", hi: "२४वें तीर्थंकर (शासन नायक)" },
     desc: {
@@ -34,7 +34,7 @@ export const lineageData: LineageNode[] = [
     id: 'sudharma',
     name: { en: "Acharya Sudharma Swami", hi: "गणधर सुधर्मा स्वामी" },
     period: { en: "Attained Kevalgyan 12 years after Gautama", hi: "द्वितीय केवलज्ञानी" },
-    role: { en: "Second Kevali (omniscent teacher)", hi: "द्वितीय पट्टाचार्य एवं केवलज्ञani" },
+    role: { en: "Second Kevali (omniscient teacher)", hi: "द्वितीय पट्टाचार्य एवं केवलज्ञानी" },
     desc: {
       en: "One of the direct Gandharas of Lord Mahavira who succeeded Gautama Swami and kept the flame of omniscience alive, delivering standard spiritual discourses.",
       hi: "गौतम स्वामी के पश्चात केवलज्ञान प्राप्त कर संघ का नेतृत्व करने वाले द्वितीय केवलज्ञानी आचार्यदेव।"

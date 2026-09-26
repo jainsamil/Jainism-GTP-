@@ -60,7 +60,7 @@ export default function HistoryPage() {
 
   // Separation of the 8 Main Epochs of Jinas vs the Generated Reference Library items
   const mainEpochs = useMemo(() => {
-    const staticEpochs = historyData.slice(0, 8).filter(item => !deletedHistoryIds.has(item.id));
+    const staticEpochs = historyData.slice(0, 8).filter(item => !item.id || !deletedHistoryIds.has(item.id));
     const firestoreEpochs = firestoreHistory.filter(item => item.category === 'Event' || item.id?.startsWith('event'));
     
     const dataMap = new Map(firestoreEpochs.map(doc => [doc.id, doc]));
@@ -91,7 +91,7 @@ export default function HistoryPage() {
     const firestoreRepo = firestoreHistory.filter(item => item.category !== 'Event' && !item.id?.startsWith('event'));
     
     const dataMap = new Map(firestoreRepo.map(doc => [doc.id, doc]));
-    const merged = repositoryItems.filter(item => !deletedHistoryIds.has(item.id)).map(fallbackItem => {
+    const merged = repositoryItems.filter(item => !item.id || !deletedHistoryIds.has(item.id)).map(fallbackItem => {
       let matchedItem = dataMap.get(fallbackItem.id);
       if (!matchedItem) {
         const matchByTitle = firestoreRepo.find((d: any) => 

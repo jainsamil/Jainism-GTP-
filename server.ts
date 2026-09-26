@@ -79,7 +79,7 @@ app.post('/api/gemini/generate-scripture', async (req, res) => {
     Make sure the text is lengthy, devotionally rich, and is completely structured with a traditional layout. Do not write any preamble or notes, output only the actual scripture content.`;
 
     const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
+      model: "gemini-2.5-flash",
       contents: prompt,
     });
 
@@ -159,7 +159,7 @@ app.post('/api/admin/ai-generate-data', async (req, res) => {
     Do not wrap the JSON object inside any Markdown code blocks or write extra words. Just output the clean JSON object directly.`;
 
     const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
+      model: "gemini-2.5-flash",
       contents: prompt,
       config: {
         systemInstruction,
@@ -340,7 +340,7 @@ Do not wrap inside markdown code blocks, just return pure JSON.`;
     }
 
     const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
+      model: "gemini-2.5-flash",
       contents,
       config: {
         systemInstruction: nlpSystemInstruction,
@@ -415,7 +415,7 @@ Return ONLY a single valid JSON object following this exact schema:
 Do not wrap the JSON in Markdown code block blocks. Just return the clean JSON string directly.`;
 
     const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
+      model: "gemini-2.5-flash",
       contents: [
         {
           inlineData: {
@@ -656,7 +656,7 @@ app.get('/api/jain-news', async (req, res) => {
 
     const response = await Promise.race([
       ai.models.generateContent({
-        model: "gemini-3.5-flash",
+        model: "gemini-2.5-flash",
         contents: prompt,
         config: {
           systemInstruction: "You are a professional Jainism news intelligence engine. Perform deep web search to fetch accurate real news. Return a valid JSON list with bilingual news items in English and Hindi.",
@@ -836,7 +836,7 @@ Please generate the absolute full detailed text content including:
 Ensure the language is highly reverent, traditional, detailed, and spiritual. Return the response in beautiful, lengthy Markdown format with clear visual demarcations. Do not write any greetings or preambles, output only the actual scripture commentary.`;
 
     const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
+      model: "gemini-2.5-flash",
       contents: prompt,
     });
 
@@ -930,7 +930,7 @@ Provide the translation in the following exact JSON format. Respond with ONLY th
 }`;
 
     const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
+      model: "gemini-2.5-flash",
       contents: prompt,
     });
 
@@ -1005,7 +1005,7 @@ app.post('/api/gemini/chat', async (req, res) => {
     });
 
     const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
+      model: "gemini-2.5-flash",
       contents,
       config: {
         systemInstruction: systemInstruction || "You are an intelligent Jain spiritual and community assistant."
@@ -1066,8 +1066,19 @@ async function startServer() {
     app.use(vite.middlewares);
   } else {
     const distPath = path.join(process.cwd(), 'dist');
-    app.use(express.static(distPath));
+    app.use(express.static(distPath, {
+      setHeaders: (res, path) => {
+        if (path.endsWith('.html')) {
+          res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+          res.setHeader('Pragma', 'no-cache');
+          res.setHeader('Expires', '0');
+        }
+      }
+    }));
     app.get('*', (req, res) => {
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
       res.sendFile(path.join(distPath, 'index.html'));
     });
   }

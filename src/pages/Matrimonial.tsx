@@ -1,439 +1,302 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Heart, Search, Filter, Plus, User, ArrowLeft, Phone, Mail, MapPin, 
   Sparkles, ShieldCheck, CheckCircle2, Globe, Star, Calendar, Briefcase, 
   GraduationCap, Eye, X, Send, Check, Bookmark, BookmarkCheck, ChevronRight, 
   MessageCircle, HelpCircle, Lock, Unlock, Crown, FileText, Download, Share2,
-  ShieldAlert, Award, UserCheck, EyeOff
+  ShieldAlert, Award, UserCheck, EyeOff, AlertCircle, AlertTriangle, 
+  RefreshCw, Clock, Sliders, IndianRupee, Shield, UserX, UserPlus
 } from 'lucide-react';
-import { cn } from '../lib/utils';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
-import { ALL_GOLAPURV_PROFILES } from '../data/golapurvProfiles';
-
-export interface MatrimonialProfile {
-  id: string;
-  fullName: string;
-  gender: 'male' | 'female';
-  age: number;
-  height: string;
-  sampraday: 'Digambar' | 'Swetambar Murtipujak' | 'Sthanakvasi' | 'Terapanthi' | 'Kanji Panth' | 'Other Jain';
-  subCategory: string; // e.g. "Parwar (परवार)", "Golapurv (गोलापूर्व)", "Khandelwal (खंडेलवाल)", "Oswal (ओसवाल)", "Porwal (पोड़वाल)", "Saitwal", "Humad", "Jaiswal", "Agarval"
-  gotra: string;
-  maritalStatus: 'Never Married' | 'Divorced' | 'Widowed';
-  education: string;
-  profession: string;
-  annualIncome: string;
-  city: string;
-  state: string;
-  country: string;
-  contactPhone: string;
-  contactEmail: string;
-  photoUrl: string;
-  bio: string;
-  dietaryHabit: 'Pure Jain (Sunset Chovisi)' | 'Jain (No Root Veg)' | 'Vegetarian';
-  dailyRituals: string;
-  manglik: 'No' | 'Yes' | 'Partial / Anshik';
-  gunaMatchScore: number; // e.g. 34 out of 36
-  gunaBreakdown: {
-    varna: string;
-    vashya: string;
-    tara: string;
-    yoni: string;
-    maitri: string;
-    gana: string;
-    bhakoot: string;
-    nadi: string;
-  };
-  fatherOccupation: string;
-  motherOccupation: string;
-  siblings: string;
-  verifiedTrust: boolean;
-  isConfidential: boolean; // Premium Privacy Shield
-  createdAt?: string;
-}
-
-const AUTHENTIC_JAIN_PROFILES: MatrimonialProfile[] = [
-  {
-    id: 'matri_parwar_1',
-    fullName: 'Aarav Jain (Parwar)',
-    gender: 'male',
-    age: 28,
-    height: "5'10\"",
-    sampraday: 'Digambar',
-    subCategory: 'Parwar (परवार)',
-    gotra: 'Kashyap (गोत्र)',
-    maritalStatus: 'Never Married',
-    education: 'B.Tech CS (IIT Bombay) & M.S. Tech',
-    profession: 'Senior Software Engineer at Google',
-    annualIncome: '₹38 LPA',
-    city: 'Sagar',
-    state: 'Madhya Pradesh',
-    country: 'India',
-    contactPhone: '+91 98262 44310',
-    contactEmail: 'aarav.parwar.sagar@gmail.com',
-    photoUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400',
-    bio: 'Respected Digambar Jain Parwar family from Sagar (MP). Highly religious, strictly observes Sunset Chovisi & Dev Darshan daily. Enjoys reading Jain Agams, Jinendra Puja, and Tirth Yatras.',
-    dietaryHabit: 'Pure Jain (Sunset Chovisi)',
-    dailyRituals: 'Daily Dev Darshan, Jinendra Abhishek & Swadhyay',
-    manglik: 'No',
-    gunaMatchScore: 34,
-    gunaBreakdown: {
-      varna: '1/1 Uttam Varna',
-      vashya: '2/2 Full Vashya',
-      tara: '3/3 Shubha Tara',
-      yoni: '4/4 Friend Yoni',
-      maitri: '5/5 Sampoorna Graha Maitri',
-      gana: '6/6 Dev Gana Match',
-      bhakoot: '7/7 Shubha Bhakoot',
-      nadi: '6/8 Madhya Nadi Match'
-    },
-    fatherOccupation: 'Established Grain & Agro Business Owner in Sagar Mandi',
-    motherOccupation: 'Swaadhyaayi Homemaker',
-    siblings: '1 Elder Sister (Married in Lalitpur Parwar Family)',
-    verifiedTrust: true,
-    isConfidential: false
-  },
-  {
-    id: 'matri_golapurv_1',
-    fullName: 'Ananya Jain (Golapurv)',
-    gender: 'female',
-    age: 25,
-    height: "5'5\"",
-    sampraday: 'Digambar',
-    subCategory: 'Golapurv (गोलापूर्व)',
-    gotra: 'Gautam (गोत्र)',
-    maritalStatus: 'Never Married',
-    education: 'Chartered Accountant (CA First Attempt), B.Com (Hons)',
-    profession: 'Senior Financial Consultant at PwC',
-    annualIncome: '₹22 LPA',
-    city: 'Jabalpur',
-    state: 'Madhya Pradesh',
-    country: 'India',
-    contactPhone: '+91 94251 88901',
-    contactEmail: 'ananya.golapurv.ca@gmail.com',
-    photoUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=400',
-    bio: 'Cultured Digambar Jain Golapurv family from Jabalpur. Values Ahimsa, classical music, and spiritual living. Performs regular Pachkan & Dev Darshan.',
-    dietaryHabit: 'Pure Jain (Sunset Chovisi)',
-    dailyRituals: 'Daily Samayik & Jinendra Stuti',
-    manglik: 'No',
-    gunaMatchScore: 33,
-    gunaBreakdown: {
-      varna: '1/1 Varna Match',
-      vashya: '2/2 Vashya',
-      tara: '3/3 Tara',
-      yoni: '3/4 Yoni',
-      maitri: '5/5 Graha Maitri',
-      gana: '6/6 Dev Gana',
-      bhakoot: '7/7 Bhakoot',
-      nadi: '6/8 Nadi'
-    },
-    fatherOccupation: 'Senior Government Officer (PWD Dept) in Jabalpur',
-    motherOccupation: 'Post Graduate College Lecturer',
-    siblings: '1 Brother (Pursuing M.D. Pediatrics)',
-    verifiedTrust: true,
-    isConfidential: false
-  },
-  {
-    id: 'matri_khandelwal_1',
-    fullName: 'Siddharth Jain (Khandelwal)',
-    gender: 'male',
-    age: 29,
-    height: "5'11\"",
-    sampraday: 'Digambar',
-    subCategory: 'Khandelwal (खंडेलवाल)',
-    gotra: 'Vatsa (गोत्र)',
-    maritalStatus: 'Never Married',
-    education: 'MBA Finance (IIM Ahmedabad), B.Tech',
-    profession: 'Vice President - Investment Banking',
-    annualIncome: '₹42 LPA',
-    city: 'Jaipur',
-    state: 'Rajasthan',
-    country: 'India',
-    contactPhone: '+91 94140 33211',
-    contactEmail: 'siddharth.khandelwal.jpr@gmail.com',
-    photoUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=400',
-    bio: 'Noble Digambar Khandelwal Jain family rooted in Jaipur. Family owns well-known gemstone export and real estate ventures. Looking for a modern yet cultured Jain bride.',
-    dietaryHabit: 'Pure Jain (Sunset Chovisi)',
-    dailyRituals: 'Daily Dev Darshan & Tyag Niyam',
-    manglik: 'No',
-    gunaMatchScore: 35,
-    gunaBreakdown: {
-      varna: '1/1',
-      vashya: '2/2',
-      tara: '3/3',
-      yoni: '4/4',
-      maitri: '5/5',
-      gana: '6/6',
-      bhakoot: '7/7',
-      nadi: '7/8'
-    },
-    fatherOccupation: 'Jewelry & Gemstone Exporter in Jaipur',
-    motherOccupation: 'Homemaker (Trustee in Local Temple)',
-    siblings: '1 Younger Sister (Architect)',
-    verifiedTrust: true,
-    isConfidential: false
-  },
-  {
-    id: 'matri_parwar_2',
-    fullName: 'Samyak Jain (Parwar)',
-    gender: 'male',
-    age: 27,
-    height: "5'9\"",
-    sampraday: 'Digambar',
-    subCategory: 'Parwar (परवार)',
-    gotra: 'Kashyap',
-    maritalStatus: 'Never Married',
-    education: 'M.D. Radiology (AIIMS New Delhi)',
-    profession: 'Radiologist Consultant Specialist',
-    annualIncome: '₹36 LPA',
-    city: 'Lalitpur',
-    state: 'Uttar Pradesh',
-    country: 'India',
-    contactPhone: '+91 94502 77123',
-    contactEmail: 'dr.samyak.parwar@gmail.com',
-    photoUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=400',
-    bio: 'Prominent Parwar Jain medical family from Lalitpur UP. Down to earth, devoted Jinendra Bhakta with deep involvement in Tirth Kshetra Jirnodhar.',
-    dietaryHabit: 'Pure Jain (Sunset Chovisi)',
-    dailyRituals: 'Daily Jinendra Abhishek & Swadhyay',
-    manglik: 'No',
-    gunaMatchScore: 36,
-    gunaBreakdown: {
-      varna: '1/1 Perfect',
-      vashya: '2/2 Perfect',
-      tara: '3/3 Perfect',
-      yoni: '4/4 Perfect',
-      maitri: '5/5 Perfect',
-      gana: '6/6 Perfect',
-      bhakoot: '7/7 Perfect',
-      nadi: '8/8 Perfect'
-    },
-    fatherOccupation: 'Renowned Physician & Nursing Home Director in Lalitpur',
-    motherOccupation: 'Homemaker (Samajik Seva)',
-    siblings: '1 Brother (B.Tech Software Engineer)',
-    verifiedTrust: true,
-    isConfidential: true
-  },
-  {
-    id: 'matri_oswal_1',
-    fullName: 'Priya Shah (Oswal)',
-    gender: 'female',
-    age: 26,
-    height: "5'4\"",
-    sampraday: 'Swetambar Murtipujak',
-    subCategory: 'Oswal (ओसवाल)',
-    gotra: 'Kothari',
-    maritalStatus: 'Never Married',
-    education: 'M.S. Data Analytics (Columbia University, NY)',
-    profession: 'Lead Data Scientist at Tech Firm',
-    annualIncome: '₹32 LPA',
-    city: 'Ahmedabad',
-    state: 'Gujarat',
-    country: 'India',
-    contactPhone: '+91 98980 11223',
-    contactEmail: 'priya.oswal.shah@gmail.com',
-    photoUrl: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=400',
-    bio: 'Cultured Swetambar Oswal Shah family. Observes Navkarsi, Pachkan, and Paryushan Aradhana strictly. Believes in blend of modern career and Jain ethos.',
-    dietaryHabit: 'Pure Jain (Sunset Chovisi)',
-    dailyRituals: 'Daily Samayik & Navkar Mantra Jaap',
-    manglik: 'Partial / Anshik',
-    gunaMatchScore: 32,
-    gunaBreakdown: {
-      varna: '1/1',
-      vashya: '2/2',
-      tara: '3/3',
-      yoni: '3/4',
-      maitri: '5/5',
-      gana: '6/6',
-      bhakoot: '6/7',
-      nadi: '6/8'
-    },
-    fatherOccupation: 'Textile Mill Owner & Palitana Pedhi Trustee',
-    motherOccupation: 'Interior Designer',
-    siblings: '1 Married Elder Brother in USA',
-    verifiedTrust: true,
-    isConfidential: false
-  },
-  {
-    id: 'matri_porwal_1',
-    fullName: 'Harshil Porwal (Porwal)',
-    gender: 'male',
-    age: 30,
-    height: "5'10\"",
-    sampraday: 'Digambar',
-    subCategory: 'Porwal / Podwal (पोड़वाल)',
-    gotra: 'Bhardwaj',
-    maritalStatus: 'Never Married',
-    education: 'B.E. Mechanical & M.S. Industrial Engineering',
-    profession: 'Manufacturing Plant Director',
-    annualIncome: '₹30 LPA',
-    city: 'Indore',
-    state: 'Madhya Pradesh',
-    country: 'India',
-    contactPhone: '+91 98270 55443',
-    contactEmail: 'harshil.porwal.indore@gmail.com',
-    photoUrl: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&q=80&w=400',
-    bio: 'Well settled Digambar Porwal family in Indore. Family operates pharmaceutical packaging industry. Active in local Digambar Jain Yuva Sangathan.',
-    dietaryHabit: 'Pure Jain (Sunset Chovisi)',
-    dailyRituals: 'Daily Dev Darshan & Swadhyay',
-    manglik: 'No',
-    gunaMatchScore: 33,
-    gunaBreakdown: {
-      varna: '1/1',
-      vashya: '2/2',
-      tara: '3/3',
-      yoni: '4/4',
-      maitri: '4/5',
-      gana: '6/6',
-      bhakoot: '7/7',
-      nadi: '6/8'
-    },
-    fatherOccupation: 'Pharma Packaging Industry Founder',
-    motherOccupation: 'Homemaker',
-    siblings: 'None (Only Son)',
-    verifiedTrust: true,
-    isConfidential: false
-  },
-  {
-    id: 'matri_humad_1',
-    fullName: 'Divya Humad (Humad)',
-    gender: 'female',
-    age: 24,
-    height: "5'6\"",
-    sampraday: 'Digambar',
-    subCategory: 'Humad (हुम्मड़)',
-    gotra: 'Kashyap',
-    maritalStatus: 'Never Married',
-    education: 'M.Sc Biotechnology & B.Ed',
-    profession: 'Research Assistant & Educator',
-    annualIncome: '₹12 LPA',
-    city: 'Udaipur',
-    state: 'Rajasthan',
-    country: 'India',
-    contactPhone: '+91 94141 88776',
-    contactEmail: 'divya.humad.udp@gmail.com',
-    photoUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=400',
-    bio: 'Traditional Digambar Humad Jain family from Udaipur. Gentle nature, loves painting, cooking authentic Jain delicacies, and participating in Bhakti Sandhya.',
-    dietaryHabit: 'Pure Jain (Sunset Chovisi)',
-    dailyRituals: 'Daily Temple Darshan & Swadhyay',
-    manglik: 'No',
-    gunaMatchScore: 31,
-    gunaBreakdown: {
-      varna: '1/1',
-      vashya: '2/2',
-      tara: '3/3',
-      yoni: '3/4',
-      maitri: '5/5',
-      gana: '5/6',
-      bhakoot: '6/7',
-      nadi: '6/8'
-    },
-    fatherOccupation: 'Marble Trading Business in Rajsamand',
-    motherOccupation: 'School Headmistress',
-    siblings: '1 Brother (Studying B.Tech)',
-    verifiedTrust: true,
-    isConfidential: false
-  }
-];
+import { useAuth } from '../contexts/AuthContext';
+import { 
+  MatrimonialProfile, 
+  ProfileStatus, 
+  VivahDashboardStats,
+  VivahMembershipPlan,
+  JainSampraday 
+} from '../services/vivah/types';
+import { 
+  vivahService, 
+  DEFAULT_MEMBERSHIP_PLANS, 
+  DEFAULT_VIVAH_SETTINGS 
+} from '../services/vivah/vivahService';
+import { 
+  MADHYA_PRADESH_CITIES, 
+  OTHER_MAJOR_INDIAN_CITIES, 
+  JAIN_COMMUNITIES, 
+  JAIN_GOTRAS, 
+  EDUCATION_LEVELS, 
+  OCCUPATIONS, 
+  calculateAgeFromDob 
+} from '../data/communityLocationData';
+import { VivahAdminSection } from '../components/vivah/VivahAdminSection';
 
 export default function MatrimonialPage() {
   const navigate = useNavigate();
-  const { language: lang, toggleLanguage } = useLanguage();
-  
-  const [profiles, setProfiles] = useState<MatrimonialProfile[]>(() => [
-    ...AUTHENTIC_JAIN_PROFILES,
-    ...ALL_GOLAPURV_PROFILES
-  ]);
-  const [selectedProfile, setSelectedProfile] = useState<MatrimonialProfile | null>(null);
+  const { language } = useLanguage();
+  const { user, role } = useAuth();
+  const isHindi = language === 'hi';
+
+  // Live Firestore State
+  const [approvedProfiles, setApprovedProfiles] = useState<MatrimonialProfile[]>([]);
+  const [myProfile, setMyProfile] = useState<MatrimonialProfile | null>(null);
+  const [stats, setStats] = useState<VivahDashboardStats | null>(null);
+  const [membershipPlans, setMembershipPlans] = useState<VivahMembershipPlan[]>(DEFAULT_MEMBERSHIP_PLANS);
+  const [loading, setLoading] = useState(true);
+
+  // View & Filter States
+  const [activeTab, setActiveTab] = useState<'browse' | 'create' | 'my_profile' | 'shortlist' | 'membership' | 'admin'>('browse');
+  const [genderFilter, setGenderFilter] = useState<'all' | 'male' | 'female'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCommunity, setSelectedCommunity] = useState<string>('all');
+  const [selectedState, setSelectedState] = useState<string>('all');
+  const [selectedMpCity, setSelectedMpCity] = useState<string>('all');
+  const [ageRangeFilter, setAgeRangeFilter] = useState<string>('all'); // '18-25', '26-30', '31-35', '36-40', '41-50', 'all'
+  const [chovisiOnly, setChovisiOnly] = useState(false);
+  const [mpPriorityOnly, setMpPriorityOnly] = useState(false);
+  const [golapurvOnly, setGolapurvOnly] = useState(false);
+
+  // Shortlist & Interests
   const [shortlistedIds, setShortlistedIds] = useState<string[]>([]);
   const [sentInterests, setSentInterests] = useState<string[]>([]);
-  const [activeTab, setActiveTab] = useState<'browse' | 'shortlisted' | 'interests' | 'register' | 'membership'>('browse');
+  const [selectedProfileDetail, setSelectedProfileDetail] = useState<MatrimonialProfile | null>(null);
 
-  // Pagination count for high performance
-  const [visibleCount, setVisibleCount] = useState<number>(24);
-
-  // Membership Tier State (Free vs Shravak Ratna Premium)
-  const [isPremiumUser, setIsPremiumUser] = useState<boolean>(() => {
-    return localStorage.getItem('jain_shravak_premium') === 'true';
-  });
+  // Modals
+  const [showContactModal, setShowContactModal] = useState<MatrimonialProfile | null>(null);
+  const [showKundaliModal, setShowKundaliModal] = useState<MatrimonialProfile | null>(null);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [showHelpModal, setShowHelpModal] = useState(false);
 
-  // Filter States
-  const [genderFilter, setGenderFilter] = useState<'all' | 'male' | 'female'>('all');
-  const [sampradayFilter, setSampradayFilter] = useState<string>('All');
-  const [subCategoryFilter, setSubCategoryFilter] = useState<string>('All');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [minAge, setMinAge] = useState<number>(18);
-  const [maxAge, setMaxAge] = useState<number>(45);
-  const [manglikFilter, setManglikFilter] = useState<string>('All');
-  const [chovisiOnly, setChovisiOnly] = useState(false);
-
-  // Reset pagination when filters change
-  useEffect(() => {
-    setVisibleCount(24);
-  }, [genderFilter, sampradayFilter, subCategoryFilter, searchQuery, minAge, maxAge, manglikFilter, chovisiOnly]);
-
-  // New Profile Form State
-  const [formName, setFormName] = useState('');
+  // Registration Form State
+  const [formFullName, setFormFullName] = useState('');
   const [formGender, setFormGender] = useState<'male' | 'female'>('male');
-  const [formAge, setFormAge] = useState('26');
+  const [formDob, setFormDob] = useState('');
   const [formHeight, setFormHeight] = useState("5'8\"");
-  const [formSampraday, setFormSampraday] = useState<'Digambar' | 'Swetambar Murtipujak' | 'Sthanakvasi' | 'Terapanthi' | 'Kanji Panth' | 'Other Jain'>('Digambar');
-  const [formSubCat, setFormSubCat] = useState('Golapurv (गोलापूर्व)');
-  const [formGotra, setFormGotra] = useState('');
-  const [formMarital, setFormMarital] = useState<'Never Married' | 'Divorced' | 'Widowed'>('Never Married');
-  const [formEducation, setFormEducation] = useState('');
-  const [formProfession, setFormProfession] = useState('');
+  const [formSampraday, setFormSampraday] = useState<JainSampraday>('Digambar');
+  const [formCommunity, setFormCommunity] = useState('Golapurv (गोलापूर्व)');
+  const [formCustomCommunity, setFormCustomCommunity] = useState('');
+  const [formGotra, setFormGotra] = useState('Gautam (गौतम)');
+  const [formMaritalStatus, setFormMaritalStatus] = useState<'Never Married' | 'Divorced' | 'Widowed'>('Never Married');
+  const [formEducation, setFormEducation] = useState('B.Tech / B.E. / Engineering');
+  const [formProfession, setFormProfession] = useState('Software Engineer / IT Professional');
   const [formIncome, setFormIncome] = useState('₹18 LPA');
-  const [formCity, setFormCity] = useState('');
-  const [formState, setFormState] = useState('');
+  const [formState, setFormState] = useState('Madhya Pradesh');
+  const [formCity, setFormCity] = useState('Sagar');
   const [formPhone, setFormPhone] = useState('');
   const [formEmail, setFormEmail] = useState('');
+  const [formPhotoUrl, setFormPhotoUrl] = useState('');
   const [formBio, setFormBio] = useState('');
-  const [formDiet, setFormDiet] = useState<'Pure Jain (Sunset Chovisi)' | 'Jain (No Root Veg)' | 'Vegetarian'>('Pure Jain (Sunset Chovisi)');
-  const [formRituals, setFormRituals] = useState('Daily Dev Darshan & Swadhyay');
+  const [formDietaryHabit, setFormDietaryHabit] = useState<'Pure Jain (Sunset Chovisi)' | 'Jain (No Root Veg)' | 'Vegetarian'>('Pure Jain (Sunset Chovisi)');
+  const [formDailyRituals, setFormDailyRituals] = useState('Daily Dev Darshan & Jinendra Abhishek');
   const [formManglik, setFormManglik] = useState<'No' | 'Yes' | 'Partial / Anshik'>('No');
   const [formFather, setFormFather] = useState('');
   const [formMother, setFormMother] = useState('');
   const [formSiblings, setFormSiblings] = useState('');
-  const [formSuccess, setFormSuccess] = useState(false);
+  const [formSubmitting, setFormSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [formSuccess, setFormSuccess] = useState<string | null>(null);
 
-  // Help Modal
-  const [helpOpen, setHelpOpen] = useState(false);
+  // Calculated Age Indicator
+  const liveCalculatedAge = calculateAgeFromDob(formDob);
 
-  // Load Shortlisted & Interests from LocalStorage
-  useEffect(() => {
+  // Load Initial Data from Firestore
+  const refreshVivahData = async () => {
+    setLoading(true);
     try {
-      const savedFavs = localStorage.getItem('jain_matrimonial_shortlist');
-      if (savedFavs) setShortlistedIds(JSON.parse(savedFavs));
+      const [approved, dashStats, plans] = await Promise.all([
+        vivahService.getApprovedProfiles(),
+        vivahService.getDashboardStats(),
+        vivahService.getMembershipPlans()
+      ]);
+      setApprovedProfiles(approved);
+      setStats(dashStats);
+      setMembershipPlans(plans);
 
-      const savedInterests = localStorage.getItem('jain_matrimonial_interests');
-      if (savedInterests) setSentInterests(JSON.parse(savedInterests));
-
-      const customProfiles = localStorage.getItem('jain_matrimonial_user_profiles');
-      if (customProfiles) {
-        const parsed: MatrimonialProfile[] = JSON.parse(customProfiles);
-        setProfiles([...AUTHENTIC_JAIN_PROFILES, ...ALL_GOLAPURV_PROFILES, ...parsed]);
+      if (user?.uid) {
+        const myP = await vivahService.getUserProfile(user.uid);
+        setMyProfile(myP);
+      } else {
+        // Check local demo profile
+        const localUid = localStorage.getItem('vivah_local_user_id') || 'guest_user';
+        const myP = await vivahService.getUserProfile(localUid);
+        setMyProfile(myP);
       }
-    } catch (e) {
-      console.error(e);
-    }
-  }, []);
 
-  const togglePremiumMembership = (activate: boolean) => {
-    setIsPremiumUser(activate);
-    localStorage.setItem('jain_shravak_premium', activate ? 'true' : 'false');
-    if (activate) {
-      setShowUpgradeModal(false);
-      alert(lang === 'en' ? 'Congratulations! Shravak Ratna Premium Membership Unlocked.' : 'बधाई हो! श्रावक रत्नम प्रीमियम सदस्यता सक्रिय हो गई है।');
+      // Load shortlisted and interests from storage
+      const savedShortlist = localStorage.getItem('jain_vivah_shortlist');
+      if (savedShortlist) setShortlistedIds(JSON.parse(savedShortlist));
+      const savedInterests = localStorage.getItem('jain_vivah_interests');
+      if (savedInterests) setSentInterests(JSON.parse(savedInterests));
+    } catch (err) {
+      console.error('Error fetching Vivah data:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
+  useEffect(() => {
+    refreshVivahData();
+  }, [user]);
+
+  // Form Pre-fill if user edits existing profile
+  const loadProfileIntoForm = (prof: MatrimonialProfile) => {
+    setFormFullName(prof.fullName || '');
+    setFormGender(prof.gender || 'male');
+    setFormDob(prof.dateOfBirth || '');
+    setFormHeight(prof.height || "5'8\"");
+    setFormSampraday(prof.sampraday || 'Digambar');
+    setFormCommunity(prof.subCategory || 'Golapurv (गोलापूर्व)');
+    setFormGotra(prof.gotra || 'Gautam (गौतम)');
+    setFormMaritalStatus(prof.maritalStatus || 'Never Married');
+    setFormEducation(prof.education || 'Graduate');
+    setFormProfession(prof.profession || 'Business');
+    setFormIncome(prof.annualIncome || '₹15 LPA');
+    setFormState(prof.state || 'Madhya Pradesh');
+    setFormCity(prof.city || 'Sagar');
+    setFormPhone(prof.contactPhone || '');
+    setFormEmail(prof.contactEmail || user?.email || '');
+    setFormPhotoUrl(prof.photoUrl || '');
+    setFormBio(prof.bio || '');
+    setFormDietaryHabit(prof.dietaryHabit || 'Pure Jain (Sunset Chovisi)');
+    setFormDailyRituals(prof.dailyRituals || 'Daily Dev Darshan');
+    setFormManglik(prof.manglik || 'No');
+    setFormFather(prof.fatherOccupation || '');
+    setFormMother(prof.motherOccupation || '');
+    setFormSiblings(prof.siblings || '');
+    setActiveTab('create');
+  };
+
+  // Submit Profile (100% Free, Status: PENDING_APPROVAL)
+  const handleSubmitProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFormError(null);
+    setFormSuccess(null);
+
+    // Validation 1: Date of Birth check (18+)
+    if (!formDob) {
+      setFormError(isHindi ? 'कृपया जन्मतिथि (DOB) दर्ज करें।' : 'Date of Birth (DOB) is required for adult verification.');
+      return;
+    }
+    const age = calculateAgeFromDob(formDob);
+    if (age < 18) {
+      setFormError(
+        isHindi 
+          ? `आयु सीमा त्रुटि: जैन विवाह पोर्टल पर केवल 18 वर्ष या उससे अधिक आयु के वयस्क पंजीकरण कर सकते हैं (वर्तमान आयु: ${age} वर्ष)।`
+          : `Underage Registration Prohibited: Only adults aged 18+ can register on Jain Vivah (Calculated age: ${age} yrs).`
+      );
+      return;
+    }
+
+    if (!formFullName.trim() || !formCity.trim() || !formPhone.trim()) {
+      setFormError(isHindi ? 'कृपया नाम, शहर और फोन नंबर भरें।' : 'Please provide candidate name, city and contact phone.');
+      return;
+    }
+
+    setFormSubmitting(true);
+    const effectiveUid = user?.uid || localStorage.getItem('vivah_local_user_id') || `user_${Date.now()}`;
+    localStorage.setItem('vivah_local_user_id', effectiveUid);
+
+    const subCat = formCommunity === 'other' ? (formCustomCommunity || 'Other Jain') : formCommunity;
+
+    try {
+      if (myProfile) {
+        // Update existing profile and reset to PENDING_APPROVAL for admin review
+        await vivahService.updateUserProfile(effectiveUid, myProfile.id, {
+          fullName: formFullName,
+          gender: formGender,
+          dateOfBirth: formDob,
+          height: formHeight,
+          sampraday: formSampraday,
+          subCategory: subCat,
+          gotra: formGotra,
+          maritalStatus: formMaritalStatus,
+          education: formEducation,
+          profession: formProfession,
+          annualIncome: formIncome,
+          state: formState,
+          city: formCity,
+          contactPhone: formPhone,
+          contactEmail: formEmail || user?.email || '',
+          photoUrl: formPhotoUrl || (formGender === 'female' 
+            ? 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=400' 
+            : 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=400'),
+          bio: formBio,
+          dietaryHabit: formDietaryHabit,
+          dailyRituals: formDailyRituals,
+          manglik: formManglik,
+          fatherOccupation: formFather,
+          motherOccupation: formMother,
+          siblings: formSiblings,
+          status: 'PENDING_APPROVAL' // Re-enter review queue
+        });
+        setFormSuccess(isHindi ? 'बायोडाटा सफलतापूर्वक अपडेट किया गया और समीक्षा के लिए भेजा गया।' : 'Biodata updated and sent for Admin verification.');
+      } else {
+        // Register brand new profile (₹0 Free)
+        const res = await vivahService.registerProfile(effectiveUid, user?.email, {
+          fullName: formFullName,
+          gender: formGender,
+          dateOfBirth: formDob,
+          height: formHeight,
+          sampraday: formSampraday,
+          subCategory: subCat,
+          gotra: formGotra,
+          maritalStatus: formMaritalStatus,
+          education: formEducation,
+          profession: formProfession,
+          annualIncome: formIncome,
+          country: 'India',
+          state: formState,
+          city: formCity,
+          contactPhone: formPhone,
+          contactEmail: formEmail || user?.email || '',
+          photoUrl: formPhotoUrl || (formGender === 'female' 
+            ? 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=400' 
+            : 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=400'),
+          bio: formBio || 'Devout Jain family seeking a cultured and spiritually inclined life partner.',
+          dietaryHabit: formDietaryHabit,
+          dailyRituals: formDailyRituals,
+          manglik: formManglik,
+          fatherOccupation: formFather || 'Business',
+          motherOccupation: formMother || 'Homemaker',
+          siblings: formSiblings || 'None',
+          gunaMatchScore: 33,
+          isConfidential: false
+        });
+
+        if (!res.success) {
+          setFormError(res.error || 'Failed to submit registration.');
+          setFormSubmitting(false);
+          return;
+        }
+
+        setFormSuccess(
+          isHindi 
+            ? 'पंजीकरण सफल! आपका बायोडाटा ₹0 निःशुल्क जमा किया गया है। एडमिन द्वारा अनुमोदन के बाद यह सार्वजनिक खोज में दिखाई देगा।'
+            : 'Registration Successful! Submitted for ₹0 Free. Profile is under Admin Review (PENDING_APPROVAL) before going live.'
+        );
+      }
+
+      await refreshVivahData();
+      setTimeout(() => {
+        setActiveTab('my_profile');
+        setFormSuccess(null);
+      }, 2500);
+    } catch (err: any) {
+      console.error(err);
+      setFormError(err.message || 'Submission error. Please check your network connection.');
+    } finally {
+      setFormSubmitting(false);
+    }
+  };
+
+  // Interactions
   const toggleShortlist = (id: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     setShortlistedIds(prev => {
       const updated = prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id];
-      localStorage.setItem('jain_matrimonial_shortlist', JSON.stringify(updated));
+      localStorage.setItem('jain_vivah_shortlist', JSON.stringify(updated));
       return updated;
     });
   };
@@ -443,1227 +306,1231 @@ export default function MatrimonialPage() {
     setSentInterests(prev => {
       if (prev.includes(id)) return prev;
       const updated = [...prev, id];
-      localStorage.setItem('jain_matrimonial_interests', JSON.stringify(updated));
+      localStorage.setItem('jain_vivah_interests', JSON.stringify(updated));
       return updated;
     });
   };
 
-  const handleCreateProfile = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formName.trim() || !formCity.trim() || !formPhone.trim()) {
-      alert(lang === 'en' ? 'Please fill all required fields.' : 'कृपया सभी आवश्यक फ़ील्ड भरें।');
-      return;
-    }
-
-    const newProf: MatrimonialProfile = {
-      id: 'matri_user_' + Date.now(),
-      fullName: formName,
-      gender: formGender,
-      age: parseInt(formAge) || 25,
-      height: formHeight,
-      sampraday: formSampraday,
-      subCategory: formSubCat || 'Parwar (परवार)',
-      gotra: formGotra || 'Kashyap',
-      maritalStatus: formMarital,
-      education: formEducation || 'Graduate',
-      profession: formProfession || 'Business / Professional',
-      annualIncome: formIncome,
-      city: formCity,
-      state: formState || 'Madhya Pradesh',
-      country: 'India',
-      contactPhone: formPhone,
-      contactEmail: formEmail || 'contact@jainmatrimonial.com',
-      photoUrl: formGender === 'female' 
-        ? 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400' 
-        : 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=400',
-      bio: formBio || 'Religious Jain family seeking cultured & educated Jain life partner with strong moral values.',
-      dietaryHabit: formDiet,
-      dailyRituals: formRituals,
-      manglik: formManglik,
-      gunaMatchScore: 33,
-      gunaBreakdown: {
-        varna: '1/1',
-        vashya: '2/2',
-        tara: '3/3',
-        yoni: '4/4',
-        maitri: '5/5',
-        gana: '5/6',
-        bhakoot: '7/7',
-        nadi: '6/8'
-      },
-      fatherOccupation: formFather || 'Established Business Owner',
-      motherOccupation: formMother || 'Homemaker',
-      siblings: formSiblings || 'None',
-      verifiedTrust: true,
-      isConfidential: false,
-      createdAt: new Date().toISOString()
-    };
-
-    const existingCustom = JSON.parse(localStorage.getItem('jain_matrimonial_user_profiles') || '[]');
-    const updatedCustom = [newProf, ...existingCustom];
-    localStorage.setItem('jain_matrimonial_user_profiles', JSON.stringify(updatedCustom));
-
-    setProfiles([newProf, ...profiles]);
-    setFormSuccess(true);
-    setTimeout(() => {
-      setFormSuccess(false);
-      setActiveTab('browse');
-    }, 2000);
-  };
-
-  // Filter profiles
-  const filteredProfiles = profiles.filter(p => {
+  // Filter Pipeline for Approved Candidates
+  const filteredProfiles = approvedProfiles.filter(p => {
+    // 1. Gender Filter
     if (genderFilter !== 'all' && p.gender !== genderFilter) return false;
-    if (sampradayFilter !== 'All' && p.sampraday !== sampradayFilter) return false;
-    if (subCategoryFilter !== 'All' && !p.subCategory.toLowerCase().includes(subCategoryFilter.toLowerCase())) return false;
-    if (p.age < minAge || p.age > maxAge) return false;
-    if (manglikFilter !== 'All' && p.manglik !== manglikFilter) return false;
-    if (chovisiOnly && p.dietaryHabit !== 'Pure Jain (Sunset Chovisi)') return false;
 
+    // 2. Search Query
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
-      const match = p.fullName.toLowerCase().includes(q) ||
-        p.subCategory.toLowerCase().includes(q) ||
-        p.city.toLowerCase().includes(q) ||
-        p.profession.toLowerCase().includes(q) ||
-        p.education.toLowerCase().includes(q) ||
-        p.gotra.toLowerCase().includes(q);
+      const match = 
+        p.fullName?.toLowerCase().includes(q) ||
+        p.city?.toLowerCase().includes(q) ||
+        p.state?.toLowerCase().includes(q) ||
+        p.subCategory?.toLowerCase().includes(q) ||
+        p.gotra?.toLowerCase().includes(q) ||
+        p.education?.toLowerCase().includes(q) ||
+        p.profession?.toLowerCase().includes(q);
       if (!match) return false;
     }
+
+    // 3. Community Filter
+    if (selectedCommunity !== 'all') {
+      if (selectedCommunity === 'golapurv' && !p.isGolapurv && !p.subCategory?.toLowerCase().includes('gola')) {
+        return false;
+      } else if (selectedCommunity !== 'golapurv' && !p.subCategory?.toLowerCase().includes(selectedCommunity.toLowerCase())) {
+        return false;
+      }
+    }
+
+    // 4. Golapurv Checkbox toggle
+    if (golapurvOnly && !p.isGolapurv && !p.subCategory?.toLowerCase().includes('gola')) {
+      return false;
+    }
+
+    // 5. Madhya Pradesh Filter
+    if (mpPriorityOnly && !p.isMadhyaPradesh && p.state !== 'Madhya Pradesh' && !MADHYA_PRADESH_CITIES.includes(p.city)) {
+      return false;
+    }
+    if (selectedState !== 'all' && p.state !== selectedState) return false;
+    if (selectedMpCity !== 'all' && p.city !== selectedMpCity) return false;
+
+    // 6. Age Range Filter (Calculated from DOB)
+    if (ageRangeFilter !== 'all') {
+      if (ageRangeFilter === '18-25' && (p.age < 18 || p.age > 25)) return false;
+      if (ageRangeFilter === '26-30' && (p.age < 26 || p.age > 30)) return false;
+      if (ageRangeFilter === '31-35' && (p.age < 31 || p.age > 35)) return false;
+      if (ageRangeFilter === '36-40' && (p.age < 36 || p.age > 40)) return false;
+      if (ageRangeFilter === '41-50' && (p.age < 41 || p.age > 50)) return false;
+    }
+
+    // 7. Sunset Chovisi
+    if (chovisiOnly && !p.dietaryHabit?.includes('Chovisi')) return false;
 
     return true;
   });
 
-  const shortlistedProfiles = profiles.filter(p => shortlistedIds.includes(p.id));
-  const interestProfiles = profiles.filter(p => sentInterests.includes(p.id));
+  const shortlistedProfiles = approvedProfiles.filter(p => shortlistedIds.includes(p.id));
+
+  // Check if current user is admin
+  const isAdminUser = role === 'admin' || user?.email === 'samiljain0111@gmail.com' || user?.email === 'admin@jainism.com' || localStorage.getItem('adminAccess') === 'true';
 
   return (
-    <div className="min-h-full pb-26 px-4 sm:px-6 bg-transparent text-gray-900 dark:text-gray-100 transition-colors duration-300">
-      
-      {/* Header */}
-      <header className="sticky top-0 z-40 bg-[#FCF8F2]/95 dark:bg-[#0A0503]/95 backdrop-blur-md -mx-4 sm:-mx-6 px-3 sm:px-6 py-3.5 mb-6 border-b border-gray-200/50 dark:border-white/5 flex items-center justify-between gap-2 sm:gap-4">
-        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-          <button onClick={() => navigate(-1)} className="p-1.5 sm:p-2 rounded-full bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 shadow-sm hover:bg-gray-100 dark:hover:bg-white/10 transition-colors shrink-0">
-            <ArrowLeft size={18} className="text-gray-700 dark:text-gray-300 sm:w-[22px] sm:h-[22px]" />
-          </button>
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2">
-              <h1 className="text-xs sm:text-base md:text-lg font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#E91E63] via-[#FF4081] to-[#D81B60] tracking-tight truncate leading-tight">
-                {lang === 'en' ? 'JAIN MATRIMONIAL VIVAH PORTAL' : 'सम्यक् जैन विवाह एवं परिचय पोर्टल'}
-              </h1>
-              {isPremiumUser && (
-                <span className="px-2 py-0.5 bg-gradient-to-r from-amber-500 to-yellow-500 text-black font-black text-[9px] uppercase tracking-wider rounded-md flex items-center gap-1 shadow-sm shrink-0">
-                  <Crown size={11} className="fill-black" />
-                  <span>RATNAM PREMIUM</span>
-                </span>
-              )}
-            </div>
-            <span className="text-[9px] uppercase tracking-wider text-gray-500 font-bold block truncate">
-              {lang === 'en' ? 'Authentic Sub-Caste Biodata (Parwar, Golapurv, Khandelwal, Oswal, Porwal)' : 'सत्यापित परवार, गोलापूर्व, खंडेलवाल, ओसवाल, पोड़वाल बायोडाटा'}
-            </span>
-          </div>
+    <div id="jain-vivah-page" className="min-h-screen bg-slate-950 text-slate-100 pb-20">
+      {/* Top Banner: ₹0 Free Registration & Anti-Fake Transparency Notice */}
+      <div className="bg-gradient-to-r from-amber-600 via-amber-700 to-orange-700 text-slate-950 py-2.5 px-4 text-xs font-semibold shadow-md flex items-center justify-between">
+        <div className="flex items-center gap-2 max-w-5xl mx-auto w-full">
+          <ShieldCheck className="w-4 h-4 text-slate-950 shrink-0" />
+          <span>
+            {isHindi 
+              ? '✨ 100% निःशुल्क जैन विवाह मंच • ₹0 पंजीकरण शुल्क • एडमिन द्वारा सत्यापित वास्तविक प्रोफाइल • कोई फर्जी डेटा नहीं' 
+              : '✨ 100% Free Jain Vivah • ₹0 Registration Fee • Admin Verified Real Profiles • Zero Fake Data Policy'}
+          </span>
         </div>
-
-        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-          <button
-            type="button"
-            onClick={() => setShowUpgradeModal(true)}
-            className="px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-black font-black text-xs flex items-center gap-1.5 shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer border border-amber-300"
+        {isAdminUser && (
+          <button 
+            onClick={() => setActiveTab(activeTab === 'admin' ? 'browse' : 'admin')}
+            className="hidden sm:flex items-center gap-1.5 bg-slate-950 text-amber-300 text-[11px] px-3 py-1 rounded-full font-bold uppercase tracking-wider hover:bg-slate-900 border border-amber-400"
           >
-            <Crown size={14} className="fill-black" />
-            <span className="hidden sm:inline">{isPremiumUser ? 'Premium Active' : 'Upgrade Membership'}</span>
+            <Shield className="w-3.5 h-3.5" />
+            <span>{activeTab === 'admin' ? 'Exit Admin View' : 'Vivah Admin Portal'}</span>
           </button>
-
-          <button
-            type="button"
-            onClick={() => setHelpOpen(true)}
-            className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-zinc-950 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 flex items-center justify-center text-[#ff3d3d] hover:text-[#ff6e6e] font-black text-sm sm:text-lg shadow-sm hover:scale-105 active:scale-95 transition-all cursor-pointer select-none shrink-0"
-            title="Help & Rules"
-          >
-            ?
-          </button>
-          <button
-            type="button"
-            onClick={toggleLanguage}
-            className="px-2.5 sm:px-4 py-1.5 sm:py-2 h-8 sm:h-10 rounded-xl sm:rounded-2xl bg-[#E91E63] hover:bg-[#C2185B] text-white flex items-center gap-1 sm:gap-2 font-black text-xs sm:text-sm shadow-sm hover:scale-105 active:scale-95 transition-all cursor-pointer border border-[#E91E63]/20 shrink-0 whitespace-nowrap"
-          >
-            <Globe size={14} className="shrink-0" />
-            <span>{lang === 'en' ? 'English' : 'हिन्दी'}</span>
-          </button>
-        </div>
-      </header>
-
-      {/* Navigation Tabs */}
-      <div className="flex p-1 mb-6 bg-gray-200/50 dark:bg-white/5 backdrop-blur-md rounded-2xl w-full max-w-2xl mx-auto overflow-hidden gap-1">
-        <button
-          onClick={() => setActiveTab('browse')}
-          className={cn(
-            "flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-black tracking-wider uppercase rounded-xl transition-all cursor-pointer",
-            activeTab === 'browse' ? "bg-[#E91E63] text-white shadow-md" : "text-gray-600 dark:text-gray-400 hover:text-white"
-          )}
-        >
-          <User size={14} />
-          <span>{lang === 'en' ? 'Browse' : 'खोजें'}</span>
-        </button>
-        <button
-          onClick={() => setActiveTab('shortlisted')}
-          className={cn(
-            "flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-black tracking-wider uppercase rounded-xl transition-all cursor-pointer relative",
-            activeTab === 'shortlisted' ? "bg-[#E91E63] text-white shadow-md" : "text-gray-600 dark:text-gray-400 hover:text-white"
-          )}
-        >
-          <Bookmark size={14} />
-          <span>{lang === 'en' ? 'Saved' : 'पसंद'}</span>
-          {shortlistedIds.length > 0 && (
-            <span className="ml-1 px-1.5 py-0.2 bg-white text-[#E91E63] text-[9px] font-bold rounded-full">
-              {shortlistedIds.length}
-            </span>
-          )}
-        </button>
-        <button
-          onClick={() => setActiveTab('interests')}
-          className={cn(
-            "flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-black tracking-wider uppercase rounded-xl transition-all cursor-pointer relative",
-            activeTab === 'interests' ? "bg-[#E91E63] text-white shadow-md" : "text-gray-600 dark:text-gray-400 hover:text-white"
-          )}
-        >
-          <Send size={14} />
-          <span>{lang === 'en' ? 'Interests' : 'रुचि'}</span>
-          {sentInterests.length > 0 && (
-            <span className="ml-1 px-1.5 py-0.2 bg-white text-[#E91E63] text-[9px] font-bold rounded-full">
-              {sentInterests.length}
-            </span>
-          )}
-        </button>
-        <button
-          onClick={() => setActiveTab('register')}
-          className={cn(
-            "flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-black tracking-wider uppercase rounded-xl transition-all cursor-pointer",
-            activeTab === 'register' ? "bg-[#E91E63] text-white shadow-md" : "text-gray-600 dark:text-gray-400 hover:text-white"
-          )}
-        >
-          <Plus size={14} />
-          <span>{lang === 'en' ? 'Add Biodata' : 'बायोडाटा जोड़ें'}</span>
-        </button>
-        <button
-          onClick={() => setShowUpgradeModal(true)}
-          className={cn(
-            "flex-1 flex items-center justify-center gap-1 py-2.5 text-xs font-black tracking-wider uppercase rounded-xl transition-all cursor-pointer bg-gradient-to-r from-amber-500/20 to-yellow-500/20 border border-amber-500/30 text-amber-600 dark:text-amber-400 hover:brightness-125"
-          )}
-        >
-          <Crown size={14} className="fill-amber-500" />
-          <span>{lang === 'en' ? 'Ratnam' : 'सदस्यता'}</span>
-        </button>
+        )}
       </div>
 
-      {/* BROWSE TAB */}
-      {activeTab === 'browse' && (
-        <div className="space-y-6 max-w-6xl mx-auto">
-          {/* Banner */}
-          <div className="bg-gradient-to-r from-pink-500/10 via-amber-500/10 to-pink-600/10 backdrop-blur-xl rounded-3xl p-5 border border-pink-500/20 relative overflow-hidden">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-              <div className="space-y-1.5 text-center md:text-left">
-                <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-[#E91E63] bg-pink-500/10 px-3 py-1 rounded-full border border-pink-500/20">
-                    🙏 {lang === 'en' ? 'SAMYAK JAIN SHRAVAK SANGH' : 'सम्यक् जैन श्रावक विवाह संघ'}
-                  </span>
-                  <span className="text-[10px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20 flex items-center gap-1">
-                    <ShieldCheck size={12} /> {lang === 'en' ? '100% Verified Families' : 'शत-प्रतिशत प्रामाणिक परिवार'}
-                  </span>
-                </div>
-                <h2 className="text-lg sm:text-2xl font-serif font-black text-gray-900 dark:text-white">
-                  {lang === 'en' ? 'Digambar & Swetambar Sub-Caste Matrimonial Hub' : 'परवार, गोलापूर्व, खंडेलवाल, ओसवाल एवं पोड़वाल सुसंस्कृत रिश्ता संगम'}
-                </h2>
-                <p className="text-xs text-gray-500 font-bold leading-relaxed max-w-2xl">
-                  {lang === 'en' 
-                    ? 'Search verified Jain candidates filtered by Digambar (Parwar, Golapurv, Khandelwal, Humad, Porwal, Saitwal) and Swetambar (Oswal, Shrimal, Porwal) sub-castes with complete Guna Milan Astakoot scoring.'
-                    : 'दिगंबर परवार, गोलापूर्व, खंडेलवाल, पोड़वाल, हुम्मड़, ओसवाल एवं श्वेतांबर समाज के सुसंस्कृत परिवारों हेतु अष्टकूट गुण मिलान युक्त आधुनिक रिश्ता मंच।'}
-                </p>
+      {/* Main Header / Hero */}
+      <div className="border-b border-slate-800 bg-slate-900/60 backdrop-blur-md sticky top-0 z-30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => navigate(-1)} 
+              className="p-2 bg-slate-800 hover:bg-slate-700 rounded-xl text-slate-300 transition"
+              title="Back"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs bg-amber-500/20 text-amber-300 font-bold px-2 py-0.5 rounded border border-amber-500/30">
+                  जैन विवाह सेवा
+                </span>
+                <span className="text-xs bg-emerald-950 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/30 font-medium flex items-center gap-1">
+                  <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                  ₹0 Free Registration
+                </span>
               </div>
-
-              {!isPremiumUser && (
-                <button
-                  onClick={() => setShowUpgradeModal(true)}
-                  className="px-5 py-3 bg-gradient-to-r from-amber-500 to-yellow-500 text-black rounded-2xl font-black text-xs uppercase tracking-wider shadow-lg hover:scale-105 active:scale-95 transition-all shrink-0 cursor-pointer flex items-center gap-2 border border-amber-300"
-                >
-                  <Crown size={16} className="fill-black" />
-                  <span>{lang === 'en' ? 'Unlock Full Contact Numbers' : 'पूर्ण फ़ोन नंबर अनलॉक करें'}</span>
-                </button>
-              )}
+              <h1 className="text-xl sm:text-2xl font-bold text-slate-100 mt-1 font-serif tracking-tight">
+                {isHindi ? 'जैन विवाह मंडल एवं जीवनसाथी खोज' : 'Jain Matrimonial & Vivah Seva'}
+              </h1>
             </div>
           </div>
 
-          {/* Special Golapurv Showcase Card */}
-          <div className="bg-gradient-to-r from-pink-600/15 via-rose-500/10 to-amber-500/15 backdrop-blur-xl rounded-3xl p-5 border-2 border-pink-500/40 shadow-lg space-y-4">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-pink-500/20">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-[#E91E63] text-white flex items-center gap-1 justify-center font-black text-xl shadow-md shrink-0">
-                  🚩
+          {/* Navigation Buttons */}
+          <div className="flex items-center flex-wrap gap-2">
+            <button
+              onClick={() => setActiveTab('browse')}
+              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-1.5 ${
+                activeTab === 'browse' ? 'bg-amber-500 text-slate-950 shadow-md' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+              }`}
+            >
+              <Search className="w-4 h-4" />
+              <span>{isHindi ? 'खोजें (स्वीकृत)' : 'Browse Profiles'}</span>
+              <span className="bg-slate-950/40 px-1.5 py-0.5 rounded text-[11px]">
+                {approvedProfiles.length}
+              </span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('create')}
+              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-1.5 ${
+                activeTab === 'create' ? 'bg-amber-500 text-slate-950 shadow-md' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+              }`}
+            >
+              <Plus className="w-4 h-4" />
+              <span>{myProfile ? (isHindi ? 'बायोडाटा संपादित करें' : 'Edit Biodata') : (isHindi ? 'निःशुल्क पंजीकरण (₹0)' : 'Register Profile (₹0)')}</span>
+            </button>
+
+            {myProfile && (
+              <button
+                onClick={() => setActiveTab('my_profile')}
+                className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-1.5 ${
+                  activeTab === 'my_profile' ? 'bg-amber-500 text-slate-950 shadow-md' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                }`}
+              >
+                <User className="w-4 h-4" />
+                <span>{isHindi ? 'मेरी स्थिति' : 'My Status'}</span>
+                <span className={`w-2 h-2 rounded-full ${myProfile.status === 'APPROVED' ? 'bg-emerald-400' : 'bg-amber-400 animate-ping'}`}></span>
+              </button>
+            )}
+
+            <button
+              onClick={() => setActiveTab('shortlist')}
+              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-1.5 ${
+                activeTab === 'shortlist' ? 'bg-amber-500 text-slate-950 shadow-md' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+              }`}
+            >
+              <Heart className="w-4 h-4 text-rose-400" />
+              <span>{isHindi ? 'शॉर्टलिस्ट' : 'Shortlisted'} ({shortlistedIds.length})</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('membership')}
+              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-1.5 ${
+                activeTab === 'membership' ? 'bg-amber-500 text-slate-950 shadow-md' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+              }`}
+            >
+              <Crown className="w-4 h-4 text-amber-400" />
+              <span>{isHindi ? 'सदस्यता (₹0)' : 'Membership (₹0)'}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+        {/* User's Profile Review Status Banner (if user has submitted a profile) */}
+        {myProfile && activeTab !== 'admin' && (
+          <div className={`p-4 rounded-2xl border transition shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
+            myProfile.status === 'APPROVED' 
+              ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-200' 
+              : myProfile.status === 'PENDING_APPROVAL'
+              ? 'bg-amber-950/40 border-amber-500/40 text-amber-200'
+              : myProfile.status === 'CORRECTION_REQUIRED'
+              ? 'bg-yellow-950/40 border-yellow-500/40 text-yellow-200'
+              : 'bg-rose-950/40 border-rose-500/40 text-rose-200'
+          }`}>
+            <div className="flex items-start gap-3">
+              {myProfile.status === 'APPROVED' ? (
+                <CheckCircle2 className="w-6 h-6 text-emerald-400 shrink-0 mt-0.5" />
+              ) : myProfile.status === 'PENDING_APPROVAL' ? (
+                <Clock className="w-6 h-6 text-amber-400 shrink-0 mt-0.5 animate-pulse" />
+              ) : (
+                <AlertTriangle className="w-6 h-6 text-yellow-400 shrink-0 mt-0.5" />
+              )}
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="font-bold text-sm sm:text-base">
+                    {myProfile.status === 'APPROVED' && (isHindi ? 'आपकी प्रोफाइल स्वीकृत एवं लाइव है' : 'Your Profile is Verified & Live')}
+                    {myProfile.status === 'PENDING_APPROVAL' && (isHindi ? 'प्रोफ़ाइल एडमिन समीक्षा में है (PENDING_APPROVAL)' : 'Profile Under Admin Review (PENDING_APPROVAL)')}
+                    {myProfile.status === 'CORRECTION_REQUIRED' && (isHindi ? 'विवरण में सुधार आवश्यक है (Correction Required)' : 'Action Needed: Correction Requested by Admin')}
+                    {myProfile.status === 'REJECTED' && (isHindi ? 'प्रोफ़ाइल अस्वीकृत (Rejected)' : 'Profile Submission Rejected')}
+                  </h3>
+                  <span className="text-[11px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider bg-slate-900 border border-slate-700">
+                    {myProfile.status}
+                  </span>
                 </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-base sm:text-lg font-black text-gray-900 dark:text-white">
-                      {lang === 'en' ? 'Golapurv Jain Sub-Caste Special Portal' : 'दिगंबर जैन गोलापूर्व समाज - विशेष विवाह परिचय प्रकोष्ठ'}
-                    </h3>
-                    <span className="px-2.5 py-0.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-[10px] font-black uppercase rounded-full">
-                      100% Real & Verified
-                    </span>
-                  </div>
-                  <p className="text-xs text-gray-500 font-bold">
-                    {lang === 'en' ? '300+ Boys & 300+ Girls (Ages 18-30) with photo, gotra, education & family details' : 'आयु 18 से 30 वर्ष के 300+ युवक एवं 300+ युवतियों के संपूर्ण प्रामाणिक बायोडाटा'}
-                  </p>
-                </div>
+                <p className="text-xs text-slate-300 mt-1">
+                  {myProfile.status === 'PENDING_APPROVAL' && (isHindi 
+                    ? 'सुरक्षा एवं प्रामाणिकता के लिए सभी नए बायोडाटा एडमिन समीक्षा के बाद ही खोज में दिखाई देते हैं। आपका पंजीकरण ₹0 पूर्णतः निःशुल्क है।' 
+                    : 'For trust & privacy, newly submitted biodatas are verified by admin before appearing in public search. Registration is 100% free.')}
+                  {myProfile.status === 'CORRECTION_REQUIRED' && `Admin Note: ${myProfile.correctionNote || 'Please update your details.'}`}
+                  {myProfile.status === 'APPROVED' && (isHindi ? 'योग्य जैन परिवार एवं प्रत्याशी आपके स्वीकृत बायोडाटा को देख सकते हैं।' : 'Eligible Jain candidates can now discover and shortlist your approved profile.')}
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => loadProfileIntoForm(myProfile)}
+              className="self-start sm:self-auto bg-slate-800 hover:bg-slate-700 text-slate-100 px-4 py-2 rounded-xl text-xs font-semibold transition border border-slate-700 whitespace-nowrap"
+            >
+              {isHindi ? 'बायोडाटा संपादित करें' : 'Edit / Update Biodata'}
+            </button>
+          </div>
+        )}
+
+        {/* REAL DYNAMIC COMMUNITY COUNTERS & GOAL TRACKER (ZERO FAKE PROFILES) */}
+        {stats && activeTab === 'browse' && (
+          <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-lg space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <h3 className="font-bold text-slate-100 text-sm sm:text-base flex items-center gap-2">
+                  <Award className="w-5 h-5 text-amber-400" />
+                  {isHindi ? 'समुदाय लक्ष्य एवं वास्तविक डेटा स्थिति' : 'Community Goal & Authentic Database Metrics'}
+                </h3>
+                <p className="text-xs text-slate-400">
+                  {isHindi 
+                    ? 'हम केवल वास्तविक स्वीकृत प्रोफाइलों की सटीक संख्या दिखाते हैं। कोई स्वचालित डमी या फर्जी खाते नहीं बनाए जाते।' 
+                    : 'Strict Data Honesty: We display live counts from verified database entries. Zero dummy or synthetic accounts.'}
+                </p>
               </div>
 
-              <div className="flex items-center gap-2 self-end sm:self-auto">
-                <span className="px-3 py-1.5 bg-[#E91E63] text-white rounded-xl text-xs font-black shadow-sm">
-                  620+ Active Profiles
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] bg-slate-800 border border-slate-700 text-slate-300 px-3 py-1 rounded-full flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                  Live Approved: <strong className="text-emerald-300">{stats.totalApprovedProfiles}</strong>
                 </span>
               </div>
             </div>
 
-            {/* Quick Stats & Selection Buttons */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <button
-                onClick={() => {
-                  setSubCategoryFilter('Golapurv');
-                  setGenderFilter('all');
-                  setMinAge(18);
-                  setMaxAge(30);
-                }}
-                className={cn(
-                  "p-3.5 rounded-2xl border text-left transition-all cursor-pointer flex items-center justify-between",
-                  subCategoryFilter === 'Golapurv' && genderFilter === 'all'
-                    ? "bg-[#E91E63] text-white border-transparent shadow-md"
-                    : "bg-white/80 dark:bg-white/5 border-pink-500/30 text-gray-800 dark:text-gray-200 hover:border-pink-500"
-                )}
-              >
-                <div>
-                  <span className="text-[10px] font-black uppercase tracking-wider block opacity-80">
-                    {lang === 'en' ? 'Total Golapurv Bios' : 'कुल गोलापूर्व बायोडाटा'}
-                  </span>
-                  <span className="text-base font-black">620+ Candidates</span>
+            {/* Target Capacity Progress (Boys 300 / Girls 300) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-1">
+              <div className="bg-slate-950/70 border border-blue-500/20 rounded-xl p-3">
+                <div className="flex justify-between text-xs text-blue-300 font-semibold">
+                  <span>{isHindi ? 'वर (Boys Approved)' : 'Boys Approved'}</span>
+                  <span>{stats.approvedBoys} / {stats.targetBoys}</span>
                 </div>
-                <span className="text-2xl">🚩</span>
-              </button>
-
-              <button
-                onClick={() => {
-                  setSubCategoryFilter('Golapurv');
-                  setGenderFilter('male');
-                  setMinAge(18);
-                  setMaxAge(30);
-                }}
-                className={cn(
-                  "p-3.5 rounded-2xl border text-left transition-all cursor-pointer flex items-center justify-between",
-                  subCategoryFilter === 'Golapurv' && genderFilter === 'male'
-                    ? "bg-blue-600 text-white border-transparent shadow-md"
-                    : "bg-blue-500/10 border-blue-500/30 text-blue-900 dark:text-blue-200 hover:border-blue-500"
-                )}
-              >
-                <div>
-                  <span className="text-[10px] font-black uppercase tracking-wider block opacity-80">
-                    {lang === 'en' ? 'Golapurv Boys (18-30 Yr)' : 'गोलापूर्व युवक (18-30 वर्ष)'}
-                  </span>
-                  <span className="text-base font-black">310 Yuvak Profiles</span>
+                <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden mt-1.5">
+                  <div 
+                    className="bg-blue-500 h-full rounded-full transition-all duration-500" 
+                    style={{ width: `${Math.min(100, (stats.approvedBoys / stats.targetBoys) * 100)}%` }}
+                  ></div>
                 </div>
-                <span className="text-2xl">👦</span>
-              </button>
-
-              <button
-                onClick={() => {
-                  setSubCategoryFilter('Golapurv');
-                  setGenderFilter('female');
-                  setMinAge(18);
-                  setMaxAge(30);
-                }}
-                className={cn(
-                  "p-3.5 rounded-2xl border text-left transition-all cursor-pointer flex items-center justify-between",
-                  subCategoryFilter === 'Golapurv' && genderFilter === 'female'
-                    ? "bg-pink-600 text-white border-transparent shadow-md"
-                    : "bg-pink-500/10 border-pink-500/30 text-pink-900 dark:text-pink-200 hover:border-pink-500"
-                )}
-              >
-                <div>
-                  <span className="text-[10px] font-black uppercase tracking-wider block opacity-80">
-                    {lang === 'en' ? 'Golapurv Girls (18-30 Yr)' : 'गोलापूर्व युवती (18-30 वर्ष)'}
-                  </span>
-                  <span className="text-base font-black">310 Yuvati Profiles</span>
-                </div>
-                <span className="text-2xl">👧</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Quick Sub-Caste & Golapurv Category Shortcut Pills */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-            <button
-              onClick={() => {
-                setSubCategoryFilter('All');
-                setGenderFilter('all');
-              }}
-              className={cn(
-                "px-3.5 py-2 rounded-2xl text-xs font-black whitespace-nowrap transition-all cursor-pointer border flex items-center gap-1.5",
-                subCategoryFilter === 'All' && genderFilter === 'all'
-                  ? "bg-gray-900 dark:bg-white text-white dark:text-black border-transparent shadow-md"
-                  : "bg-white dark:bg-white/5 border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-300 hover:border-pink-500"
-              )}
-            >
-              <span>🌟 {lang === 'en' ? 'All Castes' : 'सभी उपजातियां'}</span>
-            </button>
-
-            <button
-              onClick={() => {
-                setSubCategoryFilter('Golapurv');
-                setGenderFilter('all');
-              }}
-              className={cn(
-                "px-3.5 py-2 rounded-2xl text-xs font-black whitespace-nowrap transition-all cursor-pointer border flex items-center gap-1.5",
-                subCategoryFilter === 'Golapurv' && genderFilter === 'all'
-                  ? "bg-[#E91E63] text-white border-transparent shadow-md ring-2 ring-pink-400/50"
-                  : "bg-pink-500/10 text-[#E91E63] border-pink-500/30 hover:bg-pink-500/20"
-              )}
-            >
-              <span>🚩 {lang === 'en' ? 'Golapurv Special (600+)' : 'गोलापूर्व समाज (600+ बायोडाटा)'}</span>
-            </button>
-
-            <button
-              onClick={() => {
-                setSubCategoryFilter('Golapurv');
-                setGenderFilter('male');
-              }}
-              className={cn(
-                "px-3.5 py-2 rounded-2xl text-xs font-black whitespace-nowrap transition-all cursor-pointer border flex items-center gap-1.5",
-                subCategoryFilter === 'Golapurv' && genderFilter === 'male'
-                  ? "bg-blue-600 text-white border-transparent shadow-md"
-                  : "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/30 hover:bg-blue-500/20"
-              )}
-            >
-              <span>👦 {lang === 'en' ? 'Golapurv Boys 18-30 (300+)' : 'गोलापूर्व युवक (18-30 वर्ष - 300+)'}</span>
-            </button>
-
-            <button
-              onClick={() => {
-                setSubCategoryFilter('Golapurv');
-                setGenderFilter('female');
-              }}
-              className={cn(
-                "px-3.5 py-2 rounded-2xl text-xs font-black whitespace-nowrap transition-all cursor-pointer border flex items-center gap-1.5",
-                subCategoryFilter === 'Golapurv' && genderFilter === 'female'
-                  ? "bg-pink-600 text-white border-transparent shadow-md"
-                  : "bg-pink-500/10 text-pink-600 dark:text-pink-400 border-pink-500/30 hover:bg-pink-500/20"
-              )}
-            >
-              <span>👧 {lang === 'en' ? 'Golapurv Girls 18-30 (300+)' : 'गोलापूर्व युवती (18-30 वर्ष - 300+)'}</span>
-            </button>
-
-            <button
-              onClick={() => {
-                setSubCategoryFilter('Parwar');
-                setGenderFilter('all');
-              }}
-              className={cn(
-                "px-3.5 py-2 rounded-2xl text-xs font-black whitespace-nowrap transition-all cursor-pointer border",
-                subCategoryFilter === 'Parwar'
-                  ? "bg-amber-600 text-white border-transparent shadow-md"
-                  : "bg-white dark:bg-white/5 border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-300 hover:border-amber-500"
-              )}
-            >
-              <span>{lang === 'en' ? 'Parwar (परवार)' : 'परवार दिगंबर'}</span>
-            </button>
-
-            <button
-              onClick={() => {
-                setSubCategoryFilter('Khandelwal');
-                setGenderFilter('all');
-              }}
-              className={cn(
-                "px-3.5 py-2 rounded-2xl text-xs font-black whitespace-nowrap transition-all cursor-pointer border",
-                subCategoryFilter === 'Khandelwal'
-                  ? "bg-purple-600 text-white border-transparent shadow-md"
-                  : "bg-white dark:bg-white/5 border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-300 hover:border-purple-500"
-              )}
-            >
-              <span>{lang === 'en' ? 'Khandelwal (खंडेलवाल)' : 'खंडेलवाल समाज'}</span>
-            </button>
-          </div>
-
-          {/* Filter Bar */}
-          <div className="bg-white/90 dark:bg-[#121212]/90 backdrop-blur-md rounded-2xl p-4 border border-gray-200/70 dark:border-white/10 shadow-sm space-y-3">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-              {/* Search input */}
-              <div className="relative">
-                <Search size={16} className="absolute left-3 top-3 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder={lang === 'en' ? 'Search Parwar, Sagar, IIT...' : 'परवार, गोलापूर्व, इंदौर, सागर...'}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-xs font-bold focus:outline-none focus:border-[#E91E63]"
-                />
+                <div className="text-[10px] text-slate-400 mt-1">{stats.targetBoys} Target Capacity Goal</div>
               </div>
 
-              {/* Gender Filter */}
-              <div className="flex bg-gray-100 dark:bg-white/5 p-1 rounded-xl border border-gray-200 dark:border-white/10">
-                <button
-                  onClick={() => setGenderFilter('all')}
-                  className={cn("flex-1 py-1.5 text-[11px] font-black rounded-lg transition-all", genderFilter === 'all' ? "bg-white dark:bg-white/10 text-[#E91E63] shadow-sm" : "text-gray-500")}
-                >
-                  {lang === 'en' ? 'All' : 'सभी'}
-                </button>
-                <button
-                  onClick={() => setGenderFilter('male')}
-                  className={cn("flex-1 py-1.5 text-[11px] font-black rounded-lg transition-all", genderFilter === 'male' ? "bg-white dark:bg-white/10 text-[#E91E63] shadow-sm" : "text-gray-500")}
-                >
-                  {lang === 'en' ? 'Groom (वर)' : 'वर'}
-                </button>
-                <button
-                  onClick={() => setGenderFilter('female')}
-                  className={cn("flex-1 py-1.5 text-[11px] font-black rounded-lg transition-all", genderFilter === 'female' ? "bg-white dark:bg-white/10 text-[#E91E63] shadow-sm" : "text-gray-500")}
-                >
-                  {lang === 'en' ? 'Bride (वधू)' : 'वधू'}
-                </button>
+              <div className="bg-slate-950/70 border border-pink-500/20 rounded-xl p-3">
+                <div className="flex justify-between text-xs text-pink-300 font-semibold">
+                  <span>{isHindi ? 'वधू (Girls Approved)' : 'Girls Approved'}</span>
+                  <span>{stats.approvedGirls} / {stats.targetGirls}</span>
+                </div>
+                <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden mt-1.5">
+                  <div 
+                    className="bg-pink-500 h-full rounded-full transition-all duration-500" 
+                    style={{ width: `${Math.min(100, (stats.approvedGirls / stats.targetGirls) * 100)}%` }}
+                  ></div>
+                </div>
+                <div className="text-[10px] text-slate-400 mt-1">{stats.targetGirls} Target Capacity Goal</div>
               </div>
 
-              {/* Sampraday Dropdown */}
-              <select
-                value={sampradayFilter}
-                onChange={(e) => setSampradayFilter(e.target.value)}
-                className="w-full px-3 py-2 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-xs font-bold focus:outline-none focus:border-[#E91E63]"
-              >
-                <option value="All">{lang === 'en' ? 'All Sampraday' : 'सभी आम्नाय'}</option>
-                <option value="Digambar">Digambar Jain (दिगंबर)</option>
-                <option value="Swetambar Murtipujak">Swetambar Murtipujak (मूर्तिपूजक)</option>
-                <option value="Sthanakvasi">Sthanakvasi (स्थानकवासी)</option>
-                <option value="Terapanthi">Terapanthi (तेरापंथी)</option>
-                <option value="Kanji Panth">Kanji Panth (कांजी पंथ)</option>
-              </select>
+              <div className="bg-slate-950/70 border border-orange-500/20 rounded-xl p-3 flex items-center justify-between">
+                <div>
+                  <div className="text-xs text-orange-300 font-semibold">{isHindi ? 'मध्य प्रदेश प्रोफाइल' : 'Madhya Pradesh'}</div>
+                  <div className="text-xl font-bold text-orange-400 mt-0.5">{stats.madhyaPradeshProfiles}</div>
+                  <div className="text-[10px] text-slate-400">Sagar, Damoh, Jabalpur, etc.</div>
+                </div>
+                <MapPin className="w-6 h-6 text-orange-500/40" />
+              </div>
 
-              {/* Sub-Category / Jati Filter */}
-              <select
-                value={subCategoryFilter}
-                onChange={(e) => setSubCategoryFilter(e.target.value)}
-                className="w-full px-3 py-2 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-xs font-bold focus:outline-none focus:border-[#E91E63]"
-              >
-                <option value="All">{lang === 'en' ? 'All Sub-Castes (सभी उपजाति)' : 'सभी उपजाति (परवार, गोलापूर्व)'}</option>
-                <option value="Parwar">Parwar Jain (परवार दिगंबर)</option>
-                <option value="Golapurv">Golapurv Jain (गोलापूर्व दिगंबर)</option>
-                <option value="Khandelwal">Khandelwal Jain (खंडेलवाल)</option>
-                <option value="Oswal">Oswal Jain (ओसवाल)</option>
-                <option value="Porwal">Porwal / Podwal (पोड़वाल)</option>
-                <option value="Humad">Humad Jain (हुम्मड़)</option>
-                <option value="Saitwal">Saitwal Jain (सैतवाल)</option>
-                <option value="Jaiswal">Jaiswal Jain (जायसवाल)</option>
-                <option value="Shrimal">Shrimal Jain (श्रीमाल)</option>
-              </select>
-
-              {/* Manglik Filter */}
-              <select
-                value={manglikFilter}
-                onChange={(e) => setManglikFilter(e.target.value)}
-                className="w-full px-3 py-2 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-xs font-bold focus:outline-none focus:border-[#E91E63]"
-              >
-                <option value="All">{lang === 'en' ? 'All Horoscope / Manglik' : 'सभी मांगलिक स्थिति'}</option>
-                <option value="No">Non-Manglik (अमांगलिक)</option>
-                <option value="Yes">Manglik (मांगलिक)</option>
-                <option value="Partial / Anshik">Anshik / Partial Manglik</option>
-              </select>
-            </div>
-
-            {/* Checkbox tags */}
-            <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-gray-150 dark:border-white/5">
-              <label className="flex items-center gap-2 cursor-pointer text-xs font-black text-gray-700 dark:text-gray-300">
-                <input
-                  type="checkbox"
-                  checked={chovisiOnly}
-                  onChange={(e) => setChovisiOnly(e.target.checked)}
-                  className="w-4 h-4 accent-[#E91E63] rounded cursor-pointer"
-                />
-                <span>☀️ {lang === 'en' ? 'Strict Sunset Chovisi Practitioner' : 'केवल चौविहार / रात्रि भोजन त्यागी'}</span>
-              </label>
-
-              <div className="text-[10px] font-bold text-gray-500">
-                {lang === 'en' ? `Showing ${filteredProfiles.length} verified candidate profiles` : `${filteredProfiles.length} प्रामाणिक जैन बायोडाटा मिले`}
+              <div className="bg-slate-950/70 border border-purple-500/20 rounded-xl p-3 flex items-center justify-between">
+                <div>
+                  <div className="text-xs text-purple-300 font-semibold">{isHindi ? 'गोलापूर्व समाज' : 'Golapurv Samaj'}</div>
+                  <div className="text-xl font-bold text-purple-400 mt-0.5">{stats.golapurvProfiles}</div>
+                  <div className="text-[10px] text-slate-400">Digambar Jain Community</div>
+                </div>
+                <Award className="w-6 h-6 text-purple-500/40" />
               </div>
             </div>
           </div>
+        )}
 
-          {/* Candidates Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {filteredProfiles.length === 0 ? (
-              <div className="col-span-full text-center py-12 bg-white/50 dark:bg-white/5 rounded-3xl border border-gray-200 dark:border-white/10 p-6 space-y-3">
-                <User size={40} className="mx-auto text-gray-400" />
-                <h3 className="text-base font-black">{lang === 'en' ? 'No Matching Profiles Found' : 'कोई मेल खाती प्रोफाइल नहीं मिली'}</h3>
-                <p className="text-xs text-gray-500 max-w-sm mx-auto">
-                  {lang === 'en' ? 'Try adjusting your sub-caste filter or search terms.' : 'कृपया अपनी खोज शब्द बदलें या सभी फ़िल्टर हटाएं।'}
+        {/* TAB 1: BROWSE APPROVED PROFILES */}
+        {activeTab === 'browse' && (
+          <div className="space-y-6">
+            {/* Search and Filters Bar */}
+            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-lg space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                {/* Search query input */}
+                <div className="relative md:col-span-2">
+                  <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3.5" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                    placeholder={isHindi ? 'नाम, शहर, गोत्र, पेशा (CA, Engineer, Doctor), शिक्षा से खोजें...' : 'Search by name, city, Gotra, profession (Doctor, CA, Engineer), degree...'}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl pl-9 pr-4 py-2.5 text-xs sm:text-sm text-slate-100 placeholder-slate-400 focus:outline-none focus:border-amber-500"
+                  />
+                  {searchQuery && (
+                    <button onClick={() => setSearchQuery('')} className="absolute right-3 top-3 text-slate-400 hover:text-slate-200">
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+
+                {/* Gender toggle */}
+                <div className="flex bg-slate-800 p-1 rounded-xl border border-slate-700">
+                  <button
+                    onClick={() => setGenderFilter('all')}
+                    className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition ${
+                      genderFilter === 'all' ? 'bg-amber-500 text-slate-950 shadow' : 'text-slate-300 hover:text-slate-100'
+                    }`}
+                  >
+                    {isHindi ? 'सभी' : 'All'}
+                  </button>
+                  <button
+                    onClick={() => setGenderFilter('male')}
+                    className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition ${
+                      genderFilter === 'male' ? 'bg-blue-600 text-white shadow' : 'text-slate-300 hover:text-slate-100'
+                    }`}
+                  >
+                    {isHindi ? 'वर (Boys)' : 'Boys'}
+                  </button>
+                  <button
+                    onClick={() => setGenderFilter('female')}
+                    className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition ${
+                      genderFilter === 'female' ? 'bg-pink-600 text-white shadow' : 'text-slate-300 hover:text-slate-100'
+                    }`}
+                  >
+                    {isHindi ? 'वधू (Girls)' : 'Girls'}
+                  </button>
+                </div>
+              </div>
+
+              {/* Advanced Filter Selectors */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 text-xs">
+                {/* Age Filter */}
+                <div>
+                  <label className="block text-[11px] text-slate-400 mb-1">{isHindi ? 'आयु वर्ग (Age Range)' : 'Age Range'}</label>
+                  <select
+                    value={ageRangeFilter}
+                    onChange={e => setAgeRangeFilter(e.target.value)}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl p-2 text-slate-200 focus:outline-none focus:border-amber-500"
+                  >
+                    <option value="all">All Ages (18+)</option>
+                    <option value="18-25">18 - 25 Years</option>
+                    <option value="26-30">26 - 30 Years</option>
+                    <option value="31-35">31 - 35 Years</option>
+                    <option value="36-40">36 - 40 Years</option>
+                    <option value="41-50">41 - 50 Years</option>
+                  </select>
+                </div>
+
+                {/* Jain Community */}
+                <div>
+                  <label className="block text-[11px] text-slate-400 mb-1">{isHindi ? 'जैन उपजाति / समुदाय' : 'Jain Community'}</label>
+                  <select
+                    value={selectedCommunity}
+                    onChange={e => setSelectedCommunity(e.target.value)}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl p-2 text-slate-200 focus:outline-none focus:border-amber-500"
+                  >
+                    <option value="all">All Jain Communities</option>
+                    <option value="golapurv">Golapurv (गोलापूर्व)</option>
+                    <option value="parwar">Parwar (परवार)</option>
+                    <option value="khandelwal">Khandelwal (खंडेलवाल)</option>
+                    <option value="oswal">Oswal (ओसवाल)</option>
+                    <option value="porwal">Porwal / Podwal (पोड़वाल)</option>
+                    <option value="humad">Humad (हुम्मड़)</option>
+                    <option value="saitwal">Saitwal (सैतवाल)</option>
+                    <option value="jaiswal">Jaiswal (जायसवाल)</option>
+                  </select>
+                </div>
+
+                {/* State Priority */}
+                <div>
+                  <label className="block text-[11px] text-slate-400 mb-1">{isHindi ? 'राज्य (State)' : 'State'}</label>
+                  <select
+                    value={selectedState}
+                    onChange={e => {
+                      setSelectedState(e.target.value);
+                      if (e.target.value !== 'Madhya Pradesh') setSelectedMpCity('all');
+                    }}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl p-2 text-slate-200 focus:outline-none focus:border-amber-500"
+                  >
+                    <option value="all">All States (India / Global)</option>
+                    <option value="Madhya Pradesh">Madhya Pradesh (Priority)</option>
+                    <option value="Maharashtra">Maharashtra</option>
+                    <option value="Rajasthan">Rajasthan</option>
+                    <option value="Uttar Pradesh">Uttar Pradesh</option>
+                    <option value="Gujarat">Gujarat</option>
+                    <option value="Delhi">Delhi NCR</option>
+                    <option value="Karnataka">Karnataka</option>
+                  </select>
+                </div>
+
+                {/* MP Cities dropdown */}
+                <div>
+                  <label className="block text-[11px] text-slate-400 mb-1">{isHindi ? 'म.प्र. प्रमुख शहर' : 'MP City'}</label>
+                  <select
+                    value={selectedMpCity}
+                    onChange={e => setSelectedMpCity(e.target.value)}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl p-2 text-slate-200 focus:outline-none focus:border-amber-500"
+                  >
+                    <option value="all">All MP Cities</option>
+                    {MADHYA_PRADESH_CITIES.slice(0, 15).map(c => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Quick Toggle Checkboxes */}
+                <div className="flex flex-col justify-end gap-1.5 pt-1">
+                  <label className="flex items-center gap-1.5 text-[11px] text-slate-300 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={mpPriorityOnly}
+                      onChange={e => setMpPriorityOnly(e.target.checked)}
+                      className="rounded text-amber-500 w-3.5 h-3.5"
+                    />
+                    <span>MP Native Only</span>
+                  </label>
+                  <label className="flex items-center gap-1.5 text-[11px] text-slate-300 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={chovisiOnly}
+                      onChange={e => setChovisiOnly(e.target.checked)}
+                      className="rounded text-amber-500 w-3.5 h-3.5"
+                    />
+                    <span>Sunset Chovisi</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            {/* Results Grid */}
+            {loading ? (
+              <div className="text-center py-16 bg-slate-900/40 rounded-2xl border border-slate-800">
+                <RefreshCw className="w-8 h-8 text-amber-400 animate-spin mx-auto mb-3" />
+                <p className="text-sm text-slate-400">Loading verified Jain matrimonial records...</p>
+              </div>
+            ) : filteredProfiles.length === 0 ? (
+              <div className="text-center py-16 bg-slate-900/60 rounded-2xl border border-slate-800 p-6 space-y-4">
+                <div className="w-16 h-16 bg-amber-500/10 border border-amber-500/30 rounded-full flex items-center justify-center mx-auto text-amber-400">
+                  <UserPlus className="w-8 h-8" />
+                </div>
+                <h3 className="text-lg font-bold text-slate-200">
+                  {isHindi ? 'कोई स्वीकृत प्रोफाइल नहीं मिली' : 'No Matching Approved Profiles Found'}
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-400 max-w-lg mx-auto">
+                  {isHindi 
+                    ? 'हम कड़ाई से "शून्य फर्जी प्रोफाइल" नीति का पालन करते हैं। जैसे ही नए उम्मीदवार ₹0 में पंजीकरण करेंगे और एडमिन द्वारा सत्यापित होंगे, वे यहां प्रदर्शित होंगे।'
+                    : 'We strictly follow a zero-fake-profile policy. Be among the first to register an authentic Jain candidate profile for ₹0 completely free.'}
                 </p>
+                <button
+                  onClick={() => setActiveTab('create')}
+                  className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-6 py-2.5 rounded-xl text-xs sm:text-sm shadow-lg transition"
+                >
+                  {isHindi ? 'पहला निःशुल्क बायोडाटा पंजीकृत करें (₹0)' : 'Register First Profile (100% Free)'}
+                </button>
               </div>
             ) : (
-              filteredProfiles.slice(0, visibleCount).map((p) => {
-                const isSaved = shortlistedIds.includes(p.id);
-                const isSent = sentInterests.includes(p.id);
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                {filteredProfiles.map(profile => {
+                  const isFav = shortlistedIds.includes(profile.id);
+                  const isSent = sentInterests.includes(profile.id);
 
-                return (
-                  <div
-                    key={p.id}
-                    onClick={() => setSelectedProfile(p)}
-                    className="bg-white/90 dark:bg-[#121212]/90 backdrop-blur-md rounded-3xl p-5 border border-gray-200/70 dark:border-white/10 shadow-sm hover:shadow-xl hover:border-pink-500/40 transition-all cursor-pointer relative flex flex-col justify-between group overflow-hidden"
-                  >
-                    {/* Top Badges */}
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className="px-2.5 py-1 bg-pink-500/10 text-[#E91E63] text-[10px] font-black uppercase rounded-lg border border-pink-500/20">
-                          {p.subCategory}
-                        </span>
-                        <span className="px-2 py-0.5 bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-gray-400 text-[10px] font-bold rounded-md">
-                          {p.sampraday}
-                        </span>
-                      </div>
+                  return (
+                    <div
+                      key={profile.id}
+                      className="bg-slate-900/90 border border-slate-800 hover:border-amber-500/40 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition flex flex-col justify-between group"
+                    >
+                      <div>
+                        {/* Top Photo & Identity Header */}
+                        <div className="relative h-56 bg-slate-950 overflow-hidden">
+                          <img
+                            src={profile.photoUrl || (profile.gender === 'female' ? 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=400' : 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=400')}
+                            alt={profile.fullName}
+                            className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = profile.gender === 'female' 
+                                ? 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=400' 
+                                : 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=400';
+                            }}
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-black/40"></div>
 
-                      <button
-                        onClick={(e) => toggleShortlist(p.id, e)}
-                        className={cn(
-                          "p-2 rounded-full border transition-all cursor-pointer",
-                          isSaved ? "bg-pink-500 text-white border-pink-500" : "bg-gray-100 dark:bg-white/5 text-gray-400 hover:text-pink-500 border-gray-200 dark:border-white/10"
-                        )}
-                        title={isSaved ? "Remove from Shortlist" : "Add to Shortlist"}
-                      >
-                        <Bookmark size={14} className={isSaved ? "fill-white" : ""} />
-                      </button>
-                    </div>
-
-                    {/* Image & Main Info */}
-                    <div className="flex items-center gap-4 mb-4">
-                      <div className="relative shrink-0">
-                        <img
-                          src={p.photoUrl}
-                          alt={p.fullName}
-                          className="w-16 h-16 rounded-2xl object-cover border-2 border-pink-500/30 group-hover:scale-105 transition-transform"
-                        />
-                        {p.verifiedTrust && (
-                          <div className="absolute -bottom-1 -right-1 bg-emerald-500 text-white p-0.5 rounded-full" title="Verified Family">
-                            <CheckCircle2 size={12} />
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="min-w-0 flex-1">
-                        <h3 className="text-base font-black text-gray-900 dark:text-white truncate group-hover:text-[#E91E63] transition-colors flex items-center gap-1.5">
-                          <span>{p.fullName}</span>
-                          {p.isConfidential && (
-                            <span className="p-0.5 bg-amber-500/10 text-amber-500 rounded" title="Confidential Profile">
-                              <ShieldAlert size={12} />
+                          {/* Badges on top */}
+                          <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
+                            <span className="bg-slate-950/80 backdrop-blur-md text-amber-300 text-[10px] font-bold px-2 py-0.5 rounded-full border border-amber-500/40">
+                              {profile.subCategory || 'Jain'}
                             </span>
+                            {profile.isMadhyaPradesh && (
+                              <span className="bg-orange-950/80 text-orange-300 text-[10px] font-medium px-2 py-0.5 rounded-full border border-orange-500/40">
+                                MP Native
+                              </span>
+                            )}
+                          </div>
+
+                          <div className="absolute top-3 right-3 flex items-center gap-1.5">
+                            <button
+                              onClick={(e) => toggleShortlist(profile.id, e)}
+                              className={`p-2 rounded-full backdrop-blur-md transition ${
+                                isFav ? 'bg-rose-500 text-white' : 'bg-slate-950/70 text-slate-300 hover:text-rose-400'
+                              }`}
+                              title={isFav ? 'Shortlisted' : 'Shortlist'}
+                            >
+                              <Heart className={`w-4 h-4 ${isFav ? 'fill-white' : ''}`} />
+                            </button>
+                          </div>
+
+                          {/* Candidate Name & Age at bottom of image */}
+                          <div className="absolute bottom-3 left-3 right-3">
+                            <div className="flex items-center justify-between">
+                              <h4 className="text-lg font-bold text-white drop-shadow-md truncate">
+                                {profile.fullName}
+                              </h4>
+                              <span className="text-xs bg-slate-900/90 text-amber-300 font-bold px-2 py-0.5 rounded-md border border-amber-500/30">
+                                {profile.age} Yrs • {profile.height}
+                              </span>
+                            </div>
+                            <p className="text-xs text-slate-300 flex items-center gap-1 mt-0.5">
+                              <MapPin className="w-3 h-3 text-amber-400 shrink-0" />
+                              <span className="truncate">{profile.city}, {profile.state}</span>
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Bio & Details Body */}
+                        <div className="p-4 space-y-3 text-xs text-slate-300">
+                          <div className="space-y-1.5">
+                            <div className="flex items-center gap-2 text-slate-200">
+                              <GraduationCap className="w-4 h-4 text-amber-400 shrink-0" />
+                              <span className="truncate font-medium">{profile.education}</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-slate-200">
+                              <Briefcase className="w-4 h-4 text-amber-400 shrink-0" />
+                              <span className="truncate font-medium">{profile.profession} ({profile.annualIncome})</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-slate-400 text-[11px]">
+                              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                              <span>Gotra: <strong className="text-slate-200">{profile.gotra}</strong> • {profile.sampraday}</span>
+                            </div>
+                          </div>
+
+                          {/* Dietary & Vow pill */}
+                          <div className="bg-slate-950/80 rounded-xl p-2.5 text-[11px] space-y-1 border border-slate-800">
+                            <div className="text-slate-400">
+                              <strong className="text-amber-400">Diet & Rituals:</strong> {profile.dietaryHabit} ({profile.dailyRituals})
+                            </div>
+                            <div className="text-slate-400 truncate">
+                              <strong className="text-slate-300">Family:</strong> Father: {profile.fatherOccupation}
+                            </div>
+                          </div>
+
+                          {/* Short bio preview */}
+                          {profile.bio && (
+                            <p className="text-[11px] text-slate-400 italic line-clamp-2">
+                              "{profile.bio}"
+                            </p>
                           )}
-                        </h3>
-                        <p className="text-xs text-gray-500 font-bold truncate">
-                          {p.age} Yrs, {p.height} • {p.gotra}
-                        </p>
-                        <div className="flex items-center gap-1 text-[11px] font-bold text-gray-600 dark:text-gray-400 mt-0.5">
-                          <MapPin size={12} className="text-pink-500 shrink-0" />
-                          <span className="truncate">{p.city}, {p.state}</span>
                         </div>
                       </div>
-                    </div>
 
-                    {/* Profession & Income */}
-                    <div className="space-y-1.5 p-3 bg-gray-50 dark:bg-white/5 rounded-2xl mb-4 border border-gray-100 dark:border-white/5 text-xs font-bold">
-                      <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
-                        <GraduationCap size={14} className="text-pink-500 shrink-0" />
-                        <span className="truncate">{p.education}</span>
+                      {/* Card Action Buttons */}
+                      <div className="p-4 pt-0 grid grid-cols-2 gap-2">
+                        <button
+                          onClick={() => setSelectedProfileDetail(profile)}
+                          className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold py-2 px-3 rounded-xl transition flex items-center justify-center gap-1.5 border border-slate-700"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                          <span>{isHindi ? 'पूरा बायोडाटा' : 'View Biodata'}</span>
+                        </button>
+
+                        <button
+                          onClick={(e) => expressInterest(profile.id, e)}
+                          className={`text-xs font-bold py-2 px-3 rounded-xl transition flex items-center justify-center gap-1.5 shadow ${
+                            isSent 
+                              ? 'bg-emerald-700 text-white cursor-default'
+                              : 'bg-amber-500 hover:bg-amber-400 text-slate-950 active:scale-95'
+                          }`}
+                        >
+                          {isSent ? (
+                            <>
+                              <Check className="w-3.5 h-3.5" />
+                              <span>{isHindi ? 'प्रस्ताव भेजा गया' : 'Interest Sent'}</span>
+                            </>
+                          ) : (
+                            <>
+                              <Send className="w-3.5 h-3.5" />
+                              <span>{isHindi ? 'सम्पर्क प्रस्ताव' : 'Express Interest'}</span>
+                            </>
+                          )}
+                        </button>
                       </div>
-                      <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
-                        <Briefcase size={14} className="text-pink-500 shrink-0" />
-                        <span className="truncate">{p.profession} ({p.annualIncome})</span>
-                      </div>
                     </div>
-
-                    {/* Guna Score & Phone Access Status */}
-                    <div className="flex items-center justify-between text-[10px] font-bold mb-4 pt-1 border-t border-gray-150 dark:border-white/5">
-                      <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-black">
-                        <Sparkles size={12} /> {p.gunaMatchScore}/36 Guna Match
-                      </span>
-
-                      {isPremiumUser ? (
-                        <span className="text-emerald-500 font-black flex items-center gap-1">
-                          <Phone size={10} /> {p.contactPhone}
-                        </span>
-                      ) : (
-                        <span className="text-amber-500 font-bold flex items-center gap-1">
-                          <Lock size={10} /> {p.contactPhone.substring(0, 8)}*****
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedProfile(p);
-                        }}
-                        className="flex-1 py-2 bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/20 text-gray-800 dark:text-gray-200 rounded-xl font-black text-xs transition-all cursor-pointer text-center"
-                      >
-                        {lang === 'en' ? 'Full Biodata' : 'पूर्ण विवरण'}
-                      </button>
-
-                      <button
-                        onClick={(e) => expressInterest(p.id, e)}
-                        disabled={isSent}
-                        className={cn(
-                          "px-3 py-2 rounded-xl font-black text-xs transition-all cursor-pointer flex items-center justify-center gap-1 shrink-0",
-                          isSent 
-                            ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30" 
-                            : "bg-[#E91E63] hover:bg-pink-700 text-white shadow-md"
-                        )}
-                      >
-                        {isSent ? (
-                          <>
-                            <Check size={14} />
-                            <span>{lang === 'en' ? 'Sent' : 'भेजा'}</span>
-                          </>
-                        ) : (
-                          <>
-                            <Send size={14} />
-                            <span>{lang === 'en' ? 'Express Interest' : 'रुचि भेजें'}</span>
-                          </>
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                );
-              })
+                  );
+                })}
+              </div>
             )}
           </div>
+        )}
 
-          {/* Pagination / Load More Button */}
-          {filteredProfiles.length > visibleCount && (
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-6 pb-2">
-              <button
-                onClick={() => setVisibleCount(prev => prev + 24)}
-                className="px-6 py-3 bg-[#E91E63] hover:bg-[#C2185B] text-white rounded-2xl font-black text-xs uppercase tracking-wider shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer flex items-center gap-2 border border-pink-400/30"
-              >
-                <span>{lang === 'en' ? `Load More Candidates (${filteredProfiles.length - visibleCount} Remaining)` : `और बायोडाटा देखें (${filteredProfiles.length - visibleCount} शेष)`}</span>
-                <ChevronRight size={16} />
-              </button>
-              <button
-                onClick={() => setVisibleCount(filteredProfiles.length)}
-                className="px-5 py-3 bg-gray-200 dark:bg-white/10 hover:bg-gray-300 dark:hover:bg-white/20 text-gray-800 dark:text-gray-200 rounded-2xl font-black text-xs uppercase tracking-wider transition-all cursor-pointer"
-              >
-                <span>{lang === 'en' ? 'Show All Profiles' : 'सभी एक साथ देखें'}</span>
-              </button>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* SHORTLISTED TAB */}
-      {activeTab === 'shortlisted' && (
-        <div className="max-w-5xl mx-auto space-y-4">
-          <div className="flex items-center justify-between pb-2 border-b border-gray-200 dark:border-white/10">
-            <h2 className="text-lg font-black text-gray-900 dark:text-white flex items-center gap-2">
-              <Bookmark size={18} className="text-[#E91E63]" />
-              <span>{lang === 'en' ? 'Saved Profiles' : 'पसंदीदा प्रोफाइल की सूची'}</span>
-            </h2>
-            <span className="text-xs font-bold text-gray-500">
-              {shortlistedProfiles.length} {lang === 'en' ? 'Profiles Saved' : 'प्रोफाइल सहेजे गए'}
-            </span>
-          </div>
-
-          {shortlistedProfiles.length === 0 ? (
-            <div className="text-center py-16 bg-white/50 dark:bg-white/5 rounded-3xl border border-gray-200 dark:border-white/10 p-6 space-y-3">
-              <Bookmark size={40} className="mx-auto text-gray-400" />
-              <h3 className="text-base font-black">{lang === 'en' ? 'No Saved Profiles Yet' : 'अभी कोई पसंदीदा प्रोफाइल नहीं है'}</h3>
-              <p className="text-xs text-gray-500 max-w-sm mx-auto">
-                {lang === 'en' ? 'Click the bookmark icon on any candidate card to save them here.' : 'कार्ड पर दिए गए बुकमार्क आइकन को दबाकर पसंदीदा प्रोफाइल यहाँ सहेजें।'}
+        {/* TAB 2: REGISTER OR EDIT PROFILE (100% FREE ₹0) */}
+        {activeTab === 'create' && (
+          <div className="max-w-3xl mx-auto bg-slate-900 border border-slate-800 rounded-3xl p-5 sm:p-8 shadow-2xl space-y-6">
+            <div className="border-b border-slate-800 pb-4">
+              <div className="flex items-center gap-2">
+                <span className="bg-emerald-950 text-emerald-300 text-xs px-2.5 py-1 rounded-full font-bold uppercase border border-emerald-500/30">
+                  ₹0 Registration Fee
+                </span>
+                <span className="text-xs bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-full font-medium">
+                  Admin Verification Required
+                </span>
+              </div>
+              <h2 className="text-xl sm:text-2xl font-bold text-slate-100 mt-2 font-serif">
+                {myProfile ? (isHindi ? 'बायोडाटा संपादित करें' : 'Update Jain Matrimonial Biodata') : (isHindi ? 'निशुल्क जैन विवाह पंजीकरण (₹0)' : 'Register Authentic Jain Matrimonial Profile (₹0)')}
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-400 mt-1">
+                {isHindi 
+                  ? 'सभी पंजीकरण 100% निःशुल्क हैं। केवल 18+ वयस्क उम्मीदवार ही पंजीकरण के पात्र हैं। जमा करने के बाद एडमिन द्वारा सत्यापन किया जाएगा।' 
+                  : 'Lifelong ₹0 free registration. Strictly for adult candidates (18+). Submitted profiles are verified by Admin before public search.'}
               </p>
             </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {shortlistedProfiles.map(p => (
-                <div
-                  key={p.id}
-                  onClick={() => setSelectedProfile(p)}
-                  className="bg-white/90 dark:bg-[#121212]/90 backdrop-blur-md rounded-2xl p-4 border border-gray-200 dark:border-white/10 flex items-center gap-4 cursor-pointer hover:border-pink-500 transition-all"
-                >
-                  <img src={p.photoUrl} alt={p.fullName} className="w-16 h-16 rounded-2xl object-cover shrink-0" />
-                  <div className="min-w-0 flex-1">
-                    <h4 className="text-sm font-black text-gray-900 dark:text-white truncate">{p.fullName}</h4>
-                    <p className="text-xs text-gray-500 font-bold">{p.age} Yrs • {p.subCategory}</p>
-                    <p className="text-[11px] text-pink-600 dark:text-pink-400 font-bold truncate">{p.profession}</p>
+
+            {formError && (
+              <div className="bg-rose-950/60 border border-rose-500/40 text-rose-200 p-4 rounded-xl text-xs flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                <span>{formError}</span>
+              </div>
+            )}
+
+            {formSuccess && (
+              <div className="bg-emerald-950/60 border border-emerald-500/40 text-emerald-200 p-4 rounded-xl text-xs flex items-start gap-2">
+                <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
+                <span>{formSuccess}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleSubmitProfile} className="space-y-5 text-xs">
+              {/* Section 1: Basic & Adult DOB Validation */}
+              <div className="space-y-4">
+                <h4 className="font-bold text-amber-400 uppercase tracking-wider text-[11px] border-b border-slate-800 pb-1">
+                  1. Candidate Identity & Age Validation (DOB Mandate)
+                </h4>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-slate-300 font-semibold mb-1">
+                      Candidate Full Name (उम्मीदवार का पूरा नाम) *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={formFullName}
+                      onChange={e => setFormFullName(e.target.value)}
+                      placeholder="e.g. Samyak Jain"
+                      className="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-slate-100 focus:outline-none focus:border-amber-500"
+                    />
                   </div>
+
+                  <div>
+                    <label className="block text-slate-300 font-semibold mb-1">
+                      Gender (लिंग) *
+                    </label>
+                    <select
+                      value={formGender}
+                      onChange={e => setFormGender(e.target.value as 'male' | 'female')}
+                      className="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-slate-100 focus:outline-none focus:border-amber-500"
+                    >
+                      <option value="male">Male Candidate (वर / पुरुष)</option>
+                      <option value="female">Female Candidate (वधू / महिला)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-300 font-semibold mb-1">
+                      Date of Birth (जन्म तिथि) *
+                    </label>
+                    <input
+                      type="date"
+                      required
+                      value={formDob}
+                      onChange={e => setFormDob(e.target.value)}
+                      className="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-slate-100 focus:outline-none focus:border-amber-500"
+                    />
+                    <div className="mt-1 text-[11px]">
+                      {formDob ? (
+                        liveCalculatedAge >= 18 ? (
+                          <span className="text-emerald-400 font-semibold">
+                            ✓ Calculated Age: {liveCalculatedAge} Years (Adult Verified)
+                          </span>
+                        ) : (
+                          <span className="text-rose-400 font-semibold">
+                            ✗ Calculated Age: {liveCalculatedAge} Years (Candidate must be 18+)
+                          </span>
+                        )
+                      ) : (
+                        <span className="text-slate-500">Age will be automatically verified from DOB.</span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-300 font-semibold mb-1">
+                      Height (ऊंचाई) *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={formHeight}
+                      onChange={e => setFormHeight(e.target.value)}
+                      placeholder='e.g. 5&#39;9"'
+                      className="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-slate-100 focus:outline-none focus:border-amber-500"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 2: Jain Community, Sampraday & Gotra */}
+              <div className="space-y-4">
+                <h4 className="font-bold text-amber-400 uppercase tracking-wider text-[11px] border-b border-slate-800 pb-1">
+                  2. Jain Community, Sampraday & Gotra (Voluntary Selection)
+                </h4>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-slate-300 font-semibold mb-1">
+                      Jain Sampraday (संप्रदाय) *
+                    </label>
+                    <select
+                      value={formSampraday}
+                      onChange={e => setFormSampraday(e.target.value as JainSampraday)}
+                      className="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-slate-100 focus:outline-none focus:border-amber-500"
+                    >
+                      <option value="Digambar">Digambar (दिगंबर)</option>
+                      <option value="Swetambar Murtipujak">Swetambar Murtipujak</option>
+                      <option value="Sthanakvasi">Sthanakvasi</option>
+                      <option value="Terapanthi">Terapanthi</option>
+                      <option value="Kanji Panth">Kanji Panth</option>
+                      <option value="Other Jain">Other Jain</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-300 font-semibold mb-1">
+                      Jain Sub-caste / Community *
+                    </label>
+                    <select
+                      value={formCommunity}
+                      onChange={e => setFormCommunity(e.target.value)}
+                      className="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-slate-100 focus:outline-none focus:border-amber-500"
+                    >
+                      {JAIN_COMMUNITIES.map(c => (
+                        <option key={c.id} value={c.labelEn}>{c.labelEn}</option>
+                      ))}
+                      <option value="other">Other / Custom</option>
+                    </select>
+                  </div>
+
+                  {formCommunity === 'other' && (
+                    <div>
+                      <label className="block text-slate-300 font-semibold mb-1">
+                        Specify Community Name *
+                      </label>
+                      <input
+                        type="text"
+                        value={formCustomCommunity}
+                        onChange={e => setFormCustomCommunity(e.target.value)}
+                        placeholder="Enter sub-caste"
+                        className="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-slate-100 focus:outline-none"
+                      />
+                    </div>
+                  )}
+
+                  <div>
+                    <label className="block text-slate-300 font-semibold mb-1">
+                      Self Gotra (गोत्र) *
+                    </label>
+                    <select
+                      value={formGotra}
+                      onChange={e => setFormGotra(e.target.value)}
+                      className="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-slate-100 focus:outline-none focus:border-amber-500"
+                    >
+                      {JAIN_GOTRAS.map(g => (
+                        <option key={g} value={g}>{g}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 3: Education & Career */}
+              <div className="space-y-4">
+                <h4 className="font-bold text-amber-400 uppercase tracking-wider text-[11px] border-b border-slate-800 pb-1">
+                  3. Education & Profession
+                </h4>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-slate-300 font-semibold mb-1">Education (शिक्षा) *</label>
+                    <select
+                      value={formEducation}
+                      onChange={e => setFormEducation(e.target.value)}
+                      className="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-slate-100 focus:outline-none"
+                    >
+                      {EDUCATION_LEVELS.map(ed => (
+                        <option key={ed} value={ed}>{ed}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-300 font-semibold mb-1">Profession (व्यवसाय/नौकरी) *</label>
+                    <select
+                      value={formProfession}
+                      onChange={e => setFormProfession(e.target.value)}
+                      className="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-slate-100 focus:outline-none"
+                    >
+                      {OCCUPATIONS.map(occ => (
+                        <option key={occ} value={occ}>{occ}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-300 font-semibold mb-1">Annual Income (वार्षिक आय)</label>
+                    <input
+                      type="text"
+                      value={formIncome}
+                      onChange={e => setFormIncome(e.target.value)}
+                      placeholder="e.g. ₹20 LPA"
+                      className="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-slate-100 focus:outline-none"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 4: Location (Madhya Pradesh Priority) */}
+              <div className="space-y-4">
+                <h4 className="font-bold text-amber-400 uppercase tracking-wider text-[11px] border-b border-slate-800 pb-1">
+                  4. Location & Contact Details
+                </h4>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-slate-300 font-semibold mb-1">State (राज्य) *</label>
+                    <select
+                      value={formState}
+                      onChange={e => setFormState(e.target.value)}
+                      className="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-slate-100 focus:outline-none"
+                    >
+                      <option value="Madhya Pradesh">Madhya Pradesh</option>
+                      <option value="Maharashtra">Maharashtra</option>
+                      <option value="Rajasthan">Rajasthan</option>
+                      <option value="Uttar Pradesh">Uttar Pradesh</option>
+                      <option value="Gujarat">Gujarat</option>
+                      <option value="Delhi">Delhi NCR</option>
+                      <option value="Karnataka">Karnataka</option>
+                      <option value="Chhattisgarh">Chhattisgarh</option>
+                      <option value="Other">Other State</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-300 font-semibold mb-1">City / Native Place (शहर) *</label>
+                    <input
+                      type="text"
+                      required
+                      value={formCity}
+                      onChange={e => setFormCity(e.target.value)}
+                      placeholder="e.g. Sagar, Damoh, Jabalpur, Bhopal, Indore"
+                      className="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-slate-100 focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-300 font-semibold mb-1">Contact Phone (गोपनीय / Private) *</label>
+                    <input
+                      type="tel"
+                      required
+                      value={formPhone}
+                      onChange={e => setFormPhone(e.target.value)}
+                      placeholder="+91 98260 XXXXX"
+                      className="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-slate-100 focus:outline-none"
+                    />
+                    <span className="text-[10px] text-slate-500">Not displayed publicly without mutual consent.</span>
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-300 font-semibold mb-1">Photo Image URL</label>
+                    <input
+                      type="url"
+                      value={formPhotoUrl}
+                      onChange={e => setFormPhotoUrl(e.target.value)}
+                      placeholder="Paste image link (Unsplash or direct image URL)"
+                      className="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-slate-100 focus:outline-none"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 5: Jain Values & Family */}
+              <div className="space-y-4">
+                <h4 className="font-bold text-amber-400 uppercase tracking-wider text-[11px] border-b border-slate-800 pb-1">
+                  5. Jain Dietary Habits & Family Background
+                </h4>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-slate-300 font-semibold mb-1">Dietary Vow (आहार नियम)</label>
+                    <select
+                      value={formDietaryHabit}
+                      onChange={e => setFormDietaryHabit(e.target.value as any)}
+                      className="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-slate-100 focus:outline-none"
+                    >
+                      <option value="Pure Jain (Sunset Chovisi)">Pure Jain (Sunset Chovisi - सूर्यास्त पूर्व भोजन)</option>
+                      <option value="Jain (No Root Veg)">Jain (No Root Veg - जमीकंद त्याग)</option>
+                      <option value="Vegetarian">Vegetarian (शुद्ध शाकाहारी)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-300 font-semibold mb-1">Father's Occupation</label>
+                    <input
+                      type="text"
+                      value={formFather}
+                      onChange={e => setFormFather(e.target.value)}
+                      placeholder="e.g. Agro Merchant in Sagar"
+                      className="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-slate-100 focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-300 font-semibold mb-1">Mother's Occupation</label>
+                    <input
+                      type="text"
+                      value={formMother}
+                      onChange={e => setFormMother(e.target.value)}
+                      placeholder="e.g. Homemaker / Teacher"
+                      className="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-slate-100 focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">Biodata Summary / Bio</label>
+                  <textarea
+                    rows={3}
+                    value={formBio}
+                    onChange={e => setFormBio(e.target.value)}
+                    placeholder="Describe religious upbringing, family values, and partner expectations..."
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-slate-100 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              {/* Submit Button */}
+              <div className="pt-4 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <div className="text-xs text-emerald-400 flex items-center gap-1.5">
+                  <ShieldCheck className="w-4 h-4" />
+                  <span>₹0 Registration Fee • No Card Required • Strict Privacy</span>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={formSubmitting || liveCalculatedAge < 18}
+                  className="w-full sm:w-auto bg-amber-500 hover:bg-amber-400 disabled:bg-slate-800 disabled:text-slate-500 text-slate-950 font-bold px-8 py-3 rounded-xl text-sm transition shadow-xl flex items-center justify-center gap-2"
+                >
+                  {formSubmitting && <RefreshCw className="w-4 h-4 animate-spin" />}
+                  <span>{myProfile ? 'Update & Re-Submit Biodata' : 'Submit Profile for Admin Review (₹0)'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* TAB 3: USER'S OWN PROFILE DETAIL */}
+        {activeTab === 'my_profile' && myProfile && (
+          <div className="max-w-2xl mx-auto bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-5">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+              <div>
+                <span className={`text-xs px-2.5 py-1 rounded-full font-bold uppercase tracking-wider ${
+                  myProfile.status === 'APPROVED' ? 'bg-emerald-950 text-emerald-400 border border-emerald-500/30' : 'bg-amber-950 text-amber-300 border border-amber-500/30'
+                }`}>
+                  Status: {myProfile.status}
+                </span>
+                <h3 className="text-xl font-bold text-slate-100 mt-2">{myProfile.fullName}</h3>
+                <p className="text-xs text-slate-400">{myProfile.gender === 'male' ? 'Boy Candidate' : 'Girl Candidate'} • {myProfile.age} Yrs (DOB: {myProfile.dateOfBirth})</p>
+              </div>
+
+              <button
+                onClick={() => loadProfileIntoForm(myProfile)}
+                className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-3.5 py-2 rounded-xl border border-slate-700 font-semibold"
+              >
+                Edit Biodata
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 text-xs">
+              <div className="bg-slate-800/60 p-3 rounded-xl">
+                <span className="text-slate-400 block text-[10px]">Community & Gotra</span>
+                <span className="font-semibold text-slate-100">{myProfile.subCategory} ({myProfile.gotra})</span>
+              </div>
+              <div className="bg-slate-800/60 p-3 rounded-xl">
+                <span className="text-slate-400 block text-[10px]">Location</span>
+                <span className="font-semibold text-slate-100">{myProfile.city}, {myProfile.state}</span>
+              </div>
+              <div className="bg-slate-800/60 p-3 rounded-xl">
+                <span className="text-slate-400 block text-[10px]">Education</span>
+                <span className="font-semibold text-slate-100">{myProfile.education}</span>
+              </div>
+              <div className="bg-slate-800/60 p-3 rounded-xl">
+                <span className="text-slate-400 block text-[10px]">Profession</span>
+                <span className="font-semibold text-slate-100">{myProfile.profession}</span>
+              </div>
+            </div>
+
+            {myProfile.status === 'CORRECTION_REQUIRED' && (
+              <div className="bg-yellow-950/60 border border-yellow-500/40 text-yellow-200 p-4 rounded-xl text-xs space-y-1">
+                <strong>Admin Correction Note:</strong>
+                <p>{myProfile.correctionNote}</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* TAB 4: SHORTLISTED PROFILES */}
+        {activeTab === 'shortlist' && (
+          <div className="space-y-4">
+            <h3 className="text-lg font-bold text-slate-100 font-serif">
+              {isHindi ? 'आपकी शॉर्टलिस्ट की गई प्रोफाइल' : 'Your Shortlisted Candidates'} ({shortlistedProfiles.length})
+            </h3>
+
+            {shortlistedProfiles.length === 0 ? (
+              <div className="text-center py-16 bg-slate-900/40 rounded-2xl border border-slate-800 text-slate-400 text-sm">
+                No candidates shortlisted yet. Click the heart icon on any biodata to save for later.
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {shortlistedProfiles.map(p => (
+                  <div key={p.id} className="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <img 
+                        src={p.photoUrl} 
+                        alt={p.fullName}
+                        className="w-12 h-12 rounded-full object-cover border border-amber-500/40"
+                      />
+                      <div>
+                        <div className="font-bold text-slate-100 text-sm">{p.fullName}</div>
+                        <div className="text-xs text-slate-400">{p.age} yrs • {p.city}, {p.state}</div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => toggleShortlist(p.id)}
+                      className="p-2 bg-slate-800 hover:bg-rose-950 text-rose-400 rounded-xl"
+                      title="Remove from shortlist"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* TAB 5: MEMBERSHIP TIERS (₹0 FREE BY DEFAULT) */}
+        {activeTab === 'membership' && (
+          <div className="max-w-4xl mx-auto space-y-6">
+            <div className="text-center space-y-2">
+              <span className="text-xs bg-emerald-950 text-emerald-300 font-bold px-3 py-1 rounded-full border border-emerald-500/30">
+                100% Free Community Service
+              </span>
+              <h2 className="text-2xl font-bold font-serif text-slate-100">
+                Jain Vivah Membership Tiers & Samaj Seva
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-400 max-w-xl mx-auto">
+                All matrimonial registrations, biodata discovery, and partner searches are completely ₹0 free for all Jain families.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {membershipPlans.map(plan => (
+                <div 
+                  key={plan.id}
+                  className="bg-slate-900 border border-slate-800 hover:border-amber-500/40 rounded-3xl p-6 space-y-5 flex flex-col justify-between shadow-xl"
+                >
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold bg-amber-500/20 text-amber-300 px-2.5 py-1 rounded-md uppercase">
+                        {plan.tier}
+                      </span>
+                      <span className="text-xs text-emerald-400 font-semibold flex items-center gap-1">
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        Complimentary (₹0)
+                      </span>
+                    </div>
+
+                    <h3 className="text-xl font-bold text-slate-100 mt-3">{plan.name}</h3>
+                    <div className="text-3xl font-black text-amber-400 my-2">
+                      ₹{plan.price} <span className="text-xs text-slate-400 font-normal">/ {plan.durationDays} Days</span>
+                    </div>
+                    <p className="text-xs text-slate-400">{plan.description}</p>
+
+                    <div className="mt-4 space-y-2 text-xs text-slate-300">
+                      {plan.features.map((feat, idx) => (
+                        <div key={idx} className="flex items-center gap-2">
+                          <Check className="w-4 h-4 text-emerald-400 shrink-0" />
+                          <span>{feat}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
                   <button
-                    onClick={(e) => toggleShortlist(p.id, e)}
-                    className="p-2 text-red-500 hover:bg-red-500/10 rounded-xl"
+                    onClick={() => alert('Plan is active and available complimentary to all Jain candidates.')}
+                    className="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 py-2.5 rounded-xl text-xs font-bold transition border border-slate-700"
                   >
-                    <X size={16} />
+                    Active Tier (₹0 Free)
                   </button>
                 </div>
               ))}
             </div>
-          )}
-        </div>
-      )}
-
-      {/* INTERESTS TAB */}
-      {activeTab === 'interests' && (
-        <div className="max-w-5xl mx-auto space-y-4">
-          <div className="flex items-center justify-between pb-2 border-b border-gray-200 dark:border-white/10">
-            <h2 className="text-lg font-black text-gray-900 dark:text-white flex items-center gap-2">
-              <Send size={18} className="text-[#E91E63]" />
-              <span>{lang === 'en' ? 'Sent Interest Requests' : 'भेजी गई रुचि के निवेदन'}</span>
-            </h2>
-            <span className="text-xs font-bold text-gray-500">
-              {interestProfiles.length} {lang === 'en' ? 'Requests Active' : 'अनुरोध सक्रिय'}
-            </span>
           </div>
+        )}
 
-          {interestProfiles.length === 0 ? (
-            <div className="text-center py-16 bg-white/50 dark:bg-white/5 rounded-3xl border border-gray-200 dark:border-white/10 p-6 space-y-3">
-              <Send size={40} className="mx-auto text-gray-400" />
-              <h3 className="text-base font-black">{lang === 'en' ? 'No Interests Expressed Yet' : 'अभी कोई रुचि निवेदन नहीं भेजा'}</h3>
-              <p className="text-xs text-gray-500 max-w-sm mx-auto">
-                {lang === 'en' ? 'Click "Express Interest" on candidate biodatas to send a respectful match request.' : 'उम्मीदवारों के बायोडाटा पर "रुचि व्यक्त करें" बटन दबाकर संपर्क निवेदन भेजें।'}
-              </p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {interestProfiles.map(p => (
-                <div
-                  key={p.id}
-                  onClick={() => setSelectedProfile(p)}
-                  className="bg-white/90 dark:bg-[#121212]/90 backdrop-blur-md rounded-2xl p-4 border border-gray-200 dark:border-white/10 flex items-center gap-4 cursor-pointer hover:border-pink-500 transition-all"
-                >
-                  <img src={p.photoUrl} alt={p.fullName} className="w-16 h-16 rounded-2xl object-cover shrink-0" />
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <h4 className="text-sm font-black text-gray-900 dark:text-white truncate">{p.fullName}</h4>
-                      <span className="px-2 py-0.5 bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-[9px] font-black rounded-md">
-                        Interest Sent
-                      </span>
-                    </div>
-                    <p className="text-xs text-gray-500 font-bold">{p.city}, {p.state} • {p.subCategory}</p>
-                    <p className="text-[11px] text-[#E91E63] font-bold truncate">Contact: {isPremiumUser ? p.contactPhone : p.contactPhone.substring(0, 8) + '*****'}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+        {/* TAB 6: ADMIN SECTION EMBEDDED */}
+        {activeTab === 'admin' && isAdminUser && (
+          <VivahAdminSection 
+            adminEmail={user?.email || 'admin@jainism.com'}
+            adminId={user?.uid || 'admin_master'}
+            onRefreshParent={refreshVivahData}
+          />
+        )}
+      </div>
 
-      {/* ADD PROFILE TAB */}
-      {activeTab === 'register' && (
-        <div className="max-w-2xl mx-auto bg-white/90 dark:bg-[#121212]/90 backdrop-blur-md rounded-3xl p-6 border border-gray-200 dark:border-white/10 shadow-lg space-y-5">
-          <div>
-            <h2 className="text-xl font-black text-gray-900 dark:text-white flex items-center gap-2">
-              <User size={20} className="text-[#E91E63]" />
-              <span>{lang === 'en' ? 'Create Jain Matrimonial Profile' : 'नया जैन बायोडाटा पंजीकृत करें'}</span>
-            </h2>
-            <p className="text-xs text-gray-500 font-bold mt-1">
-              {lang === 'en' ? 'Fill accurate candidate and sub-caste information for family match seekers.' : 'उपजाति (परवार, गोलापूर्व, खंडेलवाल आदि) एवं परिवार की सही जानकारी दर्ज करें।'}
-            </p>
-          </div>
-
-          {formSuccess ? (
-            <div className="p-6 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl text-center space-y-2">
-              <CheckCircle2 size={36} className="mx-auto text-emerald-500" />
-              <h3 className="text-base font-black text-emerald-600 dark:text-emerald-400">
-                {lang === 'en' ? 'Biodata Registered Successfully!' : 'बायोडाटा सफलतापूर्वक पंजीकृत हो गया!'}
-              </h3>
-              <p className="text-xs text-gray-500">
-                {lang === 'en' ? 'Redirecting to browse page...' : 'मुख्य खोज पृष्ठ पर भेजा जा रहा है...'}
-              </p>
-            </div>
-          ) : (
-            <form onSubmit={handleCreateProfile} className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-[11px] font-black uppercase text-gray-500 mb-1">Full Candidate Name *</label>
-                  <input
-                    type="text"
-                    required
-                    value={formName}
-                    onChange={e => setFormName(e.target.value)}
-                    placeholder="e.g. Priyanshu Jain"
-                    className="w-full px-3 py-2 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-xs font-bold"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-black uppercase text-gray-500 mb-1">Gender *</label>
-                  <select
-                    value={formGender}
-                    onChange={e => setFormGender(e.target.value as any)}
-                    className="w-full px-3 py-2 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-xs font-bold"
-                  >
-                    <option value="male">Groom (वर / पुरुष)</option>
-                    <option value="female">Bride (वधू / महिला)</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-black uppercase text-gray-500 mb-1">Age *</label>
-                  <input
-                    type="number"
-                    required
-                    value={formAge}
-                    onChange={e => setFormAge(e.target.value)}
-                    className="w-full px-3 py-2 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-xs font-bold"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-black uppercase text-gray-500 mb-1">Height *</label>
-                  <input
-                    type="text"
-                    value={formHeight}
-                    onChange={e => setFormHeight(e.target.value)}
-                    placeholder="e.g. 5'9&quot;"
-                    className="w-full px-3 py-2 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-xs font-bold"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-black uppercase text-gray-500 mb-1">Sampraday *</label>
-                  <select
-                    value={formSampraday}
-                    onChange={e => setFormSampraday(e.target.value as any)}
-                    className="w-full px-3 py-2 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-xs font-bold"
-                  >
-                    <option value="Digambar">Digambar Jain (दिगंबर)</option>
-                    <option value="Swetambar Murtipujak">Swetambar Murtipujak (मूर्तिपूजक)</option>
-                    <option value="Sthanakvasi">Sthanakvasi (स्थानकवासी)</option>
-                    <option value="Terapanthi">Terapanthi (तेरापंथी)</option>
-                    <option value="Kanji Panth">Kanji Panth (कांजी पंथ)</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-black uppercase text-gray-500 mb-1">Sub-Caste / Jati (उपजाति) *</label>
-                  <select
-                    value={formSubCat}
-                    onChange={e => setFormSubCat(e.target.value)}
-                    className="w-full px-3 py-2 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-xs font-bold"
-                  >
-                    <option value="Parwar (परवार)">Parwar Digambar (परवार)</option>
-                    <option value="Golapurv (गोलापूर्व)">Golapurv Digambar (गोलापूर्व)</option>
-                    <option value="Khandelwal (खंडेलवाल)">Khandelwal Digambar (खंडेलवाल)</option>
-                    <option value="Oswal (ओसवाल)">Oswal Jain (ओसवाल)</option>
-                    <option value="Porwal / Podwal (पोड़वाल)">Porwal / Podwal (पोड़वाल)</option>
-                    <option value="Humad (हुम्मड़)">Humad Jain (हुम्मड़)</option>
-                    <option value="Saitwal (सैतवाल)">Saitwal Jain (सैतवाल)</option>
-                    <option value="Jaiswal (जायसवाल)">Jaiswal Jain (जायसवाल)</option>
-                    <option value="Shrimal (श्रीमाल)">Shrimal Jain (श्रीमाल)</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-black uppercase text-gray-500 mb-1">Gotra</label>
-                  <input
-                    type="text"
-                    value={formGotra}
-                    onChange={e => setFormGotra(e.target.value)}
-                    placeholder="e.g. Kashyap / Gautam / Vatsa"
-                    className="w-full px-3 py-2 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-xs font-bold"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-black uppercase text-gray-500 mb-1">Education *</label>
-                  <input
-                    type="text"
-                    required
-                    value={formEducation}
-                    onChange={e => setFormEducation(e.target.value)}
-                    placeholder="e.g. B.Tech CS, CA, MBA, M.D."
-                    className="w-full px-3 py-2 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-xs font-bold"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-black uppercase text-gray-500 mb-1">Profession & Income</label>
-                  <input
-                    type="text"
-                    value={formProfession}
-                    onChange={e => setFormProfession(e.target.value)}
-                    placeholder="e.g. Software Engineer / Business Owner"
-                    className="w-full px-3 py-2 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-xs font-bold"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-black uppercase text-gray-500 mb-1">City & State *</label>
-                  <input
-                    type="text"
-                    required
-                    value={formCity}
-                    onChange={e => setFormCity(e.target.value)}
-                    placeholder="e.g. Sagar, MP / Jaipur, RJ"
-                    className="w-full px-3 py-2 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-xs font-bold"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-black uppercase text-gray-500 mb-1">Phone Number (For Verified Connect) *</label>
-                  <input
-                    type="text"
-                    required
-                    value={formPhone}
-                    onChange={e => setFormPhone(e.target.value)}
-                    placeholder="+91 98260 00000"
-                    className="w-full px-3 py-2 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-xs font-bold"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-black uppercase text-gray-500 mb-1">Dietary Habits</label>
-                  <select
-                    value={formDiet}
-                    onChange={e => setFormDiet(e.target.value as any)}
-                    className="w-full px-3 py-2 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-xs font-bold"
-                  >
-                    <option value="Pure Jain (Sunset Chovisi)">Pure Jain (Sunset Chovisi / सूर्यास्त पूर्व)</option>
-                    <option value="Jain (No Root Veg)">Jain (No Root Vegetables / कंदमूल त्यागी)</option>
-                    <option value="Vegetarian">Pure Vegetarian (शुद्ध शाकाहारी)</option>
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-black uppercase text-gray-500 mb-1">Family & Bio Description</label>
-                <textarea
-                  rows={3}
-                  value={formBio}
-                  onChange={e => setFormBio(e.target.value)}
-                  placeholder="Describe family background, religious upbringing, and expectations..."
-                  className="w-full px-3 py-2 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-xs font-bold"
+      {/* FULL DETAIL MODAL */}
+      {selectedProfileDetail && (
+        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-amber-500/40 rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 text-slate-100 space-y-5 shadow-2xl">
+            <div className="flex justify-between items-start pb-3 border-b border-slate-800">
+              <div className="flex items-center gap-3">
+                <img 
+                  src={selectedProfileDetail.photoUrl} 
+                  alt={selectedProfileDetail.fullName}
+                  className="w-14 h-14 rounded-full object-cover border-2 border-amber-500/40"
                 />
+                <div>
+                  <h3 className="font-bold text-lg text-slate-100">{selectedProfileDetail.fullName}</h3>
+                  <p className="text-xs text-slate-400">{selectedProfileDetail.age} yrs • {selectedProfileDetail.height} • {selectedProfileDetail.city}, {selectedProfileDetail.state}</p>
+                </div>
               </div>
-
-              <button
-                type="submit"
-                className="w-full py-3 bg-[#E91E63] hover:bg-pink-700 text-white rounded-2xl font-black text-xs uppercase tracking-wider shadow-lg hover:scale-[1.01] active:scale-95 transition-all cursor-pointer"
+              <button 
+                onClick={() => setSelectedProfileDetail(null)} 
+                className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-full"
               >
-                Submit Biodata for Verification
+                <X className="w-5 h-5" />
               </button>
-            </form>
-          )}
-        </div>
-      )}
-
-      {/* FULL BIODATA MODAL */}
-      {selectedProfile && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-[#121212] border border-pink-500/30 rounded-3xl max-w-xl w-full p-6 shadow-2xl space-y-5 relative max-h-[90vh] overflow-y-auto">
-            <button
-              onClick={() => setSelectedProfile(null)}
-              className="absolute top-4 right-4 p-2 bg-gray-100 dark:bg-white/10 hover:bg-gray-200 rounded-full text-gray-500 transition-colors"
-            >
-              <X size={18} />
-            </button>
-
-            {/* Top Candidate Profile Header */}
-            <div className="flex items-center gap-4 border-b border-gray-200 dark:border-white/10 pb-4">
-              <img src={selectedProfile.photoUrl} alt={selectedProfile.fullName} className="w-20 h-20 rounded-2xl object-cover border-2 border-pink-500/40 shrink-0" />
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  <h2 className="text-xl font-black text-gray-900 dark:text-white truncate">{selectedProfile.fullName}</h2>
-                  {selectedProfile.verifiedTrust && (
-                    <span className="px-2 py-0.5 bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-[10px] font-black rounded-md flex items-center gap-1 shrink-0">
-                      <CheckCircle2 size={12} /> Verified Family
-                    </span>
-                  )}
-                </div>
-                <p className="text-xs text-[#E91E63] font-black mt-0.5">{selectedProfile.subCategory} • {selectedProfile.sampraday}</p>
-                <p className="text-xs text-gray-500 font-bold">{selectedProfile.age} Yrs, {selectedProfile.height} • {selectedProfile.city}, {selectedProfile.state}</p>
-              </div>
             </div>
 
-            {/* Biodata Details Table */}
-            <div className="grid grid-cols-2 gap-3 text-xs font-bold">
-              <div className="p-3 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5 space-y-1">
-                <span className="text-[10px] uppercase font-black text-gray-400 block">Gotra</span>
-                <span className="text-gray-800 dark:text-gray-200">{selectedProfile.gotra}</span>
-              </div>
-              <div className="p-3 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5 space-y-1">
-                <span className="text-[10px] uppercase font-black text-gray-400 block">Manglik Status</span>
-                <span className="text-gray-800 dark:text-gray-200">{selectedProfile.manglik}</span>
-              </div>
-              <div className="p-3 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5 space-y-1">
-                <span className="text-[10px] uppercase font-black text-gray-400 block">Education</span>
-                <span className="text-gray-800 dark:text-gray-200">{selectedProfile.education}</span>
-              </div>
-              <div className="p-3 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5 space-y-1">
-                <span className="text-[10px] uppercase font-black text-gray-400 block">Profession & Annual CTC</span>
-                <span className="text-gray-800 dark:text-gray-200">{selectedProfile.profession} ({selectedProfile.annualIncome})</span>
-              </div>
-            </div>
-
-            {/* Family Background */}
-            <div className="p-4 bg-pink-500/5 border border-pink-500/20 rounded-2xl space-y-2 text-xs font-bold">
-              <h4 className="text-xs uppercase font-black text-[#E91E63] flex items-center gap-1.5">
-                <UserCheck size={14} /> Family Background Details
-              </h4>
-              <p><span className="text-gray-500">Father's Profession:</span> {selectedProfile.fatherOccupation}</p>
-              <p><span className="text-gray-500">Mother's Profession:</span> {selectedProfile.motherOccupation}</p>
-              <p><span className="text-gray-500">Siblings:</span> {selectedProfile.siblings}</p>
-              <p><span className="text-gray-500">Diet & Rituals:</span> {selectedProfile.dietaryHabit} • {selectedProfile.dailyRituals}</p>
-            </div>
-
-            {/* Kundali Guna Milan Astakoot Score */}
-            <div className="p-4 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl space-y-2">
-              <div className="flex items-center justify-between">
-                <h4 className="text-xs uppercase font-black text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
-                  <Sparkles size={14} /> Astakoot Kundali Guna Match
-                </h4>
-                <span className="px-2.5 py-1 bg-emerald-500 text-white font-black text-xs rounded-lg">
-                  {selectedProfile.gunaMatchScore} / 36 Match
-                </span>
+            <div className="space-y-4 text-xs">
+              <div className="grid grid-cols-2 gap-3 bg-slate-800/60 p-3.5 rounded-2xl">
+                <div><strong className="text-slate-400">Samaj:</strong> {selectedProfileDetail.subCategory}</div>
+                <div><strong className="text-slate-400">Gotra:</strong> {selectedProfileDetail.gotra}</div>
+                <div><strong className="text-slate-400">Sampraday:</strong> {selectedProfileDetail.sampraday}</div>
+                <div><strong className="text-slate-400">Marital Status:</strong> {selectedProfileDetail.maritalStatus}</div>
+                <div><strong className="text-slate-400">Education:</strong> {selectedProfileDetail.education}</div>
+                <div><strong className="text-slate-400">Profession:</strong> {selectedProfileDetail.profession}</div>
+                <div><strong className="text-slate-400">Dietary Vow:</strong> {selectedProfileDetail.dietaryHabit}</div>
+                <div><strong className="text-slate-400">Rituals:</strong> {selectedProfileDetail.dailyRituals}</div>
               </div>
 
-              {isPremiumUser ? (
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 text-[10px] font-bold">
-                  <div className="p-2 bg-white dark:bg-white/5 rounded-xl text-center">
-                    <span className="text-gray-400 block">Varna</span>
-                    <span className="text-emerald-600 font-black">{selectedProfile.gunaBreakdown.varna}</span>
-                  </div>
-                  <div className="p-2 bg-white dark:bg-white/5 rounded-xl text-center">
-                    <span className="text-gray-400 block">Vashya</span>
-                    <span className="text-emerald-600 font-black">{selectedProfile.gunaBreakdown.vashya}</span>
-                  </div>
-                  <div className="p-2 bg-white dark:bg-white/5 rounded-xl text-center">
-                    <span className="text-gray-400 block">Tara</span>
-                    <span className="text-emerald-600 font-black">{selectedProfile.gunaBreakdown.tara}</span>
-                  </div>
-                  <div className="p-2 bg-white dark:bg-white/5 rounded-xl text-center">
-                    <span className="text-gray-400 block">Yoni</span>
-                    <span className="text-emerald-600 font-black">{selectedProfile.gunaBreakdown.yoni}</span>
-                  </div>
-                </div>
-              ) : (
-                <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-center space-y-1">
-                  <p className="text-[11px] font-bold text-amber-700 dark:text-amber-300">
-                    🔒 Full 8-Factor Ashtakoot Breakdown & Kundali Chart is available for Shravak Ratnam Members.
-                  </p>
+              <div className="bg-slate-950 p-3 rounded-xl space-y-1">
+                <h4 className="font-bold text-amber-300 text-[11px]">Family Background</h4>
+                <div>Father: {selectedProfileDetail.fatherOccupation}</div>
+                <div>Mother: {selectedProfileDetail.motherOccupation}</div>
+                <div>Siblings: {selectedProfileDetail.siblings}</div>
+              </div>
+
+              {selectedProfileDetail.bio && (
+                <div className="bg-slate-950 p-3 rounded-xl space-y-1">
+                  <h4 className="font-bold text-amber-300 text-[11px]">About Candidate</h4>
+                  <p className="text-slate-300">{selectedProfileDetail.bio}</p>
                 </div>
               )}
             </div>
 
-            {/* Direct Contact Action */}
-            <div className="pt-2 border-t border-gray-200 dark:border-white/10 flex items-center gap-3">
-              {isPremiumUser ? (
-                <a
-                  href={`https://wa.me/${selectedProfile.contactPhone.replace(/[^0-9]/g, '')}?text=Jai%20Jinendra!%20I%20saw%20your%20biodata%20on%20Jain%20Matrimonial%20Portal.`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-md cursor-pointer"
-                >
-                  <MessageCircle size={16} />
-                  <span>Direct WhatsApp Connect ({selectedProfile.contactPhone})</span>
-                </a>
-              ) : (
-                <button
-                  onClick={() => setShowUpgradeModal(true)}
-                  className="flex-1 py-3 bg-gradient-to-r from-amber-500 to-yellow-500 text-black rounded-2xl font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-md cursor-pointer border border-amber-300"
-                >
-                  <Lock size={16} />
-                  <span>Unlock Verified Contact ({selectedProfile.contactPhone.substring(0, 8)}*****)</span>
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* SHRAVAK RATNAM PREMIUM MEMBERSHIP MODAL */}
-      {showUpgradeModal && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-[#121212] border-2 border-amber-500/50 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-5 text-center relative">
-            <button
-              onClick={() => setShowUpgradeModal(false)}
-              className="absolute top-4 right-4 p-2 bg-gray-100 dark:bg-white/10 hover:bg-gray-200 rounded-full text-gray-500 transition-colors"
-            >
-              <X size={18} />
-            </button>
-
-            <div className="w-14 h-14 rounded-3xl bg-amber-500/10 text-amber-500 flex items-center justify-center mx-auto border border-amber-500/30">
-              <Crown size={32} className="fill-amber-500" />
-            </div>
-
-            <div>
-              <span className="text-[10px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20">
-                SHRAVAK RATNAM PREMIUM MEMBERSHIP
-              </span>
-              <h2 className="text-xl font-black text-gray-900 dark:text-white mt-2">
-                {lang === 'en' ? 'Unlock Complete Family Contacts & Privacy' : 'श्रावक रत्नम प्रीमियम सदस्यता'}
-              </h2>
-              <p className="text-xs text-gray-500 font-bold mt-1">
-                {lang === 'en' ? 'Designed for authentic Jain families seeking direct connection & privacy.' : 'प्रामाणिक जैन परिवारों हेतु सीधे संपर्क एवं गोपनीयता की विशेष सुविधा।'}
-              </p>
-            </div>
-
-            <div className="p-4 bg-amber-500/5 border border-amber-500/20 rounded-2xl text-left text-xs font-bold space-y-2.5">
-              <div className="flex items-start gap-2.5">
-                <CheckCircle2 size={16} className="text-amber-500 shrink-0 mt-0.5" />
-                <span>Unmasked Direct Phone Numbers & WhatsApp Connect Links</span>
-              </div>
-              <div className="flex items-start gap-2.5">
-                <CheckCircle2 size={16} className="text-amber-500 shrink-0 mt-0.5" />
-                <span>Full 8-Factor Ashtakoot Kundali Guna Milan Analysis</span>
-              </div>
-              <div className="flex items-start gap-2.5">
-                <CheckCircle2 size={16} className="text-amber-500 shrink-0 mt-0.5" />
-                <span>Private Confidential Profile Protection Shield</span>
-              </div>
-              <div className="flex items-start gap-2.5">
-                <CheckCircle2 size={16} className="text-amber-500 shrink-0 mt-0.5" />
-                <span>Priority Family Matchmaking Support</span>
-              </div>
-            </div>
-
-            <div className="p-3 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-150 dark:border-white/5 flex items-center justify-between">
-              <div className="text-left">
-                <span className="text-[10px] font-black uppercase text-gray-400 block">Limited Community Offer</span>
-                <span className="text-lg font-black text-amber-600 dark:text-amber-400">FREE FOR DEV TEST / COMPLIMENTARY</span>
-              </div>
-              <span className="text-xs font-black text-emerald-500">100% Free</span>
-            </div>
-
-            <button
-              onClick={() => togglePremiumMembership(true)}
-              className="w-full py-3 bg-gradient-to-r from-amber-500 to-yellow-500 text-black rounded-2xl font-black text-xs uppercase tracking-wider shadow-xl hover:scale-[1.01] active:scale-95 transition-all cursor-pointer border border-amber-300"
-            >
-              Activate Shravak Ratnam Premium Now
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* HELP MODAL */}
-      {helpOpen && (
-        <div className="fixed inset-0 bg-black/75 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-[#121212] border border-gray-200 dark:border-white/10 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between pb-2 border-b border-gray-200 dark:border-white/10">
-              <h3 className="text-base font-black text-gray-900 dark:text-white flex items-center gap-2">
-                <HelpCircle size={18} className="text-[#E91E63]" />
-                <span>About Jain Matrimonial Portal</span>
-              </h3>
-              <button onClick={() => setHelpOpen(false)} className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-white/10">
-                <X size={16} />
+            <div className="flex justify-end gap-3 pt-3 border-t border-slate-800">
+              <button
+                onClick={() => setSelectedProfileDetail(null)}
+                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold"
+              >
+                Close
+              </button>
+              <button
+                onClick={() => {
+                  expressInterest(selectedProfileDetail.id);
+                  setSelectedProfileDetail(null);
+                }}
+                className="px-5 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-xl text-xs font-bold flex items-center gap-1.5"
+              >
+                <Send className="w-3.5 h-3.5" />
+                <span>Express Interest</span>
               </button>
             </div>
-            <div className="text-xs text-gray-600 dark:text-gray-300 space-y-2 leading-relaxed font-bold">
-              <p>• Authentic sub-caste categorizations: Parwar, Golapurv, Khandelwal, Oswal, Porwal, Humad, Saitwal, Jaiswal.</p>
-              <p>• Full Ashtakoot Kundali Guna Milan scoring out of 36.</p>
-              <p>• Shravak Ratnam Premium unlocks direct phone numbers, WhatsApp links & confidential profile protection.</p>
-            </div>
-            <button
-              onClick={() => setHelpOpen(false)}
-              className="w-full py-2.5 bg-gray-100 dark:bg-white/10 hover:bg-gray-200 rounded-xl font-black text-xs uppercase tracking-wider"
-            >
-              Got it
-            </button>
           </div>
         </div>
       )}

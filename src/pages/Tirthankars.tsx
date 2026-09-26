@@ -29,8 +29,134 @@ const KALYANAK_DATES: Record<string, { n: string; hi: string; tithi: string; hiT
     { n: "Garbha", hi: "गर्भ", tithi: "Margashirsha Krishna Panchami", hiTithi: "मार्गशीर्ष कृष्ण पंचमी" },
     { n: "Janma", hi: "जन्म", tithi: "Kartika Shukla Dwitiya", hiTithi: "कार्तिक शुक्ल द्वितीया" },
     { n: "Tapa", hi: "तप", tithi: "Kartika Krishna Trayodashi", hiTithi: "कार्तिक कृष्ण त्रयोदशी" },
-    { n: "Kevalgyan", hi: "केवलज्ञान", tithi: "Kartika Krishna Nomami", hiTithi: "कार्तिक कृष्ण नवमी" },
+    { n: "Kevalgyan", hi: "केवलज्ञान", tithi: "Kartika Krishna Navami", hiTithi: "कार्तिक कृष्ण नवमी" },
     { n: "Moksha", hi: "मोक्ष", tithi: "Chaitra Shukla Saptami", hiTithi: "चैत्र शुक्ल सप्तमी (सम्मेद शिखरजी)" }
+  ],
+  "4": [
+    { n: "Garbha", hi: "गर्भ", tithi: "Vaishakha Shukla Shashthi", hiTithi: "वैशाख शुक्ल षष्ठी" },
+    { n: "Janma", hi: "जन्म", tithi: "Magha Shukla Dwadashi", hiTithi: "माघ शुक्ल द्वादशी" },
+    { n: "Tapa", hi: "तप", tithi: "Magha Shukla Dwadashi", hiTithi: "माघ शुक्ल द्वादशी" },
+    { n: "Kevalgyan", hi: "केवलज्ञान", tithi: "Pausha Shukla Chaturdashi", hiTithi: "पौष शुक्ल चतुर्दशी" },
+    { n: "Moksha", hi: "मोक्ष", tithi: "Vaishakha Shukla Saptami", hiTithi: "वैशाख शुक्ल सप्तमी (सम्मेद शिखरजी)" }
+  ],
+  "5": [
+    { n: "Garbha", hi: "गर्भ", tithi: "Shravana Shukla Dwitiya", hiTithi: "श्रावण शुक्ल द्वितीया" },
+    { n: "Janma", hi: "जन्म", tithi: "Chaitra Shukla Ekadashi", hiTithi: "चैत्र शुक्ल एकादशी" },
+    { n: "Tapa", hi: "तप", tithi: "Chaitra Shukla Ekadashi", hiTithi: "चैत्र शुक्ल एकादशी" },
+    { n: "Kevalgyan", hi: "केवलज्ञान", tithi: "Chaitra Shukla Ekadashi", hiTithi: "चैत्र शुक्ल एकादशी" },
+    { n: "Moksha", hi: "मोक्ष", tithi: "Chaitra Shukla Navami", hiTithi: "चैत्र शुक्ल नवमी (सम्मेद शिखरजी)" }
+  ],
+  "6": [
+    { n: "Garbha", hi: "गर्भ", tithi: "Magha Krishna Shashti", hiTithi: "माघ कृष्ण षष्ठी" },
+    { n: "Janma", hi: "जन्म", tithi: "Kartika Krishna Dwadashi", hiTithi: "कार्तिक कृष्ण द्वादशी" },
+    { n: "Tapa", hi: "तप", tithi: "Kartika Krishna Trayodashi", hiTithi: "कार्तिक कृष्ण त्रयोदशी" },
+    { n: "Kevalgyan", hi: "केवलज्ञान", tithi: "Chaitra Shukla Purnima", hiTithi: "चैत्र शुक्ल पूर्णिमा" },
+    { n: "Moksha", hi: "मोक्ष", tithi: "Phalguna Krishna Chaturdashi", hiTithi: "फाल्गुन कृष्ण चतुर्दशी (सम्मेद शिखरजी)" }
+  ],
+  "7": [
+    { n: "Garbha", hi: "गर्भ", tithi: "Bhadrapada Shukla Shashti", hiTithi: "भाद्रपद शुक्ल षष्ठी" },
+    { n: "Janma", hi: "जन्म", tithi: "Jyeshtha Shukla Dwadashi", hiTithi: "ज्येष्ठ शुक्ल द्वादशी" },
+    { n: "Tapa", hi: "तप", tithi: "Jyeshtha Shukla Trayodashi", hiTithi: "ज्येष्ठ शुक्ल त्रयोदशी" },
+    { n: "Kevalgyan", hi: "केवलज्ञान", tithi: "Phalguna Krishna Shashti", hiTithi: "फाल्गुन कृष्ण षष्ठी" },
+    { n: "Moksha", hi: "मोक्ष", tithi: "Phalguna Krishna Saptami", hiTithi: "फाल्गुन कृष्ण सप्तमी (सम्मेद शिखरजी)" }
+  ],
+  "8": [
+    { n: "Garbha", hi: "गर्भ", tithi: "Chaitra Krishna Panchami", hiTithi: "चैत्र कृष्ण पंचमी" },
+    { n: "Janma", hi: "जन्म", tithi: "Pausha Krishna Ekadashi", hiTithi: "पौष कृष्ण एकादशी" },
+    { n: "Tapa", hi: "तप", tithi: "Pausha Krishna Ekadashi", hiTithi: "पौष कृष्ण एकादशी" },
+    { n: "Kevalgyan", hi: "केवलज्ञान", tithi: "Phalguna Krishna Saptami", hiTithi: "फाल्गुन कृष्ण सप्तमी" },
+    { n: "Moksha", hi: "मोक्ष", tithi: "Bhadrapada Shukla Saptami", hiTithi: "भाद्रपद शुक्ल सप्तमी (सम्मेद शिखरजी)" }
+  ],
+  "9": [
+    { n: "Garbha", hi: "गर्भ", tithi: "Phalguna Krishna Navami", hiTithi: "फाल्गुन कृष्ण नवमी" },
+    { n: "Janma", hi: "जन्म", tithi: "Margashirsha Shukla Pratipada", hiTithi: "मार्गशीर्ष शुक्ल प्रतिपदा" },
+    { n: "Tapa", hi: "तप", tithi: "Margashirsha Shukla Pratipada", hiTithi: "मार्गशीर्ष शुक्ल प्रतिपदा" },
+    { n: "Kevalgyan", hi: "केवलज्ञान", tithi: "Kartika Shukla Dwitiya", hiTithi: "कार्तिक शुक्ल द्वितीया" },
+    { n: "Moksha", hi: "मोक्ष", tithi: "Ashvina Shukla Ashtami", hiTithi: "आश्विन शुक्ल अष्टमी (सम्मेद शिखरजी)" }
+  ],
+  "10": [
+    { n: "Garbha", hi: "गर्भ", tithi: "Chaitra Krishna Ashtami", hiTithi: "चैत्र कृष्ण अष्टमी" },
+    { n: "Janma", hi: "जन्म", tithi: "Magha Krishna Dwadashi", hiTithi: "माघ कृष्ण द्वादशी" },
+    { n: "Tapa", hi: "तप", tithi: "Magha Krishna Dwadashi", hiTithi: "माघ कृष्ण द्वादशी" },
+    { n: "Kevalgyan", hi: "केवलज्ञान", tithi: "Pausha Krishna Chaturdashi", hiTithi: "पौष कृष्ण चतुर्दशी" },
+    { n: "Moksha", hi: "मोक्ष", tithi: "Vaishakha Krishna Dwitiya", hiTithi: "वैशाख कृष्ण द्वितीया (सम्मेद शिखरजी)" }
+  ],
+  "11": [
+    { n: "Garbha", hi: "गर्भ", tithi: "Jyeshtha Krishna Shashti", hiTithi: "ज्येष्ठ कृष्ण षष्ठी" },
+    { n: "Janma", hi: "जन्म", tithi: "Phalguna Krishna Ekadashi", hiTithi: "फाल्गुन कृष्ण एकादशी" },
+    { n: "Tapa", hi: "तप", tithi: "Phalguna Krishna Ekadashi", hiTithi: "फाल्गुन कृष्ण एकादशी" },
+    { n: "Kevalgyan", hi: "केवलज्ञान", tithi: "Magha Krishna Amavasya", hiTithi: "माघ कृष्ण अमावस्या" },
+    { n: "Moksha", hi: "मोक्ष", tithi: "Shravana Shukla Purnima", hiTithi: "श्रावण शुक्ल पूर्णिमा (सम्मेद शिखरजी)" }
+  ],
+  "12": [
+    { n: "Garbha", hi: "गर्भ", tithi: "Ashadha Krishna Navami", hiTithi: "आषाढ़ कृष्ण नवमी" },
+    { n: "Janma", hi: "जन्म", tithi: "Phalguna Krishna Chaturdashi", hiTithi: "फाल्गुन कृष्ण चतुर्दशी" },
+    { n: "Tapa", hi: "तप", tithi: "Phalguna Krishna Chaturdashi", hiTithi: "फाल्गुन कृष्ण चतुर्दशी" },
+    { n: "Kevalgyan", hi: "केवलज्ञान", tithi: "Magha Shukla Dwitiya", hiTithi: "माघ शुक्ल द्वितीया" },
+    { n: "Moksha", hi: "मोक्ष", tithi: "Bhadrapada Shukla Chaturdashi", hiTithi: "भाद्रपद शुक्ल चतुर्दशी (चंपापुर)" }
+  ],
+  "13": [
+    { n: "Garbha", hi: "गर्भ", tithi: "Jyeshtha Shukla Dashami", hiTithi: "ज्येष्ठ शुक्ल दशमी" },
+    { n: "Janma", hi: "जन्म", tithi: "Magha Shukla Chaturdashi", hiTithi: "माघ शुक्ल चतुर्दशी" },
+    { n: "Tapa", hi: "तप", tithi: "Magha Shukla Chaturdashi", hiTithi: "माघ शुक्ल चतुर्दशी" },
+    { n: "Kevalgyan", hi: "केवलज्ञान", tithi: "Pausha Shukla Shashti", hiTithi: "पौष शुक्ल षष्ठी" },
+    { n: "Moksha", hi: "मोक्ष", tithi: "Ashadha Krishna Ashtami", hiTithi: "आषाढ़ कृष्ण अष्टमी (सम्मेद शिखरजी)" }
+  ],
+  "14": [
+    { n: "Garbha", hi: "गर्भ", tithi: "Kartika Krishna Pratipada", hiTithi: "कार्तिक कृष्ण प्रतिपदा" },
+    { n: "Janma", hi: "जन्म", tithi: "Vaishakha Krishna Trayodashi", hiTithi: "वैशाख कृष्ण त्रयोदशी" },
+    { n: "Tapa", hi: "तप", tithi: "Vaishakha Krishna Trayodashi", hiTithi: "वैशाख कृष्ण त्रयोदशी" },
+    { n: "Kevalgyan", hi: "केवलज्ञान", tithi: "Chaitra Krishna Amavasya", hiTithi: "चैत्र कृष्ण अमावस्या" },
+    { n: "Moksha", hi: "मोक्ष", tithi: "Chaitra Shukla Panchami", hiTithi: "चैत्र शुक्ल पंचमी (सम्मेद शिखरजी)" }
+  ],
+  "15": [
+    { n: "Garbha", hi: "गर्भ", tithi: "Vaishakha Shukla Trayodashi", hiTithi: "वैशाख शुक्ल त्रयोदशी" },
+    { n: "Janma", hi: "जन्म", tithi: "Magha Shukla Trayodashi", hiTithi: "माघ शुक्ल त्रयोदशी" },
+    { n: "Tapa", hi: "तप", tithi: "Magha Shukla Trayodashi", hiTithi: "माघ शुक्ल त्रयोदशी" },
+    { n: "Kevalgyan", hi: "केवलज्ञान", tithi: "Pausha Shukla Purnima", hiTithi: "पौष शुक्ल पूर्णिमा" },
+    { n: "Moksha", hi: "मोक्ष", tithi: "Jyeshtha Shukla Chaturdashi", hiTithi: "ज्येष्ठ शुक्ल चतुर्दशी (सम्मेद शिखरजी)" }
+  ],
+  "16": [
+    { n: "Garbha", hi: "गर्भ", tithi: "Bhadrapada Krishna Saptami", hiTithi: "भाद्रपद कृष्ण सप्तमी" },
+    { n: "Janma", hi: "जन्म", tithi: "Jyeshtha Krishna Chaturdashi", hiTithi: "ज्येष्ठ कृष्ण चतुर्दशी" },
+    { n: "Tapa", hi: "तप", tithi: "Jyeshtha Krishna Chaturdashi", hiTithi: "ज्येष्ठ कृष्ण चतुर्दशी" },
+    { n: "Kevalgyan", hi: "केवलज्ञान", tithi: "Pausha Shukla Dashami", hiTithi: "पौष शुक्ल दशमी" },
+    { n: "Moksha", hi: "मोक्ष", tithi: "Jyeshtha Krishna Chaturdashi", hiTithi: "ज्येष्ठ कृष्ण चतुर्दशी (सम्मेद शिखरजी)" }
+  ],
+  "17": [
+    { n: "Garbha", hi: "गर्भ", tithi: "Shravana Krishna Dashami", hiTithi: "श्रावण कृष्ण दशमी" },
+    { n: "Janma", hi: "जन्म", tithi: "Vaishakha Shukla Chaturdashi", hiTithi: "वैशाख शुक्ल चतुर्दशी" },
+    { n: "Tapa", hi: "तप", tithi: "Vaishakha Shukla Chaturdashi", hiTithi: "वैशाख शुक्ल चतुर्दशी" },
+    { n: "Kevalgyan", hi: "केवलज्ञान", tithi: "Chaitra Shukla Tritiya", hiTithi: "चैत्र शुक्ल तृतीया" },
+    { n: "Moksha", hi: "मोक्ष", tithi: "Vaishakha Shukla Pratipada", hiTithi: "वैशाख शुक्ल प्रतिपदा (सम्मेद शिखरजी)" }
+  ],
+  "18": [
+    { n: "Garbha", hi: "गर्भ", tithi: "Phalguna Shukla Dwitiya", hiTithi: "फाल्गुन शुक्ल द्वितीया" },
+    { n: "Janma", hi: "जन्म", tithi: "Margashirsha Shukla Dashami", hiTithi: "मार्गशीर्ष शुक्ल दशमी" },
+    { n: "Tapa", hi: "तप", tithi: "Margashirsha Shukla Dashami", hiTithi: "मार्गशीर्ष शुक्ल दशमी" },
+    { n: "Kevalgyan", hi: "केवलज्ञान", tithi: "Kartika Shukla Dwadashi", hiTithi: "कार्तिक शुक्ल द्वादशी" },
+    { n: "Moksha", hi: "मोक्ष", tithi: "Margashirsha Shukla Dashami", hiTithi: "मार्गशीर्ष शुक्ल दशमी (सम्मेद शिखरजी)" }
+  ],
+  "19": [
+    { n: "Garbha", hi: "गर्भ", tithi: "Phalguna Shukla Ekadashi", hiTithi: "फाल्गुन शुक्ल एकादशी" },
+    { n: "Janma", hi: "जन्म", tithi: "Margashirsha Shukla Ekadashi", hiTithi: "मार्गशीर्ष शुक्ल एकादशी" },
+    { n: "Tapa", hi: "तप", tithi: "Margashirsha Shukla Ekadashi", hiTithi: "मार्गशीर्ष शुक्ल एकादशी" },
+    { n: "Kevalgyan", hi: "केवलज्ञान", tithi: "Pausha Krishna Dwitiya", hiTithi: "पौष कृष्ण द्वितीया" },
+    { n: "Moksha", hi: "मोक्ष", tithi: "Phalguna Shukla Dwitiya", hiTithi: "फाल्गुन शुक्ल द्वितीया (सम्मेद शिखरजी)" }
+  ],
+  "20": [
+    { n: "Garbha", hi: "गर्भ", tithi: "Shravana Shukla Dwitiya", hiTithi: "श्रावण शुक्ल द्वितीया" },
+    { n: "Janma", hi: "जन्म", tithi: "Jyeshtha Krishna Navami", hiTithi: "ज्येष्ठ कृष्ण नवमी" },
+    { n: "Tapa", hi: "तप", tithi: "Jyeshtha Krishna Navami", hiTithi: "ज्येष्ठ कृष्ण नवमी" },
+    { n: "Kevalgyan", hi: "केवलज्ञान", tithi: "Vaishakha Krishna Navami", hiTithi: "वैशाख कृष्ण नवमी" },
+    { n: "Moksha", hi: "मोक्ष", tithi: "Phalguna Krishna Dwadashi", hiTithi: "फाल्गुन कृष्ण द्वादशी (सम्मेद शिखरजी)" }
+  ],
+  "21": [
+    { n: "Garbha", hi: "गर्भ", tithi: "Ashvina Krishna Dwitiya", hiTithi: "आश्विन कृष्ण द्वितीया" },
+    { n: "Janma", hi: "जन्म", tithi: "Ashadha Krishna Ashtami", hiTithi: "आषाढ़ कृष्ण अष्टमी" },
+    { n: "Tapa", hi: "तप", tithi: "Ashadha Krishna Ashtami", hiTithi: "आषाढ़ कृष्ण अष्टमी" },
+    { n: "Kevalgyan", hi: "केवलज्ञान", tithi: "Margashirsha Shukla Ekadashi", hiTithi: "मार्गशीर्ष शुक्ल एकादशी" },
+    { n: "Moksha", hi: "मोक्ष", tithi: "Vaishakha Krishna Panchami", hiTithi: "वैशाख कृष्ण पंचमी (सम्मेद शिखरजी)" }
   ],
   "22": [
     { n: "Garbha", hi: "गर्भ", tithi: "Kartika Shukla Shashti", hiTithi: "कार्तिक शुक्ल षष्ठी" },

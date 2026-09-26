@@ -603,7 +603,7 @@ export default function JainStorePage() {
       setStores(prev => prev.map(s => s.id === storeId ? { ...s, status: 'approved' } : s));
       // Re-trigger checks
       if (myRegisteredStore && myRegisteredStore.id === storeId) {
-        setMyRegisteredStore(prev => ({ ...prev, status: 'approved' }));
+        setMyRegisteredStore((prev: any) => prev ? ({ ...prev, status: 'approved' }) : null);
       }
       alert('Store approved successfully!');
     } catch (err) {

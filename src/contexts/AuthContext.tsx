@@ -53,17 +53,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // Check if demo user was active
-    const savedDemo = localStorage.getItem('jainism_demo_user');
-    if (savedDemo) {
-      try {
+    try {
+      const savedDemo = localStorage.getItem('jainism_demo_user');
+      if (savedDemo) {
         const mockUser = JSON.parse(savedDemo);
         setUser(mockUser);
         setRole('admin');
         setLoading(false);
         return;
-      } catch (e) {
-        localStorage.removeItem('jainism_demo_user');
       }
+    } catch (e) {
+      try { localStorage.removeItem('jainism_demo_user'); } catch (err) { /* ignore */ }
     }
 
     // Process redirect result if coming back from OAuth redirect (e.g., inside Android WebView)
@@ -85,10 +85,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       // If a demo user is already set, do not override it with a null auth state on reload
-      const isDemoActive = localStorage.getItem('jainism_demo_user');
-      if (isDemoActive) {
-        setLoading(false);
-        return;
+      try {
+        const isDemoActive = localStorage.getItem('jainism_demo_user');
+        if (isDemoActive) {
+          setLoading(false);
+          return;
+        }
+      } catch (e) {
+        // ignore
       }
 
       setUser(currentUser);

@@ -11,6 +11,7 @@ import { collection, onSnapshot } from 'firebase/firestore';
 
 type PanchangDetails = {
   tithi: string;
+  shortTithi?: string;
   paksha: string;
   festivals: string[];
   kalyanak: string[];
@@ -62,6 +63,169 @@ const SUN_DATA: Record<number, Array<{ day: number, sunrise: string, sunset: str
     { day: 2, sunrise: '07:23', sunset: '17:29' }, { day: 7, sunrise: '07:27', sunset: '17:31' }, { day: 12, sunrise: '07:30', sunset: '17:33' }, { day: 17, sunrise: '07:33', sunset: '17:36' }, { day: 22, sunrise: '07:35', sunset: '17:39' }, { day: 27, sunrise: '07:37', sunset: '17:43' },
   ]
 };
+
+export interface JainTirth {
+  id: string;
+  nameHi: string;
+  nameEn: string;
+  location: string;
+  state: string;
+  sunriseOffsetMin: number;
+  sunsetOffsetMin: number;
+  significanceHi: string;
+  significanceEn: string;
+}
+
+export const JAIN_TIRTHS: JainTirth[] = [
+  {
+    id: 'shikharji',
+    nameHi: 'श्री सम्मेद शिखरजी',
+    nameEn: 'Shree Sammed Shikharji',
+    location: 'मधुबन, गिरिडीह',
+    state: 'झारखण्ड',
+    sunriseOffsetMin: -22,
+    sunsetOffsetMin: -22,
+    significanceHi: '२० तीर्थंकरों एवं अनंत मुनियों की पावन मोक्ष निर्वाण भूमि (पारसनाथ पर्वत)',
+    significanceEn: 'Holy Moksha Nirvana land of 20 Tirthankaras & countless ascetics'
+  },
+  {
+    id: 'girnar',
+    nameHi: 'श्री गिरनार महातीर्थ',
+    nameEn: 'Shree Girnar Ji',
+    location: 'जूनागढ़',
+    state: 'गुजरात',
+    sunriseOffsetMin: 32,
+    sunsetOffsetMin: 32,
+    significanceHi: '२२वें तीर्थंकर भगवान नेमिनाथ जी की दीक्षा, केवलज्ञान व मोक्ष स्थली (५वीं टोंक)',
+    significanceEn: 'Diksha, Gyan & Moksha of 22nd Tirthankara Neminath (5th Tonk)'
+  },
+  {
+    id: 'palitana',
+    nameHi: 'श्री शत्रुंजय महातीर्थ (पालीताना)',
+    nameEn: 'Shree Shatrunjaya (Palitana)',
+    location: 'भावनगर',
+    state: 'गुजरात',
+    sunriseOffsetMin: 28,
+    sunsetOffsetMin: 28,
+    significanceHi: 'प्रथम तीर्थंकर भगवान आदिनाथ जी का शाश्वत महातीर्थ एवं कोटि-कोटि मुनियों की निर्वाण भूमि',
+    significanceEn: 'Eternal Tirth of Bhagwan Rishabhdev & countless ascetics'
+  },
+  {
+    id: 'pavapuri',
+    nameHi: 'श्री पावापुरी जी',
+    nameEn: 'Shree Pavapuri Ji',
+    location: 'नालंदा',
+    state: 'बिहार',
+    sunriseOffsetMin: -20,
+    sunsetOffsetMin: -20,
+    significanceHi: '२४वें तीर्थंकर भगवान महावीर स्वामी की पावन निर्वाण स्थली (कमल सरोवर जल मंदिर)',
+    significanceEn: 'Holy Nirvana land of 24th Tirthankara Bhagwan Mahavira (Jal Mandir)'
+  },
+  {
+    id: 'kundalpur',
+    nameHi: 'श्री कुण्डलपुर जी',
+    nameEn: 'Shree Kundalpur Ji',
+    location: 'दमोह',
+    state: 'मध्य प्रदेश',
+    sunriseOffsetMin: 2,
+    sunsetOffsetMin: 2,
+    significanceHi: 'अतिशयकारी बड़े बाबा भगवान आदिनाथ जी का दिव्य महातीर्थ',
+    significanceEn: 'Miraculous Bade Baba Bhagwan Adinath Divine Tirth'
+  },
+  {
+    id: 'shravanabelagola',
+    nameHi: 'श्री श्रवणबेलगोला महातीर्थ',
+    nameEn: 'Shree Shravanabelagola',
+    location: 'हासन',
+    state: 'कर्नाटक',
+    sunriseOffsetMin: 8,
+    sunsetOffsetMin: 12,
+    significanceHi: 'भगवान बाहुबली स्वामी (गोमटेश्वर) की ५७ फीट विश्वप्रसिद्ध अखण्ड पाषाण प्रतिमा',
+    significanceEn: '57ft world-famous monolithic statue of Bhagwan Bahubali'
+  },
+  {
+    id: 'hastinapur',
+    nameHi: 'श्री हस्तिनापुर जी',
+    nameEn: 'Shree Hastinapur Ji',
+    location: 'मेरठ',
+    state: 'उत्तर प्रदेश',
+    sunriseOffsetMin: 5,
+    sunsetOffsetMin: 6,
+    significanceHi: 'भगवान शांतिनाथ, कुन्थुनाथ, अरहनाथ जी की कल्याणक भूमि व अक्षय तृतीया इक्षु रस आहार स्थली',
+    significanceEn: 'Kalyanaks of 3 Tirthankaras & Akshaya Tritiya Ikshu Ras Ahar site'
+  },
+  {
+    id: 'mahavirji',
+    nameHi: 'श्री महावीर जी',
+    nameEn: 'Shree Mahavir Ji',
+    location: 'करौली',
+    state: 'राजस्थान',
+    sunriseOffsetMin: 12,
+    sunsetOffsetMin: 12,
+    significanceHi: 'अतिशय क्षेत्र भगवान महावीर स्वामी का चमत्कारी धाम',
+    significanceEn: 'Atishay Kshetra miraculous abode of Bhagwan Mahavira'
+  },
+  {
+    id: 'tijara',
+    nameHi: 'श्री तिजारा जी',
+    nameEn: 'Shree Tijara Ji',
+    location: 'अलवर',
+    state: 'राजस्थान',
+    sunriseOffsetMin: 10,
+    sunsetOffsetMin: 10,
+    significanceHi: '८वें तीर्थंकर भगवान चन्द्रप्रभ जी का पावन दिगंबर अतिशय क्षेत्र',
+    significanceEn: 'Holy Digambar Atishay Kshetra of 8th Tirthankara Chandraprabhu'
+  },
+  {
+    id: 'ayodhya',
+    nameHi: 'श्री अयोध्या जी तीर्थ',
+    nameEn: 'Shree Ayodhya Ji',
+    location: 'अयोध्या',
+    state: 'उत्तर प्रदेश',
+    sunriseOffsetMin: -12,
+    sunsetOffsetMin: -12,
+    significanceHi: 'भगवान ऋषभदेव, अजितनाथ, अभिनन्दननाथ, सुमतिनाथ व अनंतनाथ की पवित्र जन्मभूमि',
+    significanceEn: 'Birthplace of 5 Tirthankaras including Bhagwan Rishabhdev'
+  },
+  {
+    id: 'standard',
+    nameHi: 'अखिल भारतीय मानक (IST)',
+    nameEn: 'All India Standard (IST)',
+    location: 'केन्द्रीय भारत',
+    state: 'भारत',
+    sunriseOffsetMin: 0,
+    sunsetOffsetMin: 0,
+    significanceHi: 'भारतीय मानक समय (IST) आधारित औसत जैन पंचांग समय',
+    significanceEn: 'Standard Indian calculation basis for general Jain Panchang'
+  }
+];
+
+export function adjustTimeString(timeStr: string, offsetMinutes: number): string {
+  if (!timeStr) return '';
+  const clean = timeStr.replace(/(AM|PM)/gi, '').trim();
+  const parts = clean.split(':');
+  let h = parseInt(parts[0], 10);
+  let m = parseInt(parts[1], 10);
+  if (isNaN(h) || isNaN(m)) return timeStr;
+
+  const isPM = timeStr.toUpperCase().includes('PM');
+  if (isPM && h < 12) h += 12;
+  if (!isPM && h === 12 && timeStr.toUpperCase().includes('AM')) h = 0;
+
+  let totalMins = h * 60 + m + offsetMinutes;
+  if (totalMins < 0) totalMins += 24 * 60;
+  totalMins = totalMins % (24 * 60);
+
+  const newH24 = Math.floor(totalMins / 60);
+  const newM = totalMins % 60;
+  const suffix = newH24 >= 12 ? 'PM' : 'AM';
+  const newH12 = (newH24 % 12) === 0 ? 12 : newH24 % 12;
+  return `${String(newH12).padStart(2, '0')}:${String(newM).padStart(2, '0')} ${suffix}`;
+}
+
+export function addMinutesToTimeString(timeStr: string, addMins: number): string {
+  return adjustTimeString(timeStr, addMins);
+}
 
 const getSunTime = (date: Date) => {
   const m = date.getMonth();
@@ -194,107 +358,95 @@ const JAIN_DATA_2026: Record<number, Record<number, any>> = {
     30: { tithi: 'बैशाख शुक्ल 15 (पूर्णिमा)', festivals: ['बुद्ध पूर्णिमा', 'कूर्म जयंती'] }
   },
   4: { // May
-    1: { tithi: 'वैशाख शुक्ल 15', festivals: ['श्री वर्धमान उपदेश दिवस'] },
-    4: { tithi: 'ज्येष्ठ कृष्ण 4', acharyaDarpan: ['आचार्य श्री भरतसागरजी - संयम प्र.'] },
-    10: { tithi: 'ज्येष्ठ कृष्ण 10', festivals: ['महोत्सव महा पूजा दिवस'] },
-    11: { tithi: 'ज्येष्ठ कृष्ण 11', kalyanak: ['भग. शांतिनाथजी - जन्म, तप', 'भग. आदिनाथजी - गर्भ'], festivals: ['अपरा एकादशी'] },
-    12: { tithi: 'ज्येष्ठ कृष्ण 12', festivals: ['श्री कुन्थुनाथ मोक्ष उत्सव'] },
-    13: { tithi: 'ज्येष्ठ कृष्ण 13', kalyanak: ['भग. कुन्थुनाथजी - जन्म, तप', 'भग. अरनाथजी - जन्म, तप'], festivals: ['वट सावित्री व्रत'] },
-    14: { tithi: 'ज्येष्ठ कृष्ण 14', acharyaDarpan: ['आर्यिका श्री रत्नमतिजी - दीक्षा स्मृति'], vrat: ['रोहिणी व्रत'] },
-    15: { tithi: 'ज्येष्ठ कृष्ण 30 (अमावस्या)', kalyanak: ['भग. शीतलनाथजी - मोक्ष', 'भग. सुपार्श्वनाथजी - ज्ञान'], festivals: ['शनि जयंती'] },
-    18: { tithi: 'ज्येष्ठ शुक्ल 2', festivals: ['वृष संक्रांति'] },
-    19: { tithi: 'ज्येष्ठ शुक्ल 3', kalyanak: ['भग. सुपार्श्वनाथजी - जन्म, तप'] },
-    21: { tithi: 'ज्येष्ठ शुक्ल 5', festivals: ['श्रुत पंचमी'], vrat: ['शास्त्र पूजन'] },
-    26: { tithi: 'ज्येष्ठ शुक्ल 10', kalyanak: ['भग. महावीरस्वामी - ज्ञान'], festivals: ['गंगा दशमी'] },
-    27: { tithi: 'ज्येष्ठ शुक्ल 11', festivals: ['निर्जला एकादशी'] },
-    28: { tithi: 'ज्येष्ठ शुक्ल 12', festivals: ['स्वाध्याय दिवस'] },
-    29: { tithi: 'ज्येष्ठ शुक्ल 13', festivals: ['स्वाध्याय दिवस दिन 2'] },
-    30: { tithi: 'ज्येष्ठ शुक्ल 14', festivals: ['स्वाध्याय दिवस दिन 3'] },
-    31: { tithi: 'शुक्ल 15 (पूर्णिमा)', festivals: ['ज्येष्ठ पूर्णिमा'], vrat: ['रोहिणी व्रत'] }
+    1: { festivals: ['वैशाख पूर्णिमा', 'बुद्ध पूर्णिमा', 'श्री वर्धमान उपदेश दिवस'] },
+    4: { acharyaDarpan: ['आचार्य श्री भरतसागरजी - संयम प्र.'] },
+    11: { kalyanak: ['भग. शांतिनाथजी - जन्म, तप', 'भग. आदिनाथजी - गर्भ'], festivals: ['अपरा एकादशी'] },
+    13: { kalyanak: ['भग. कुन्थुनाथजी - जन्म, तप', 'भग. अरनाथजी - जन्म, तप'], festivals: ['वट सावित्री व्रत'] },
+    16: { kalyanak: ['भग. शीतलनाथजी - मोक्ष', 'भग. सुपार्श्वनाथजी - ज्ञान'], festivals: ['ज्येष्ठ अमावस्या', 'शनि जयंती'] },
+    17: { festivals: ['अधिक मास (पुरुषोत्तम मास) प्रारंभ', 'अधिक ज्येष्ठ शुक्ल प्रतिपदा'] },
+    27: { festivals: ['परमा एकादशी'] },
+    31: { festivals: ['अधिक मास पूर्णिमा'] }
   },
   5: { // Jun
-    1: { tithi: 'आषाढ़ कृष्ण 1', acharyaDarpan: ['आचार्य श्री विमलसागरजी - आचार्य पद'] },
-    5: { tithi: 'आषाढ़ कृष्ण 5', festivals: ['मुनि विहार दिवस'] },
-    10: { tithi: 'आषाढ़ कृष्ण 10', kalyanak: ['भग. मुनिसुव्रतनाथजी - जन्म, तप'] },
-    11: { tithi: 'आषाढ़ कृष्ण 11', festivals: ['योगिनी एकादशी'], vrat: ['रोहिणी व्रत'] },
-    14: { tithi: 'आषाढ़ कृष्ण 14', festivals: ['आषाढ़ अमावस्या पूर्व संध्या'] },
-    15: { tithi: 'आषाढ़ शुक्ल 1', festivals: ['मिथुन संक्रांति'] },
-    18: { tithi: 'आषाढ़ शुक्ल 4', acharyaDarpan: ['मुनि श्री भरतसागरजी - दीक्षा स्मृति'] },
-    24: { tithi: 'आषाढ़ शुक्ल 10', kalyanak: ['भग. नेमिनाथजी - गर्भ'] },
-    25: { tithi: 'आषाढ़ शुक्ल 11', festivals: ['देवशयनी एकादशी'] },
-    28: { tithi: 'आषाढ़ शुक्ल 14', festivals: ['चातुर्मास व्रत प्रारंभ पूर्व संध्या'] },
-    30: { tithi: 'आषाढ़ शुक्ल 15 (पूर्णिमा)', festivals: ['गुरु पूर्णिमा', 'चातुर्मास कलश स्थापना', 'व्यास पूर्णिमा', 'कोकिला व्रत'] }
+    11: { festivals: ['पद्मिनी एकादशी'] },
+    15: { festivals: ['अधिक मास समापन', 'सोमवती अमावस्या'] },
+    16: { festivals: ['निज ज्येष्ठ शुक्ल प्रतिपदा', 'मिथुन संक्रांति'] },
+    20: { festivals: ['श्रुत पंचमी (जिनवाणी पूजन महापर्व)'], vrat: ['शास्त्र स्वाध्याय एवं पूजन'] },
+    25: { festivals: ['निर्जला एकादशी'] },
+    29: { festivals: ['ज्येष्ठ पूर्णिमा', 'कबीर जयंती'] },
+    30: { festivals: ['आषाढ़ कृष्ण प्रतिपदा'] }
   },
   6: { // Jul
-    1: { tithi: 'श्रावण कृष्ण 1', festivals: ['वीर शासन जयंती', 'चातुर्मास व्रत नियम प्रारंभ'] },
-    5: { tithi: 'श्रावण कृष्ण 5', festivals: ['मुनि आराधना दिवस'] },
-    8: { tithi: 'श्रावण कृष्ण 8', vrat: ['रोहिणी व्रत'] },
-    10: { tithi: 'श्रावण कृष्ण 10', festivals: ['वीर शासन जयंती'] },
-    11: { tithi: 'श्रावण कृष्ण 11', festivals: ['कामिका एकादशी'] },
-    14: { tithi: 'श्रावण कृष्ण 14', kalyanak: ['भग. पारसनाथजी - जन्म, तप', 'भग. मल्लिनाथजी - गर्भ'] },
-    15: { tithi: 'श्रावण कृष्ण 30 (अमावस्या)', festivals: ['हरियाली अमावस्या'] },
-    17: { tithi: 'श्रावण शुक्ल 2', festivals: ['कर्क संक्रांति'] },
-    18: { tithi: 'श्रावण शुक्ल 3', festivals: ['हरियाली तीज'] },
-    20: { tithi: 'श्रावण शुक्ल 5', festivals: ['नाग पंचमी'] },
-    24: { tithi: 'श्रावण शुक्ल 9', kalyanak: ['भग. नेमिनाथजी - मोक्ष'] },
-    28: { tithi: 'श्रावण शुक्ल 15 (पूर्णिमा)', festivals: ['रक्षाबंधन'], vrat: ['श्रावणी पूर्णिमा'] }
+    10: { festivals: ['योगिनी एकादशी'] },
+    14: { festivals: ['आषाढ़ अमावस्या'] },
+    15: { festivals: ['गुप्त नवरात्रि प्रारंभ', 'कर्क संक्रांति'] },
+    24: { kalyanak: ['भग. पारसनाथजी - जन्म, तप', 'भग. मल्लिनाथजी - गर्भ'] },
+    25: { festivals: ['देवशयनी एकादशी'] },
+    29: { festivals: ['गुरु पूर्णिमा', 'चातुर्मास कलश स्थापना महापर्व', 'व्यास पूर्णिमा'] },
+    30: { festivals: ['वीर शासन जयंती (भगवान महावीर की प्रथम देशना)', 'चातुर्मास व्रत प्रारंभ'], vrat: ['वीर शासन जयंती व्रत'] }
   },
   7: { // Aug
-    1: { tithi: 'श्रावण शुक्ल 15', festivals: ['रक्षाबंधन पर्व उल्लास'] },
-    4: { tithi: 'भाद्रपद कृष्ण 4', vrat: ['रोहिणी व्रत'] },
-    7: { tithi: 'भाद्रपद कृष्ण 7', kalyanak: ['भग. पारसनाथजी - मोक्ष'], festivals: ['श्री कृष्ण जन्माष्टमी'] },
-    10: { tithi: 'भाद्रपद कृष्ण 10', kalyanak: ['भग. आदिनाथजी - गर्भ कल्याणक'] },
-    12: { tithi: 'भाद्रपद कृष्ण 12', festivals: ['सिंह संक्रांति'] },
-    13: { tithi: 'भाद्रपद कृष्ण 13', festivals: ['भाद्रपद अमावस्या', 'पर्युषण महापर्व पूर्व संध्या'] },
-    15: { tithi: 'भाद्रपद शुक्ल 1', festivals: ['स्वतंत्रता दिवस', 'पर्युषण पर्व प्रारंभ'] },
-    18: { tithi: 'भाद्रपद शुक्ल 5', festivals: ['ऋषि पंचमी'] },
-    21: { tithi: 'भाद्रपद शुक्ल 8', festivals: ['दशलक्षण महापर्व प्रारंभ', 'राधा अष्टमी'] },
-    23: { tithi: 'भाद्रपद शुक्ल 10', festivals: ['सुगंध दशमी'], vrat: ['सुगंध दशमी व्रत'] },
-    27: { tithi: 'भाद्रपद शुक्ल 14', festivals: ['अनंत चतुर्दशी'], vrat: ['अनंत चतुर्दशी व्रत'] },
-    28: { tithi: 'भाद्रपद शुक्ल 15 (पूर्णिमा)', festivals: ['क्षमावाणी महापर्व', 'सुगंध दशमी'], vrat: ['भाद्रपद पूर्णिमा'] },
-    31: { tithi: 'आश्विन कृष्ण 4', vrat: ['रोहिणी व्रत'] }
+    12: { festivals: ['श्रावण हरियाली अमावस्या'] },
+    13: { festivals: ['श्रावण शुक्ल प्रतिपदा'] },
+    15: { festivals: ['स्वतंत्रता दिवस', 'हरियाली तीज'] },
+    17: { festivals: ['नाग पंचमी'] },
+    25: { kalyanak: ['भगवान नेमिनाथजी - मोक्ष कल्याणक (ऊर्जयंत गिरनार)'] },
+    27: { festivals: ['रक्षाबंधन (अकंपनाचार्य आदि 700 मुनिराज रक्षा पर्व)', 'श्रावणी पूर्णिमा'] },
+    28: { festivals: ['भाद्रपद कृष्ण प्रतिपदा'] }
   },
   8: { // Sep
-    5: { tithi: 'आश्विन कृष्ण 9', festivals: ['मुनि स्वाध्याय दिन'] },
-    11: { tithi: 'आश्विन कृष्ण 14', festivals: ['आश्विन अमावस्या', 'सर्वपितृ अमावस्या'] },
-    13: { tithi: 'आश्विन शुक्ल 1', festivals: ['शारदीय नवरात्रि प्रारंभ'] },
-    17: { tithi: 'आश्विन शुक्ल 5', festivals: ['कन्या संक्रांति'] },
-    22: { tithi: 'आश्विन शुक्ल 10', festivals: ['विजयादशमी', 'दशहरा'] },
-    26: { tithi: 'आश्विन शुक्ल 14', festivals: ['शरद पूर्णिमा पूर्व'] },
-    27: { tithi: 'आश्विन शुक्ल 15', festivals: ['शरद पूर्णिमा', 'महावीर निर्वाण लाडू स्मृति'] },
-    28: { tithi: 'कार्तिक कृष्ण 1', vrat: ['रोहिणी व्रत'] }
+    4: { festivals: ['श्री कृष्ण जन्माष्टमी'] },
+    7: { festivals: ['अजा एकादशी'] },
+    8: { festivals: ['श्वेतांबर पर्युषण महापर्व प्रारंभ'], vrat: ['पर्युषण व्रत प्रारंभ'] },
+    11: { festivals: ['भाद्रपद अमावस्या (पिठोरी अमावस्या)'] },
+    12: { festivals: ['भाद्रपद शुक्ल प्रतिपदा'] },
+    14: { festivals: ['हरितालिका तीज'] },
+    15: { festivals: ['श्वेतांबर संवत्सरी महापर्व (विश्व क्षमापना दिन)', 'गणेश चतुर्थी'], vrat: ['संवत्सरी उपवास'] },
+    16: { festivals: ['दिगंबर दशलक्षण महापर्व प्रारंभ (दिन 1: उत्तम क्षमा धर्म)', 'ऋषि पंचमी'], vrat: ['दशलक्षण व्रत प्रारंभ'] },
+    17: { festivals: ['दशलक्षण महापर्व (दिन 2: उत्तम मार्दव धर्म)'] },
+    18: { festivals: ['दशलक्षण महापर्व (दिन 3: उत्तम आर्जव धर्म)'] },
+    19: { festivals: ['दशलक्षण महापर्व (दिन 4: उत्तम शौच धर्म)', 'राधा अष्टमी'] },
+    20: { festivals: ['दशलक्षण महापर्व (दिन 5: उत्तम सत्य धर्म)'] },
+    21: { festivals: ['दशलक्षण महापर्व (दिन 6: उत्तम संयम धर्म)', 'सुगंध दशमी (धूप दशमी)'], kalyanak: ['भगवान वासुपूज्य स्वामी - मोक्ष कल्याणक (मंदारगिरि)'], vrat: ['सुगंध दशमी व्रत', 'धूप घट पूजन'] },
+    22: { festivals: ['दशलक्षण महापर्व (दिन 7: उत्तम तप धर्म)', 'परिवर्तिनी / जलझूलनी एकादशी'], vrat: ['उत्तम तप आराधना', 'एकादशी व्रत'] },
+    23: { festivals: ['दशलक्षण महापर्व (दिन 8: उत्तम त्याग धर्म) - द्वादशी'], vrat: ['उत्तम त्याग आराधना', 'द्वादशी व्रत'] },
+    24: { festivals: ['दशलक्षण महापर्व (दिन 9: उत्तम आकिंचन्य धर्म)'], vrat: ['उत्तम आकिंचन्य आराधना'] },
+    25: { festivals: ['दशलक्षण महापर्व समापन (दिन 10: उत्तम ब्रह्मचर्य धर्म)', 'अनंत चतुर्दशी'], vrat: ['अनंत चतुर्दशी व्रत', 'चौदस उपवास'] },
+    26: { festivals: ['क्षमावाणी महापर्व (मिच्छामि दुक्कड़म)', 'विश्व मैत्री दिवस', 'भाद्रपद पूर्णिमा'], vrat: ['क्षमापना दिवस', 'रत्नत्रय व्रत पूर्ण'] },
+    27: { festivals: ['पितृ पक्ष प्रारंभ (आश्विन कृष्ण प्रतिपदा)'] }
   },
   9: { // Oct
-    1: { tithi: 'कार्तिक कृष्ण 5', festivals: ['मुनि विहार व्रत'] },
-    9: { tithi: 'कार्तिक कृष्ण 13', festivals: ['धनतेरस'] },
-    10: { tithi: 'कार्तिक कृष्ण 14', festivals: ['दीपावली', 'रूप चतुर्दशी'], kalyanak: ['भगवान महावीर निर्वाण'] },
-    11: { tithi: 'कार्तिक शुक्ल 1', festivals: ['वीर निर्वाण संवत नववर्ष', 'गोवर्धन पूजा'], vrat: ['गौतम गणधर केवलज्ञान'] },
-    12: { tithi: 'कार्तिक शुक्ल 2', festivals: ['भाई दूज'] },
-    15: { tithi: 'कार्तिक शुक्ल 5', festivals: ['ज्ञान पंचमी', 'पाण्डव पंचमी'] },
-    18: { tithi: 'कार्तिक शुक्ल 8', festivals: ['गोपाष्टमी'] },
-    24: { tithi: 'कार्तिक शुक्ल 14', festivals: ['तुलसी विवाह'], vrat: ['रोहिणी व्रत'] },
-    25: { tithi: 'कार्तिक शुक्ल 15 (पूर्णिमा)', festivals: ['कार्तिक पूर्णिमा', 'रथयात्रा', 'देव दीपावली'] },
-    31: { tithi: 'मार्गशीर्ष कृष्ण 6', festivals: ['स्वाध्याय एकाग्रता दिन'] }
+    10: { festivals: ['आश्विन अमावस्या', 'सर्वपितृ अमावस्या', 'महालया'] },
+    11: { festivals: ['शारदीय नवरात्रि प्रारंभ', 'घटस्थापना'] },
+    17: { festivals: ['महा सप्तमी', 'सरस्वती आवाहन'] },
+    18: { festivals: ['महा अष्टमी', 'दुर्गा अष्टमी'] },
+    19: { festivals: ['महानवमी', 'आयुध पूजा'] },
+    20: { festivals: ['विजयादशमी', 'दशहरा'] },
+    21: { festivals: ['पापांकुशा एकादशी'] },
+    25: { festivals: ['शरद पूर्णिमा', 'कोजागरी पूर्णिमा', 'शरद उत्सव'] },
+    26: { festivals: ['कार्तिक कृष्ण प्रतिपदा'] }
   },
   10: { // Nov
-    1: { tithi: 'मार्गशीर्ष कृष्ण 7', festivals: ['जैन संस्कृति प्रचार दिन'] },
-    10: { tithi: 'मार्गशीर्ष कृष्ण 10', kalyanak: ['भग. नेमिनाथजी - जन्म, तप'], festivals: ['मार्गशीर्ष अमावस्या'] },
-    16: { tithi: 'मार्गशीर्ष शुक्ल 1', festivals: ['वृश्चिक संक्रांति'] },
-    20: { tithi: 'मार्गशीर्ष शुक्ल 5', festivals: ['विवाह पंचमी'], vrat: ['रोहिणी व्रत'] },
-    24: { tithi: 'मार्गशीर्ष शुक्ल 9', kalyanak: ['भग. मल्लिनाथजी - जन्म, तप'] },
-    25: { tithi: 'मार्गशीर्ष शुक्ल 10', kalyanak: ['भग. शांतिनाथजी - मोक्ष', 'भग. कुन्थुनाथजी - मोक्ष', 'भग. अरनाथजी - मोक्ष'], festivals: ['गीता जयंती'] },
-    30: { tithi: 'मार्गशीर्ष शुक्ल 15 (पूर्णिमा)', festivals: ['अनंग त्रयोदशी स्मृति'] }
+    2: { festivals: ['अहोई अष्टमी व्रत'] },
+    6: { festivals: ['धनतेरस', 'धनत्रयोदशी', 'धन्वंतरि जयंती'] },
+    7: { festivals: ['रूप चतुर्दशी', 'नरक चतुर्दशी', 'छोटी दिवाली'] },
+    8: { festivals: ['दीपावली महापर्व', 'महालक्ष्मी पूजन', 'भगवान महावीर निर्वाण लाडू अर्पण'], kalyanak: ['भगवान महावीर स्वामी - मोक्ष कल्याणक (पावापुरी जी)'], vrat: ['महावीर निर्वाण दिवस'] },
+    9: { festivals: ['वीर निर्वाण संवत 2553 नूतन वर्ष प्रारंभ', 'गौतम गणधर केवलज्ञान दिवस', 'गोवर्धन पूजा', 'अन्नकूट महोत्सव'], vrat: ['वीर संवत नववर्ष व्रत'] },
+    10: { festivals: ['भाई दूज', 'यम द्वितीया'] },
+    13: { festivals: ['ज्ञान पंचमी', 'सौभाग्य पंचमी', 'जिनवाणी स्वाध्याय दिवस'], vrat: ['ज्ञान पंचमी व्रत'] },
+    14: { festivals: ['छठ पूजा (सूर्य षष्ठी)'] },
+    19: { festivals: ['देवउठनी एकादशी', 'प्रबोधिनी एकादशी', 'तुलसी विवाह प्रारंभ'] },
+    24: { festivals: ['कार्तिक पूर्णिमा', 'देव दीपावली', 'रथयात्रा महोत्सव'], vrat: ['कार्तिक पूर्णिमा व्रत'] },
+    25: { festivals: ['मार्गशीर्ष कृष्ण प्रतिपदा'] }
   },
   11: { // Dec
-    1: { tithi: 'पौष कृष्ण 7', festivals: ['शीतकालीन संयम दिन'] },
-    5: { tithi: 'पौष कृष्ण 11', kalyanak: ['भग. पारसनाथजी - जन्म स्मृति'], festivals: ['पौष कृष्ण एकादशी'] },
-    10: { tithi: 'पौष कृष्ण 30 (अमावस्या)', festivals: ['पौष अमावस्या'] },
-    16: { tithi: 'पौष शुक्ल 1', festivals: ['धनु संक्रांति'] },
-    18: { tithi: 'पौष शुक्ल 10', kalyanak: ['भग. पारसनाथजी - जन्म, तप'] },
-    19: { tithi: 'पौष शुक्ल 11', vrat: ['रोहिणी व्रत'] },
-    24: { tithi: 'पौष शुक्ल 16', acharyaDarpan: ['मुनि श्री धीरसागरजी - समाधि स्मृति'] },
-    25: { tithi: 'पौष शुक्ल 17', festivals: ['बड़ा दिन (Christmas)'] },
-    31: { tithi: 'पौष शुक्ल 23', festivals: ['नवीन वर्ष पूर्व संध्या पूजा'] }
+    8: { festivals: ['मार्गशीर्ष अमावस्या'] },
+    9: { festivals: ['मार्गशीर्ष शुक्ल प्रतिपदा'] },
+    19: { festivals: ['मोक्षदा एकादशी', 'गीता जयंती'] },
+    23: { festivals: ['मार्गशीर्ष पूर्णिमा', 'दत्तात्रेय जयंती'] },
+    24: { festivals: ['पौष कृष्ण प्रतिपदा'] },
+    25: { festivals: ['बड़ा दिन (Christmas)'] },
+    31: { festivals: ['वर्ष 2026 की पूर्व संध्या'] }
   }
 };
 
@@ -345,37 +497,56 @@ const getMUHURAT_2026 = (date: Date) => {
   return muhurats.length > 0 ? muhurats : ['सामान्य शुभ दिन'];
 };
 
-// Fortnight starters for 2026
+// Fortnight starters for 2026 (Reflecting standard Hindu/Jain Purnimanta Panchang with Adhik Maas in 2026)
 const PAKSHA_STARTERS_2026 = [
   { start: '2025-12-20', name: 'पौष शुक्ल' },
   { start: '2026-01-04', name: 'माघ कृष्ण' },
-  { start: '2026-01-18', name: 'माघ शुक्ल' },
-  { start: '2026-02-01', name: 'फाल्गुन कृष्ण' },
-  { start: '2026-02-16', name: 'फाल्गुन शुक्ल' },
-  { start: '2026-03-02', name: 'चैत्र कृष्ण' },
-  { start: '2026-03-18', name: 'चैत्र शुक्ल' },
+  { start: '2026-01-19', name: 'माघ शुक्ल' },
+  { start: '2026-02-02', name: 'फाल्गुन कृष्ण' },
+  { start: '2026-02-18', name: 'फाल्गुन शुक्ल' },
+  { start: '2026-03-04', name: 'चैत्र कृष्ण' },
+  { start: '2026-03-20', name: 'चैत्र शुक्ल' },
   { start: '2026-04-02', name: 'वैशाख कृष्ण' },
-  { start: '2026-04-15', name: 'वैशाख शुक्ल' },
-  { start: '2026-05-01', name: 'ज्येष्ठ कृष्ण' },
-  { start: '2026-05-16', name: 'ज्येष्ठ शुक्ल' },
-  { start: '2026-06-01', name: 'आषाढ़ कृष्ण' },
-  { start: '2026-06-15', name: 'आषाढ़ शुक्ल' },
-  { start: '2026-07-01', name: 'श्रावण कृष्ण' },
-  { start: '2026-07-16', name: 'श्रावण शुक्ल' },
-  { start: '2026-07-29', name: 'भाद्रपद कृष्ण' },
-  { start: '2026-08-15', name: 'भाद्रपद शुक्ल' },
-  { start: '2026-08-29', name: 'आश्विन कृष्ण' },
-  { start: '2026-09-13', name: 'आश्विन शुक्ल' },
-  { start: '2026-09-28', name: 'कार्तिक कृष्ण' },
-  { start: '2026-10-11', name: 'कार्तिक शुक्ल' },
-  { start: '2026-10-26', name: 'मार्गशीर्ष कृष्ण' },
-  { start: '2026-11-16', name: 'मार्गशीर्ष शुक्ल' },
-  { start: '2026-11-26', name: 'पौष कृष्ण' },
-  { start: '2026-12-11', name: 'पौष शुक्ल' },
-  { start: '2026-12-26', name: 'माघ कृष्ण' }
+  { start: '2026-04-18', name: 'वैशाख शुक्ल' },
+  { start: '2026-05-02', name: 'ज्येष्ठ कृष्ण' },
+  { start: '2026-05-17', name: 'अधिक ज्येष्ठ शुक्ल' },
+  { start: '2026-06-01', name: 'अधिक ज्येष्ठ कृष्ण' },
+  { start: '2026-06-16', name: 'ज्येष्ठ शुक्ल' },
+  { start: '2026-06-30', name: 'आषाढ़ कृष्ण' },
+  { start: '2026-07-15', name: 'आषाढ़ शुक्ल' },
+  { start: '2026-07-30', name: 'श्रावण कृष्ण' },
+  { start: '2026-08-13', name: 'श्रावण शुक्ल' },
+  { start: '2026-08-28', name: 'भाद्रपद कृष्ण' },
+  { start: '2026-09-12', name: 'भाद्रपद शुक्ल' },
+  { start: '2026-09-27', name: 'आश्विन कृष्ण' },
+  { start: '2026-10-11', name: 'आश्विन शुक्ल' },
+  { start: '2026-10-26', name: 'कार्तिक कृष्ण' },
+  { start: '2026-11-09', name: 'कार्तिक शुक्ल' },
+  { start: '2026-11-25', name: 'मार्गशीर्ष कृष्ण' },
+  { start: '2026-12-09', name: 'मार्गशीर्ष शुक्ल' },
+  { start: '2026-12-24', name: 'पौष कृष्ण' }
 ];
 
-const getCalculatedTithi = (date: Date): { tithi: string; paksha: string } => {
+const TITHI_NAMES_HI = [
+  '',
+  'प्रतिपदा',
+  'द्वितीया',
+  'तृतीया',
+  'चतुर्थी',
+  'पंचमी',
+  'षष्ठी',
+  'सप्तमी',
+  'अष्टमी',
+  'नवमी',
+  'दशमी',
+  'एकादशी',
+  'द्वादशी',
+  'त्रयोदशी',
+  'चतुर्दशी',
+  'पूर्णिमा'
+];
+
+const getCalculatedTithi = (date: Date): { tithi: string; shortTithi: string; paksha: string } => {
   const targetTime = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
   
   let activeStarter = PAKSHA_STARTERS_2026[0];
@@ -395,43 +566,62 @@ const getCalculatedTithi = (date: Date): { tithi: string; paksha: string } => {
   const isKrishna = activeStarter.name.includes('कृष्ण');
   const baseName = activeStarter.name.split(' ')[0];
   const pakshaName = isKrishna ? 'कृष्ण पक्ष' : 'शुक्ल पक्ष';
+  const pakshaShort = isKrishna ? 'कृष्ण' : 'शुक्ल';
+
+  let tithiNameWord = TITHI_NAMES_HI[tithiNum] || '';
+  if (isKrishna && tithiNum >= 15) {
+    tithiNameWord = 'अमावस्या';
+  }
 
   let tithiStr = '';
-  if (activeStarter.name === 'माघ कृष्ण') {
-    if (tithiNum === 2) tithiStr = 'माघ कृष्ण 2/3';
-    else if (tithiNum > 2) tithiStr = `माघ कृष्ण ${tithiNum}`;
+  let shortTithiStr = '';
+
+  if (activeStarter.name === 'माघ कृष्ण' && tithiNum === 2) {
+    tithiStr = 'माघ कृष्ण 2/3 (द्वितीया)';
+    shortTithiStr = 'कृष्ण 2/3';
   } else if (activeStarter.name === 'माघ शुक्ल' && tithiNum === 12) {
-    tithiStr = 'माघ शुक्ल 12-13';
+    tithiStr = 'माघ शुक्ल 12-13 (द्वादशी)';
+    shortTithiStr = 'शुक्ल 12-13';
   } else if (activeStarter.name === 'चैत्र कृष्ण' && tithiNum === 6) {
-    tithiStr = 'चैत्र कृष्ण 6-7';
-  } else if (activeStarter.name === 'चैत्र कृष्ण' && tithiNum === 10) {
-    tithiStr = 'चैत्र कृष्ण 10-11';
+    tithiStr = 'चैत्र कृष्ण 6-7 (षष्ठी)';
+    shortTithiStr = 'कृष्ण 6-7';
   }
 
   if (!tithiStr) {
     if (tithiNum >= 15) {
-      tithiStr = isKrishna ? `${baseName} कृष्ण 30 (अमावस्या)` : `${baseName} शुक्ल 15 (पूर्णिमा)`;
+      if (isKrishna) {
+        tithiStr = `${baseName} कृष्ण 30 (अमावस्या)`;
+        shortTithiStr = 'अमावस्या';
+      } else {
+        tithiStr = `${baseName} शुक्ल 15 (पूर्णिमा)`;
+        shortTithiStr = 'पूर्णिमा';
+      }
     } else {
-      tithiStr = `${activeStarter.name} ${tithiNum}`;
+      tithiStr = `${activeStarter.name} ${tithiNum} (${tithiNameWord})`;
+      shortTithiStr = `${pakshaShort} ${tithiNum}`;
     }
   }
 
   return {
     tithi: tithiStr,
+    shortTithi: shortTithiStr,
     paksha: pakshaName
   };
 };
 
-const getGenericTithi = (date: Date) => {
+const getGenericTithi = (date: Date): { tithi: string; shortTithi: string; paksha: string } => {
   const day = date.getDate();
   const tithiNum = (day % 15) === 0 ? 15 : day % 15;
   const isSud = day <= 15;
   const paksha = isSud ? 'शुक्ल पक्ष' : 'कृष्ण पक्ष';
+  const pakshaShort = isSud ? 'शुक्ल' : 'कृष्ण';
   const monthNames = ["माघ", "फाल्गुन", "चैत्र", "वैशाख", "ज्येष्ठ", "आषाढ़", "श्रावण", "भाद्रपद", "आश्विन", "कार्तिक", "मार्गशीर्ष", "पौष"];
   const mName = monthNames[date.getMonth()];
-  const tithiName = `${mName} ${isSud ? 'शुक्ल' : 'कृष्ण'} ${tithiNum === 15 ? (isSud ? '15 (पूर्णिमा)' : '30 (अमावस्या)') : tithiNum}`;
+  const tithiNameWord = TITHI_NAMES_HI[tithiNum] || '';
+  const tithiName = `${mName} ${pakshaShort} ${tithiNum === 15 ? (isSud ? '15 (पूर्णिमा)' : '30 (अमावस्या)') : `${tithiNum} (${tithiNameWord})`}`;
   return {
     tithi: tithiName,
+    shortTithi: `${pakshaShort} ${tithiNum === 15 ? (isSud ? '15' : '30') : tithiNum}`,
     paksha: paksha
   };
 };
@@ -443,6 +633,16 @@ export default function PanchangPage() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
   const [loading, setLoading] = useState(true);
   const [dbUpdates, setDbUpdates] = useState<Record<string, any>>({});
+  const [selectedTirthId, setSelectedTirthId] = useState<string>(() => {
+    return localStorage.getItem('preferred_jain_tirth') || 'shikharji';
+  });
+
+  const selectedTirth = JAIN_TIRTHS.find(t => t.id === selectedTirthId) || JAIN_TIRTHS[0];
+
+  const handleSelectTirth = (id: string) => {
+    setSelectedTirthId(id);
+    localStorage.setItem('preferred_jain_tirth', id);
+  };
 
   useEffect(() => {
     const unsub = onSnapshot(collection(db, 'panchang'), (snapshot) => {
@@ -475,8 +675,9 @@ export default function PanchangPage() {
       const calculated = getCalculatedTithi(date);
 
       baseDetails = {
-        tithi: calculated.tithi,
-        paksha: calculated.paksha,
+        tithi: dayData.tithi || calculated.tithi,
+        shortTithi: dayData.shortTithi || calculated.shortTithi,
+        paksha: dayData.paksha || calculated.paksha,
         festivals: dayData.festivals || [],
         kalyanak: dayData.kalyanak || [],
         acharyaDarpan: dayData.acharyaDarpan || [],
@@ -494,6 +695,7 @@ export default function PanchangPage() {
 
       baseDetails = {
         tithi: fallback.tithi,
+        shortTithi: fallback.shortTithi,
         paksha: fallback.paksha,
         festivals: [],
         kalyanak: [],
@@ -517,6 +719,7 @@ export default function PanchangPage() {
       return {
         ...baseDetails,
         tithi: override.tithi || baseDetails.tithi,
+        shortTithi: override.shortTithi || override.tithi || baseDetails.shortTithi,
         paksha: override.paksha || baseDetails.paksha,
         festivals: override.festivals ? parseStrVal(override.festivals) : baseDetails.festivals,
         kalyanak: override.kalyanak ? parseStrVal(override.kalyanak) : baseDetails.kalyanak,
@@ -623,13 +826,25 @@ export default function PanchangPage() {
         
         <div className="bg-white dark:bg-[#121111] rounded-[3rem] border-2 border-orange-500/20 dark:border-[#FF6D00]/20 p-8 shadow-2xl relative overflow-hidden backdrop-blur-xl">
           <div className="flex justify-between items-center mb-10 relative z-10">
-            <button onClick={() => setCurrentDate(subMonths(currentDate, 1))} className="p-3 text-gray-400 dark:text-gray-500 hover:text-gray-800 dark:hover:text-white transition-colors">
+            <button onClick={() => setCurrentDate(subMonths(currentDate, 1))} className="p-3 text-gray-400 dark:text-gray-500 hover:text-gray-800 dark:hover:text-white transition-colors" title="Previous Month">
               <ChevronLeft size={28} />
             </button>
             <div className="text-center">
-              <h2 className="text-4xl font-display font-black text-[#FF6D00] drop-shadow-[0_0_15px_rgba(255,109,0,0.4)]">
-                {format(currentDate, 'MMMM yyyy', { locale: language === 'hi' ? hi : undefined })}
-              </h2>
+              <div className="flex items-center justify-center gap-2">
+                <h2 className="text-3xl sm:text-4xl font-display font-black text-[#FF6D00] drop-shadow-[0_0_15px_rgba(255,109,0,0.4)]">
+                  {format(currentDate, 'MMMM yyyy', { locale: language === 'hi' ? hi : undefined })}
+                </h2>
+                <button
+                  onClick={() => {
+                    const now = new Date();
+                    setCurrentDate(now);
+                    setSelectedDate(now);
+                  }}
+                  className="px-2.5 py-1 text-[10px] font-bold rounded-full bg-amber-100 dark:bg-[#FFD54F]/20 text-amber-900 dark:text-[#FFD54F] border border-amber-300 dark:border-[#FFD54F]/40 hover:bg-amber-200 transition-colors shadow-xs"
+                >
+                  {language === 'hi' ? 'आज' : 'Today'}
+                </button>
+              </div>
               <div className="flex gap-4 justify-center mt-2">
                 <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400 tracking-widest uppercase">
                   {language === 'hi' ? `वि.सं. ${currentDate.getFullYear() + 57}` : `V.S. ${currentDate.getFullYear() + 57}`}
@@ -640,7 +855,7 @@ export default function PanchangPage() {
                 </span>
               </div>
             </div>
-            <button onClick={() => setCurrentDate(addMonths(currentDate, 1))} className="p-3 text-gray-400 dark:text-gray-500 hover:text-gray-800 dark:hover:text-white transition-colors">
+            <button onClick={() => setCurrentDate(addMonths(currentDate, 1))} className="p-3 text-gray-400 dark:text-gray-500 hover:text-gray-800 dark:hover:text-white transition-colors" title="Next Month">
               <ChevronRight size={28} />
             </button>
           </div>
@@ -682,10 +897,10 @@ export default function PanchangPage() {
                     </span>
                   </div>
                   <span className={cn(
-                    "text-[8px] font-bold uppercase tracking-tighter opacity-70",
+                    "text-[8px] font-bold uppercase tracking-tighter opacity-70 truncate max-w-[50px] text-center",
                     isSelected ? "text-[#FF6D00] dark:text-[#FFD54F] opacity-100 font-extrabold" : "text-gray-500 dark:text-gray-400"
                   )}>
-                    {details.tithi}
+                    {details.shortTithi || details.tithi}
                   </span>
                   
                   {(details.festivals.length > 0 || details.kalyanak.length > 0) && (
@@ -698,7 +913,15 @@ export default function PanchangPage() {
         </div>
       </div>
 
-      {selectedDate && selectedDetails && (
+      {selectedDate && selectedDetails && (() => {
+        const tirthSunrise = adjustTimeString(selectedDetails.sunrise, selectedTirth.sunriseOffsetMin);
+        const tirthSunset = adjustTimeString(selectedDetails.sunset, selectedTirth.sunsetOffsetMin);
+        const tirthNavkarsi = addMinutesToTimeString(tirthSunrise, 48);
+        const tirthPorsi = addMinutesToTimeString(tirthSunrise, 180);
+        const tirthSadhPorsi = addMinutesToTimeString(tirthSunrise, 270);
+        const tirthChauvihar = tirthSunset;
+
+        return (
         <div className="space-y-6 animate-in slide-in-from-bottom-8 duration-500 pb-10 line-height-normal">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-xl font-display font-black flex items-center gap-2">
@@ -707,13 +930,142 @@ export default function PanchangPage() {
             </h3>
           </div>
 
+          {/* Jain Tirth Selector Card */}
+          <div className="bg-white dark:bg-[#121212] rounded-[2rem] p-6 border-2 border-[#FF6D00]/25 shadow-xl relative overflow-hidden transition-all duration-300">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-gray-150 dark:border-white/10">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-2xl bg-[#FF6D00]/10 flex items-center justify-center border border-[#FF6D00]/30 text-[#FF6D00]">
+                  <Sun size={22} className="animate-spin-slow" />
+                </div>
+                <div>
+                  <h4 className="font-display font-black text-base sm:text-lg text-gray-900 dark:text-white flex items-center gap-2">
+                    <span>{language === 'hi' ? 'तीर्थ अनुसार पंचांग एवं चौविहार समय' : 'Jain Tirth Timings & Chauvihar'}</span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#00E676]/10 text-[#00E676] border border-[#00E676]/30 font-black">
+                      {language === 'hi' ? 'नवीनतम' : 'Latest'}
+                    </span>
+                  </h4>
+                  <p className="text-[10px] font-semibold text-gray-500 dark:text-gray-400">
+                    {language === 'hi' 
+                      ? 'अपने पूज्य तीर्थ का चयन करें — सूर्योदय, सूर्यास्त व नवकारसी स्वतः समायोजित होंगे'
+                      : 'Select your revered Tirth — Sunrise, Sunset & Navkarsi adjust automatically'}
+                  </p>
+                </div>
+              </div>
+              <div className="text-right shrink-0">
+                <span className="text-xs font-black px-3 py-1.5 rounded-xl bg-[#FF6D00]/15 text-[#FF6D00] border border-[#FF6D00]/30 inline-block">
+                  📍 {language === 'hi' ? selectedTirth.nameHi : selectedTirth.nameEn}
+                </span>
+              </div>
+            </div>
+
+            {/* Tirth Switcher Pills */}
+            <div className="flex gap-2 overflow-x-auto pb-3 mb-4 scrollbar-hide">
+              {JAIN_TIRTHS.map(tirth => {
+                const isSelected = tirth.id === selectedTirthId;
+                return (
+                  <button
+                    key={tirth.id}
+                    onClick={() => handleSelectTirth(tirth.id)}
+                    className={cn(
+                      "px-3.5 py-2 rounded-xl text-xs font-black whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer",
+                      isSelected
+                        ? "bg-gradient-to-r from-[#FF6D00] to-[#FF8A65] text-white shadow-md shadow-[#FF6D00]/25 scale-102"
+                        : "bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/10 border border-gray-200 dark:border-white/5"
+                    )}
+                  >
+                    <span>{language === 'hi' ? tirth.nameHi : tirth.nameEn}</span>
+                    {tirth.sunriseOffsetMin !== 0 && (
+                      <span className={cn(
+                        "text-[9px] px-1.5 py-0.5 rounded-md font-mono",
+                        isSelected ? "bg-black/20 text-white" : "bg-gray-200 dark:bg-white/10 text-gray-500 dark:text-gray-400"
+                      )}>
+                        {tirth.sunriseOffsetMin > 0 ? `+${tirth.sunriseOffsetMin}m` : `${tirth.sunriseOffsetMin}m`}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Tirth Significance Note */}
+            <div className="bg-amber-50 dark:bg-amber-500/10 rounded-xl p-3 mb-4 border border-amber-200 dark:border-amber-500/20 flex items-start gap-2.5">
+              <Sparkles size={16} className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+              <p className="text-xs font-semibold text-amber-900 dark:text-amber-200">
+                <strong className="font-black">{language === 'hi' ? selectedTirth.nameHi : selectedTirth.nameEn} ({selectedTirth.location}, {selectedTirth.state}): </strong>
+                {language === 'hi' ? selectedTirth.significanceHi : selectedTirth.significanceEn}
+              </p>
+            </div>
+
+            {/* 4-Box Sacred Jain Timings Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="bg-gray-50 dark:bg-white/5 rounded-2xl p-3.5 border border-gray-150 dark:border-white/5">
+                <div className="flex items-center gap-1.5 text-amber-500 mb-1">
+                  <Sunrise size={16} />
+                  <span className="text-[10px] font-black uppercase tracking-wider">{t.sunrise}</span>
+                </div>
+                <h5 className="text-lg font-black text-gray-900 dark:text-white">{tirthSunrise}</h5>
+                <p className="text-[9px] font-semibold text-gray-400 dark:text-gray-500 mt-0.5">
+                  {selectedTirth.sunriseOffsetMin !== 0 ? `${selectedTirth.sunriseOffsetMin > 0 ? '+' : ''}${selectedTirth.sunriseOffsetMin} min offset` : 'IST Standard'}
+                </p>
+              </div>
+
+              <div className="bg-gray-50 dark:bg-white/5 rounded-2xl p-3.5 border border-gray-150 dark:border-white/5">
+                <div className="flex items-center gap-1.5 text-orange-500 mb-1">
+                  <Sunset size={16} />
+                  <span className="text-[10px] font-black uppercase tracking-wider">{t.sunset}</span>
+                </div>
+                <h5 className="text-lg font-black text-gray-900 dark:text-white">{tirthSunset}</h5>
+                <p className="text-[9px] font-semibold text-gray-400 dark:text-gray-500 mt-0.5">
+                  {language === 'hi' ? 'संध्या प्रतिक्रमण' : 'Evening Pratikraman'}
+                </p>
+              </div>
+
+              <div className="bg-emerald-50 dark:bg-emerald-500/10 rounded-2xl p-3.5 border border-emerald-200 dark:border-emerald-500/20">
+                <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 mb-1">
+                  <Clock size={16} />
+                  <span className="text-[10px] font-black uppercase tracking-wider">{language === 'hi' ? 'नवकारसी' : 'Navkarsi'}</span>
+                </div>
+                <h5 className="text-lg font-black text-emerald-700 dark:text-emerald-300">{tirthNavkarsi}</h5>
+                <p className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
+                  {language === 'hi' ? 'सूर्योदय + 48 मि. त्याग' : '+48m after Sunrise'}
+                </p>
+              </div>
+
+              <div className="bg-rose-50 dark:bg-rose-500/10 rounded-2xl p-3.5 border border-rose-200 dark:border-rose-500/20">
+                <div className="flex items-center gap-1.5 text-rose-600 dark:text-rose-400 mb-1">
+                  <Moon size={16} />
+                  <span className="text-[10px] font-black uppercase tracking-wider">{language === 'hi' ? 'चौविहार समय' : 'Chauvihar'}</span>
+                </div>
+                <h5 className="text-lg font-black text-rose-700 dark:text-rose-300">{tirthChauvihar}</h5>
+                <p className="text-[9px] font-bold text-rose-600 dark:text-rose-400 mt-0.5">
+                  {language === 'hi' ? 'रात्रि भोजन/जल त्याग' : 'Sunset Fasting Begins'}
+                </p>
+              </div>
+            </div>
+
+            {/* Additional Porsi Details */}
+            <div className="mt-3 pt-3 border-t border-gray-150 dark:border-white/5 flex flex-wrap items-center justify-between text-xs text-gray-500 dark:text-gray-400 gap-2">
+              <div className="flex items-center gap-1.5 font-semibold">
+                <span className="font-bold text-gray-800 dark:text-gray-200">{language === 'hi' ? 'पोरसी (1 प्रहर):' : 'Porsi (1 Prahar):'}</span>
+                <span>{tirthPorsi}</span>
+              </div>
+              <div className="flex items-center gap-1.5 font-semibold">
+                <span className="font-bold text-gray-800 dark:text-gray-200">{language === 'hi' ? 'साढ़ पोरसी (1.5 प्रहर):' : 'Sadh Porsi:'}</span>
+                <span>{tirthSadhPorsi}</span>
+              </div>
+              <div className="flex items-center gap-1.5 text-[11px] text-amber-600 dark:text-amber-400 font-bold">
+                <span>✦ {language === 'hi' ? 'सूर्यास्त से 24 मि. पूर्व जल-आहार ग्रहण नियम श्रेयस्कर है' : 'Finish dinner 24m before Sunset'}</span>
+              </div>
+            </div>
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2 bg-white dark:bg-[#121212] rounded-[2rem] p-6 border border-gray-200 dark:border-white/5 flex items-center justify-between shadow-sm dark:shadow-xl transition-all duration-300">
               <div>
                 <p className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest mb-1">{t.tithi}</p>
-                <div className="flex items-baseline gap-2">
-                  <h4 className="text-3xl font-black text-gray-900 dark:text-white">{selectedDetails.tithi}</h4>
-                  <span className="text-xs text-[#FF6D00] font-bold">{selectedDetails.paksha}</span>
+                <div className="flex flex-wrap items-baseline gap-2">
+                  <h4 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white">{selectedDetails.tithi}</h4>
+                  <span className="text-xs px-2.5 py-0.5 rounded-full bg-[#FF6D00]/10 text-[#FF6D00] dark:text-[#FFD54F] font-bold border border-[#FF6D00]/20">{selectedDetails.paksha}</span>
                 </div>
               </div>
               <div className="flex flex-col items-end">
@@ -721,11 +1073,11 @@ export default function PanchangPage() {
                 <div className="flex gap-4">
                   <div className="flex items-center gap-1.5 text-gray-700 dark:text-gray-300">
                     <Sunrise size={16} className="text-[#FFD54F]" />
-                    <span className="text-xs font-bold">{selectedDetails.sunrise}</span>
+                    <span className="text-xs font-bold">{tirthSunrise}</span>
                   </div>
                   <div className="flex items-center gap-1.5 text-gray-700 dark:text-gray-300">
                     <Sunset size={16} className="text-[#FF8A65]" />
-                    <span className="text-xs font-bold">{selectedDetails.sunset}</span>
+                    <span className="text-xs font-bold">{tirthSunset}</span>
                   </div>
                 </div>
               </div>
@@ -835,7 +1187,8 @@ export default function PanchangPage() {
             </div>
           </div>
         </div>
-      )}
+        );
+      })()}
       <SectionAiAgent section="panchang" />
     </div>
   );

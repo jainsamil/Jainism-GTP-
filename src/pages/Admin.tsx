@@ -5,7 +5,7 @@ import {
   Database, HelpCircle, History, Calendar, Star,
   RefreshCw, CheckCircle2, ArrowLeft, LogOut, BarChart3,
   PlaySquare, Quote, MessageCircle, HelpCircle as QuizIcon,
-  Sparkles, Hotel, Store, ShoppingBag, Package
+  Sparkles, Hotel, Store, ShoppingBag, Package, Heart
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useAuth } from '../contexts/AuthContext';
@@ -23,8 +23,9 @@ import {
   LineChart, Line, PieChart, Pie, Cell
 } from 'recharts';
 import AdminAiAgent from '../components/AdminAiAgent';
+import { VivahAdminSection } from '../components/vivah/VivahAdminSection';
 
-type CollectionType = 'dashboard' | 'analytics' | 'ai_agent' | 'knowledge' | 'tirthankars' | 'aagams' | 'history' | 'festivals' | 'classes' | 'exams' | 'saints' | 'vichaar' | 'quiz' | 'media' | 'panchang' | 'settings' | 'dharamshala_bookings' | 'jain_stores' | 'jain_products' | 'jain_orders';
+type CollectionType = 'dashboard' | 'analytics' | 'ai_agent' | 'jain_vivah' | 'knowledge' | 'tirthankars' | 'aagams' | 'history' | 'festivals' | 'classes' | 'exams' | 'saints' | 'vichaar' | 'quiz' | 'media' | 'panchang' | 'settings' | 'dharamshala_bookings' | 'jain_stores' | 'jain_products' | 'jain_orders';
 
 import { tirthankarsData } from '../data/tirthankarsData';
 import { aagamsData } from '../data/aagamsData';
@@ -487,6 +488,7 @@ export default function AdminPage() {
 
   const collections = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'jain_vivah', label: 'Jain Vivah Seva', icon: Heart },
     { id: 'analytics', label: 'Analytics', icon: BarChart3 },
     { id: 'ai_agent', label: 'AI Developer Agent', icon: Sparkles },
     { id: 'knowledge', label: 'Knowledge (FAQs)', icon: HelpCircle },
@@ -702,6 +704,11 @@ export default function AdminPage() {
                 </div>
               </div>
             </div>
+          ) : activeCollection === 'jain_vivah' ? (
+            <VivahAdminSection 
+              adminEmail={user?.email || 'admin@jainism.com'} 
+              adminId={user?.uid || 'admin_user'} 
+            />
           ) : activeCollection === 'ai_agent' ? (
             <AdminAiAgent />
           ) : (

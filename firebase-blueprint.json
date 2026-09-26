@@ -299,6 +299,54 @@
         "createdAt": { "type": "string" }
       },
       "required": ["id", "storeId", "storeName", "title", "price", "category", "status"]
+    },
+    "vivah_profile": {
+      "title": "Jain Vivah Matrimonial Profile",
+      "description": "Verified adult Jain matrimonial candidate records with admin approval lifecycle",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "fullName": { "type": "string" },
+        "gender": { "type": "string", "enum": ["male", "female"] },
+        "dateOfBirth": { "type": "string" },
+        "age": { "type": "number" },
+        "sampraday": { "type": "string" },
+        "subCategory": { "type": "string" },
+        "city": { "type": "string" },
+        "state": { "type": "string" },
+        "status": { "type": "string", "enum": ["PENDING_APPROVAL", "APPROVED", "REJECTED", "SUSPENDED", "HIDDEN", "DELETED", "CORRECTION_REQUIRED"] },
+        "verificationStatus": { "type": "string" },
+        "membershipTier": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "userId", "fullName", "gender", "dateOfBirth", "age", "status"]
+    },
+    "vivah_membership_plan": {
+      "title": "Vivah Membership Plan",
+      "description": "Admin configurable Vivah membership plans and tier pricing",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "tier": { "type": "string" },
+        "price": { "type": "number" },
+        "durationDays": { "type": "number" },
+        "isActive": { "type": "boolean" }
+      },
+      "required": ["id", "name", "price", "durationDays"]
+    },
+    "vivah_audit_log": {
+      "title": "Vivah Admin Audit Log",
+      "description": "Immutable log of admin approvals, rejections, and setting modifications",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "adminId": { "type": "string" },
+        "action": { "type": "string" },
+        "timestamp": { "type": "string" }
+      },
+      "required": ["id", "adminId", "action", "timestamp"]
     }
   },
   "firestore": {
@@ -320,6 +368,10 @@
     "/dharamshala_bookings/{id}": { "schema": "dharamshala_booking", "description": "Bookings table for notifications and approvals" },
     "/jain_news/{id}": { "schema": "jain_news", "description": "Verified news updates" },
     "/jain_stores/{id}": { "schema": "jain_store", "description": "Vendor stores" },
-    "/jain_products/{id}": { "schema": "jain_product", "description": "Vendor items" }
+    "/jain_products/{id}": { "schema": "jain_product", "description": "Vendor items" },
+    "/vivahProfiles/{id}": { "schema": "vivah_profile", "description": "Jain Vivah matrimonial profiles" },
+    "/vivahSettings/config": { "schema": "settings", "description": "Jain Vivah administration configuration" },
+    "/vivahMembershipPlans/{id}": { "schema": "vivah_membership_plan", "description": "Jain Vivah membership plans and pricing" },
+    "/vivahAuditLogs/{id}": { "schema": "vivah_audit_log", "description": "Jain Vivah administrative audit trail" }
   }
 }

@@ -233,8 +233,8 @@ export default function ChatPage() {
   const liveRecognitionRef = useRef<any>(null);
   const liveUtteranceRef = useRef<any>(null);
 
-  // New High-Level System Controls (Locked dynamically to the latest upgrade model)
-  const [selectedModel, setSelectedModel] = useState<'gemini-3.5-flash' | 'gemini-flash-latest' | 'gemini-3.1-pro-preview'>('gemini-flash-latest');
+  // New High-Level System Controls (Locked dynamically to standard Gemini models)
+  const [selectedModel, setSelectedModel] = useState<'gemini-2.5-flash' | 'gemini-2.5-pro' | 'gemini-2.0-flash'>('gemini-2.5-flash');
   const [toolsTab, setToolsTab] = useState<'modes' | 'dhyana'>('modes');
   const [breathPhase, setBreathPhase] = useState<'in' | 'hold' | 'out' | null>(null);
   const [breathTimer, setBreathTimer] = useState<number>(0);

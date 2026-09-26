@@ -3,7 +3,7 @@ import {
   Search, BookOpen, ChevronDown, ChevronUp, Lightbulb, Microscope, 
   Sparkles, Loader2, Mic, MicOff, ArrowLeft, CheckCircle, XCircle, 
   Compass, ShieldCheck, Home, Sunset, Droplet, Apple, Volume2, VolumeX, Star, HelpCircle, Globe,
-  Newspaper, Activity
+  Newspaper, Activity, Calendar, ScrollText, Play, Pause, X, Bookmark, Quote, Clock, Flame
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { db } from '../firebase';
@@ -14,6 +14,8 @@ import { knowledgeData as FALLBACK_KNOWLEDGE } from '../data/knowledgeBase';
 import { livingGuideData, LivingGuideCategory } from '../data/livingGuide';
 import SectionAiAgent from '../components/SectionAiAgent';
 import UnifiedSearchBar from '../components/UnifiedSearchBar';
+import { PARV_KATHAYEIN, ParvKatha } from '../data/parvKathayeinData';
+import { JAIN_KAHANIYAN, JainKahani } from '../data/jainKahaniyanData';
 
 const IconMap: Record<string, any> = {
   Home,
@@ -29,10 +31,64 @@ import { jainUpchaarData } from '../data/jainUpchaar';
 export default function KnowledgePage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [activeTab, setActiveTab ] = useState<'qa' | 'guide' | 'baal_bodh' | 'games' | 'upchaar'>('qa');
+  const [activeTab, setActiveTab ] = useState<'qa' | 'guide' | 'baal_bodh' | 'parv_katha' | 'jain_kahaniyan' | 'games' | 'upchaar'>('qa');
   const [search, setSearch] = useState('');
   const [selectedUpchaarCat, setSelectedUpchaarCat] = useState<string>('All');
   const [openUpchaarId, setOpenUpchaarId] = useState<string | null>(null);
+
+  // Parv Katha & Jain Kahaniyan states
+  const [selectedParvKatha, setSelectedParvKatha] = useState<ParvKatha | null>(null);
+  const [selectedKahani, setSelectedKahani] = useState<JainKahani | null>(null);
+  const [parvSearch, setParvSearch] = useState('');
+  const [kahaniSearch, setKahaniSearch] = useState('');
+  const [selectedParvTag, setSelectedParvTag] = useState<string>('All');
+  const [selectedKahaniCat, setSelectedKahaniCat] = useState<string>('All');
+  const [isSpeakingKatha, setIsSpeakingKatha] = useState(false);
+  const [isSpeakingKahani, setIsSpeakingKahani] = useState(false);
+
+  const toggleSpeechKatha = (text: string) => {
+    if (isSpeakingKatha) {
+      window.speechSynthesis?.cancel();
+      setIsSpeakingKatha(false);
+    } else {
+      window.speechSynthesis?.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = lang === 'en' ? 'en-US' : 'hi-IN';
+      utterance.rate = 0.95;
+      utterance.onend = () => setIsSpeakingKatha(false);
+      utterance.onerror = () => setIsSpeakingKatha(false);
+      window.speechSynthesis?.speak(utterance);
+      setIsSpeakingKatha(true);
+    }
+  };
+
+  const toggleSpeechKahani = (text: string) => {
+    if (isSpeakingKahani) {
+      window.speechSynthesis?.cancel();
+      setIsSpeakingKahani(false);
+    } else {
+      window.speechSynthesis?.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = lang === 'en' ? 'en-US' : 'hi-IN';
+      utterance.rate = 0.95;
+      utterance.onend = () => setIsSpeakingKahani(false);
+      utterance.onerror = () => setIsSpeakingKahani(false);
+      window.speechSynthesis?.speak(utterance);
+      setIsSpeakingKahani(true);
+    }
+  };
+
+  const handleCloseKathaModal = () => {
+    window.speechSynthesis?.cancel();
+    setIsSpeakingKatha(false);
+    setSelectedParvKatha(null);
+  };
+
+  const handleCloseKahaniModal = () => {
+    window.speechSynthesis?.cancel();
+    setIsSpeakingKahani(false);
+    setSelectedKahani(null);
+  };
   const { language: lang, toggleLanguage } = useLanguage();
   const [openIdx, setOpenIdx] = useState<string | null>(null);
   const [knowledge, setKnowledge] = useState<any[]>([]);
@@ -307,11 +363,11 @@ export default function KnowledgePage() {
       </header>
 
       {/* Main Mode / Tab Switcher */}
-      <div className="flex flex-wrap p-1 mb-8 bg-gray-200/50 dark:bg-white/5 backdrop-blur-md rounded-2xl w-full max-w-3xl mx-auto overflow-hidden gap-1 justify-center md:flex-nowrap">
+      <div className="flex flex-wrap p-1 mb-8 bg-gray-200/50 dark:bg-white/5 backdrop-blur-md rounded-2xl w-full max-w-4xl mx-auto overflow-hidden gap-1 justify-center">
         <button
           onClick={() => { setActiveTab('qa'); setSearch(''); }}
           className={cn(
-            "flex-1 min-w-[90px] flex items-center justify-center gap-1.5 py-3 text-[9px] md:text-xs font-black tracking-wider uppercase rounded-xl transition-all duration-300 cursor-pointer",
+            "flex-1 min-w-[85px] sm:min-w-[100px] flex items-center justify-center gap-1.5 py-2.5 sm:py-3 text-[9px] md:text-xs font-black tracking-wider uppercase rounded-xl transition-all duration-300 cursor-pointer",
             activeTab === 'qa' 
               ? "bg-[#FF6D00] text-white shadow-md shadow-[#FF6D00]/20" 
               : "text-gray-600 dark:text-gray-400 hover:text-gray-950 dark:hover:text-white"
@@ -323,7 +379,7 @@ export default function KnowledgePage() {
         <button
           onClick={() => { setActiveTab('guide'); setSearch(''); }}
           className={cn(
-            "flex-1 min-w-[90px] flex items-center justify-center gap-1.5 py-3 text-[9px] md:text-xs font-black tracking-wider uppercase rounded-xl transition-all duration-300 cursor-pointer",
+            "flex-1 min-w-[85px] sm:min-w-[100px] flex items-center justify-center gap-1.5 py-2.5 sm:py-3 text-[9px] md:text-xs font-black tracking-wider uppercase rounded-xl transition-all duration-300 cursor-pointer",
             activeTab === 'guide' 
               ? "bg-[#FF6D00] text-white shadow-md shadow-[#FF6D00]/20" 
               : "text-gray-600 dark:text-gray-400 hover:text-gray-950 dark:hover:text-white"
@@ -335,38 +391,62 @@ export default function KnowledgePage() {
         <button
           onClick={() => { setActiveTab('baal_bodh'); setSearch(''); setSelectedBook(null); setSelectedChapter(null); }}
           className={cn(
-            "flex-1 min-w-[90px] flex items-center justify-center gap-1.5 py-3 text-[9px] md:text-xs font-black tracking-wider uppercase rounded-xl transition-all duration-300 cursor-pointer",
+            "flex-1 min-w-[85px] sm:min-w-[100px] flex items-center justify-center gap-1.5 py-2.5 sm:py-3 text-[9px] md:text-xs font-black tracking-wider uppercase rounded-xl transition-all duration-300 cursor-pointer",
             activeTab === 'baal_bodh' 
               ? "bg-[#FF6D00] text-white shadow-md shadow-[#FF6D00]/20" 
               : "text-gray-600 dark:text-gray-400 hover:text-gray-950 dark:hover:text-white"
           )}
         >
           <BookOpen size={14} />
-          {lang === 'en' ? 'Baal Bodh' : 'बालबोध पाठशाला'}
+          {lang === 'en' ? 'Baal Bodh' : 'बालबोध'}
+        </button>
+        <button
+          onClick={() => { setActiveTab('parv_katha'); setParvSearch(''); setSelectedParvKatha(null); }}
+          className={cn(
+            "flex-1 min-w-[85px] sm:min-w-[100px] flex items-center justify-center gap-1.5 py-2.5 sm:py-3 text-[9px] md:text-xs font-black tracking-wider uppercase rounded-xl transition-all duration-300 cursor-pointer",
+            activeTab === 'parv_katha' 
+              ? "bg-[#FF6D00] text-white shadow-md shadow-[#FF6D00]/20" 
+              : "text-gray-600 dark:text-gray-400 hover:text-gray-950 dark:hover:text-white"
+          )}
+        >
+          <Calendar size={14} />
+          {lang === 'en' ? 'Parv Kathayein' : 'पर्व कथाएं'}
+        </button>
+        <button
+          onClick={() => { setActiveTab('jain_kahaniyan'); setKahaniSearch(''); setSelectedKahani(null); }}
+          className={cn(
+            "flex-1 min-w-[85px] sm:min-w-[100px] flex items-center justify-center gap-1.5 py-2.5 sm:py-3 text-[9px] md:text-xs font-black tracking-wider uppercase rounded-xl transition-all duration-300 cursor-pointer",
+            activeTab === 'jain_kahaniyan' 
+              ? "bg-[#FF6D00] text-white shadow-md shadow-[#FF6D00]/20" 
+              : "text-gray-600 dark:text-gray-400 hover:text-gray-950 dark:hover:text-white"
+          )}
+        >
+          <ScrollText size={14} />
+          {lang === 'en' ? 'Jain Stories' : 'जैन कहानियां'}
         </button>
         <button
           onClick={() => { setActiveTab('games'); setSearch(''); }}
           className={cn(
-            "flex-1 min-w-[90px] flex items-center justify-center gap-1.5 py-3 text-[9px] md:text-xs font-black tracking-wider uppercase rounded-xl transition-all duration-300 cursor-pointer",
+            "flex-1 min-w-[85px] sm:min-w-[100px] flex items-center justify-center gap-1.5 py-2.5 sm:py-3 text-[9px] md:text-xs font-black tracking-wider uppercase rounded-xl transition-all duration-300 cursor-pointer",
             activeTab === 'games' 
               ? "bg-[#FF6D00] text-white shadow-md shadow-[#FF6D00]/20" 
               : "text-gray-600 dark:text-gray-400 hover:text-gray-950 dark:hover:text-white"
           )}
         >
           <Sparkles size={14} />
-          {lang === 'en' ? 'Jain Games' : 'जैन गेम्स'}
+          {lang === 'en' ? 'Games' : 'जैन गेम्स'}
         </button>
         <button
           onClick={() => { setActiveTab('upchaar'); setSearch(''); }}
           className={cn(
-            "flex-1 min-w-[90px] flex items-center justify-center gap-1.5 py-3 text-[9px] md:text-xs font-black tracking-wider uppercase rounded-xl transition-all duration-300 cursor-pointer",
+            "flex-1 min-w-[85px] sm:min-w-[100px] flex items-center justify-center gap-1.5 py-2.5 sm:py-3 text-[9px] md:text-xs font-black tracking-wider uppercase rounded-xl transition-all duration-300 cursor-pointer",
             activeTab === 'upchaar' 
               ? "bg-[#FF6D00] text-white shadow-md shadow-[#FF6D00]/20" 
               : "text-gray-600 dark:text-gray-400 hover:text-gray-950 dark:hover:text-white"
           )}
         >
           <Activity size={14} />
-          {lang === 'en' ? 'Jain Upchaar' : 'जैन उपचार'}
+          {lang === 'en' ? 'Upchaar' : 'जैन उपचार'}
         </button>
       </div>
 
@@ -829,6 +909,488 @@ export default function KnowledgePage() {
                       </div>
                     </>
                   )}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ==================== PARV KATHAYEIN TAB ==================== */}
+      {activeTab === 'parv_katha' && (
+        <div className="space-y-6 max-w-5xl mx-auto animate-in fade-in duration-300">
+          {/* Header Banner */}
+          <div className="bg-gradient-to-br from-amber-500/15 via-orange-500/10 to-[#FFD54F]/5 backdrop-blur-xl rounded-3xl p-6 border border-amber-500/20 relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-36 h-36 bg-amber-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-amber-500/20 transition-all duration-700 pointer-events-none" />
+            
+            <div className="flex items-center gap-2 text-amber-800 dark:text-amber-300 mb-2 relative z-10">
+              <Calendar size={18} className="animate-pulse" />
+              <span className="text-xs font-black tracking-widest uppercase">Sacred Jain Festivals & Vrat Legends | जैन पर्व एवं व्रत कथाएं</span>
+            </div>
+            
+            <h2 className="text-xl sm:text-2xl font-display font-black text-gray-900 dark:text-white leading-tight">
+              {lang === 'en' ? 'Eternal Vrat Stories & Festival Lore' : 'परम पावन जैन पर्व कथाएं एवं व्रत विधान'}
+            </h2>
+            <p className="text-gray-600 dark:text-gray-300 text-xs sm:text-sm font-semibold mt-2 leading-relaxed max-w-3xl">
+              {lang === 'en' 
+                ? "Immerse in the timeless sagas of Daslakshan, Rohini Vrat, Anant Chaturdashi, Sugandh Dashami, and eternal Jain festivals that illuminate the path of self-purification, fasting, and supreme soul awakening." 
+                : "दशलक्षण महापर्व, रोहिणी व्रत, अनंत चतुर्दशी, सुगंध दशमी, अष्टाह्निका एवं श्रुतपंचमी आदि महापर्वों की पावन कथाएं एवं व्रत विधि। ये कथाएं जीवन में तप, त्याग, संयम और कर्म-निर्जरा का मार्ग प्रशस्त करती हैं।"}
+            </p>
+          </div>
+
+          {/* Search bar */}
+          <UnifiedSearchBar
+            value={parvSearch}
+            onChange={(val) => setParvSearch(val)}
+            placeholder={lang === 'en' ? "Search festival stories (e.g., Daslakshan, Rohini, Sugandh)..." : "पर्व कथा खोजें (जैसे: दशलक्षण, रोहिणी, सुगंध दशमी, अनंत चतुर्दशी)..."}
+          />
+
+          {/* Tag filters */}
+          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
+            {['All', 'महापर्व', 'व्रत कथा', 'शाश्वत महापर्व', 'जिनवाणी पर्व', 'दानतीर्थ पर्व', 'मोक्षकल्याणक'].map((tag) => {
+              const displayName = lang === 'en' ? (
+                tag === 'All' ? 'All Stories' :
+                tag === 'महापर्व' ? 'Grand Festivals' :
+                tag === 'व्रत कथा' ? 'Vrat Tales' :
+                tag === 'शाश्वत महापर्व' ? 'Eternal Parvas' :
+                tag === 'जिनवाणी पर्व' ? 'Scriptural' :
+                tag === 'दानतीर्थ पर्व' ? 'Charity Lore' : 'Liberation'
+              ) : (tag === 'All' ? 'सभी कथाएं' : tag);
+
+              return (
+                <button
+                  key={tag}
+                  onClick={() => setSelectedParvTag(tag)}
+                  className={cn(
+                    "px-4 py-1.5 rounded-full text-xs font-black tracking-wider uppercase border whitespace-nowrap transition-all duration-300 cursor-pointer",
+                    selectedParvTag === tag
+                      ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white border-transparent shadow-sm"
+                      : "bg-white dark:bg-[#121212] border-gray-200 dark:border-white/5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                  )}
+                >
+                  {displayName}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Parv Kathayein Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {PARV_KATHAYEIN
+              .filter(item => {
+                const q = parvSearch.toLowerCase();
+                const matchesSearch = (
+                  item.title.toLowerCase().includes(q) ||
+                  item.titleEn.toLowerCase().includes(q) ||
+                  item.significance.toLowerCase().includes(q) ||
+                  item.fullStory.toLowerCase().includes(q)
+                );
+                const matchesTag = selectedParvTag === 'All' || item.tag === selectedParvTag;
+                return matchesSearch && matchesTag;
+              })
+              .map((item) => (
+                <div
+                  key={item.id}
+                  className="bg-white dark:bg-[#121212]/90 backdrop-blur-md rounded-3xl border border-gray-200/50 dark:border-white/5 p-5 sm:p-6 shadow-sm hover:border-amber-500/40 hover:shadow-md transition-all duration-300 flex flex-col justify-between group relative overflow-hidden"
+                >
+                  <div className="absolute top-0 right-0 w-28 h-28 bg-amber-500/5 rounded-full blur-2xl group-hover:bg-amber-500/10 transition-colors pointer-events-none" />
+                  
+                  <div className="space-y-3 relative z-10">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <span className="text-[10px] font-black tracking-wider uppercase px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-800 dark:text-amber-300 border border-amber-500/20">
+                        {item.tag}
+                      </span>
+                      <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-white/5 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                        <Clock size={11} />
+                        {item.duration}
+                      </span>
+                    </div>
+
+                    <div>
+                      <h3 className="text-base sm:text-lg font-display font-black text-gray-900 dark:text-white group-hover:text-amber-800 dark:group-hover:text-amber-300 transition-colors leading-snug">
+                        {lang === 'en' ? item.titleEn : item.title}
+                      </h3>
+                      <p className="text-[11px] font-bold text-amber-800 dark:text-amber-400 mt-1 flex items-center gap-1">
+                        <Calendar size={12} className="shrink-0" />
+                        <span>{lang === 'en' ? item.tithiEn : item.tithiHindi}</span>
+                      </p>
+                    </div>
+
+                    <p className="text-xs text-gray-600 dark:text-gray-300 font-medium line-clamp-3 leading-relaxed">
+                      {lang === 'en' ? item.significanceEn : item.significance}
+                    </p>
+
+                    {item.characters.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 pt-1">
+                        {item.characters.map((char, cIdx) => (
+                          <span key={cIdx} className="text-[9px] font-semibold text-gray-500 dark:text-gray-400 bg-gray-100/70 dark:bg-white/5 px-2 py-0.5 rounded-md">
+                            👤 {char}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-2.5 pt-4 mt-4 border-t border-gray-100 dark:border-white/5 relative z-10">
+                    <button
+                      onClick={() => setSelectedParvKatha(item)}
+                      className="flex-1 py-2.5 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-black text-xs shadow-sm hover:scale-[1.02] active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                      <BookOpen size={14} />
+                      <span>{lang === 'en' ? 'Read Full Katha' : 'सम्पूर्ण कथा पढ़ें'}</span>
+                    </button>
+                    <button
+                      onClick={() => toggleSpeechKatha(item.fullStory)}
+                      className="p-2.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/20 transition-colors cursor-pointer"
+                      title={lang === 'en' ? 'Listen to Katha' : 'कथा सुनें'}
+                    >
+                      {isSpeakingKatha ? <VolumeX size={16} /> : <Volume2 size={16} />}
+                    </button>
+                  </div>
+                </div>
+              ))}
+          </div>
+
+          {/* Modal Reader for Selected Parv Katha */}
+          {selectedParvKatha && (
+            <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-3 sm:p-5 animate-in fade-in">
+              <div className="bg-[#FCF8F2] dark:bg-[#121212] border border-amber-500/30 rounded-3xl max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden relative">
+                {/* Header */}
+                <div className="p-4 sm:p-6 bg-gradient-to-r from-amber-500/10 to-orange-500/10 border-b border-gray-200/50 dark:border-white/10 flex items-start justify-between gap-3">
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-amber-500 text-white">
+                        {selectedParvKatha.tag}
+                      </span>
+                      <span className="text-xs font-bold text-amber-800 dark:text-amber-300">
+                        ⏳ {selectedParvKatha.duration}
+                      </span>
+                    </div>
+                    <h2 className="text-lg sm:text-xl font-display font-black text-gray-900 dark:text-white leading-tight">
+                      {lang === 'en' ? selectedParvKatha.titleEn : selectedParvKatha.title}
+                    </h2>
+                    <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mt-0.5">
+                      📅 {lang === 'en' ? selectedParvKatha.tithiEn : selectedParvKatha.tithiHindi}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      onClick={() => toggleSpeechKatha(selectedParvKatha.fullStory)}
+                      className={cn(
+                        "p-2.5 rounded-full border transition-all cursor-pointer flex items-center gap-1.5 text-xs font-bold",
+                        isSpeakingKatha 
+                          ? "bg-red-500 text-white border-red-400" 
+                          : "bg-amber-500/10 text-amber-800 dark:text-amber-300 border-amber-500/20 hover:bg-amber-500/20"
+                      )}
+                      title={isSpeakingKatha ? "Stop Narration" : "Listen to Story"}
+                    >
+                      {isSpeakingKatha ? <VolumeX size={16} /> : <Volume2 size={16} />}
+                      <span className="hidden sm:inline">{isSpeakingKatha ? (lang === 'en' ? 'Stop' : 'रोकें') : (lang === 'en' ? 'Listen' : 'सुनें')}</span>
+                    </button>
+                    <button
+                      onClick={handleCloseKathaModal}
+                      className="p-2 rounded-full bg-gray-200 dark:bg-white/10 hover:bg-gray-300 dark:hover:bg-white/20 text-gray-700 dark:text-gray-300 cursor-pointer"
+                    >
+                      <X size={18} />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Body Content */}
+                <div className="p-4 sm:p-6 overflow-y-auto space-y-6 text-gray-800 dark:text-gray-200 leading-relaxed font-sans text-sm">
+                  {/* Significance Box */}
+                  <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 space-y-1">
+                    <h4 className="text-xs font-black uppercase text-amber-800 dark:text-amber-300 tracking-wider">
+                      ✨ {lang === 'en' ? 'Spiritual Significance' : 'पर्व का आध्यात्मिक महत्व'}
+                    </h4>
+                    <p className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                      {lang === 'en' ? selectedParvKatha.significanceEn : selectedParvKatha.significance}
+                    </p>
+                  </div>
+
+                  {/* Vrat Vidhi Box */}
+                  <div className="p-4 rounded-2xl bg-orange-500/10 border border-orange-500/20 space-y-1">
+                    <h4 className="text-xs font-black uppercase text-orange-800 dark:text-orange-300 tracking-wider flex items-center gap-1.5">
+                      <Flame size={13} />
+                      <span>{lang === 'en' ? 'Vrat Vidhi & Ritual Code' : 'पावन व्रत विधि एवं आवश्यक नियम'}</span>
+                    </h4>
+                    <p className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                      {lang === 'en' ? selectedParvKatha.vratVidhiEn : selectedParvKatha.vratVidhi}
+                    </p>
+                  </div>
+
+                  {/* Full Story Section */}
+                  <div className="space-y-3">
+                    <h3 className="text-base font-display font-black text-amber-800 dark:text-amber-300 border-b border-gray-200/50 dark:border-white/10 pb-2 flex items-center gap-2">
+                      <BookOpen size={17} />
+                      <span>{lang === 'en' ? 'Full Sacred Narrative' : 'सम्पूर्ण पावन कथा'}</span>
+                    </h3>
+                    <div className="whitespace-pre-line leading-loose text-sm font-medium text-gray-800 dark:text-gray-200">
+                      {selectedParvKatha.fullStory}
+                    </div>
+                  </div>
+
+                  {/* Moral Lessons */}
+                  {selectedParvKatha.moralLessons.length > 0 && (
+                    <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 space-y-2">
+                      <h4 className="text-xs font-black uppercase text-emerald-800 dark:text-emerald-300 tracking-wider flex items-center gap-1.5">
+                        <CheckCircle size={14} />
+                        <span>{lang === 'en' ? 'Moral & Spiritual Takeaways' : 'आत्मिक शिक्षा एवं प्रेरणा'}</span>
+                      </h4>
+                      <ul className="list-disc pl-5 space-y-1 text-xs text-gray-700 dark:text-gray-300 font-medium">
+                        {selectedParvKatha.moralLessons.map((m, idx) => (
+                          <li key={idx}>{m}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+
+                {/* Footer */}
+                <div className="p-4 bg-gray-100 dark:bg-white/5 border-t border-gray-200/50 dark:border-white/10 flex justify-end">
+                  <button
+                    onClick={handleCloseKathaModal}
+                    className="px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-black text-xs uppercase tracking-wider cursor-pointer"
+                  >
+                    {lang === 'en' ? 'Close Reader' : 'पाठ समाप्त'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ==================== JAIN KAHANIYAN TAB ==================== */}
+      {activeTab === 'jain_kahaniyan' && (
+        <div className="space-y-6 max-w-5xl mx-auto animate-in fade-in duration-300">
+          {/* Header Banner */}
+          <div className="bg-gradient-to-br from-emerald-500/15 via-teal-500/10 to-[#00E676]/5 backdrop-blur-xl rounded-3xl p-6 border border-emerald-500/20 relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-36 h-36 bg-emerald-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-emerald-500/20 transition-all duration-700 pointer-events-none" />
+            
+            <div className="flex items-center gap-2 text-emerald-800 dark:text-emerald-300 mb-2 relative z-10">
+              <ScrollText size={18} className="animate-pulse" />
+              <span className="text-xs font-black tracking-widest uppercase">Inspiring Jain Moral Lore | जैन कहानियां एवं प्रथमानुयोग गाथाएं</span>
+            </div>
+            
+            <h2 className="text-xl sm:text-2xl font-display font-black text-gray-900 dark:text-white leading-tight">
+              {lang === 'en' ? 'Timeless Prathamanuyog Tales & Moral Wisdom' : 'अमर जैन महापुरुष एवं सती-चरित्र कहानियां'}
+            </h2>
+            <p className="text-gray-600 dark:text-gray-300 text-xs sm:text-sm font-semibold mt-2 leading-relaxed max-w-3xl">
+              {lang === 'en' 
+                ? "Experience the extraordinary faith of Seth Sudarshan, Sati Chandanbala, the Frog of Samavasaran, Prince Varishena, Mainasundari, and Muni Gajasukumala that demonstrate the miraculous power of celibacy, forgiveness, and Ahimsa." 
+                : "सेठ सुदर्शन का शील, चन्दनबाला का त्याग, समवसरण गामी मेंढक का सम्यक्त्व, मुनि गजसुकुमाल की क्षमा और मैना सुन्दरी के सिद्धचक्र महात्म्य की अमर गाथाएं जो हर आयु वर्ग के श्रद्धालुओं को धर्म पर अडिग रहने की प्रेरणा देती हैं।"}
+            </p>
+          </div>
+
+          {/* Search bar */}
+          <UnifiedSearchBar
+            value={kahaniSearch}
+            onChange={(val) => setKahaniSearch(val)}
+            placeholder={lang === 'en' ? "Search Jain moral stories (e.g., Sudarshan, Chandanbala, Frog)..." : "जैन कहानी खोजें (जैसे: सुदर्शन, चन्दनबाला, मेंढक, वारिषेण, श्रीपाल)..."}
+          />
+
+          {/* Category filters */}
+          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
+            {['All', 'शील एवं सम्यक्त्व', 'त्याग एवं समर्पण', 'भाव भक्ति', 'वैराग्य एवं संयम', 'अटल श्रद्धा एवं पतिव्रत', 'उत्तम क्षमा एवं ध्यान', 'पश्चात्ताप एवं तीर्थंकर गोत्र'].map((cat) => {
+              const displayName = lang === 'en' ? (
+                cat === 'All' ? 'All Stories' :
+                cat === 'शील एवं सम्यक्त्व' ? 'Celibacy & Faith' :
+                cat === 'त्याग एवं समर्पण' ? 'Sacrifice' :
+                cat === 'भाव भक्ति' ? 'Pure Devotion' :
+                cat === 'वैराग्य एवं संयम' ? 'Renunciation' :
+                cat === 'अटल श्रद्धा एवं पतिव्रत' ? 'Steadfast Faith' :
+                cat === 'उत्तम क्षमा एवं ध्यान' ? 'Forgiveness' : 'Repentance'
+              ) : (cat === 'All' ? 'सभी कहानियां' : cat);
+
+              return (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedKahaniCat(cat)}
+                  className={cn(
+                    "px-4 py-1.5 rounded-full text-xs font-black tracking-wider uppercase border whitespace-nowrap transition-all duration-300 cursor-pointer",
+                    selectedKahaniCat === cat
+                      ? "bg-gradient-to-r from-emerald-500 to-teal-500 text-white border-transparent shadow-sm"
+                      : "bg-white dark:bg-[#121212] border-gray-200 dark:border-white/5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                  )}
+                >
+                  {displayName}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Kahaniyan Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {JAIN_KAHANIYAN
+              .filter(item => {
+                const q = kahaniSearch.toLowerCase();
+                const matchesSearch = (
+                  item.title.toLowerCase().includes(q) ||
+                  item.titleEn.toLowerCase().includes(q) ||
+                  item.character.toLowerCase().includes(q) ||
+                  item.summary.toLowerCase().includes(q) ||
+                  item.fullStory.toLowerCase().includes(q)
+                );
+                const matchesCat = selectedKahaniCat === 'All' || item.category === selectedKahaniCat;
+                return matchesSearch && matchesCat;
+              })
+              .map((item) => (
+                <div
+                  key={item.id}
+                  className="bg-white dark:bg-[#121212]/90 backdrop-blur-md rounded-3xl border border-gray-200/50 dark:border-white/5 p-5 sm:p-6 shadow-sm hover:border-emerald-500/40 hover:shadow-md transition-all duration-300 flex flex-col justify-between group relative overflow-hidden"
+                >
+                  <div className="absolute top-0 right-0 w-28 h-28 bg-emerald-500/5 rounded-full blur-2xl group-hover:bg-emerald-500/10 transition-colors pointer-events-none" />
+                  
+                  <div className="space-y-3 relative z-10">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <span className="text-[10px] font-black tracking-wider uppercase px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 border border-emerald-500/20">
+                        {item.category}
+                      </span>
+                      <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-white/5 px-2.5 py-0.5 rounded-full">
+                        ⏳ {item.era}
+                      </span>
+                    </div>
+
+                    <div>
+                      <h3 className="text-base sm:text-lg font-display font-black text-gray-900 dark:text-white group-hover:text-emerald-800 dark:group-hover:text-emerald-300 transition-colors leading-snug">
+                        {lang === 'en' ? item.titleEn : item.title}
+                      </h3>
+                      <p className="text-[11px] font-semibold text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-1">
+                        <span>👤 {item.character}</span>
+                      </p>
+                    </div>
+
+                    {/* Key Quote Box */}
+                    <div className="p-3 rounded-xl bg-amber-500/5 border border-amber-500/15 flex items-start gap-2">
+                      <Quote size={13} className="text-amber-800 dark:text-amber-400 shrink-0 mt-0.5" />
+                      <p className="text-xs font-semibold text-amber-850 dark:text-amber-300 italic leading-snug">
+                        "{item.keyQuote}"
+                      </p>
+                    </div>
+
+                    <p className="text-xs text-gray-600 dark:text-gray-300 font-medium line-clamp-3 leading-relaxed">
+                      {lang === 'en' ? item.summaryEn : item.summary}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2.5 pt-4 mt-4 border-t border-gray-100 dark:border-white/5 relative z-10">
+                    <button
+                      onClick={() => setSelectedKahani(item)}
+                      className="flex-1 py-2.5 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-black text-xs shadow-sm hover:scale-[1.02] active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                      <BookOpen size={14} />
+                      <span>{lang === 'en' ? 'Read Story' : 'कथा पढ़ें'}</span>
+                    </button>
+                    <button
+                      onClick={() => toggleSpeechKahani(item.fullStory)}
+                      className="p-2.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-500/20 transition-colors cursor-pointer"
+                      title={lang === 'en' ? 'Listen to Story' : 'कथा सुनें'}
+                    >
+                      {isSpeakingKahani ? <VolumeX size={16} /> : <Volume2 size={16} />}
+                    </button>
+                  </div>
+                </div>
+              ))}
+          </div>
+
+          {/* Modal Reader for Selected Kahani */}
+          {selectedKahani && (
+            <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-3 sm:p-5 animate-in fade-in">
+              <div className="bg-[#FCF8F2] dark:bg-[#121212] border border-emerald-500/30 rounded-3xl max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden relative">
+                {/* Header */}
+                <div className="p-4 sm:p-6 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border-b border-gray-200/50 dark:border-white/10 flex items-start justify-between gap-3">
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-emerald-600 text-white">
+                        {selectedKahani.category}
+                      </span>
+                      <span className="text-xs font-bold text-gray-500 dark:text-gray-400">
+                        ⏳ {selectedKahani.era}
+                      </span>
+                    </div>
+                    <h2 className="text-lg sm:text-xl font-display font-black text-gray-900 dark:text-white leading-tight">
+                      {lang === 'en' ? selectedKahani.titleEn : selectedKahani.title}
+                    </h2>
+                    <p className="text-xs font-semibold text-emerald-800 dark:text-emerald-300 mt-0.5">
+                      👤 {selectedKahani.character}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      onClick={() => toggleSpeechKahani(selectedKahani.fullStory)}
+                      className={cn(
+                        "p-2.5 rounded-full border transition-all cursor-pointer flex items-center gap-1.5 text-xs font-bold",
+                        isSpeakingKahani 
+                          ? "bg-red-500 text-white border-red-400" 
+                          : "bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 border-emerald-500/20 hover:bg-emerald-500/20"
+                      )}
+                      title={isSpeakingKahani ? "Stop Narration" : "Listen to Story"}
+                    >
+                      {isSpeakingKahani ? <VolumeX size={16} /> : <Volume2 size={16} />}
+                      <span className="hidden sm:inline">{isSpeakingKahani ? (lang === 'en' ? 'Stop' : 'रोकें') : (lang === 'en' ? 'Listen' : 'सुनें')}</span>
+                    </button>
+                    <button
+                      onClick={handleCloseKahaniModal}
+                      className="p-2 rounded-full bg-gray-200 dark:bg-white/10 hover:bg-gray-300 dark:hover:bg-white/20 text-gray-700 dark:text-gray-300 cursor-pointer"
+                    >
+                      <X size={18} />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Body Content */}
+                <div className="p-4 sm:p-6 overflow-y-auto space-y-6 text-gray-800 dark:text-gray-200 leading-relaxed font-sans text-sm">
+                  {/* Key Quote Callout */}
+                  <div className="p-4 rounded-2xl bg-amber-500/10 border-l-4 border-amber-500 flex items-start gap-3">
+                    <Quote size={20} className="text-amber-800 dark:text-amber-400 shrink-0 mt-0.5" />
+                    <div>
+                      <h4 className="text-[10px] font-black uppercase text-amber-800 dark:text-amber-400 tracking-wider">
+                        {lang === 'en' ? 'Core Spiritual Truth' : 'पावन सूत्र वाक्य'}
+                      </h4>
+                      <p className="text-xs sm:text-sm font-bold text-gray-900 dark:text-white mt-0.5 italic">
+                        "{selectedKahani.keyQuote}"
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Full Story Section */}
+                  <div className="space-y-3">
+                    <h3 className="text-base font-display font-black text-emerald-800 dark:text-emerald-300 border-b border-gray-200/50 dark:border-white/10 pb-2 flex items-center gap-2">
+                      <BookOpen size={17} />
+                      <span>{lang === 'en' ? 'Full Story' : 'सम्पूर्ण गाथा'}</span>
+                    </h3>
+                    <div className="whitespace-pre-line leading-loose text-sm font-medium text-gray-800 dark:text-gray-200">
+                      {selectedKahani.fullStory}
+                    </div>
+                  </div>
+
+                  {/* Moral Lessons */}
+                  {selectedKahani.moralLessons.length > 0 && (
+                    <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 space-y-2">
+                      <h4 className="text-xs font-black uppercase text-emerald-800 dark:text-emerald-300 tracking-wider flex items-center gap-1.5">
+                        <CheckCircle size={14} />
+                        <span>{lang === 'en' ? 'Spiritual Lessons (शिक्षा)' : 'नैतिक एवं आत्मिक शिक्षा'}</span>
+                      </h4>
+                      <ul className="list-disc pl-5 space-y-1.5 text-xs text-gray-700 dark:text-gray-300 font-medium">
+                        {selectedKahani.moralLessons.map((m, idx) => (
+                          <li key={idx}>{m}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+
+                {/* Footer */}
+                <div className="p-4 bg-gray-100 dark:bg-white/5 border-t border-gray-200/50 dark:border-white/10 flex justify-end">
+                  <button
+                    onClick={handleCloseKahaniModal}
+                    className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs uppercase tracking-wider cursor-pointer"
+                  >
+                    {lang === 'en' ? 'Close Reader' : 'पाठ समाप्त'}
+                  </button>
                 </div>
               </div>
             </div>

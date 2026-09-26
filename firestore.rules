@@ -204,6 +204,22 @@ service cloud.firestore {
       allow read, write: if true;
     }
 
+    match /vivahProfiles/{id} {
+      allow read, write: if true;
+    }
+
+    match /vivahSettings/{id} {
+      allow read, write: if true;
+    }
+
+    match /vivahMembershipPlans/{id} {
+      allow read, write: if true;
+    }
+
+    match /vivahAuditLogs/{id} {
+      allow read, write: if true;
+    }
+
     match /test/{id} {
       allow read, write: if true;
     }

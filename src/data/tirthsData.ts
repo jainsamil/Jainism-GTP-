@@ -25,7 +25,7 @@ export interface TirthItem {
 export const TIRTHS_DATA: TirthItem[] = [
   {
     id: "shikharji",
-    name: { en: "Sammed Shikharji (समेद शिखरजी)", hi: "श्री सम्मेद शिखरजी" },
+    name: { en: "Sammed Shikharji (सम्मेद शिखरजी)", hi: "श्री सम्मेद शिखरजी" },
     region: { en: "Giridih, Jharkhand", hi: "गिरिडीह, झारखंड" },
     significance: {
       en: "The most sacred salvation hill where 20 of the 24 Tirthankars attained final liberation (Moksha).",

@@ -513,7 +513,7 @@ export default function SwadhyayPage() {
         <form onSubmit={handleAddGoal} className="flex gap-2 mb-4">
           <input 
             type="text" 
-            placeholder={lang === 'en' ? "E.g. Read 2 pages of Dravyasgrah..." : "उदा. २ पेज समयसार जी पढ़ें..."}
+            placeholder={lang === 'en' ? "E.g. Read 2 pages of Dravyasangraha..." : "उदा. २ पेज समयसार जी पढ़ें..."}
             value={newGoal}
             onChange={(e) => setNewGoal(e.target.value)}
             className="flex-1 bg-gray-50 dark:bg-[#1A1A1A]/50 border border-gray-200 dark:border-white/5 rounded-xl px-4 py-2 text-xs text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-orange-500"
