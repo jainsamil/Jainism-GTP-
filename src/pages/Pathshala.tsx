@@ -19,6 +19,7 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import SectionAiAgent from '../components/SectionAiAgent';
 import PathshalaFlashcardsDeck, { FLASHCARDS_DATA } from '../components/PathshalaFlashcardsDeck';
+import JainKidsGames from '../components/JainKidsGames';
 
 export default function PathshalaPage() {
   const { theme } = useTheme();
@@ -42,7 +43,7 @@ export default function PathshalaPage() {
   const [studentClassName, setStudentClassName] = useState('');
   const [authError, setAuthError] = useState('');
 
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'classes' | 'homework' | 'exams' | 'results' | 'discussions' | 'users' | 'flashcards'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'kids_games' | 'flashcards' | 'classes' | 'homework' | 'exams' | 'results' | 'discussions' | 'users'>('kids_games');
   const [classes, setClasses] = useState<any[]>([]);
   const [homeworks, setHomeworks] = useState<any[]>([]);
   const [exams, setExams] = useState<any[]>([]);
@@ -1133,7 +1134,7 @@ export default function PathshalaPage() {
 
       {/* Navigation Tabs */}
       <div className={cn("flex gap-2 mb-6 p-1 rounded-2xl border overflow-x-auto hide-scrollbar", isDark ? "bg-[#121212]/60 border-white/5" : "bg-white border-gray-200 shadow-sm")}>
-        {['dashboard', 'flashcards', 'classes', 'homework', 'exams', 'results', 'discussions', 'users'].map((tab) => (
+        {['kids_games', 'dashboard', 'flashcards', 'classes', 'homework', 'exams', 'results', 'discussions', 'users'].map((tab) => (
           <button 
             key={tab}
             onClick={() => setActiveTab(tab as any)} 
@@ -1144,10 +1145,17 @@ export default function PathshalaPage() {
                 : "text-gray-500 hover:text-gray-400"
             )}
           >
-            {tab === 'homework' ? 'Homework' : t[tab as keyof typeof t]}
+            {tab === 'kids_games' ? (language === 'en' ? '🎮 Kids Games & Sanskar' : '🎮 बाल संस्कार गेम्स') :
+             tab === 'homework' ? 'Homework' : t[tab as keyof typeof t]}
           </button>
         ))}
       </div>
+
+      {activeTab === 'kids_games' && (
+        <div className="mb-8">
+          <JainKidsGames />
+        </div>
+      )}
 
       {activeTab === 'dashboard' && (
         <div className="space-y-6">

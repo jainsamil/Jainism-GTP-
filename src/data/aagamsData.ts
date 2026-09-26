@@ -1,13 +1,75 @@
 import { BHAKTAMAR_DATA } from './bhaktamarData';
 import { MASTER_ABHISHEK_PUJAN_ITEM } from './abhishekPujanVidhiData';
 import { JAIN_DHARM_ORDERED_PUJANS, JAIN_DHARM_ORDERED_PATHS } from './jainDharmPujanPathData';
+import { JAIN_AAGAM_GRANTHS, JainAagamGranth, AnuyogaType, AagamChapter } from './jainAagamGranthsData';
 
 export interface AagamItem {
   id: string;
-  category: 'Pujan' | 'Stuti' | 'Vidhan' | 'Chalisa' | 'Bhajan' | 'Aarti';
+  category: 'Aagams' | 'AbhishekVidhi' | 'Pujan' | 'Stuti' | 'Vidhan' | 'Chalisa' | 'Bhajan' | 'Aarti';
   title: string;
   content: string;
+  titleEn?: string;
+  originalTitle?: string;
+  author?: string;
+  period?: string;
+  anuyoga?: AnuyogaType;
+  overview?: string;
+  importance?: string;
+  chapters?: AagamChapter[];
+  keyThemes?: string[];
+  totalVerses?: string | number;
+  totalChapters?: number;
+  language?: string;
 }
+
+export const mappedAagamGranthItems: AagamItem[] = JAIN_AAGAM_GRANTHS.map(granth => {
+  let fullContent = `॥ ${granth.originalTitle || granth.title} ॥\n`;
+  fullContent += `रचयिता: ${granth.author} | काल: ${granth.period}\n`;
+  fullContent += `अनुयोग: ${
+    granth.anuyoga === 'Dravyanuyoga' ? 'द्रव्यानुयोग (अध्यात्म व तत्त्वज्ञान)' :
+    granth.anuyoga === 'Charananuyoga' ? 'चरणानुयोग (आचार व श्रावक-मुनि धर्म)' :
+    granth.anuyoga === 'Karananuyoga' ? 'करणानुयोग (भूगोल व कर्म सिद्धांत)' :
+    'प्रथमानुयोग (महापुरुष चरित्र व इतिहास)'
+  }\n`;
+  fullContent += `भाषा: ${granth.language} | कुल अध्याय/पर्व: ${granth.totalChapters} | कुल श्लोक/गाथा: ${granth.totalVerses}\n\n`;
+  fullContent += `【 ग्रन्थ सार एवं परिचय 】\n${granth.overview}\n\n`;
+  fullContent += `【 आगम महत्व 】\n${granth.importance}\n\n`;
+  fullContent += `प्रमुख प्रतिपाद्य विषय: ${granth.keyThemes.join(', ')}\n\n`;
+  fullContent += `====================================\n\n`;
+
+  granth.chapters.forEach(ch => {
+    fullContent += `【 अध्याय ${ch.chapterNumber}: ${ch.chapterTitle} 】\n`;
+    fullContent += `विषय संक्षेप: ${ch.summary}\n\n`;
+    ch.originalVerses.forEach(v => {
+      fullContent += `[${v.verseNumber}]\n`;
+      fullContent += `मूल पाठ:\n${v.prakritOrSanskrit}\n\n`;
+      if (v.transliteration) fullContent += `उच्चारण (Transliteration):\n${v.transliteration}\n\n`;
+      fullContent += `हिन्दी अन्वयार्थ / सरल अर्थ:\n${v.hindiMeaning}\n\n`;
+      fullContent += `आध्यात्मिक भावार्थ:\n${v.bhavartha}\n\n`;
+      if (v.practicalLifeLesson) fullContent += `जीवन सूत्र (Practical Lesson):\n${v.practicalLifeLesson}\n\n`;
+    });
+    fullContent += `------------------------------------\n\n`;
+  });
+
+  return {
+    id: granth.id,
+    category: 'Aagams' as const,
+    title: granth.title,
+    titleEn: granth.titleEn,
+    originalTitle: granth.originalTitle,
+    content: fullContent,
+    author: granth.author,
+    period: granth.period,
+    anuyoga: granth.anuyoga,
+    overview: granth.overview,
+    importance: granth.importance,
+    chapters: granth.chapters,
+    keyThemes: granth.keyThemes,
+    totalVerses: granth.totalVerses,
+    totalChapters: granth.totalChapters,
+    language: granth.language
+  };
+});
 
 // Assemble full Bhaktamar Stotra 48 shlokas dynamically from the master bhaktamarData
 const fullBhaktamarContent = `॥ भक्तामर स्तोत्र ॥
@@ -2240,6 +2302,7 @@ const existingStutis = baseAagamsData.filter(item =>
 const otherBaseItems = baseAagamsData.filter(item => item.category !== 'Pujan' && item.category !== 'Stuti');
 
 const combinedInitial: AagamItem[] = [
+  ...mappedAagamGranthItems,
   ...orderedPujans,
   ...existingPujans,
   ...orderedPaths,

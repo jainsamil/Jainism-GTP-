@@ -121,3 +121,21 @@ html.dark .admin-modal select option,
   stroke-width: inherit !important;
 }
 
+@media print {
+  header, footer, nav, button, .print\:hidden, #jain-radio-player {
+    display: none !important;
+  }
+  body, html, #root {
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-size: 13pt !important;
+    overflow: visible !important;
+    user-select: auto !important;
+  }
+  .print-clean {
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+}
+

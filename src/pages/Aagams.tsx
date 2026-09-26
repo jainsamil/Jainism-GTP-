@@ -27,7 +27,8 @@ import {
   Droplets,
   Flame,
   Flower2,
-  RotateCcw
+  RotateCcw,
+  Printer
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { db } from '../firebase';
@@ -40,7 +41,7 @@ import UnifiedSearchBar from '../components/UnifiedSearchBar';
 import { aagamsData } from '../data/aagamsData';
 import { ABHISHEK_PUJAN_STEPS, MASTER_ABHISHEK_PUJAN_ITEM, AbhishekPujanStep } from '../data/abhishekPujanVidhiData';
 
-const categories = ['AbhishekVidhi', 'Pujan', 'Stuti', 'Vidhan', 'Chalisa', 'Bhajan', 'Aarti'];
+const categories = ['Aagams', 'AbhishekVidhi', 'Pujan', 'Stuti', 'Vidhan', 'Chalisa', 'Bhajan', 'Aarti'];
 
 export const ABHISHEK_AAGAM_ITEMS = ABHISHEK_PUJAN_STEPS.map(step => ({
   id: step.id,
@@ -65,7 +66,7 @@ export default function AagamsPage() {
   const { language, toggleLanguage } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
-  const [activeCat, setActiveCat] = useState('AbhishekVidhi');
+  const [activeCat, setActiveCat] = useState('Aagams');
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -81,6 +82,11 @@ export default function AagamsPage() {
   const [isListening, setIsListening] = useState(false);
   const [speechError, setSpeechError] = useState('');
   const recognitionRef = useRef<any>(null);
+
+  // Anuyoga Filter for Sacred Aagams
+  const [anuyogaFilter, setAnuyogaFilter] = useState<'all' | 'Dravyanuyoga' | 'Charananuyoga' | 'Karananuyoga' | 'Prathamanuyoga'>('all');
+  const [selectedChapterIndex, setSelectedChapterIndex] = useState<number>(0);
+  const [readingMode, setReadingMode] = useState<'structured' | 'continuous'>('structured');
 
   // New features & Ritual state
   const [ritualFilter, setRitualFilter] = useState<'all' | 'Abhishek' | 'Pujan' | 'Visarjan'>('all');
@@ -315,6 +321,22 @@ export default function AagamsPage() {
   };
 
   const filtered = aagams.filter(item => {
+    if (activeCat === 'Aagams') {
+      if (item.category !== 'Aagams') return false;
+      if (anuyogaFilter !== 'all' && item.anuyoga !== anuyogaFilter) return false;
+      if (search) {
+        const q = search.toLowerCase();
+        return (
+          item.title.toLowerCase().includes(q) ||
+          (item.titleEn && item.titleEn.toLowerCase().includes(q)) ||
+          (item.author && item.author.toLowerCase().includes(q)) ||
+          (item.overview && item.overview.toLowerCase().includes(q)) ||
+          (item.content && item.content.toLowerCase().includes(q)) ||
+          (item.keyThemes && item.keyThemes.some((t: string) => t.toLowerCase().includes(q)))
+        );
+      }
+      return true;
+    }
     if (activeCat === 'AbhishekVidhi') {
       if (item.category !== 'AbhishekVidhi') return false;
       if (ritualFilter !== 'all' && item.stepCategory !== ritualFilter) return false;
@@ -485,7 +507,8 @@ export default function AagamsPage() {
                 : "bg-white dark:bg-[#121212] text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-white/5 hover:border-saffron/30"
             )}
           >
-            {cat === 'AbhishekVidhi' ? (language === 'en' ? '✨ Abhishek to Visarjan (15 Steps)' : '✨ अभिषेक से विसर्जन विधि (१५ चरण)') :
+            {cat === 'Aagams' ? (language === 'en' ? '📜 Jain Aagams (4 Anuyogas)' : '📜 मूल जैन आगम (चार अनुयोग)') :
+             cat === 'AbhishekVidhi' ? (language === 'en' ? '✨ Abhishek to Visarjan (15 Steps)' : '✨ अभिषेक से विसर्जन विधि (१५ चरण)') :
              cat === 'Pujan' ? (language === 'en' ? 'Pujan Collection' : 'देव पूजा संग्रह') :
              cat === 'Stuti' ? (language === 'en' ? 'Stuti & Path' : 'स्तुति एवं पाठ संग्रह') :
              cat === 'Vidhan' ? (language === 'en' ? 'Vidhan' : 'विधान संग्रह') :
@@ -496,6 +519,58 @@ export default function AagamsPage() {
           </button>
         ))}
       </div>
+
+      {/* Dedicated Authentic Jain Aagams & Jinvani Hub Header */}
+      {activeCat === 'Aagams' && (
+        <div className="mb-6 space-y-4">
+          <div className="bg-gradient-to-br from-amber-600/15 via-orange-500/10 to-transparent dark:from-amber-600/20 dark:to-transparent rounded-3xl p-5 sm:p-6 border-2 border-amber-500/30 shadow-lg relative overflow-hidden">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-sm">
+                    {language === 'en' ? 'Sacred Jinvani Repository' : 'परम पूज्य जिनवाणी संग्रह'}
+                  </span>
+                  <span className="text-[10px] font-black text-amber-700 dark:text-amber-300 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20">
+                    {language === 'en' ? 'All 4 Anuyogas' : 'चारों अनुयोग सविस्तार'}
+                  </span>
+                </div>
+                <h3 className="text-xl sm:text-2xl font-display font-black text-gray-900 dark:text-white">
+                  {language === 'en' ? 'Jain Aagams & Authentic Scriptures' : 'मूल जैन आगम एवं सम्पूर्ण जिनवाणी'}
+                </h3>
+                <p className="text-xs sm:text-sm text-gray-700 dark:text-gray-300 font-medium max-w-2xl leading-relaxed">
+                  {language === 'en'
+                    ? 'Explore the sacred Four Anuyogas: Dravyanuyoga (Samayasara, Tattvartha Sutra), Charananuyoga (Ratnakaranda, Mulachara), Karananuyoga (Gommatasara, Trilokasara), and Prathamanuyoga (Padmapurana, Adipurana) with verses, commentaries & audio.'
+                    : 'आचार्य कुन्दकुन्द, उमास्वामी, समन्तभद्र एवं नेमिचन्द्र विरचित चारों अनुयोग (द्रव्यानुयोग, चरणानुयोग, करणानुयोग, प्रथमानुयोग) का प्राकृत-संस्कृत मूल गाथा, हिन्दी अन्वयार्थ, आध्यात्मिक भावार्थ एवं ऑडियो वाचन सहित सम्पूर्ण प्रामाणिक संग्रह।'}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Anuyoga Filter Pills */}
+          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+            {[
+              { id: 'all', hi: 'सभी चारों अनुयोग', en: 'All 4 Anuyogas' },
+              { id: 'Dravyanuyoga', hi: '१. द्रव्यानुयोग (अध्यात्म व तत्त्वज्ञान)', en: '1. Dravyanuyoga (Philosophy)' },
+              { id: 'Charananuyoga', hi: '२. चरणानुयोग (आचार व श्रावक-मुनि धर्म)', en: '2. Charananuyoga (Conduct)' },
+              { id: 'Karananuyoga', hi: '३. करणानुयोग (भूगोल व कर्म विज्ञान)', en: '3. Karananuyoga (Cosmology)' },
+              { id: 'Prathamanuyoga', hi: '४. प्रथमानुयोग (महापुरुष चरित व इतिहास)', en: '4. Prathamanuyoga (History)' },
+            ].map(f => (
+              <button
+                key={f.id}
+                onClick={() => setAnuyogaFilter(f.id as any)}
+                className={cn(
+                  "px-3.5 py-2 rounded-xl text-xs font-black whitespace-nowrap transition-all cursor-pointer border",
+                  anuyogaFilter === f.id
+                    ? "bg-gradient-to-r from-amber-600 to-orange-600 text-white border-transparent shadow-sm scale-102"
+                    : "bg-white dark:bg-[#121212] text-gray-600 dark:text-gray-300 border-gray-200 dark:border-white/5 hover:border-amber-500/30"
+                )}
+              >
+                {language === 'en' ? f.en : f.hi}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Dedicated Abhishek-to-Visarjan Ritual Hub Header */}
       {activeCat === 'AbhishekVidhi' && (
@@ -595,6 +670,91 @@ export default function AagamsPage() {
             const isRead = chantedLog.includes(item.id);
             const isCompletedStep = completedSteps.includes(item.id);
             const isAbhishekStep = item.category === 'AbhishekVidhi';
+
+            if (item.category === 'Aagams') {
+              const anuyogaColor = 
+                item.anuyoga === 'Dravyanuyoga' ? 'border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300' :
+                item.anuyoga === 'Charananuyoga' ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300' :
+                item.anuyoga === 'Karananuyoga' ? 'border-sky-500/40 bg-sky-500/10 text-sky-700 dark:text-sky-300' :
+                'border-purple-500/40 bg-purple-500/10 text-purple-700 dark:text-purple-300';
+
+              const anuyogaLabel = 
+                item.anuyoga === 'Dravyanuyoga' ? (language === 'en' ? 'Dravyanuyoga • Metaphysics' : 'द्रव्यानुयोग • अध्यात्म व तत्त्वज्ञान') :
+                item.anuyoga === 'Charananuyoga' ? (language === 'en' ? 'Charananuyoga • Conduct' : 'चरणानुयोग • आचार व मुनिधर्म') :
+                item.anuyoga === 'Karananuyoga' ? (language === 'en' ? 'Karananuyoga • Cosmology' : 'करणानुयोग • ब्रह्मांड व कर्म सिद्धांत') :
+                (language === 'en' ? 'Prathamanuyoga • History' : 'प्रथमानुयोग • महापुरुष चरित');
+
+              return (
+                <div
+                  key={item.id}
+                  onClick={() => {
+                    setSelectedChapterIndex(0);
+                    setSelectedItem(item);
+                  }}
+                  className="bg-white dark:bg-[#121212] p-5 sm:p-6 rounded-3xl shadow-sm border border-gray-200 dark:border-white/10 hover:border-amber-500/50 hover:shadow-lg transition-all duration-300 group cursor-pointer relative overflow-hidden flex flex-col justify-between gap-4"
+                >
+                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                    <div className="space-y-2 flex-1 min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className={cn("text-[9px] font-black uppercase px-2.5 py-0.5 rounded-full border", anuyogaColor)}>
+                          {anuyogaLabel}
+                        </span>
+                        {item.author && (
+                          <span className="text-[10px] font-bold text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-white/5 px-2.5 py-0.5 rounded-full">
+                            ✍️ {item.author}
+                          </span>
+                        )}
+                        {item.period && (
+                          <span className="text-[10px] font-medium text-gray-400 hidden sm:inline">
+                            ⏳ {item.period}
+                          </span>
+                        )}
+                        {item.totalVerses && (
+                          <span className="text-[10px] font-bold text-amber-700 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-md">
+                            📖 {item.totalVerses} {language === 'en' ? 'Verses' : 'श्लोक/गाथाएं'}
+                          </span>
+                        )}
+                      </div>
+
+                      <h3 className="text-lg sm:text-xl font-display font-black text-gray-900 dark:text-white group-hover:text-amber-600 transition-colors">
+                        {item.title}
+                      </h3>
+
+                      {item.overview && (
+                        <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 leading-relaxed line-clamp-2">
+                          {item.overview}
+                        </p>
+                      )}
+
+                      {item.keyThemes && (
+                        <div className="flex flex-wrap gap-1.5 pt-1">
+                          {item.keyThemes.slice(0, 5).map((th: string, i: number) => (
+                            <span key={i} className="text-[9px] font-semibold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-white/5 px-2 py-0.5 rounded-md">
+                              #{th}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex sm:flex-col items-center sm:items-end justify-between gap-2.5 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-100 dark:border-white/5">
+                      <button
+                        onClick={(e) => handleToggleBookmark(item.id, e)}
+                        className="p-2.5 rounded-full bg-gray-100 dark:bg-white/10 hover:text-amber-600 transition-colors cursor-pointer"
+                        title="Bookmark"
+                      >
+                        <Heart size={16} className={isBookmarked ? "fill-amber-600 text-amber-600" : "text-gray-400"} />
+                      </button>
+
+                      <div className="px-4 py-2 rounded-2xl bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-black text-xs shadow-md shadow-amber-600/20 flex items-center gap-2 group-hover:scale-102 transition-transform">
+                        <BookOpen size={14} />
+                        <span>{language === 'en' ? 'Read & Swadhyay' : 'स्वाध्याय करें'}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            }
 
             if (isAbhishekStep) {
               return (
@@ -864,6 +1024,13 @@ export default function AagamsPage() {
                   <span>{chantedLog.includes(selectedItem.id) ? (language === 'en' ? 'Chanted' : 'पूरा हुआ') : (language === 'en' ? 'Done' : 'चढ़ाया')}</span>
                 </button>
                 <button 
+                  onClick={() => window.print()}
+                  className="p-1.5 md:p-2 rounded-full border border-current/10 hover:bg-current/5 transition-colors cursor-pointer shrink-0"
+                  title={language === 'en' ? 'Print / Save PDF' : 'प्रिंट / PDF सेव करें'}
+                >
+                  <Printer size={15} />
+                </button>
+                <button 
                   onClick={() => setIsFullscreen(!isFullscreen)}
                   className="p-1.5 md:p-2 rounded-full border border-current/10 hover:bg-current/5 transition-colors cursor-pointer shrink-0"
                   title="Fullscreen Reader"
@@ -969,6 +1136,188 @@ export default function AagamsPage() {
                 className="max-w-xl mx-auto space-y-6 relative z-10 transition-all text-center"
                 style={{ fontSize: `${fontSize}px` }}
               >
+                {/* Aagam Granth Header Details (if Aagam) */}
+                {selectedItem.chapters && selectedItem.chapters.length > 0 && (
+                  <div className="text-left bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-transparent border-2 border-amber-500/30 rounded-3xl p-5 not-italic shadow-sm space-y-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div>
+                        <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                          <span className="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/30">
+                            {selectedItem.anuyoga === 'Dravyanuyoga' ? 'द्रव्यानुयोग' :
+                             selectedItem.anuyoga === 'Charananuyoga' ? 'चरणानुयोग' :
+                             selectedItem.anuyoga === 'Karananuyoga' ? 'करणानुयोग' : 'प्रथमानुयोग'}
+                          </span>
+                          {selectedItem.author && (
+                            <span className="text-[10px] font-bold text-gray-700 dark:text-gray-300">
+                              ✍️ {selectedItem.author}
+                            </span>
+                          )}
+                          {selectedItem.period && (
+                            <span className="text-[10px] text-gray-500 dark:text-gray-400">
+                              • {selectedItem.period}
+                            </span>
+                          )}
+                        </div>
+                        <h3 className="text-base sm:text-lg font-display font-black text-gray-900 dark:text-white">
+                          {selectedItem.originalTitle || selectedItem.title}
+                        </h3>
+                      </div>
+
+                      {/* Mode Toggle */}
+                      <div className="flex items-center gap-1 bg-white/70 dark:bg-black/30 p-1 rounded-2xl border border-amber-500/20 shrink-0">
+                        <button
+                          onClick={() => setReadingMode('structured')}
+                          className={cn(
+                            "px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer",
+                            readingMode === 'structured'
+                              ? "bg-amber-600 text-white shadow-sm"
+                              : "text-gray-600 dark:text-gray-300 hover:text-amber-600"
+                          )}
+                        >
+                          {language === 'en' ? 'Structured Swadhyay' : 'संरचित स्वाध्याय'}
+                        </button>
+                        <button
+                          onClick={() => setReadingMode('continuous')}
+                          className={cn(
+                            "px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer",
+                            readingMode === 'continuous'
+                              ? "bg-amber-600 text-white shadow-sm"
+                              : "text-gray-600 dark:text-gray-300 hover:text-amber-600"
+                          )}
+                        >
+                          {language === 'en' ? 'Continuous Text' : 'अखंड पाठ'}
+                        </button>
+                      </div>
+                    </div>
+
+                    {selectedItem.overview && (
+                      <p className="text-xs text-gray-700 dark:text-gray-300 font-medium leading-relaxed border-t border-amber-500/15 pt-3">
+                        {selectedItem.overview}
+                      </p>
+                    )}
+
+                    {/* Chapter Tabs */}
+                    {readingMode === 'structured' && (
+                      <div className="pt-2 border-t border-amber-500/15">
+                        <span className="text-[10px] font-black uppercase text-amber-800 dark:text-amber-300 tracking-wider block mb-2">
+                          {language === 'en' ? 'Select Chapter / Section:' : 'अध्याय / अधिकार चयन करें:'}
+                        </span>
+                        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+                          {selectedItem.chapters.map((ch: any, idx: number) => (
+                            <button
+                              key={idx}
+                              onClick={() => setSelectedChapterIndex(idx)}
+                              className={cn(
+                                "px-3 py-1.5 rounded-xl text-xs font-black whitespace-nowrap transition-all cursor-pointer border",
+                                selectedChapterIndex === idx
+                                  ? "bg-amber-600 text-white border-transparent shadow-sm scale-102"
+                                  : "bg-white dark:bg-black/30 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-white/10 hover:border-amber-500/30"
+                              )}
+                            >
+                              {ch.chapterTitle}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Structured Verse by Verse Swadhyay Board */}
+                {selectedItem.chapters && readingMode === 'structured' && selectedItem.chapters[selectedChapterIndex] ? (
+                  <div className="space-y-6 text-left not-italic font-sans">
+                    {/* Chapter Header */}
+                    <div className="p-4 rounded-2xl bg-amber-500/5 border border-amber-500/20">
+                      <h4 className="text-base font-black text-amber-900 dark:text-amber-200 mb-1">
+                        {selectedItem.chapters[selectedChapterIndex].chapterTitle}
+                      </h4>
+                      <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">
+                        {selectedItem.chapters[selectedChapterIndex].summary}
+                      </p>
+                    </div>
+
+                    {/* Verses List */}
+                    <div className="space-y-6">
+                      {selectedItem.chapters[selectedChapterIndex].originalVerses.map((v: any, vIdx: number) => (
+                        <div 
+                          key={vIdx}
+                          className="bg-white dark:bg-[#18181b] border-2 border-amber-500/25 rounded-3xl p-5 sm:p-6 shadow-sm space-y-4 hover:border-amber-500/40 transition-colors"
+                        >
+                          <div className="flex items-center justify-between gap-2 border-b border-gray-150 dark:border-white/10 pb-3">
+                            <span className="text-xs font-black uppercase tracking-wider text-amber-700 dark:text-amber-300 bg-amber-500/10 px-3 py-1 rounded-xl">
+                              {v.verseNumber}
+                            </span>
+
+                            <button
+                              onClick={() => {
+                                window.speechSynthesis.cancel();
+                                const textToRead = `${v.prakritOrSanskrit}. सरल अर्थ: ${v.hindiMeaning}. भावार्थ: ${v.bhavartha}`;
+                                const utter = new SpeechSynthesisUtterance(textToRead);
+                                utter.lang = 'hi-IN';
+                                utter.rate = speechRate;
+                                window.speechSynthesis.speak(utter);
+                              }}
+                              className="px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-800 dark:text-amber-300 font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+                              title="Listen to this verse"
+                            >
+                              <Volume2 size={13} />
+                              <span>{language === 'en' ? 'Audio' : 'श्रवण'}</span>
+                            </button>
+                          </div>
+
+                          {/* Original Prakrit / Sanskrit Verse */}
+                          <div className="p-4 rounded-2xl bg-amber-50/60 dark:bg-amber-950/20 border border-amber-500/20 text-center">
+                            <p className="font-serif text-lg sm:text-xl font-bold text-amber-950 dark:text-amber-100 leading-relaxed whitespace-pre-line">
+                              {v.prakritOrSanskrit}
+                            </p>
+                            {v.transliteration && (
+                              <p className="mt-2 text-xs font-sans text-gray-500 dark:text-gray-400 italic">
+                                {v.transliteration}
+                              </p>
+                            )}
+                          </div>
+
+                          {/* Hindi Meaning */}
+                          <div className="space-y-1">
+                            <span className="text-[10px] font-black uppercase text-amber-800 dark:text-amber-400 tracking-wider">
+                              📖 सरल अन्वयार्थ (Hindi Meaning):
+                            </span>
+                            <p className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed font-medium">
+                              {v.hindiMeaning}
+                            </p>
+                          </div>
+
+                          {/* Spiritual Bhavartha */}
+                          {v.bhavartha && (
+                            <div className="space-y-1 bg-emerald-500/5 border border-emerald-500/20 p-3.5 rounded-2xl">
+                              <span className="text-[10px] font-black uppercase text-emerald-800 dark:text-emerald-400 tracking-wider flex items-center gap-1">
+                                <Sparkles size={12} />
+                                <span>आध्यात्मिक भावार्थ एवं टीका रहस्य:</span>
+                              </span>
+                              <p className="text-xs sm:text-sm text-gray-700 dark:text-gray-300 leading-relaxed font-medium">
+                                {v.bhavartha}
+                              </p>
+                            </div>
+                          )}
+
+                          {/* Practical Life Lesson */}
+                          {v.practicalLifeLesson && (
+                            <div className="space-y-1 bg-orange-500/5 border border-orange-500/20 p-3.5 rounded-2xl">
+                              <span className="text-[10px] font-black uppercase text-orange-800 dark:text-orange-400 tracking-wider flex items-center gap-1">
+                                <Info size={12} />
+                                <span>दैनिक जीवन सूत्र (Practical Takeaway):</span>
+                              </span>
+                              <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed font-medium">
+                                {v.practicalLifeLesson}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+
                 {/* Ritual Step Guidance Cards (if available) */}
                 {selectedItem.vidhiInstruction && (
                   <div className="text-left bg-amber-500/10 border-2 border-amber-500/30 rounded-2xl p-4 sm:p-5 text-sm not-italic shadow-sm">
@@ -1010,7 +1359,7 @@ export default function AagamsPage() {
                   </div>
                 )}
 
-                {selectedItem.content.split('\n').map((line: string, index: number) => {
+                {(!selectedItem.chapters || readingMode === 'continuous') && selectedItem.content.split('\n').map((line: string, index: number) => {
                   const cleaned = line.trim();
                   if (!cleaned) return <div key={`empty-${index}`} className="h-4" />;
                   

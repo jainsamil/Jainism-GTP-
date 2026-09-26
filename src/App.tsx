@@ -44,6 +44,9 @@ import YatraBookingPage from './pages/YatraBooking';
 import PrivacyPolicyPage from './pages/PrivacyPolicy';
 import TermsPage from './pages/Terms';
 import ContactPage from './pages/Contact';
+import SamayikPratikramanPage from './pages/SamayikPratikraman';
+import NiyamTrackerPage from './pages/NiyamTracker';
+import JainRadioPlayer from './components/JainRadioPlayer';
 import Footer from './components/Footer';
 import BackgroundDesign from './components/BackgroundDesign';
 
@@ -185,6 +188,9 @@ function Layout({ children }: { children: React.ReactNode }) {
         </button>
       )}
 
+      {/* 24x7 Live Jain Radio Player */}
+      {!isAdmin && <JainRadioPlayer />}
+
       {/* Bottom Navigation */}
       {!isAdmin && !isChat && (
         <nav className="fixed bottom-0 left-0 right-0 w-full bg-white/80 dark:bg-[#0A0A0A]/80 backdrop-blur-2xl border-t border-gray-200 dark:border-white/10 px-6 py-3 flex justify-between items-center z-50 pb-safe shadow-[0_-10px_30px_rgba(0,0,0,0.05)] dark:shadow-[0_-10px_30px_rgba(0,0,0,0.5)] transition-colors duration-300">
@@ -257,6 +263,8 @@ export default function App() {
                   <Route path="/store" element={<JainStorePage />} />
                   <Route path="/matrimonial" element={<MatrimonialPage />} />
                   <Route path="/yatra" element={<YatraBookingPage />} />
+                  <Route path="/samayik" element={<SamayikPratikramanPage />} />
+                  <Route path="/niyam" element={<NiyamTrackerPage />} />
                   <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
                   <Route path="/terms" element={<TermsPage />} />
                   <Route path="/contact" element={<ContactPage />} />

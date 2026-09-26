@@ -14,6 +14,7 @@ import UnifiedSearchBar from '../components/UnifiedSearchBar';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import { TIRTHS_DATA, ALL_60_TIRTHS, TirthItem, NearbyTemple } from '../data/tirthsData';
+import { SHIKHARJI_31_TONKS, GIRNAR_GUIDE } from '../data/shikharjiVandanaData';
 
 const SIMULATED_CITIES = [
   { name: { en: "Indore (MP)", hi: "इन्दौर (म.प्र.)" }, lat: 22.7196, lng: 75.8577 },
@@ -42,6 +43,23 @@ export default function TirthPage() {
   const [search, setSearch] = useState('');
   const [selectedTirth, setSelectedTirth] = useState<TirthItem | null>(null);
   const [showHelpModal, setShowHelpModal] = useState(false);
+  const [tirthActiveTab, setTirthActiveTab] = useState<'all' | 'shikharji' | 'girnar'>('all');
+  const [completedTonks, setCompletedTonks] = useState<number[]>(() => {
+    try {
+      const saved = localStorage.getItem('shikharji_completed_tonks');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const toggleTonk = (num: number) => {
+    const updated = completedTonks.includes(num)
+      ? completedTonks.filter(n => n !== num)
+      : [...completedTonks, num];
+    setCompletedTonks(updated);
+    localStorage.setItem('shikharji_completed_tonks', JSON.stringify(updated));
+  };
 
   // Firestore dynamic sync state
   const [firestoreTirths, setFirestoreTirths] = useState<TirthItem[]>([]);
@@ -327,16 +345,154 @@ export default function TirthPage() {
         </div>
       </div>
 
-      {/* Search Bar */}
-      <div className="mb-6">
-        <UnifiedSearchBar
-          value={search}
-          onChange={(val) => setSearch(val)}
-          placeholder={lang === 'en' ? "Search sacred places..." : "पवित्र तीर्थ खोजें..."}
-        />
+      {/* Tirth Sections Tabs */}
+      <div className="flex gap-2 overflow-x-auto pb-1 mb-6 scrollbar-hide">
+        {[
+          { id: 'all', hi: '🏛️ समस्त तीर्थ क्षेत्र', en: '🏛️ All Sacred Tirths' },
+          { id: 'shikharji', hi: '🏔️ श्री सम्मेद शिखरजी (३१ टोंक)', en: '🏔️ Shikharji (31 Tonks)' },
+          { id: 'girnar', hi: '⛰️ श्री गिरनार जी (१०,००० सीढ़ियां)', en: '⛰️ Girnarji Guide' }
+        ].map(tb => (
+          <button
+            key={tb.id}
+            onClick={() => setTirthActiveTab(tb.id as any)}
+            className={cn(
+              "px-4 py-2.5 rounded-2xl text-xs font-black whitespace-nowrap transition-all cursor-pointer border",
+              tirthActiveTab === tb.id
+                ? "bg-gradient-to-r from-amber-600 to-orange-600 text-white border-transparent shadow-md shadow-amber-600/20 scale-102"
+                : "bg-white dark:bg-[#18181b] text-gray-700 dark:text-gray-300 border-gray-200 dark:border-white/10 hover:border-amber-500/30"
+            )}
+          >
+            {lang === 'en' ? tb.en : tb.hi}
+          </button>
+        ))}
       </div>
 
-      {/* Main Grid Checklist of items */}
+      {/* SHIKHARJI 31 TONKS VANDANA VIEW */}
+      {tirthActiveTab === 'shikharji' && (
+        <div className="space-y-6 mb-8">
+          <div className="bg-gradient-to-br from-amber-500/15 via-orange-500/10 to-transparent dark:from-amber-600/20 dark:to-transparent rounded-3xl p-5 sm:p-6 border-2 border-amber-500/30 shadow-lg space-y-3">
+            <div className="flex items-center justify-between text-xs font-black text-amber-900 dark:text-amber-200">
+              <span>{lang === 'en' ? 'Shikharji Vandana Progress' : 'श्री सम्मेद शिखरजी वंदना प्रगति'}</span>
+              <span>{completedTonks.length} / {SHIKHARJI_31_TONKS.length} {lang === 'en' ? 'Tonks Visited' : 'टोंक वंदना संपन्न'}</span>
+            </div>
+            <div className="w-full h-3 bg-amber-500/20 rounded-full overflow-hidden p-0.5">
+              <div
+                className="h-full bg-gradient-to-r from-amber-500 to-[#00E676] rounded-full transition-all duration-500"
+                style={{ width: `${(completedTonks.length / SHIKHARJI_31_TONKS.length) * 100}%` }}
+              />
+            </div>
+            <p className="text-xs text-gray-700 dark:text-gray-300 font-medium">
+              {lang === 'en'
+                ? 'Twenty Tirthankaras attained Nirvana from this supreme mountain. Follow this authentic serial order of Tonks, chanting the sacred Arghya at each summit.'
+                : 'इस परम पावन पर्वतराज से २० तीर्थंकर एवं अनंतानंत मुनिराज मोक्ष पधारे हैं। प्रत्येक टोंक पर पहुँचकर चरण पादुका के दर्शन कर अर्घ्य समर्पित करें।'}
+            </p>
+          </div>
+
+          <div className="grid gap-3.5">
+            {SHIKHARJI_31_TONKS.map((tonk) => {
+              const isDone = completedTonks.includes(tonk.number);
+              return (
+                <div
+                  key={tonk.number}
+                  className={cn(
+                    "p-4 sm:p-5 rounded-3xl border transition-all duration-200 shadow-sm space-y-3",
+                    isDone
+                      ? "bg-emerald-500/10 dark:bg-emerald-950/20 border-emerald-500/40"
+                      : "bg-white dark:bg-[#18181b] border-gray-200 dark:border-white/10 hover:border-amber-500/40"
+                  )}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="w-7 h-7 rounded-xl bg-amber-500/20 text-amber-800 dark:text-amber-300 font-black text-xs flex items-center justify-center">
+                          {tonk.number}
+                        </span>
+                        <h4 className="text-base font-black text-gray-900 dark:text-white">
+                          {tonk.kootName}
+                        </h4>
+                      </div>
+                      <span className="text-xs font-bold text-amber-700 dark:text-amber-400 block">
+                        {tonk.tirthankar} • दूरी: {tonk.distanceFromStart}
+                      </span>
+                    </div>
+
+                    <button
+                      onClick={() => toggleTonk(tonk.number)}
+                      className={cn(
+                        "px-3.5 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer border",
+                        isDone
+                          ? "bg-emerald-600 text-white border-transparent"
+                          : "bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-white/10 hover:border-emerald-500/40"
+                      )}
+                    >
+                      <CheckCircle size={14} className={isDone ? "text-white" : "text-gray-400"} />
+                      <span>{isDone ? (lang === 'en' ? 'Vandana Done' : 'वंदना संपन्न') : (lang === 'en' ? 'Mark Done' : 'वंदना पूर्ण')}</span>
+                    </button>
+                  </div>
+
+                  {/* Arghya formula */}
+                  <div className="p-3 rounded-2xl bg-amber-50/70 dark:bg-amber-950/20 border border-amber-500/20 text-center">
+                    <span className="text-[10px] font-black uppercase text-amber-800 dark:text-amber-300 tracking-wider block mb-1">
+                      🕉️ पावन अर्घ्य मंत्र:
+                    </span>
+                    <p className="font-serif font-bold text-amber-950 dark:text-amber-100 text-xs sm:text-sm">
+                      {tonk.arghyaMantra}
+                    </p>
+                  </div>
+
+                  <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">
+                    {tonk.significance}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* GIRNAR 10,000 STEPS GUIDE VIEW */}
+      {tirthActiveTab === 'girnar' && (
+        <div className="space-y-6 mb-8">
+          <div className="bg-gradient-to-br from-amber-500/15 via-orange-500/10 to-transparent dark:from-amber-600/20 dark:to-transparent rounded-3xl p-5 sm:p-6 border-2 border-amber-500/30 shadow-lg space-y-4">
+            <h3 className="text-lg sm:text-xl font-black text-gray-900 dark:text-white">
+              {GIRNAR_GUIDE.titleHi}
+            </h3>
+            <p className="text-xs sm:text-sm text-gray-700 dark:text-gray-300 font-medium leading-relaxed">
+              {GIRNAR_GUIDE.overviewHi}
+            </p>
+          </div>
+
+          <div className="bg-white dark:bg-[#18181b] border border-gray-200 dark:border-white/10 rounded-3xl p-5 sm:p-6 shadow-sm space-y-3">
+            <h4 className="text-sm font-black text-amber-800 dark:text-amber-300 uppercase tracking-wider">
+              📋 गिरनार जी वंदना आवश्यक नियम एवं सुझाव:
+            </h4>
+            <ul className="space-y-2.5">
+              {GIRNAR_GUIDE.rules.map((rule, idx) => (
+                <li key={idx} className="flex items-start gap-3 text-xs sm:text-sm text-gray-700 dark:text-gray-300 font-medium">
+                  <span className="w-5 h-5 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
+                    {idx + 1}
+                  </span>
+                  <span>{rule}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
+
+      {/* Search Bar (Only in All Tirths tab) */}
+      {tirthActiveTab === 'all' && (
+        <div className="mb-6">
+          <UnifiedSearchBar
+            value={search}
+            onChange={(val) => setSearch(val)}
+            placeholder={lang === 'en' ? "Search sacred places..." : "पवित्र तीर्थ खोजें..."}
+          />
+        </div>
+      )}
+
+      {/* Main Grid Checklist of items (Only in All Tirths tab) */}
+      {tirthActiveTab === 'all' && (
       <div className="grid gap-4 md:grid-cols-2">
         {filtered.map(tirth => (
           <div 
@@ -391,6 +547,7 @@ export default function TirthPage() {
           </div>
         ))}
       </div>
+      )}
 
       {/* Large details popup */}
       <AnimatePresence>
