@@ -44,6 +44,7 @@ import YatraBookingPage from './pages/YatraBooking';
 import PrivacyPolicyPage from './pages/PrivacyPolicy';
 import TermsPage from './pages/Terms';
 import ContactPage from './pages/Contact';
+import JainGamesPage from './pages/JainGames';
 import SamayikPratikramanPage from './pages/SamayikPratikraman';
 import NiyamTrackerPage from './pages/NiyamTracker';
 import JainRadioPlayer from './components/JainRadioPlayer';
@@ -245,6 +246,7 @@ export default function App() {
                   <Route path="/admin" element={<AdminPage />} />
                   <Route path="/saints" element={<SaintsPage />} />
                   <Route path="/pathshala" element={<PathshalaPage />} />
+                  <Route path="/games" element={<JainGamesPage />} />
                   <Route path="/vichaar" element={<VichaarPage />} />
                   <Route path="/history" element={<HistoryPage />} />
                   <Route path="/quiz" element={<QuizPage />} />

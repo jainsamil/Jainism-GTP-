@@ -27,6 +27,61 @@ const PORT = 3000;
 
 app.use(express.json());
 
+// Global Anti-Cache & Site-Data Purge Middleware
+app.use((req, res, next) => {
+  res.setHeader('Clear-Site-Data', '"cache"');
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  next();
+});
+
+// Explicitly serve sw.js with aggressive no-cache headers to purge old service workers
+app.get(['/sw.js', '/service-worker.js'], (req, res) => {
+  res.setHeader('Clear-Site-Data', '"cache"');
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  res.setHeader('Content-Type', 'application/javascript');
+  res.sendFile(path.join(process.cwd(), 'public', 'sw.js'));
+});
+
+// Stale-Bundle Rescue Handler: catches requests from old cached index.html (e.g. /assets/index-*.js)
+app.get(['/assets/index-*.js', '/assets/*.js'], (req, res, next) => {
+  const assetsDir = path.join(process.cwd(), 'dist', 'assets');
+  let targetFile = path.join(process.cwd(), 'dist', req.path);
+
+  if (!fs.existsSync(targetFile) && fs.existsSync(assetsDir)) {
+    const files = fs.readdirSync(assetsDir);
+    const jsFiles = files.filter(f => f.startsWith('index-') && f.endsWith('.js'));
+    if (jsFiles.length > 0) {
+      targetFile = path.join(assetsDir, jsFiles[0]);
+    }
+  }
+
+  if (fs.existsSync(targetFile)) {
+    res.setHeader('Content-Type', 'application/javascript');
+    return res.sendFile(targetFile);
+  }
+
+  // Self-recovery script fallback
+  res.setHeader('Content-Type', 'application/javascript');
+  return res.send(`
+    console.log('[Applet] Stale bundle recovered - clearing cache');
+    try {
+      var s = document.querySelectorAll('#initial-splash, .splash-content, .splash-bg, [id*="splash"], [class*="splash"], .splash-badge');
+      s.forEach(function(el){ el.remove(); });
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function(rs){ rs.forEach(function(r){ r.unregister(); }); });
+      }
+      if ('caches' in window) {
+        caches.keys().then(function(ks){ ks.forEach(function(k){ caches.delete(k); }); });
+      }
+    } catch(e){}
+    setTimeout(function() { window.location.reload(); }, 50);
+  `);
+});
+
 // In-memory Database
 const db = {
   users: [] as any[], // { id, name, role, subject, isOnline }

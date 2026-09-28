@@ -19,7 +19,7 @@ if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
 // Clean any stale splash screen elements from DOM
 if (typeof document !== 'undefined') {
   try {
-    const staleSplashes = document.querySelectorAll('#initial-splash, .splash-content, .splash-bg');
+    const staleSplashes = document.querySelectorAll('#initial-splash, .splash-content, .splash-bg, [id*="splash"], [class*="splash"], .splash-badge');
     staleSplashes.forEach((el) => el.remove());
   } catch (e) {
     // ignore

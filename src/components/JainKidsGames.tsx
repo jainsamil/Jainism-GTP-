@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Sparkles, Trophy, Award, CheckCircle2, RotateCcw, Volume2, Printer, Star } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Sparkles, Trophy, Award, CheckCircle2, RotateCcw, Volume2, Printer, Star, Gamepad2, ArrowRight } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { cn } from '../lib/utils';
 
@@ -28,6 +29,7 @@ export interface JainKidsGamesProps {
 }
 
 export default function JainKidsGames({ language: propLanguage, onBack }: JainKidsGamesProps = {}) {
+  const navigate = useNavigate();
   const { language: ctxLanguage } = useLanguage();
   const language = propLanguage || ctxLanguage;
   const [activeGameTab, setActiveGameTab] = useState<'match' | 'navkar' | 'certificate'>('match');
@@ -148,6 +150,37 @@ export default function JainKidsGames({ language: propLanguage, onBack }: JainKi
 
   return (
     <div className="space-y-6">
+      {/* Featured Games Hub Launcher Banner */}
+      <div 
+        onClick={() => navigate('/games')}
+        className="bg-gradient-to-r from-[#8D4B18] via-[#75390F] to-[#D97706] text-white p-4 sm:p-5 rounded-3xl shadow-lg flex items-center justify-between gap-4 cursor-pointer hover:scale-101 active:scale-99 transition-all group"
+      >
+        <div className="flex items-center gap-3.5">
+          <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center text-2xl shadow-inner">
+            🎲
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="text-sm sm:text-base font-serif font-black">
+                {language === 'en' ? 'Jain Games & Fun Hub' : 'जैन खेल एवं मनोरंजन हब'}
+              </h3>
+              <span className="px-2 py-0.5 rounded-full bg-amber-300 text-amber-950 font-black text-[9px] uppercase tracking-wider">
+                NEW
+              </span>
+            </div>
+            <p className="text-xs text-amber-100/90 mt-0.5">
+              {language === 'en' 
+                ? 'Play Jain Tambola, Gyan Deepak (KBC), Moksha Path & Jain Puzzle' 
+                : 'तंबोला (हौजी), ज्ञान दीपक (KBC), मोक्ष मार्ग (ज्ञान चौपड़) एवं तीर्थ पहेली'}
+            </p>
+          </div>
+        </div>
+
+        <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center group-hover:bg-white/30 transition-colors shrink-0">
+          <ArrowRight size={16} />
+        </div>
+      </div>
+
       {/* Sub tabs */}
       <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
         {[

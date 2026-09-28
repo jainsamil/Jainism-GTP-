@@ -103,12 +103,12 @@
         overflow: hidden;
       }
       /* Hard override: permanently prevent any legacy splash elements from showing or blocking clicks */
-      #initial-splash, .splash-content, .splash-bg {
+      #initial-splash, .splash-content, .splash-bg, [id*="splash"], [class*="splash"], .splash-badge {
         display: none !important;
         visibility: hidden !important;
         opacity: 0 !important;
         pointer-events: none !important;
-        z-index: -99999 !important;
+        z-index: -999999 !important;
       }
     </style>
   </head>
@@ -116,12 +116,55 @@
     <div id="root"></div>
     <script>
       (function() {
+        function removeStaleSplash() {
+          try {
+            var s = document.querySelectorAll('#initial-splash, .splash-content, .splash-bg, [id*="splash"], [class*="splash"], .splash-badge');
+            for (var i = 0; i < s.length; i++) {
+              if (s[i]) {
+                s[i].style.setProperty('display', 'none', 'important');
+                s[i].style.setProperty('visibility', 'hidden', 'important');
+                s[i].style.setProperty('opacity', '0', 'important');
+                s[i].style.setProperty('pointer-events', 'none', 'important');
+                if (s[i].parentNode) s[i].parentNode.removeChild(s[i]);
+              }
+            }
+
+            // Text-based fallback to eradicate any legacy element containing ULTRA PREMIUM or NEON
+            if (document.body) {
+              var all = document.body.querySelectorAll('*');
+              for (var j = 0; j < all.length; j++) {
+                var node = all[j];
+                if (node && node.id !== 'root' && !node.closest('#root')) {
+                  var txt = (node.innerText || node.textContent || '');
+                  if (txt.includes('ULTRA PREMIUM') || txt.includes('NEON EDITION')) {
+                    node.style.setProperty('display', 'none', 'important');
+                    if (node.parentNode) node.parentNode.removeChild(node);
+                  }
+                }
+              }
+            }
+          } catch(e){}
+        }
+        removeStaleSplash();
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', removeStaleSplash);
+        }
+        window.addEventListener('load', removeStaleSplash);
+        var splashCheckCount = 0;
+        var splashInterval = setInterval(function() {
+          removeStaleSplash();
+          splashCheckCount++;
+          if (splashCheckCount > 40) clearInterval(splashInterval);
+        }, 50);
+
+        // MutationObserver to instantly delete any splash node if injected
         try {
-          var s = document.querySelectorAll('#initial-splash, .splash-content, .splash-bg');
-          for (var i = 0; i < s.length; i++) {
-            if (s[i] && s[i].parentNode) s[i].parentNode.removeChild(s[i]);
-          }
+          var observer = new MutationObserver(function() {
+            removeStaleSplash();
+          });
+          observer.observe(document.documentElement, { childList: true, subtree: true });
         } catch(e){}
+
         // Unregister any stale service workers and clear caches to immediately break out of cached splash loops
         if ('serviceWorker' in navigator) {
           navigator.serviceWorker.getRegistrations().then(function(regs) {
