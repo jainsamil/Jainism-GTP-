@@ -4,6 +4,11 @@ import { Sparkles, Trophy, Award, CheckCircle2, RotateCcw, Volume2, Printer, Sta
 import { useLanguage } from '../contexts/LanguageContext';
 import { cn } from '../lib/utils';
 
+import MokshaPathGame from './games/MokshaPathGame';
+import GyanDeepakGame from './games/GyanDeepakGame';
+import JainTambolaGame from './games/JainTambolaGame';
+import JainPuzzleGame from './games/JainPuzzleGame';
+
 interface CardItem {
   id: number;
   matchId: number;
@@ -32,7 +37,7 @@ export default function JainKidsGames({ language: propLanguage, onBack }: JainKi
   const navigate = useNavigate();
   const { language: ctxLanguage } = useLanguage();
   const language = propLanguage || ctxLanguage;
-  const [activeGameTab, setActiveGameTab] = useState<'match' | 'navkar' | 'certificate'>('match');
+  const [activeGameTab, setActiveGameTab] = useState<'match' | 'moksha' | 'gyan' | 'tambola' | 'puzzle' | 'navkar' | 'certificate'>('match');
 
   // GAME 1: MATCHING CARDS
   const generateDeck = (): CardItem[] => {
@@ -184,9 +189,13 @@ export default function JainKidsGames({ language: propLanguage, onBack }: JainKi
       {/* Sub tabs */}
       <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
         {[
-          { id: 'match', hi: '🎮 तीर्थंकर-चिन्ह मिलान खेल', en: '🎮 Symbol Match' },
-          { id: 'navkar', hi: '🕉️ णमोकार सीखो (सरल अर्थ)', en: '🕉️ Learn Navkar' },
-          { id: 'certificate', hi: '🏆 बाल संस्कार प्रमाण-पत्र', en: '🏆 Certificate' },
+          { id: 'match', hi: '🎯 तीर्थंकर मिलान', en: '🎯 Symbol Match' },
+          { id: 'moksha', hi: '🎲 मोक्ष पथ (साँप-सीढ़ी)', en: '🎲 Moksha Path' },
+          { id: 'gyan', hi: '💡 ज्ञान दीपक क्विज़', en: '💡 Gyan Deepak' },
+          { id: 'tambola', hi: '🎟️ जैन तंबोला', en: '🎟️ Jain Tambola' },
+          { id: 'puzzle', hi: '🧩 तीर्थंकर पहेली', en: '🧩 Jigsaw Puzzle' },
+          { id: 'navkar', hi: '🕉️ णमोकार सीखो', en: '🕉️ Learn Navkar' },
+          { id: 'certificate', hi: '🏆 संस्कार प्रमाण-पत्र', en: '🏆 Certificate' },
         ].map(tb => (
           <button
             key={tb.id}
@@ -202,6 +211,12 @@ export default function JainKidsGames({ language: propLanguage, onBack }: JainKi
           </button>
         ))}
       </div>
+
+      {/* NEW INTEGRATED GAMES */}
+      {activeGameTab === 'moksha' && <MokshaPathGame />}
+      {activeGameTab === 'gyan' && <GyanDeepakGame />}
+      {activeGameTab === 'tambola' && <JainTambolaGame />}
+      {activeGameTab === 'puzzle' && <JainPuzzleGame />}
 
       {/* 1. MATCHING GAME */}
       {activeGameTab === 'match' && (

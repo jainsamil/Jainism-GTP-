@@ -46,6 +46,14 @@ export default function KnowledgePage() {
   const [isSpeakingKatha, setIsSpeakingKatha] = useState(false);
   const [isSpeakingKahani, setIsSpeakingKahani] = useState(false);
 
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tab = params.get('tab');
+    if (tab && ['qa', 'guide', 'baal_bodh', 'parv_katha', 'jain_kahaniyan', 'games', 'upchaar'].includes(tab)) {
+      setActiveTab(tab as any);
+    }
+  }, [location.search]);
+
   const toggleSpeechKatha = (text: string) => {
     if (isSpeakingKatha) {
       window.speechSynthesis?.cancel();

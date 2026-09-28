@@ -6,7 +6,7 @@ import {
   PlaySquare, Landmark, HelpCircle, PartyPopper,
   Disc, Navigation, Flame, FileText, Heart, Utensils,
   Sparkles, Sun, Moon, MapPin, Shield, Hotel, Languages,
-  Newspaper, ShoppingBag, Compass, HeartHandshake, Gamepad2
+  Newspaper, ShoppingBag, Compass, HeartHandshake
 } from 'lucide-react';
 import { db } from '../firebase';
 import { collection, query, limit, doc, onSnapshot } from 'firebase/firestore';
@@ -71,7 +71,6 @@ export default function HomePage() {
     { title: 'Knowledge', icon: BookOpen, path: '/knowledge', color: 'from-[#2962FF] to-[#448AFF]', shadow: 'shadow-[0_0_15px_rgba(41,98,255,0.3)]', enabled: true },
     { title: 'Saints', icon: Users, path: '/saints', color: 'from-[#00C853] to-[#69F0AE]', shadow: 'shadow-[0_0_15px_rgba(0,200,83,0.3)]', enabled: true },
     { title: 'Pathshala', icon: GraduationCap, path: '/pathshala', color: 'from-[#AA00FF] to-[#E040FB]', shadow: 'shadow-[0_0_15px_rgba(170,0,255,0.3)]', enabled: true },
-    { title: 'Jain Games & Fun', icon: Gamepad2, path: '/games', color: 'from-[#8D4B18] to-[#D97706]', shadow: 'shadow-[0_0_15px_rgba(217,119,6,0.3)]', enabled: true },
     { title: 'Tirthankar', icon: Library, path: '/tirthankars', color: 'from-[#FFD600] to-[#FFFF00]', shadow: 'shadow-[0_0_15px_rgba(255,214,0,0.3)]', enabled: true },
     { title: 'Pujan & Aagams', icon: ScrollText, path: '/aagams?cat=Aagams', color: 'from-[#D50000] to-[#FF5252]', shadow: 'shadow-[0_0_15px_rgba(213,0,0,0.3)]', enabled: true },
     { title: 'Panchang', icon: Calendar, path: '/panchang', color: 'from-[#304FFE] to-[#536DFE]', shadow: 'shadow-[0_0_15px_rgba(48,79,254,0.3)]', enabled: true },

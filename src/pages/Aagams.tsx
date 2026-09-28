@@ -83,8 +83,8 @@ export default function AagamsPage() {
   const [speechError, setSpeechError] = useState('');
   const recognitionRef = useRef<any>(null);
 
-  // Anuyoga Filter for Sacred Aagams
-  const [anuyogaFilter, setAnuyogaFilter] = useState<'all' | 'Dravyanuyoga' | 'Charananuyoga' | 'Karananuyoga' | 'Prathamanuyoga'>('all');
+  // Anuyoga & Canonical Agamas Filter
+  const [anuyogaFilter, setAnuyogaFilter] = useState<'all' | 'Anga' | 'Mulasutra' | 'Dravyanuyoga' | 'Charananuyoga' | 'Karananuyoga' | 'Prathamanuyoga'>('all');
   const [selectedChapterIndex, setSelectedChapterIndex] = useState<number>(0);
   const [readingMode, setReadingMode] = useState<'structured' | 'continuous'>('structured');
 
@@ -167,8 +167,20 @@ export default function AagamsPage() {
     } else {
       if (!selectedItem) return;
       window.speechSynthesis.cancel();
+      
+      let rawText = selectedItem.content || '';
+      if (selectedItem.chapters && selectedItem.chapters.length > 0) {
+        const curChap = selectedItem.chapters[selectedChapterIndex] || selectedItem.chapters[0];
+        if (curChap) {
+          rawText = `${curChap.chapterTitle}\n${curChap.summary}\n`;
+          curChap.originalVerses?.forEach(v => {
+            rawText += `${v.verseNumber}: ${v.prakritOrSanskrit}\n${v.hindiMeaning}\n${v.bhavartha}\n`;
+          });
+        }
+      }
+
       // clean content of formatting markers
-      const cleanText = selectedItem.content
+      const cleanText = rawText
         .replace(/॥/g, '')
         .replace(/ॐ ह्रीं श्रीं/g, 'ओम ह्रीम श्रीम')
         .replace(/ॐ ह्रीं/g, 'ओम ह्रीम')
@@ -199,9 +211,30 @@ export default function AagamsPage() {
   // Update speech speed live
   useEffect(() => {
     if (isSpeaking && selectedItem) {
-      // restart with updated speed
-      toggleTTSChant();
-      toggleTTSChant();
+      window.speechSynthesis.cancel();
+      let rawText = selectedItem.content || '';
+      if (selectedItem.chapters && selectedItem.chapters.length > 0) {
+        const curChap = selectedItem.chapters[selectedChapterIndex] || selectedItem.chapters[0];
+        if (curChap) {
+          rawText = `${curChap.chapterTitle}\n${curChap.summary}\n`;
+          curChap.originalVerses?.forEach(v => {
+            rawText += `${v.verseNumber}: ${v.prakritOrSanskrit}\n${v.hindiMeaning}\n${v.bhavartha}\n`;
+          });
+        }
+      }
+
+      const cleanText = rawText
+        .replace(/॥/g, '')
+        .replace(/ॐ ह्रीं श्रीं/g, 'ओम ह्रीम श्रीम')
+        .replace(/ॐ ह्रीं/g, 'ओम ह्रीम')
+        .replace(/स्वाहा/g, 'स्वाहा');
+
+      const utterance = new SpeechSynthesisUtterance(cleanText);
+      utterance.lang = 'hi-IN';
+      utterance.rate = speechRate;
+      utterance.onend = () => setIsSpeaking(false);
+      utterance.onerror = () => setIsSpeaking(false);
+      window.speechSynthesis.speak(utterance);
     }
   }, [speechRate]);
 
@@ -266,9 +299,21 @@ export default function AagamsPage() {
         } else {
           dataMap.delete(fallbackItem.id);
         }
-        return matchedItem ? { ...fallbackItem, ...matchedItem } : fallbackItem;
+        return matchedItem 
+          ? { 
+              ...fallbackItem, 
+              ...matchedItem, 
+              chapters: (matchedItem.chapters && matchedItem.chapters.length > 0) ? matchedItem.chapters : (fallbackItem as any).chapters,
+              content: matchedItem.content || fallbackItem.content
+            } 
+          : fallbackItem;
       });
-      const finalAagams = [...merged, ...Array.from(dataMap.values())];
+      const finalAagams = [...merged, ...Array.from(dataMap.values())].map(item => ({
+        ...item,
+        category: item.category || 'Aagams',
+        content: item.content || '',
+        title: typeof item.title === 'string' ? item.title : (item.title?.hi || item.title?.en || 'Untitled')
+      }));
       setAagams(finalAagams);
       setLoading(false);
     }, (error) => {
@@ -323,11 +368,18 @@ export default function AagamsPage() {
   const filtered = aagams.filter(item => {
     if (activeCat === 'Aagams') {
       if (item.category !== 'Aagams') return false;
-      if (anuyogaFilter !== 'all' && item.anuyoga !== anuyogaFilter) return false;
+      if (anuyogaFilter !== 'all') {
+        if (anuyogaFilter === 'Anga' && item.aagamType !== 'Anga') return false;
+        if (anuyogaFilter === 'Mulasutra' && item.aagamType !== 'Mulasutra' && item.aagamType !== 'Upanga') return false;
+        if (['Dravyanuyoga', 'Charananuyoga', 'Karananuyoga', 'Prathamanuyoga'].includes(anuyogaFilter)) {
+          if (item.anuyoga !== anuyogaFilter) return false;
+        }
+      }
       if (search) {
         const q = search.toLowerCase();
         return (
-          item.title.toLowerCase().includes(q) ||
+          (item.title && item.title.toLowerCase().includes(q)) ||
+          (item.originalTitle && item.originalTitle.toLowerCase().includes(q)) ||
           (item.titleEn && item.titleEn.toLowerCase().includes(q)) ||
           (item.author && item.author.toLowerCase().includes(q)) ||
           (item.overview && item.overview.toLowerCase().includes(q)) ||
@@ -343,7 +395,7 @@ export default function AagamsPage() {
       if (search) {
         const q = search.toLowerCase();
         return (
-          item.title.toLowerCase().includes(q) ||
+          (item.title && item.title.toLowerCase().includes(q)) ||
           (item.subtitle && item.subtitle.toLowerCase().includes(q)) ||
           (item.vidhiInstruction && item.vidhiInstruction.toLowerCase().includes(q)) ||
           (item.mantras && item.mantras.some((m: string) => m.toLowerCase().includes(q)))
@@ -353,7 +405,7 @@ export default function AagamsPage() {
     }
     return (
       item.category === activeCat &&
-      item.title.toLowerCase().includes(search.toLowerCase())
+      item.title && item.title.toLowerCase().includes(search.toLowerCase())
     );
   }).sort((a, b) => {
     if (activeCat === 'AbhishekVidhi') {
@@ -377,6 +429,7 @@ export default function AagamsPage() {
     if (hasPrev) {
       window.speechSynthesis.cancel();
       setIsSpeaking(false);
+      setSelectedChapterIndex(0);
       setSelectedItem(activeList[currentIndex - 1]);
       if (readerRef.current) {
         readerRef.current.scrollTop = 0;
@@ -388,6 +441,7 @@ export default function AagamsPage() {
     if (hasNext) {
       window.speechSynthesis.cancel();
       setIsSpeaking(false);
+      setSelectedChapterIndex(0);
       setSelectedItem(activeList[currentIndex + 1]);
       if (readerRef.current) {
         readerRef.current.scrollTop = 0;
@@ -546,14 +600,16 @@ export default function AagamsPage() {
             </div>
           </div>
 
-          {/* Anuyoga Filter Pills */}
+          {/* Anuyoga & Canonical Agamas Filter Pills */}
           <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
             {[
-              { id: 'all', hi: 'सभी चारों अनुयोग', en: 'All 4 Anuyogas' },
-              { id: 'Dravyanuyoga', hi: '१. द्रव्यानुयोग (अध्यात्म व तत्त्वज्ञान)', en: '1. Dravyanuyoga (Philosophy)' },
-              { id: 'Charananuyoga', hi: '२. चरणानुयोग (आचार व श्रावक-मुनि धर्म)', en: '2. Charananuyoga (Conduct)' },
-              { id: 'Karananuyoga', hi: '३. करणानुयोग (भूगोल व कर्म विज्ञान)', en: '3. Karananuyoga (Cosmology)' },
-              { id: 'Prathamanuyoga', hi: '४. प्रथमानुयोग (महापुरुष चरित व इतिहास)', en: '4. Prathamanuyoga (History)' },
+              { id: 'all', hi: 'सभी आगम एवं शास्त्र', en: 'All Scriptures' },
+              { id: 'Anga', hi: '१२ अंग आगम (द्वादशांग)', en: '12 Angas (Canon)' },
+              { id: 'Mulasutra', hi: 'मूलसूत्र व उपांग', en: 'Mulasutras & Upangas' },
+              { id: 'Dravyanuyoga', hi: '१. द्रव्यानुयोग (अध्यात्म व तत्त्वज्ञान)', en: '1. Dravyanuyoga' },
+              { id: 'Charananuyoga', hi: '२. चरणानुयोग (आचार व श्रावक-मुनि धर्म)', en: '2. Charananuyoga' },
+              { id: 'Karananuyoga', hi: '३. करणानुयोग (भूगोल व कर्म विज्ञान)', en: '3. Karananuyoga' },
+              { id: 'Prathamanuyoga', hi: '४. प्रथमानुयोग (महापुरुष चरित व इतिहास)', en: '4. Prathamanuyoga' },
             ].map(f => (
               <button
                 key={f.id}
@@ -696,6 +752,19 @@ export default function AagamsPage() {
                   <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                     <div className="space-y-2 flex-1 min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
+                        {item.aagamType && (
+                          <span className={cn(
+                            "text-[9px] font-black uppercase px-2.5 py-0.5 rounded-full border shadow-xs",
+                            item.aagamType === 'Anga' ? "bg-amber-500/20 text-amber-800 dark:text-amber-200 border-amber-500/40" :
+                            item.aagamType === 'Mulasutra' ? "bg-blue-500/20 text-blue-800 dark:text-blue-200 border-blue-500/40" :
+                            item.aagamType === 'Digambar' ? "bg-purple-500/20 text-purple-800 dark:text-purple-200 border-purple-500/40" :
+                            "bg-emerald-500/20 text-emerald-800 dark:text-emerald-200 border-emerald-500/40"
+                          )}>
+                            {item.aagamType === 'Anga' ? 'द्वादशांग अंग' :
+                             item.aagamType === 'Mulasutra' ? 'मूल आगम / सूत्र' :
+                             item.aagamType === 'Digambar' ? 'दिगंबर महाग्रंथ' : item.aagamType}
+                          </span>
+                        )}
                         <span className={cn("text-[9px] font-black uppercase px-2.5 py-0.5 rounded-full border", anuyogaColor)}>
                           {anuyogaLabel}
                         </span>
@@ -1224,98 +1293,104 @@ export default function AagamsPage() {
                 )}
 
                 {/* Structured Verse by Verse Swadhyay Board */}
-                {selectedItem.chapters && readingMode === 'structured' && selectedItem.chapters[selectedChapterIndex] ? (
-                  <div className="space-y-6 text-left not-italic font-sans">
-                    {/* Chapter Header */}
-                    <div className="p-4 rounded-2xl bg-amber-500/5 border border-amber-500/20">
-                      <h4 className="text-base font-black text-amber-900 dark:text-amber-200 mb-1">
-                        {selectedItem.chapters[selectedChapterIndex].chapterTitle}
-                      </h4>
-                      <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">
-                        {selectedItem.chapters[selectedChapterIndex].summary}
-                      </p>
-                    </div>
-
-                    {/* Verses List */}
-                    <div className="space-y-6">
-                      {selectedItem.chapters[selectedChapterIndex].originalVerses.map((v: any, vIdx: number) => (
-                        <div 
-                          key={vIdx}
-                          className="bg-white dark:bg-[#18181b] border-2 border-amber-500/25 rounded-3xl p-5 sm:p-6 shadow-sm space-y-4 hover:border-amber-500/40 transition-colors"
-                        >
-                          <div className="flex items-center justify-between gap-2 border-b border-gray-150 dark:border-white/10 pb-3">
-                            <span className="text-xs font-black uppercase tracking-wider text-amber-700 dark:text-amber-300 bg-amber-500/10 px-3 py-1 rounded-xl">
-                              {v.verseNumber}
-                            </span>
-
-                            <button
-                              onClick={() => {
-                                window.speechSynthesis.cancel();
-                                const textToRead = `${v.prakritOrSanskrit}. सरल अर्थ: ${v.hindiMeaning}. भावार्थ: ${v.bhavartha}`;
-                                const utter = new SpeechSynthesisUtterance(textToRead);
-                                utter.lang = 'hi-IN';
-                                utter.rate = speechRate;
-                                window.speechSynthesis.speak(utter);
-                              }}
-                              className="px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-800 dark:text-amber-300 font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
-                              title="Listen to this verse"
-                            >
-                              <Volume2 size={13} />
-                              <span>{language === 'en' ? 'Audio' : 'श्रवण'}</span>
-                            </button>
-                          </div>
-
-                          {/* Original Prakrit / Sanskrit Verse */}
-                          <div className="p-4 rounded-2xl bg-amber-50/60 dark:bg-amber-950/20 border border-amber-500/20 text-center">
-                            <p className="font-serif text-lg sm:text-xl font-bold text-amber-950 dark:text-amber-100 leading-relaxed whitespace-pre-line">
-                              {v.prakritOrSanskrit}
-                            </p>
-                            {v.transliteration && (
-                              <p className="mt-2 text-xs font-sans text-gray-500 dark:text-gray-400 italic">
-                                {v.transliteration}
-                              </p>
-                            )}
-                          </div>
-
-                          {/* Hindi Meaning */}
-                          <div className="space-y-1">
-                            <span className="text-[10px] font-black uppercase text-amber-800 dark:text-amber-400 tracking-wider">
-                              📖 सरल अन्वयार्थ (Hindi Meaning):
-                            </span>
-                            <p className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed font-medium">
-                              {v.hindiMeaning}
-                            </p>
-                          </div>
-
-                          {/* Spiritual Bhavartha */}
-                          {v.bhavartha && (
-                            <div className="space-y-1 bg-emerald-500/5 border border-emerald-500/20 p-3.5 rounded-2xl">
-                              <span className="text-[10px] font-black uppercase text-emerald-800 dark:text-emerald-400 tracking-wider flex items-center gap-1">
-                                <Sparkles size={12} />
-                                <span>आध्यात्मिक भावार्थ एवं टीका रहस्य:</span>
-                              </span>
-                              <p className="text-xs sm:text-sm text-gray-700 dark:text-gray-300 leading-relaxed font-medium">
-                                {v.bhavartha}
-                              </p>
-                            </div>
-                          )}
-
-                          {/* Practical Life Lesson */}
-                          {v.practicalLifeLesson && (
-                            <div className="space-y-1 bg-orange-500/5 border border-orange-500/20 p-3.5 rounded-2xl">
-                              <span className="text-[10px] font-black uppercase text-orange-800 dark:text-orange-400 tracking-wider flex items-center gap-1">
-                                <Info size={12} />
-                                <span>दैनिक जीवन सूत्र (Practical Takeaway):</span>
-                              </span>
-                              <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed font-medium">
-                                {v.practicalLifeLesson}
-                              </p>
-                            </div>
-                          )}
+                {selectedItem.chapters && readingMode === 'structured' && selectedItem.chapters[Math.min(selectedChapterIndex, Math.max(0, selectedItem.chapters.length - 1))] ? (
+                  (() => {
+                    const safeIndex = Math.min(selectedChapterIndex, Math.max(0, selectedItem.chapters.length - 1));
+                    const currentChapter = selectedItem.chapters[safeIndex];
+                    return (
+                      <div className="space-y-6 text-left not-italic font-sans">
+                        {/* Chapter Header */}
+                        <div className="p-4 rounded-2xl bg-amber-500/5 border border-amber-500/20">
+                          <h4 className="text-base font-black text-amber-900 dark:text-amber-200 mb-1">
+                            {currentChapter.chapterTitle}
+                          </h4>
+                          <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">
+                            {currentChapter.summary}
+                          </p>
                         </div>
-                      ))}
-                    </div>
-                  </div>
+
+                        {/* Verses List */}
+                        <div className="space-y-6">
+                          {currentChapter.originalVerses.map((v: any, vIdx: number) => (
+                            <div 
+                              key={vIdx}
+                              className="bg-white dark:bg-[#18181b] border-2 border-amber-500/25 rounded-3xl p-5 sm:p-6 shadow-sm space-y-4 hover:border-amber-500/40 transition-colors"
+                            >
+                              <div className="flex items-center justify-between gap-2 border-b border-gray-150 dark:border-white/10 pb-3">
+                                <span className="text-xs font-black uppercase tracking-wider text-amber-700 dark:text-amber-300 bg-amber-500/10 px-3 py-1 rounded-xl">
+                                  {v.verseNumber}
+                                </span>
+
+                                <button
+                                  onClick={() => {
+                                    window.speechSynthesis.cancel();
+                                    const textToRead = `${v.prakritOrSanskrit}. सरल अर्थ: ${v.hindiMeaning}. भावार्थ: ${v.bhavartha}`;
+                                    const utter = new SpeechSynthesisUtterance(textToRead);
+                                    utter.lang = 'hi-IN';
+                                    utter.rate = speechRate;
+                                    window.speechSynthesis.speak(utter);
+                                  }}
+                                  className="px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-800 dark:text-amber-300 font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+                                  title="Listen to this verse"
+                                >
+                                  <Volume2 size={13} />
+                                  <span>{language === 'en' ? 'Audio' : 'श्रवण'}</span>
+                                </button>
+                              </div>
+
+                              {/* Original Prakrit / Sanskrit Verse */}
+                              <div className="p-4 rounded-2xl bg-amber-50/60 dark:bg-amber-950/20 border border-amber-500/20 text-center">
+                                <p className="font-serif text-lg sm:text-xl font-bold text-amber-950 dark:text-amber-100 leading-relaxed whitespace-pre-line">
+                                  {v.prakritOrSanskrit}
+                                </p>
+                                {v.transliteration && (
+                                  <p className="mt-2 text-xs font-sans text-gray-500 dark:text-gray-400 italic">
+                                    {v.transliteration}
+                                  </p>
+                                )}
+                              </div>
+
+                              {/* Hindi Meaning */}
+                              <div className="space-y-1">
+                                <span className="text-[10px] font-black uppercase text-amber-800 dark:text-amber-400 tracking-wider">
+                                  📖 सरल अन्वयार्थ (Hindi Meaning):
+                                </span>
+                                <p className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed font-medium">
+                                  {v.hindiMeaning}
+                                </p>
+                              </div>
+
+                              {/* Spiritual Bhavartha */}
+                              {v.bhavartha && (
+                                <div className="space-y-1 bg-emerald-500/5 border border-emerald-500/20 p-3.5 rounded-2xl">
+                                  <span className="text-[10px] font-black uppercase text-emerald-800 dark:text-emerald-400 tracking-wider flex items-center gap-1">
+                                    <Sparkles size={12} />
+                                    <span>आध्यात्मिक भावार्थ एवं टीका रहस्य:</span>
+                                  </span>
+                                  <p className="text-xs sm:text-sm text-gray-700 dark:text-gray-300 leading-relaxed font-medium">
+                                    {v.bhavartha}
+                                  </p>
+                                </div>
+                              )}
+
+                              {/* Practical Life Lesson */}
+                              {v.practicalLifeLesson && (
+                                <div className="space-y-1 bg-orange-500/5 border border-orange-500/20 p-3.5 rounded-2xl">
+                                  <span className="text-[10px] font-black uppercase text-orange-800 dark:text-orange-400 tracking-wider flex items-center gap-1">
+                                    <Info size={12} />
+                                    <span>दैनिक जीवन सूत्र (Practical Takeaway):</span>
+                                  </span>
+                                  <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed font-medium">
+                                    {v.practicalLifeLesson}
+                                  </p>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })()
                 ) : null}
 
                 {/* Ritual Step Guidance Cards (if available) */}
@@ -1359,7 +1434,7 @@ export default function AagamsPage() {
                   </div>
                 )}
 
-                {(!selectedItem.chapters || readingMode === 'continuous') && selectedItem.content.split('\n').map((line: string, index: number) => {
+                {(!selectedItem.chapters || readingMode === 'continuous') && (selectedItem.content || '').split('\n').map((line: string, index: number) => {
                   const cleaned = line.trim();
                   if (!cleaned) return <div key={`empty-${index}`} className="h-4" />;
                   

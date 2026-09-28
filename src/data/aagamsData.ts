@@ -2,6 +2,7 @@ import { BHAKTAMAR_DATA } from './bhaktamarData';
 import { MASTER_ABHISHEK_PUJAN_ITEM } from './abhishekPujanVidhiData';
 import { JAIN_DHARM_ORDERED_PUJANS, JAIN_DHARM_ORDERED_PATHS } from './jainDharmPujanPathData';
 import { JAIN_AAGAM_GRANTHS, JainAagamGranth, AnuyogaType, AagamChapter } from './jainAagamGranthsData';
+import { CANONICAL_45_AAGAMS } from './canonical45AagamsData';
 
 export interface AagamItem {
   id: string;
@@ -13,6 +14,7 @@ export interface AagamItem {
   author?: string;
   period?: string;
   anuyoga?: AnuyogaType;
+  aagamType?: 'Anga' | 'Upanga' | 'Prakirnaka' | 'Chhedasutra' | 'Mulasutra' | 'Chulika' | 'Digambar';
   overview?: string;
   importance?: string;
   chapters?: AagamChapter[];
@@ -21,6 +23,26 @@ export interface AagamItem {
   totalChapters?: number;
   language?: string;
 }
+
+export const mappedCanonicalAagamItems: AagamItem[] = CANONICAL_45_AAGAMS.map(a => ({
+  id: a.id,
+  category: 'Aagams' as const,
+  title: a.title,
+  titleEn: a.titleEn,
+  originalTitle: a.originalTitle,
+  author: a.author,
+  period: a.period,
+  anuyoga: a.anuyoga,
+  aagamType: a.aagamType,
+  overview: a.overview,
+  importance: a.importance,
+  keyThemes: a.keyThemes,
+  chapters: a.chapters as any,
+  totalVerses: a.totalVerses,
+  totalChapters: a.totalChapters,
+  language: a.language,
+  content: a.content
+}));
 
 export const mappedAagamGranthItems: AagamItem[] = JAIN_AAGAM_GRANTHS.map(granth => {
   let fullContent = `॥ ${granth.originalTitle || granth.title} ॥\n`;
@@ -2302,6 +2324,7 @@ const existingStutis = baseAagamsData.filter(item =>
 const otherBaseItems = baseAagamsData.filter(item => item.category !== 'Pujan' && item.category !== 'Stuti');
 
 const combinedInitial: AagamItem[] = [
+  ...mappedCanonicalAagamItems,
   ...mappedAagamGranthItems,
   ...orderedPujans,
   ...existingPujans,
